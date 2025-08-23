@@ -19,14 +19,28 @@
 ## 📦 **Installation** 
 
 ```bash
+# Install the package
+npm install dynamic-open-api
+
+# Or if you want to clone and install from source
+git clone https://github.com/easynet-world/7134-dynamic-open-api.git
+cd 7134-dynamic-open-api
 npm install
 ```
 
 ## ⚡ **Quick Start (3 Steps)** 
 
-### **Step 1: Setup Environment**
+### **Step 1: Install and Setup**
 
 ```bash
+# Install the package
+npm install dynamic-open-api
+
+# Or clone from source
+git clone https://github.com/easynet-world/7134-dynamic-open-api.git
+cd 7134-dynamic-open-api
+npm install
+
 # Copy and edit environment file
 cp .env.example .env
 ```
