@@ -4,14 +4,16 @@
     ["@semantic-release/commit-analyzer", {
       "preset": "angular",
       "releaseRules": [
-        {"type": "major", "release": "major"},
-        {"type": "minor", "release": "minor"},
+        {"type": "major", "release": false},
+        {"type": "minor", "release": false},
         {"type": "patch", "release": "patch"}
       ]
     }],
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    "@semantic-release/npm",
+    ["@semantic-release/npm", {
+      "npmPublish": true
+    }],
     "@semantic-release/github"
   ]
 }
