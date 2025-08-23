@@ -75,6 +75,7 @@ describe('Framework Functionality', () => {
   test('should have environment configuration files', () => {
     const fs = require('fs');
     expect(fs.existsSync('.env.example')).toBe(true);
-    expect(fs.existsSync('.env')).toBe(true);
+    // Note: .env file should not be committed to git for security reasons
+    // Users should copy .env.example to .env and configure their own values
   });
 });
