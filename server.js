@@ -30,10 +30,8 @@ app.get('/health', (req, res) => {
 app.get('/api-info', (req, res) => {
   res.json({
     message: 'Dynamic API Framework',
-    totalRoutes: 1,
-    routes: [
-      { method: 'GET', path: '/hello', processor: 'HelloProcessor' }
-    ],
+    totalRoutes: loadedRoutes.length,
+    routes: loadedRoutes,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
@@ -41,6 +39,35 @@ app.get('/api-info', (req, res) => {
 
 // OpenAPI specification endpoint
 app.get('/openapi.json', (req, res) => {
+  const paths = {};
+  
+  loadedRoutes.forEach(route => {
+    if (!paths[route.path]) {
+      paths[route.path] = {};
+    }
+    
+    // Try to get OpenAPI info from the processor
+    try {
+      const processorPath = path.join(__dirname, 'api', route.path.substring(1), route.method.toLowerCase() + '.js');
+      const ProcessorClass = require(processorPath);
+      const processor = new ProcessorClass();
+      
+      if (processor.openApi) {
+        paths[route.path][route.method.toLowerCase()] = processor.openApi;
+      } else {
+        paths[route.path][route.method.toLowerCase()] = {
+          summary: `${route.method} ${route.path}`,
+          tags: ['api']
+        };
+      }
+    } catch (error) {
+      paths[route.path][route.method.toLowerCase()] = {
+        summary: `${route.method} ${route.path}`,
+        tags: ['api']
+      };
+    }
+  });
+  
   res.json({
     openapi: '3.0.0',
     info: {
@@ -48,25 +75,70 @@ app.get('/openapi.json', (req, res) => {
       version: '1.0.0',
       description: 'Dynamically generated API endpoints'
     },
-    paths: {
-      '/hello': {
-        get: {
-          summary: 'Hello World endpoint',
-          tags: ['demo']
-        }
-      }
-    }
+    paths: paths
   });
 });
 
-// Hello endpoint - manually loaded
-app.get('/hello', (req, res) => {
-  res.json({
-    success: true,
-    data: { message: 'Hello World!' },
-    timestamp: new Date().toISOString()
-  });
-});
+// Dynamic API loading function
+function loadAPIs() {
+  const fs = require('fs');
+  const path = require('path');
+  const apiDir = path.join(__dirname, 'api');
+  
+  if (!fs.existsSync(apiDir)) {
+    console.log('⚠️  No api/ directory found');
+    return [];
+  }
+
+  const routes = [];
+  
+  function scanDirectory(dir, basePath = '') {
+    const items = fs.readdirSync(dir);
+    
+    items.forEach(item => {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        // Recursively scan subdirectories
+        scanDirectory(fullPath, path.join(basePath, item));
+      } else if (stat.isFile() && item.endsWith('.js')) {
+        // Found an API file
+        const httpMethod = path.basename(item, '.js');
+        const routePath = path.join(basePath, path.dirname(item));
+        const normalizedPath = '/' + routePath.replace(/\\/g, '/');
+        
+        try {
+          const ProcessorClass = require(fullPath);
+          const processor = new ProcessorClass();
+          
+          if (typeof processor.process === 'function') {
+            // Register the route dynamically
+            app[httpMethod.toLowerCase()](normalizedPath, (req, res) => {
+              processor.process(req, res);
+            });
+            
+            routes.push({
+              method: httpMethod.toUpperCase(),
+              path: normalizedPath,
+              processor: processor.constructor.name
+            });
+            
+            console.log(`✅ Loaded API: ${httpMethod.toUpperCase()} ${normalizedPath}`);
+          }
+        } catch (error) {
+          console.log(`⚠️  Error loading API from ${fullPath}: ${error.message}`);
+        }
+      }
+    });
+  }
+  
+  scanDirectory(apiDir);
+  return routes;
+}
+
+// Load all APIs
+const loadedRoutes = loadAPIs();
 
 // Start server
 const host = process.env.SERVER_HOST || '0.0.0.0';
