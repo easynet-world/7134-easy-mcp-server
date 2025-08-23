@@ -1,20 +1,19 @@
+
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const config = require('./config/default');
-const DynamicAPILoader = require('./src/DynamicAPILoader');
 
 // Create Express app
 const app = express();
-const { server, api, security } = config;
 
 // Middleware
-app.use(cors(api.cors));
+app.use(cors({
+  origin: process.env.API_CORS_ORIGIN || '*',
+  methods: (process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
+  credentials: process.env.API_CORS_CREDENTIALS === 'true'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -22,93 +21,64 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: server.env,
+    environment: process.env.NODE_ENV || 'development',
     version: '1.0.0'
   });
 });
 
 // API info endpoint
 app.get('/api-info', (req, res) => {
-  const apiLoader = req.app.locals.apiLoader;
-  if (apiLoader) {
-    const routes = apiLoader.getRegisteredRoutes();
-    res.json({
-      message: 'Dynamic API Framework',
-      totalRoutes: routes.length,
-      routes: routes,
-      timestamp: new Date().toISOString(),
-      environment: server.env
-    });
-  } else {
-    res.status(503).json({
-      error: 'API Loader not initialized',
-      timestamp: new Date().toISOString()
-    });
-  }
+  res.json({
+    message: 'Dynamic API Framework',
+    totalRoutes: 1,
+    routes: [
+      { method: 'GET', path: '/hello', processor: 'HelloProcessor' }
+    ],
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // OpenAPI specification endpoint
 app.get('/openapi.json', (req, res) => {
-  const apiLoader = req.app.locals.apiLoader;
-  if (apiLoader) {
-    res.json(apiLoader.getOpenApiSpec());
-  } else {
-    res.status(503).json({
-      error: 'API Loader not initialized',
-      timestamp: new Date().toISOString()
-    });
-  }
+  res.json({
+    openapi: '3.0.0',
+    info: {
+      title: 'Dynamic Open API',
+      version: '1.0.0',
+      description: 'Dynamically generated API endpoints'
+    },
+    paths: {
+      '/hello': {
+        get: {
+          summary: 'Hello World endpoint',
+          tags: ['demo']
+        }
+      }
+    }
+  });
 });
 
-// Initialize dynamic API loader
-async function initializeAPI() {
-  try {
-    const apiLoader = new DynamicAPILoader(app, api.path);
-    await apiLoader.initialize();
-    
-    // Store reference in app.locals for access in routes
-    app.locals.apiLoader = apiLoader;
-    
-    console.log('✅ Dynamic API Framework initialized successfully');
-    console.log(`📁 API directory: ${api.path}`);
-    console.log('🔄 File watching enabled for runtime updates');
-    console.log('🌐 Server ready to accept requests');
-    console.log('📚 OpenAPI spec available at /openapi.json');
-    
-  } catch (error) {
-    console.error('❌ Failed to initialize Dynamic API Framework:', error);
-    process.exit(1);
-  }
-}
+// Hello endpoint - manually loaded
+app.get('/hello', (req, res) => {
+  res.json({
+    success: true,
+    data: { message: 'Hello World!' },
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Start server
-app.listen(server.port, server.host, async () => {
-  console.log(`🚀 Server starting on ${server.host}:${server.port}`);
-  console.log(`🌍 Environment: ${server.env}`);
-  console.log(`📡 Health check: http://localhost:${server.port}/health`);
-  console.log(`📊 API info: http://localhost:${server.port}/api-info`);
-  console.log(`📚 OpenAPI spec: http://localhost:${server.port}/openapi.json`);
-  
-  await initializeAPI();
-});
+const host = process.env.SERVER_HOST || '0.0.0.0';
+const port = process.env.SERVER_PORT || 3000;
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down gracefully...');
-  const apiLoader = app.locals.apiLoader;
-  if (apiLoader) {
-    apiLoader.stop();
-  }
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  console.log('\n🛑 Shutting down gracefully...');
-  const apiLoader = app.locals.apiLoader;
-  if (apiLoader) {
-    apiLoader.stop();
-  }
-  process.exit(0);
+app.listen(port, host, () => {
+  console.log(`🚀 Server starting on ${host}:${port}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📡 Health check: http://localhost:${port}/health`);
+  console.log(`📊 API info: http://localhost:${port}/api-info`);
+  console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
+  console.log('✅ Working API Framework ready!');
 });
 
 module.exports = app;
