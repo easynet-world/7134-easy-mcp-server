@@ -55,4 +55,53 @@ describe('API Examples', () => {
       expect(instance.description.length).toBeGreaterThan(0);
     });
   });
+
+  test('All examples should be classes', () => {
+    const examples = [
+      require('../api/example/get'),
+      require('../api/example/post'),
+      require('../api/example/put'),
+      require('../api/example/patch'),
+      require('../api/example/delete')
+    ];
+    
+    examples.forEach(ExampleClass => {
+      expect(typeof ExampleClass).toBe('function');
+      expect(ExampleClass.prototype).toBeDefined();
+    });
+  });
+
+  test('All examples should be instantiable', () => {
+    const examples = [
+      require('../api/example/get'),
+      require('../api/example/post'),
+      require('../api/example/put'),
+      require('../api/example/patch'),
+      require('../api/example/delete')
+    ];
+    
+    examples.forEach(ExampleClass => {
+      expect(() => {
+        new ExampleClass();
+      }).not.toThrow();
+    });
+  });
+
+  test('All examples should have process method that accepts req and res', () => {
+    const examples = [
+      require('../api/example/get'),
+      require('../api/example/post'),
+      require('../api/example/put'),
+      require('../api/example/patch'),
+      require('../api/example/delete')
+    ];
+    
+    examples.forEach(ExampleClass => {
+      const instance = new ExampleClass();
+      const processMethod = instance.process;
+      
+      expect(typeof processMethod).toBe('function');
+      expect(processMethod.length).toBe(2); // req, res parameters
+    });
+  });
 });

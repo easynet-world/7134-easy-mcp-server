@@ -3,6 +3,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+// Import core modules
+const APILoader = require('./src/core/api-loader');
+const OpenAPIGenerator = require('./src/core/openapi-generator');
+const DynamicAPIMCPServer = require('./src/mcp/mcp-server');
+const HotReloader = require('./src/utils/hot-reloader');
+
 // Create Express app
 const app = express();
 
@@ -14,6 +20,10 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Initialize core services
+const apiLoader = new APILoader(app);
+const openapiGenerator = new OpenAPIGenerator(apiLoader);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -28,10 +38,16 @@ app.get('/health', (req, res) => {
 
 // API info endpoint
 app.get('/api-info', (req, res) => {
+  const routes = apiLoader.getRoutes();
+  const errors = apiLoader.getErrors();
+  const validationIssues = apiLoader.validateRoutes();
+  
   res.json({
     message: 'Dynamic API Framework',
-    totalRoutes: loadedRoutes.length,
-    routes: loadedRoutes,
+    totalRoutes: routes.length,
+    routes: routes,
+    errors: errors,
+    validationIssues: validationIssues,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
@@ -39,171 +55,219 @@ app.get('/api-info', (req, res) => {
 
 // OpenAPI specification endpoint
 app.get('/openapi.json', (req, res) => {
-  const paths = {};
-  
-  loadedRoutes.forEach(route => {
-    if (!paths[route.path]) {
-      paths[route.path] = {};
-    }
-    
-    // Use stored processor instance for OpenAPI generation
-    const processor = route.processorInstance;
-    
-    if (processor) {
-      // Build API info with available properties
-      const apiInfo = {
-        summary: `${route.method} ${route.path}`,
-        tags: ['api']
-      };
-      
-      // Add description if available
-      if (processor.description) {
-        apiInfo.description = processor.description;
-      }
-      
-      // Add custom OpenAPI info if available
-      if (processor.openApi) {
-        Object.assign(apiInfo, processor.openApi);
-      }
-      
-      paths[route.path][route.method.toLowerCase()] = apiInfo;
-    } else {
-      paths[route.path][route.method.toLowerCase()] = {
-        summary: `${route.method} ${route.path}`,
-        tags: ['api']
-      };
-    }
-  });
-  
-  res.json({
-    openapi: '3.0.0',
-    info: {
-      title: 'Dynamic Open API Framework',
-      version: '1.0.0',
-      description: 'A dynamic API framework that automatically generates OpenAPI specifications from file-based API endpoints',
-      contact: {
-        name: 'API Support',
-        url: 'https://github.com/easynet-world/7134-dynamic-open-api'
-      },
-      license: {
-        name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
-    },
-    servers: [
-      {
-        url: `http://localhost:${process.env.SERVER_PORT || 3000}`,
-        description: 'Development server'
-      }
-    ],
-    paths: paths,
-    components: {
-      schemas: {
-        Error: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: false },
-            error: { type: 'string', example: 'Error message' },
-            timestamp: { type: 'string', format: 'date-time' }
-          }
-        },
-        Success: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: true },
-            data: { type: 'object' },
-            timestamp: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    }
-  });
-});
-
-// Dynamic API loading function
-function loadAPIs() {
-  const fs = require('fs');
-  const path = require('path');
-  const apiDir = path.join(__dirname, 'api');
-  
-  if (!fs.existsSync(apiDir)) {
-    console.log('⚠️  No api/ directory found');
-    return [];
-  }
-
-  const routes = [];
-  const processors = new Map(); // Store processor instances for OpenAPI generation
-  
-  function scanDirectory(dir, basePath = '') {
-    const items = fs.readdirSync(dir);
-    
-    items.forEach(item => {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      
-      if (stat.isDirectory()) {
-        // Recursively scan subdirectories
-        scanDirectory(fullPath, path.join(basePath, item));
-      } else if (stat.isFile() && item.endsWith('.js')) {
-        // Found an API file
-        const httpMethod = path.basename(item, '.js');
-        const routePath = path.join(basePath, path.dirname(item));
-        const normalizedPath = '/' + routePath.replace(/\\/g, '/');
-        
-        try {
-          const ProcessorClass = require(fullPath);
-          const processor = new ProcessorClass();
-          
-          if (typeof processor.process === 'function') {
-            // Register the route dynamically
-            app[httpMethod.toLowerCase()](normalizedPath, (req, res) => {
-              processor.process(req, res);
-            });
-            
-            routes.push({
-              method: httpMethod.toUpperCase(),
-              path: normalizedPath,
-              processor: processor.constructor.name
-            });
-            
-            // Store processor instance for OpenAPI generation
-            const key = `${httpMethod.toLowerCase()}:${normalizedPath}`;
-            processors.set(key, processor);
-            
-            console.log(`✅ Loaded API: ${httpMethod.toUpperCase()} ${normalizedPath}`);
-          }
-        } catch (error) {
-          console.log(`⚠️  Error loading API from ${fullPath}: ${error.message}`);
-        }
-      }
+  try {
+    const spec = openapiGenerator.generateSpec();
+    res.json(spec);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Failed to generate OpenAPI spec: ${error.message}`,
+      timestamp: new Date().toISOString()
     });
   }
-  
-  scanDirectory(apiDir);
-  
-  // Attach processors to routes for OpenAPI generation
-  routes.forEach(route => {
-    const key = `${route.method.toLowerCase()}:${route.path}`;
-    route.processorInstance = processors.get(key);
-  });
-  
-  return routes;
-}
+});
 
 // Load all APIs
-const loadedRoutes = loadAPIs();
+let loadedRoutes = apiLoader.loadAPIs();
+
+// MCP (Model Context Protocol) endpoints
+app.get('/mcp/tools', (req, res) => {
+  try {
+    const routes = apiLoader.getRoutes();
+    const tools = routes.map(route => ({
+      name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+      description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+      method: route.method,
+      path: route.path,
+      processor: route.processor
+    }));
+    
+    res.json({
+      success: true,
+      tools,
+      totalTools: tools.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Failed to get MCP tools: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/mcp/execute/:toolName', (req, res) => {
+  const { toolName } = req.params;
+  const { body, query, headers } = req.body;
+  
+  try {
+    // Parse the tool name to get method and path
+    const [method, ...pathParts] = toolName.split('_');
+    const path = '/' + pathParts.join('/');
+    
+    // Find the route
+    const routes = apiLoader.getRoutes();
+    const route = routes.find(r => 
+      r.method.toLowerCase() === method.toUpperCase() && 
+      r.path === path
+    );
+    
+    if (!route) {
+      return res.status(404).json({
+        success: false,
+        error: `API endpoint not found: ${method.toUpperCase()} ${path}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Execute the API endpoint
+    executeAPIEndpoint(route, { body, query, headers }, res);
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Error executing API endpoint: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * Execute an API endpoint with mock request/response objects
+ */
+async function executeAPIEndpoint(route, args, res) {
+  // Create mock request and response objects
+  const mockReq = {
+    method: route.method,
+    path: route.path,
+    body: args.body || {},
+    query: args.query || {},
+    headers: args.headers || {},
+    params: {}
+  };
+
+  const mockRes = {
+    statusCode: 200,
+    headers: {},
+    json: function(data) {
+      this.data = data;
+      this.statusCode = 200;
+      return this;
+    },
+    send: function(data) {
+      this.data = data;
+      this.statusCode = 200;
+      return this;
+    },
+    status: function(code) {
+      this.statusCode = code;
+      return this;
+    }
+  };
+
+  try {
+    // Execute the processor
+    if (route.processorInstance && typeof route.processorInstance.process === 'function') {
+      await route.processorInstance.process(mockReq, mockRes);
+      
+      res.json({
+        success: true,
+        statusCode: mockRes.statusCode,
+        data: mockRes.data,
+        endpoint: `${route.method} ${route.path}`,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      throw new Error(`Processor not available for ${route.method} ${route.path}`);
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Error executing processor: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
 
 // Start server
 const host = process.env.SERVER_HOST || '0.0.0.0';
 const port = process.env.SERVER_PORT || 3000;
 
+// Start MCP server if enabled
+let mcpServer = null;
+let hotReloader = null;
+
+if (process.env.MCP_ENABLED !== 'false') {
+  try {
+    mcpServer = new DynamicAPIMCPServer(
+      process.env.MCP_HOST || 'localhost',
+      process.env.MCP_PORT || 3001
+    );
+    
+    // Start MCP server first
+    mcpServer.run().then(() => {
+      console.log('🤖 MCP Server started successfully!');
+      
+      // Set the routes for MCP server after it's started
+      mcpServer.setRoutes(loadedRoutes);
+      console.log(`🔌 MCP Server: Routes set (${loadedRoutes.length} routes)`);
+      
+      // Initialize hot reloading after MCP server is ready
+      hotReloader = new HotReloader(apiLoader, mcpServer);
+      hotReloader.startWatching();
+      
+    }).catch(error => {
+      console.warn('⚠️  MCP Server failed to start:', error.message);
+    });
+  } catch (error) {
+    console.warn('⚠️  MCP Server not available:', error.message);
+  }
+}
+
+// Start the main server
 app.listen(port, host, () => {
   console.log(`🚀 Server starting on ${host}:${port}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📡 Health check: http://localhost:${port}/health`);
   console.log(`📊 API info: http://localhost:${port}/api-info`);
   console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
-  console.log('✅ Working API Framework ready!');
+  console.log(`🤖 MCP tools: http://localhost:${port}/mcp/tools`);
+  if (mcpServer) {
+    console.log(`🔌 MCP server: ws://${process.env.MCP_HOST || 'localhost'}:${process.env.MCP_PORT || 3001}`);
+  }
+  console.log('✅ Working API Framework with MCP support ready!');
 });
 
-module.exports = app;
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down servers...');
+  if (hotReloader) {
+    hotReloader.stopWatching();
+  }
+  if (mcpServer) {
+    mcpServer.stop();
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Shutting down servers...');
+  if (hotReloader) {
+    hotReloader.stopWatching();
+  }
+  if (mcpServer) {
+    mcpServer.stop();
+  }
+  process.exit(0);
+});
+
+// Export functions for external use
+module.exports = {
+  app,
+  apiLoader,
+  openapiGenerator,
+  mcpServer,
+  hotReloader,
+  getLoadedRoutes: () => apiLoader.getRoutes()
+};
