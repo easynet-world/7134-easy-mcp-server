@@ -41,4 +41,3 @@ api/example/
 ├── put.js      → PUT /example
 ├── patch.js    → PATCH /example
 └── delete.js   → DELETE /example
-```
