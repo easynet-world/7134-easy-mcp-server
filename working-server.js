@@ -1,14 +1,17 @@
 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const config = require('./config/default');
 
 // Create Express app
 const app = express();
-const { server, api } = config;
 
 // Middleware
-app.use(cors(api.cors));
+app.use(cors({
+  origin: process.env.API_CORS_ORIGIN || '*',
+  methods: (process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
+  credentials: process.env.API_CORS_CREDENTIALS === 'true'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -18,7 +21,7 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: server.env,
+    environment: process.env.NODE_ENV || 'development',
     version: '1.0.0'
   });
 });
@@ -32,7 +35,7 @@ app.get('/api-info', (req, res) => {
       { method: 'GET', path: '/hello', processor: 'HelloProcessor' }
     ],
     timestamp: new Date().toISOString(),
-    environment: server.env
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -66,12 +69,15 @@ app.get('/hello', (req, res) => {
 });
 
 // Start server
-app.listen(server.port, server.host, () => {
-  console.log(`🚀 Server starting on ${server.host}:${server.port}`);
-  console.log(`🌍 Environment: ${server.env}`);
-  console.log(`📡 Health check: http://localhost:${server.port}/health`);
-  console.log(`📊 API info: http://localhost:${server.port}/api-info`);
-  console.log(`📚 OpenAPI spec: http://localhost:${server.port}/openapi.json`);
+const host = process.env.SERVER_HOST || '0.0.0.0';
+const port = process.env.SERVER_PORT || 3000;
+
+app.listen(port, host, () => {
+  console.log(`🚀 Server starting on ${host}:${port}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📡 Health check: http://localhost:${port}/health`);
+  console.log(`📊 API info: http://localhost:${port}/api-info`);
+  console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
   console.log('✅ Working API Framework ready!');
 });
 
