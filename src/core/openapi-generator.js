@@ -128,7 +128,7 @@ class OpenAPIGenerator {
       description: 'A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models',
       contact: {
         name: 'API Support',
-        url: 'https://github.com/easynet-world/easy-mcp'
+        url: 'https://github.com/easynet-world/easy-mcp-server'
       },
       license: {
         name: 'MIT',

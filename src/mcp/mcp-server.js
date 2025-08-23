@@ -117,7 +117,7 @@ class DynamicAPIMCPServer {
           prompts: {}
         },
         serverInfo: {
-          name: 'easy-mcp',
+          name: 'easy-mcp-server',
           version: require('../../package.json').version
         }
       }
@@ -191,7 +191,7 @@ class DynamicAPIMCPServer {
                 prompts: {}
               },
               serverInfo: {
-                name: 'easy-mcp',
+                name: 'easy-mcp-server',
                 version: require('../../package.json').version
               }
             }

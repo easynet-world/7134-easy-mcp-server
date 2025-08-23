@@ -1,6 +1,6 @@
-# Easy MCP
+# Easy MCP Server
 
-0.1.0 • Public • Published recently
+0.0.1 • Public • Published recently
 
 * Readme
 * Code
@@ -8,7 +8,7 @@
 * Dependents
 * Versions
 
-# Easy MCP
+# Easy MCP Server
 
 npm version License: MIT Node.js Version
 
@@ -32,7 +32,7 @@ npm version License: MIT Node.js Version
 ## 📦 **Installation** 
 
 ```bash
-npm install easy-mcp
+npm install easy-mcp-server
 ```
 
 ## ⚡ **Quick Start (3 Steps)** 
