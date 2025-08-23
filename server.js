@@ -46,21 +46,28 @@ app.get('/openapi.json', (req, res) => {
       paths[route.path] = {};
     }
     
-    // Try to get OpenAPI info from the processor
-    try {
-      const processorPath = path.join(__dirname, 'api', route.path.substring(1), route.method.toLowerCase() + '.js');
-      const ProcessorClass = require(processorPath);
-      const processor = new ProcessorClass();
+    // Use stored processor instance for OpenAPI generation
+    const processor = route.processorInstance;
+    
+    if (processor) {
+      // Build API info with available properties
+      const apiInfo = {
+        summary: `${route.method} ${route.path}`,
+        tags: ['api']
+      };
       
-      if (processor.openApi) {
-        paths[route.path][route.method.toLowerCase()] = processor.openApi;
-      } else {
-        paths[route.path][route.method.toLowerCase()] = {
-          summary: `${route.method} ${route.path}`,
-          tags: ['api']
-        };
+      // Add description if available
+      if (processor.description) {
+        apiInfo.description = processor.description;
       }
-    } catch (error) {
+      
+      // Add custom OpenAPI info if available
+      if (processor.openApi) {
+        Object.assign(apiInfo, processor.openApi);
+      }
+      
+      paths[route.path][route.method.toLowerCase()] = apiInfo;
+    } else {
       paths[route.path][route.method.toLowerCase()] = {
         summary: `${route.method} ${route.path}`,
         tags: ['api']
@@ -125,6 +132,7 @@ function loadAPIs() {
   }
 
   const routes = [];
+  const processors = new Map(); // Store processor instances for OpenAPI generation
   
   function scanDirectory(dir, basePath = '') {
     const items = fs.readdirSync(dir);
@@ -158,6 +166,10 @@ function loadAPIs() {
               processor: processor.constructor.name
             });
             
+            // Store processor instance for OpenAPI generation
+            const key = `${httpMethod.toLowerCase()}:${normalizedPath}`;
+            processors.set(key, processor);
+            
             console.log(`✅ Loaded API: ${httpMethod.toUpperCase()} ${normalizedPath}`);
           }
         } catch (error) {
@@ -168,6 +180,13 @@ function loadAPIs() {
   }
   
   scanDirectory(apiDir);
+  
+  // Attach processors to routes for OpenAPI generation
+  routes.forEach(route => {
+    const key = `${route.method.toLowerCase()}:${route.path}`;
+    route.processorInstance = processors.get(key);
+  });
+  
   return routes;
 }
 
