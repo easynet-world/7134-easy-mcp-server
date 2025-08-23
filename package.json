@@ -22,20 +22,10 @@
     "eslint": "^8.57.0",
     "semantic-release": "^23.0.2",
     "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.6",
     "@semantic-release/npm": "^11.0.2"
   },
   "keywords": ["api", "framework", "dynamic", "express", "nodejs"],
   "author": "Your Name",
-  "license": "MIT",
-  "release": {
-    "branches": ["master"],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/git"
-    ]
-  }
+  "license": "MIT"
 }
