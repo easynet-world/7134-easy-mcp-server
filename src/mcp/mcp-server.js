@@ -108,16 +108,16 @@ class DynamicAPIMCPServer {
 
     // Send MCP server initialization message
     const initMessage = {
-      jsonrpc: "2.0",
-      method: "notifications/initialized",
+      jsonrpc: '2.0',
+      method: 'notifications/initialized',
       params: {
-        protocolVersion: "2024-11-05",
+        protocolVersion: '2024-11-05',
         capabilities: {
           tools: {},
           prompts: {}
         },
         serverInfo: {
-          name: "easy-mcp",
+          name: 'easy-mcp',
           version: require('../../package.json').version
         }
       }
@@ -182,16 +182,16 @@ class DynamicAPIMCPServer {
         // Handle MCP initialization
         if (data.method === 'initialize') {
           const response = {
-            jsonrpc: "2.0",
+            jsonrpc: '2.0',
             id: data.id,
             result: {
-              protocolVersion: "2024-11-05",
+              protocolVersion: '2024-11-05',
               capabilities: {
                 tools: {},
                 prompts: {}
               },
               serverInfo: {
-                name: "easy-mcp",
+                name: 'easy-mcp',
                 version: require('../../package.json').version
               }
             }
@@ -219,7 +219,7 @@ class DynamicAPIMCPServer {
           'Access-Control-Allow-Origin': '*'
         });
         res.end(JSON.stringify({ 
-          jsonrpc: "2.0",
+          jsonrpc: '2.0',
           id: null,
           error: { 
             code: -32603, 
@@ -241,13 +241,13 @@ class DynamicAPIMCPServer {
         return await this.processCallTool(data);
       } else if (data.method === 'ping') {
         return { 
-          jsonrpc: "2.0", 
+          jsonrpc: '2.0', 
           id: data.id, 
           result: { type: 'pong' } 
         };
       } else {
         return { 
-          jsonrpc: "2.0", 
+          jsonrpc: '2.0', 
           id: data.id, 
           error: { 
             code: -32601, 
@@ -257,7 +257,7 @@ class DynamicAPIMCPServer {
       }
     } catch (error) {
       return { 
-        jsonrpc: "2.0", 
+        jsonrpc: '2.0', 
         id: data.id, 
         error: { 
           code: -32603, 
@@ -278,17 +278,17 @@ class DynamicAPIMCPServer {
       name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
       description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: {
-          body: { type: "object", description: "Request body" },
-          query: { type: "object", description: "Query parameters" },
-          headers: { type: "object", description: "Request headers" }
+          body: { type: 'object', description: 'Request body' },
+          query: { type: 'object', description: 'Query parameters' },
+          headers: { type: 'object', description: 'Request headers' }
         }
       }
     }));
     
     return {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: data.id,
       result: {
         tools
@@ -309,7 +309,7 @@ class DynamicAPIMCPServer {
     
     if (!route) {
       return {
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: data.id,
         error: {
           code: -32602,
@@ -320,12 +320,12 @@ class DynamicAPIMCPServer {
     
     const result = await this.executeAPIEndpoint(route, args);
     return {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: data.id,
       result: {
         content: [
           {
-            type: "text",
+            type: 'text',
             text: JSON.stringify(result, null, 2)
           }
         ]
@@ -341,21 +341,21 @@ class DynamicAPIMCPServer {
       const data = JSON.parse(message);
       
       switch (data.type) {
-        case 'list_tools':
-          this.handleListTools(ws, data);
-          break;
-        case 'call_tool':
-          this.handleCallTool(ws, data);
-          break;
-        case 'ping':
-          ws.send(JSON.stringify({ type: 'pong', id: data.id }));
-          break;
-        default:
-          ws.send(JSON.stringify({
-            type: 'error',
-            id: data.id,
-            error: `Unknown message type: ${data.type}`
-          }));
+      case 'list_tools':
+        this.handleListTools(ws, data);
+        break;
+      case 'call_tool':
+        this.handleCallTool(ws, data);
+        break;
+      case 'ping':
+        ws.send(JSON.stringify({ type: 'pong', id: data.id }));
+        break;
+      default:
+        ws.send(JSON.stringify({
+          type: 'error',
+          id: data.id,
+          error: `Unknown message type: ${data.type}`
+        }));
       }
     } catch (error) {
       ws.send(JSON.stringify({
@@ -491,8 +491,8 @@ class DynamicAPIMCPServer {
    */
   notifyRouteChanges(routes) {
     const notification = {
-      jsonrpc: "2.0",
-      method: "notifications/toolsChanged",
+      jsonrpc: '2.0',
+      method: 'notifications/toolsChanged',
       params: {
         tools: routes.map(route => ({
           name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
@@ -531,10 +531,10 @@ class DynamicAPIMCPServer {
       this.server.listen(this.port, this.host, () => {
         console.log('🚀 MCP Server started successfully!');
         console.log(`📡 WebSocket server listening on ws://${this.host}:${this.port}`);
-        console.log(`🌐 HTTP endpoints available:`);
-        console.log(`  - GET  /sse  - Server-Sent Events for Inspector`);
-        console.log(`  - POST /mcp  - HTTP MCP requests`);
-        console.log(`  - POST /     - StreamableHttp for Inspector`);
+        console.log('🌐 HTTP endpoints available:');
+        console.log('  - GET  /sse  - Server-Sent Events for Inspector');
+        console.log('  - POST /mcp  - HTTP MCP requests');
+        console.log('  - POST /     - StreamableHttp for Inspector');
         console.log('🔧 Available MCP commands:');
         console.log('  - list_tools: Discover available API endpoints');
         console.log('  - call_tool: Execute a specific API endpoint');

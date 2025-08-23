@@ -68,7 +68,7 @@ app.get('/openapi.json', (req, res) => {
 });
 
 // Load all APIs
-let loadedRoutes = apiLoader.loadAPIs();
+const loadedRoutes = apiLoader.loadAPIs();
 
 // MCP (Model Context Protocol) endpoints
 app.get('/mcp/tools', (req, res) => {

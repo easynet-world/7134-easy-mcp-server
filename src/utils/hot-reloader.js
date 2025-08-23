@@ -36,7 +36,7 @@ class HotReloader {
     
     this.watcher = chokidar.watch('api/**/*.js', {
       ignored: [
-        /(^|[\/\\])\../, // Ignore hidden files
+        /(^|[/\\])\./, // Ignore hidden files
         /node_modules/,   // Ignore node_modules
         /\.git/,          // Ignore git files
         /\.DS_Store/      // Ignore macOS files

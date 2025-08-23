@@ -26,14 +26,14 @@ describe('Core Modules', () => {
       expect(typeof loader.reloadAPIs).toBe('function');
     });
     
-      test('should load APIs from directory', () => {
-    const loader = new APILoader();
-    const routes = loader.loadAPIs();
+    test('should load APIs from directory', () => {
+      const loader = new APILoader();
+      const routes = loader.loadAPIs();
     
-    expect(Array.isArray(routes)).toBe(true);
-    // Note: In test environment, API directory might be empty
-    expect(routes.length).toBeGreaterThanOrEqual(0);
-  });
+      expect(Array.isArray(routes)).toBe(true);
+      // Note: In test environment, API directory might be empty
+      expect(routes.length).toBeGreaterThanOrEqual(0);
+    });
     
     test('should return routes with correct structure', () => {
       const loader = new APILoader();
@@ -78,34 +78,34 @@ describe('Core Modules', () => {
       expect(typeof generator.generateComponents).toBe('function');
     });
     
-      test('should generate OpenAPI spec', () => {
-    const mockApiLoader = {
-      getRoutes: () => [
-        { method: 'GET', path: '/test', processor: class Test {} }
-      ]
-    };
-    const generator = new OpenAPIGenerator(mockApiLoader);
+    test('should generate OpenAPI spec', () => {
+      const mockApiLoader = {
+        getRoutes: () => [
+          { method: 'GET', path: '/test', processor: class Test {} }
+        ]
+      };
+      const generator = new OpenAPIGenerator(mockApiLoader);
     
-    const spec = generator.generateSpec();
+      const spec = generator.generateSpec();
     
-    expect(spec).toHaveProperty('openapi');
-    expect(spec).toHaveProperty('info');
-    expect(spec).toHaveProperty('servers');
-    expect(spec).toHaveProperty('paths');
-    expect(spec).toHaveProperty('components');
-    expect(spec.openapi).toBe('3.0.0');
-  });
+      expect(spec).toHaveProperty('openapi');
+      expect(spec).toHaveProperty('info');
+      expect(spec).toHaveProperty('servers');
+      expect(spec).toHaveProperty('paths');
+      expect(spec).toHaveProperty('components');
+      expect(spec.openapi).toBe('3.0.0');
+    });
     
-      test('should generate correct info section', () => {
-    const mockApiLoader = {};
-    const generator = new OpenAPIGenerator(mockApiLoader);
-    const info = generator.generateInfo();
+    test('should generate correct info section', () => {
+      const mockApiLoader = {};
+      const generator = new OpenAPIGenerator(mockApiLoader);
+      const info = generator.generateInfo();
     
-    expect(info.title).toBe('Easy MCP Framework');
-    expect(info.version).toBe('0.0.1');
-    expect(info.description).toContain('MCP');
-    expect(info.description).toContain('AI models');
-  });
+      expect(info.title).toBe('Easy MCP Framework');
+      expect(info.version).toBe('0.0.1');
+      expect(info.description).toContain('MCP');
+      expect(info.description).toContain('AI models');
+    });
   });
 
   describe('HotReloader', () => {
@@ -126,28 +126,28 @@ describe('Core Modules', () => {
       }).not.toThrow();
     });
     
-      test('should have required methods', () => {
-    const mockApiLoader = {};
-    const mockMcpServer = {};
-    const reloader = new HotReloader(mockApiLoader, mockMcpServer);
+    test('should have required methods', () => {
+      const mockApiLoader = {};
+      const mockMcpServer = {};
+      const reloader = new HotReloader(mockApiLoader, mockMcpServer);
     
-    expect(typeof reloader.startWatching).toBe('function');
-    expect(typeof reloader.stopWatching).toBe('function');
-    expect(typeof reloader.queueReload).toBe('function');
-  });
+      expect(typeof reloader.startWatching).toBe('function');
+      expect(typeof reloader.stopWatching).toBe('function');
+      expect(typeof reloader.queueReload).toBe('function');
+    });
     
-      test('should start and stop without errors', () => {
-    const mockApiLoader = {};
-    const mockMcpServer = {};
-    const reloader = new HotReloader(mockApiLoader, mockMcpServer);
+    test('should start and stop without errors', () => {
+      const mockApiLoader = {};
+      const mockMcpServer = {};
+      const reloader = new HotReloader(mockApiLoader, mockMcpServer);
     
-    expect(() => {
-      reloader.startWatching();
-    }).not.toThrow();
+      expect(() => {
+        reloader.startWatching();
+      }).not.toThrow();
     
-    expect(() => {
-      reloader.stopWatching();
-    }).not.toThrow();
-  });
+      expect(() => {
+        reloader.stopWatching();
+      }).not.toThrow();
+    });
   });
 });
