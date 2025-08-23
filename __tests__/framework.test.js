@@ -57,7 +57,7 @@ describe('Framework Functionality', () => {
   test('package.json should have correct name and description', () => {
     const packageJson = require('../package.json');
     
-    expect(packageJson.name).toBe('easy-mcp');
+    expect(packageJson.name).toBe('easy-mcp-server');
     expect(packageJson.description).toContain('MCP');
     expect(packageJson.description).toContain('AI models');
   });
