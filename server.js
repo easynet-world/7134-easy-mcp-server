@@ -71,11 +71,45 @@ app.get('/openapi.json', (req, res) => {
   res.json({
     openapi: '3.0.0',
     info: {
-      title: 'Dynamic Open API',
+      title: 'Dynamic Open API Framework',
       version: '1.0.0',
-      description: 'Dynamically generated API endpoints'
+      description: 'A dynamic API framework that automatically generates OpenAPI specifications from file-based API endpoints',
+      contact: {
+        name: 'API Support',
+        url: 'https://github.com/easynet-world/7134-dynamic-open-api'
+      },
+      license: {
+        name: 'MIT',
+        url: 'https://opensource.org/licenses/MIT'
+      }
     },
-    paths: paths
+    servers: [
+      {
+        url: `http://localhost:${process.env.SERVER_PORT || 3000}`,
+        description: 'Development server'
+      }
+    ],
+    paths: paths,
+    components: {
+      schemas: {
+        Error: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: false },
+            error: { type: 'string', example: 'Error message' },
+            timestamp: { type: 'string', format: 'date-time' }
+          }
+        },
+        Success: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: { type: 'object' },
+            timestamp: { type: 'string', format: 'date-time' }
+          }
+        }
+      }
+    }
   });
 });
 
