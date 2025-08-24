@@ -1,6 +1,6 @@
 # Easy MCP Server
 
-1.0.0 • Public • Published recently
+0.0.1 • Public • Published recently
 
 * Readme
 * Code
