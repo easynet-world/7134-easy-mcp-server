@@ -271,3 +271,4 @@ module.exports = {
   hotReloader,
   getLoadedRoutes: () => apiLoader.getRoutes()
 };
+// Version 0.0.1
