@@ -11,9 +11,9 @@ class GetExample {
   // This single method creates everything automatically!
   process(req, res) {
     res.json({
-      message: "Hello from your API!",
+      message: 'Hello from your API!',
       timestamp: new Date().toISOString(),
-      magic: "This response came from ONE JavaScript method!"
+      magic: 'This response came from ONE JavaScript method!'
     });
   }
   
