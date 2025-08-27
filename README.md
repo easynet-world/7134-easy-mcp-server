@@ -12,297 +12,210 @@
 
 npm version License: MIT Node.js Version
 
-> **Dynamic API framework that automatically converts your functions to MCP tools and OpenAPI specs.**
+> **🎯 ONE FUNCTION = THREE INTERFACES AUTOMATICALLY**  
+> **Write a single JavaScript function and instantly get REST API + MCP Tool + OpenAPI Documentation**
 
-## ✨ **What This Does** 
+## 🚀 **The Magic (One Glance)**
 
-**Write one function and automatically get both MCP (Model Context Protocol) integration AND OpenAPI specifications. No manual setup, no complex configuration - just save files and they're live!**
+**You write ONE JavaScript class with a `process()` method:**
 
-## 🚀 **Key Benefits** 
+```javascript
+// api/hello/get.js
+class HelloWorld {
+  process(req, res) {
+    res.json({ message: "Hello World!" });
+  }
+}
 
-| Feature                          | What You Get                                                       |
-| -------------------------------- | ------------------------------------------------------------------ |
-| 🔍 **Auto Discovery**            | Automatically scans `api/` directory for endpoint definitions     |
-| 🤖 **Instant MCP**               | Your functions become AI tools automatically                       |
-| 📚 **Auto OpenAPI**              | Complete OpenAPI 3.0 specs generated automatically                |
-| ⚡ **Dynamic Loading**            | Changes detected in real-time, no server restarts                 |
-| 🛡️ **Zero Configuration**         | Works out of the box with Express and MCP                         |
-| 🌐 **Multi-Transport**           | WebSocket, SSE, and StreamableHttp support                        |
-
-## 📦 **Installation** 
-
-```bash
-npm install easy-mcp-server
+module.exports = HelloWorld;
 ```
 
-## ⚡ **Quick Start (3 Steps)** 
+**Save the file and automatically get:**
 
-### **Step 1: Setup Environment**
+✅ **REST API**: `GET /hello`  
+✅ **MCP Tool**: `get_hello` (available to AI models)  
+✅ **OpenAPI**: Complete documentation  
+✅ **Hot Reload**: Changes detected instantly  
 
-```bash
-# Copy and edit environment file
-cp .env.example .env
-```
+## ✨ **How It Works (Super Simple)**
 
-**Edit `.env` with your settings:**
-
-```bash
-SERVER_HOST=0.0.0.0
-SERVER_PORT=3000
-MCP_ENABLED=true
-MCP_HOST=localhost
-MCP_PORT=3001
-```
-
-### **Step 2: Create Your API Function**
-
+### **Step 1: Write One Function**
 ```javascript
 // api/users/get.js
 class GetUsers {
-  // 🎯 ONE function that does everything!
   process(req, res) {
-    res.json({ 
-      success: true, 
-      users: [
-        { id: 1, name: 'John Doe' },
-        { id: 2, name: 'Jane Smith' }
-      ]
-    });
-  }
-  
-  // Optional: Add description for MCP tools
-  get description() {
-    return 'Retrieve all users from the system';
+    const users = [
+      { id: 1, name: 'John' },
+      { id: 2, name: 'Jane' }
+    ];
+    res.json({ users });
   }
 }
 
 module.exports = GetUsers;
 ```
 
-### **Step 3: Start and Use**
+### **Step 2: Save the File**
+That's it! The framework automatically:
+
+✅ **Creates REST endpoint**: `GET /users`  
+✅ **Creates MCP tool**: `get_users` available to AI models  
+✅ **Generates OpenAPI spec**: Complete documentation  
+✅ **Enables hot reloading**: Changes detected instantly  
+
+### **Step 3: Use Anywhere**
+
+**🌐 REST API:**
+```bash
+curl http://localhost:3000/users
+# Response: {"users": [...]}
+```
+
+**🤖 MCP Tool (AI Models):**
+```json
+// AI can now call your function via MCP
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_users",
+    "arguments": {}
+  }
+}
+```
+
+**📚 OpenAPI Documentation:**
+```bash
+curl http://localhost:3000/openapi.json
+# Full OpenAPI 3.0 specification
+```
+
+## 🎯 **The Power: Zero Configuration Magic**
+
+| What You Write | What You Get Automatically |
+|----------------|----------------------------|
+| **1 JavaScript file** | **3 Complete Interfaces** |
+| `process(req, res)` method | REST API endpoint |
+| File naming (`get.js`) | HTTP method detection |
+| Directory structure | URL routing |
+| Save file | Hot reload + live update |
+
+## 🚀 **Installation & Quick Start**
 
 ```bash
-# Start the server
+npm install easy-mcp-server
+```
+
+**3-Step Setup:**
+
+```bash
+# 1. Copy environment
+cp .env.example .env
+
+# 2. Create your first API function
+mkdir -p api/users
+# Create api/users/get.js with the example above
+
+# 3. Start the server
 npm start
-
-# Your API is now available at:
-# 🌐 REST: http://localhost:3000/users
-# 🤖 MCP: ws://localhost:3001
-# 📚 OpenAPI: http://localhost:3000/openapi.json
 ```
 
-## 🎯 **Core Methods** 
+**🎉 You now have:**
+- REST API: `http://localhost:3000/users`
+- MCP Server: `ws://localhost:3001` 
+- OpenAPI Docs: `http://localhost:3000/openapi.json`
 
-| Method                          | Purpose               | Example                                                    |
-| ------------------------------- | --------------------- | ---------------------------------------------------------- |
-| `process(req, res)`             | Handle HTTP requests  | `process(req, res) { res.json(data) }`                    |
-| `get description`               | MCP tool description  | `get description() { return 'Tool description' }`         |
-| `get openApi`                   | Custom OpenAPI spec   | `get openApi() { return { summary: 'Custom' } }`          |
-| File naming                     | Define HTTP method    | `get.js` = GET, `post.js` = POST                          |
+## 🔥 **Simple Examples**
 
-## 🔍 **How It Works** 
-
-### **1\. API Discovery**
-
+### **Example 1: Hello World**
 ```javascript
-// Just save a file in api/ directory
-// api/products/post.js
-class CreateProduct {
+// api/hello/get.js
+class HelloWorld {
   process(req, res) {
-    // Your logic here
-  }
-}
-```
-
-**✅ Automatically becomes:**
-- **REST API**: `POST /products` endpoint
-- **MCP Tool**: Available to AI models via `tools/list`
-- **OpenAPI**: Documentation generated automatically
-- **Hot Reload**: Changes detected instantly
-
-### **2\. MCP Integration**
-
-```javascript
-// AI models can now use your function:
-// tools/list -> discovers your API
-// tools/call -> executes your function
-```
-
-**✅ No manual MCP setup required:**
-- WebSocket server starts automatically
-- SSE and StreamableHttp support included
-- JSON-RPC 2.0 protocol implemented
-- Inspector-ready out of the box
-
-### **3\. Zero Manual Work**
-
-* ❌ No SQL writing required
-* ❌ No MCP server configuration
-* ❌ No OpenAPI specification writing
-* ❌ No manual route registration
-* ✅ Just write your business logic
-
-## 📋 **Complete Example** 
-
-```javascript
-// api/orders/get.js
-class GetOrders {
-  process(req, res) {
-    const { status, limit = 10 } = req.query;
-    
-    // Your business logic here
-    const orders = [
-      { id: 1, status: 'pending', amount: 99.99 },
-      { id: 2, status: 'completed', amount: 149.99 }
-    ];
-    
-    res.json({ 
-      success: true, 
-      data: orders,
-      count: orders.length 
-    });
-  }
-  
-  get description() {
-    return 'Retrieve orders with optional filtering by status';
-  }
-  
-  get openApi() {
-    return {
-      summary: 'Get orders',
-      description: 'Retrieve orders with filtering options',
-      tags: ['orders'],
-      parameters: [
-        {
-          name: 'status',
-          in: 'query',
-          schema: { type: 'string', enum: ['pending', 'completed', 'cancelled'] }
-        },
-        {
-          name: 'limit',
-          in: 'query',
-          schema: { type: 'integer', default: 10, minimum: 1, maximum: 100 }
-        }
-      ]
-    };
+    res.json({ message: "Hello World!" });
   }
 }
 
-module.exports = GetOrders;
+module.exports = HelloWorld;
 ```
 
 **🎯 What you get automatically:**
-- **REST API**: `GET /orders?status=pending&limit=5`
-- **MCP Tool**: `get_orders` available to AI models
-- **OpenAPI**: Complete documentation with parameters
-- **Validation**: Built-in parameter validation
-- **Hot Reload**: Save file = instant update
+- **REST**: `GET /hello` → `{"message": "Hello World!"}`
+- **MCP**: `get_hello` tool available to AI models
+- **OpenAPI**: Complete documentation
 
-## 🚀 **Advanced Features** 
+### **Example 2: Create User**
+```javascript
+// api/users/post.js
+class CreateUser {
+  process(req, res) {
+    const { name, email } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Name required' });
+    }
+    
+    const user = { id: Date.now(), name, email };
+    res.status(201).json({ user });
+  }
+}
 
-### **Hot Reloading**
+module.exports = CreateUser;
+```
+
+**🎯 What you get automatically:**
+- **REST**: `POST /users` with request body
+- **MCP**: `post_users` tool with parameters
+- **OpenAPI**: Full request/response schemas
+
+## 🌟 **Key Benefits**
+
+| Feature | What It Means |
+|---------|---------------|
+| **🔍 Auto Discovery** | Scan `api/` directory, find endpoints automatically |
+| **🤖 Instant MCP** | Your functions become AI tools in real-time |
+| **📚 Auto OpenAPI** | Complete API documentation generated automatically |
+| **⚡ Hot Reloading** | Save file = instant update across all interfaces |
+| **🛡️ Zero Config** | Works out of the box, no setup required |
+
+## 🔧 **Framework Architecture**
+
+```
+📁 api/
+├── 📄 hello/get.js    → GET /hello (REST) + get_hello (MCP) + OpenAPI
+├── 📄 users/get.js    → GET /users (REST) + get_users (MCP) + OpenAPI
+└── 📄 users/post.js   → POST /users (REST) + post_users (MCP) + OpenAPI
+
+🔄 Auto-Conversion Engine:
+├── 📡 API Loader: Discovers and registers endpoints
+├── 🤖 MCP Server: Exposes functions as AI tools
+├── 📚 OpenAPI Generator: Creates complete documentation
+└── ⚡ Hot Reloader: Updates everything in real-time
+```
+
+## 🧪 **Test Your Setup**
 
 ```bash
-# Just save any file in api/ directory
-# Changes are detected automatically
-# No server restart needed
-# MCP tools update in real-time
-# OpenAPI specs regenerate instantly
+# Test REST API
+curl http://localhost:3000/hello
+
+# Test MCP Server
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"method":"tools/list"}'
+
+# View OpenAPI docs
+curl http://localhost:3000/openapi.json
 ```
 
-### **Multiple HTTP Methods**
+## 🎯 **Use Cases**
 
-```bash
-api/
-├── users/
-│   ├── get.js      # GET /users
-│   ├── post.js     # POST /users  
-│   ├── put.js      # PUT /users/:id
-│   ├── patch.js    # PATCH /users/:id
-│   └── delete.js   # DELETE /users/:id
-```
-
-### **MCP Transport Options**
-
-| Transport        | URL                    | Use Case                    |
-| ---------------- | ---------------------- | --------------------------- |
-| **WebSocket**    | `ws://localhost:3001`  | Real-time AI communication  |
-| **SSE**          | `GET /sse`             | Inspector compatibility     |
-| **StreamableHttp**| `POST /`               | Inspector preferred         |
-
-## 🧪 **Testing** 
-
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Lint code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-```
-
-## 🔧 **Development** 
-
-### **Available Scripts**
-
-- `npm start` - Start both servers with hot reloading
-- `npm run dev` - Start with nodemon for development
-- `npm test` - Run test suite
-- `npm run lint` - Check code quality
-- `npm run lint:fix` - Fix code quality issues
-- `npm run clean` - Clean and reinstall dependencies
-
-### **Project Structure**
-
-```
-├── src/
-│   ├── core/           # Core framework modules
-│   │   ├── api-loader.js      # Dynamic API discovery
-│   │   └── openapi-generator.js # OpenAPI generation
-│   ├── mcp/            # MCP server implementation
-│   │   └── mcp-server.js      # MCP protocol server
-│   └── utils/          # Utility services
-│       └── hot-reloader.js    # Hot reloading service
-├── api/                # API endpoint definitions
-│   └── example/        # Example API endpoints
-├── server.js           # Main Express server
-├── .env.example        # Environment configuration template
-└── package.json        # Dependencies and scripts
-```
-
-## 🚀 **Production Deployment** 
-
-For production deployment:
-
-1. Set `NODE_ENV=production`
-2. Hot reloading is automatically disabled
-3. Use proper process management (PM2, Docker, etc.)
-4. Configure reverse proxy for HTTPS
-5. Set appropriate CORS policies
-
-## 🤝 **Contributing** 
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📄 **License** 
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 **Support** 
-
-- **Issues**: Create an issue on GitHub
-- **Documentation**: Check the [Wiki](../../wiki)
-- **Community**: Join our discussions
+- **AI Integration**: Expose your APIs to AI models via MCP
+- **Rapid Prototyping**: Build APIs in minutes, not hours
+- **Microservices**: Create lightweight, focused API services
+- **AI Tools**: Build custom tools for AI assistants
+- **API Documentation**: Auto-generate complete OpenAPI specs
 
 ---
 
-**Dynamic API framework that thinks for itself** 🧠✨
+**🎯 The Future of API Development: Write Once, Deploy Everywhere**  
+**One function = REST API + MCP Tool + OpenAPI Documentation** 🚀✨
