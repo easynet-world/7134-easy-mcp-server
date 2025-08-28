@@ -8,7 +8,9 @@
  */
 
 
-class PostExample {
+const BaseAPI = require('../../src/core/base-api');
+
+class PostExample extends BaseAPI {
   // This single method creates everything automatically!
   process(req, res) {
     const { name, message } = req.body;
@@ -29,11 +31,14 @@ class PostExample {
     res.status(201).json(result);
   }
   
-  // Enhanced OpenAPI documentation
+  get description() {
+    return 'Create a greeting by sending name and optional message';
+  }
+  
+  // Enhanced OpenAPI documentation with custom request body
   get openApi() {
     return {
-      summary: 'Create greeting',
-      description: 'Create a greeting by sending name and optional message',
+      ...super.openApi,
       requestBody: {
         required: true,
         content: {
@@ -42,20 +47,22 @@ class PostExample {
               type: 'object',
               required: ['name'],
               properties: {
-                name: { type: 'string', description: 'Name of the person to greet' },
-                message: { type: 'string', description: 'Optional message to include' }
+                name: {
+                  type: 'string',
+                  description: 'Name of the person to greet (required)',
+                  example: 'John Doe'
+                },
+                message: {
+                  type: 'string',
+                  description: 'Optional message to include',
+                  example: 'Welcome to our API!'
+                }
               }
             }
           }
         }
       }
-      // Response schema auto-generated from runtime analysis!
     };
-  }
-  
-  // MCP uses the OpenAPI description automatically
-  get description() {
-    return this.openApi.description;
   }
 }
 

@@ -7,7 +7,9 @@
  * 3. OpenAPI: Complete documentation
  */
 
-class GetExample {
+const BaseAPI = require('../../src/core/base-api');
+
+class GetExample extends BaseAPI {
   // This single method creates everything automatically!
   process(req, res) {
     res.json({
@@ -17,18 +19,8 @@ class GetExample {
     });
   }
   
-  // Enhanced OpenAPI documentation
-  get openApi() {
-    return {
-      summary: 'Get greeting message',
-      description: 'Get a simple greeting message from the server with timestamp and magic message'
-      // Response schema auto-generated from runtime analysis!
-    };
-  }
-  
-  // MCP uses the OpenAPI description automatically
   get description() {
-    return this.openApi.description;
+    return 'Get a simple greeting message from the server with timestamp and magic message';
   }
 }
 

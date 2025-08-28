@@ -18,17 +18,15 @@
 
 ```javascript
 // api/hello/get.js
-class HelloWorld {
+const BaseAPI = require('../../src/core/base-api');
+
+class HelloWorld extends BaseAPI {
   process(req, res) {
     res.json({ message: "Hello World!" });
   }
   
-  get openApi() {
-    return {
-      summary: 'Get greeting message',
-      description: 'Returns a simple greeting message from the server'
-      // Response schema auto-generated from runtime analysis!
-    };
+  get description() {
+    return 'Returns a simple greeting message from the server';
   }
 }
 
@@ -47,7 +45,9 @@ module.exports = HelloWorld;
 ### **Step 1: Write One Function**
 ```javascript
 // api/users/get.js
-class GetUsers {
+const BaseAPI = require('../../src/core/base-api');
+
+class GetUsers extends BaseAPI {
   process(req, res) {
     const users = [
       { id: 1, name: 'John' },
@@ -56,12 +56,8 @@ class GetUsers {
     res.json({ users });
   }
   
-  get openApi() {
-    return {
-      summary: 'Get all users',
-      description: 'Retrieves a list of all users from the server'
-      // Response schema auto-generated from runtime analysis!
-    };
+  get description() {
+    return 'Retrieves a list of all users from the server';
   }
 }
 
@@ -176,7 +172,9 @@ module.exports = HelloWorld;
 ### **Example 2: Create User**
 ```javascript
 // api/users/post.js
-class CreateUser {
+const BaseAPI = require('../../src/core/base-api');
+
+class CreateUser extends BaseAPI {
   process(req, res) {
     const { name, email } = req.body;
     
@@ -192,10 +190,10 @@ class CreateUser {
     return 'Creates a new user with name and email on the server';
   }
   
+  // Enhanced OpenAPI documentation with custom request body
   get openApi() {
     return {
-      summary: 'Create a new user',
-      description: 'Creates a new user with name and email on the server',
+      ...super.openApi,
       requestBody: {
         required: true,
         content: {
@@ -211,44 +209,8 @@ class CreateUser {
                 },
                 email: {
                   type: 'string',
-                  format: 'email',
                   description: 'User email address',
                   example: 'john@example.com'
-                }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'User created successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  user: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'integer', example: 1703123456789 },
-                      name: { type: 'string', example: 'John Doe' },
-                      email: { type: 'string', example: 'john@example.com' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        '400': {
-          description: 'Bad request - name is required',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  error: { type: 'string', example: 'Name required' }
                 }
               }
             }
@@ -333,15 +295,19 @@ OpenAPI is the industry standard for API documentation. It provides a machine-re
 - **API Documentation**: Professional, interactive documentation
 - **Code Examples**: Generate code samples for any language
 
-**💡 Pro Tip**: Add an `openApi` getter to your classes for enhanced documentation:
+**💡 Pro Tip**: Extend the BaseAPI class for the simplest setup:
 ```javascript
-get openApi() {
-  return {
-    summary: 'Brief description',
-    description: 'Detailed description',
-    requestBody: { /* request schema */ }
-    // Response schema auto-generated from runtime analysis!
-  };
+const BaseAPI = require('../../src/core/base-api');
+
+class MyAPI extends BaseAPI {
+  process(req, res) { /* your logic */ }
+  
+  get description() {
+    return 'Your API description';
+  }
+  
+  // Summary and response schema auto-generated!
+  // Add custom openApi getter only if you need request body schemas
 }
 ```
 
@@ -368,26 +334,27 @@ class MyAPI {
 }
 ```
 
-### **Now (New Way):**
+### **Now (New Way with Base Class):**
 ```javascript
-class MyAPI {
+const BaseAPI = require('../../src/core/base-api');
+
+class MyAPI extends BaseAPI {
   process(req, res) { /* your logic */ }
   
-  get openApi() {
-    return {
-      summary: 'Summary',
-      description: 'Single description used by both MCP and OpenAPI'
-      // Response schema auto-generated! 🎉
-    };
+  get description() {
+    return 'Single description used by both MCP and OpenAPI';
   }
+  // Summary and response schema auto-generated! 🎉
 }
 ```
 
 ### **Benefits:**
 - ✅ **Single source of truth** - One description for both MCP and OpenAPI
 - ✅ **Auto-generated schemas** - Response schemas created automatically
+- ✅ **Auto-generated summary** - Summary automatically uses description
 - ✅ **Zero duplication** - No need to maintain separate descriptions
 - ✅ **Always in sync** - MCP and OpenAPI always use the same information
+- ✅ **Easy inheritance** - Extend BaseAPI for consistent structure
 
 ---
 

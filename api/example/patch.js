@@ -1,12 +1,18 @@
-class PatchExample {
+const BaseAPI = require('../../src/core/base-api');
+
+class PatchExample extends BaseAPI {
   process(req, res) {
     res.json({ message: 'PATCH request successful', data: req.body, method: 'PATCH' });
   }
   
+  get description() {
+    return 'Partially update a resource on the server. This endpoint allows you to modify specific fields of an existing resource without replacing the entire object.';
+  }
+  
+  // Enhanced OpenAPI documentation with custom request body
   get openApi() {
     return {
-      summary: 'Partially update resource',
-      description: 'Partially update a resource on the server. This endpoint allows you to modify specific fields of an existing resource without replacing the entire object.',
+      ...super.openApi,
       requestBody: {
         required: true,
         content: {
@@ -18,13 +24,7 @@ class PatchExample {
           }
         }
       }
-      // Response schema auto-generated from runtime analysis!
     };
-  }
-  
-  // MCP uses the OpenAPI description automatically
-  get description() {
-    return this.openApi.description;
   }
 }
 module.exports = PatchExample;

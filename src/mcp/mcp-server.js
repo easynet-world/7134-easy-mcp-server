@@ -274,18 +274,18 @@ class DynamicAPIMCPServer {
     const routes = this.getLoadedRoutes();
     console.log('🔍 MCP HTTP: Routes loaded:', routes.length);
     
-    const tools = routes.map(route => ({
-      name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-      description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          body: { type: 'object', description: 'Request body' },
-          query: { type: 'object', description: 'Query parameters' },
-          headers: { type: 'object', description: 'Request headers' }
+          const tools = routes.map(route => ({
+        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+        description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            body: { type: 'object', description: 'Request body' },
+            query: { type: 'object', description: 'Query parameters' },
+            headers: { type: 'object', description: 'Request headers' }
+          }
         }
-      }
-    }));
+      }));
     
     return {
       jsonrpc: '2.0',
@@ -376,7 +376,7 @@ class DynamicAPIMCPServer {
       
       const tools = routes.map(route => ({
         name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-        description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+        description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
         method: route.method,
         path: route.path,
         processor: route.processor
@@ -496,7 +496,7 @@ class DynamicAPIMCPServer {
       params: {
         tools: routes.map(route => ({
           name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-          description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+          description: route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
           method: route.method,
           path: route.path
         }))
