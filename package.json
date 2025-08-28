@@ -53,6 +53,12 @@
     "type": "github",
     "url": "https://github.com/sponsors/easynet-world"
   },
+  "maintainers": [
+    {
+      "name": "EasyNet World",
+      "email": "support@easynet.world"
+    }
+  ],
   "engines": {
     "node": ">=16.0.0"
   }
