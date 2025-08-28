@@ -41,6 +41,10 @@
   ],
   "author": "Your Name",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/easynet-world/7134-easy-mcp-server.git"
+  },
   "engines": {
     "node": ">=16.0.0"
   }
