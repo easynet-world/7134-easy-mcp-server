@@ -23,32 +23,11 @@ class HelloWorld {
     res.json({ message: "Hello World!" });
   }
   
-  get description() {
-    return 'Returns a simple greeting message from the server';
-  }
-  
   get openApi() {
     return {
       summary: 'Get greeting message',
-      description: 'Returns a simple hello world message',
-      responses: {
-        '200': {
-          description: 'Successful response',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  message: {
-                    type: 'string',
-                    example: 'Hello World!'
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      description: 'Returns a simple greeting message from the server'
+      // Response schema auto-generated from runtime analysis!
     };
   }
 }
@@ -77,38 +56,11 @@ class GetUsers {
     res.json({ users });
   }
   
-  get description() {
-    return 'Retrieves a list of all users from the server';
-  }
-  
   get openApi() {
     return {
       summary: 'Get all users',
-      description: 'Retrieves a list of all users from the server',
-      responses: {
-        '200': {
-          description: 'Successful response',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  users: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'integer', example: 1 },
-                        name: { type: 'string', example: 'John' }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      description: 'Retrieves a list of all users from the server'
+      // Response schema auto-generated from runtime analysis!
     };
   }
 }
@@ -387,11 +339,55 @@ get openApi() {
   return {
     summary: 'Brief description',
     description: 'Detailed description',
-    requestBody: { /* request schema */ },
-    responses: { /* response schemas */ }
+    requestBody: { /* request schema */ }
+    // Response schema auto-generated from runtime analysis!
   };
 }
 ```
+
+**🎯 MCP Integration**: MCP automatically uses the OpenAPI description, so no separate `description` getter needed!
+
+## 🚀 **Simplified API Development**
+
+### **Before (Old Way):**
+```javascript
+class MyAPI {
+  process(req, res) { /* your logic */ }
+  
+  get description() {
+    return 'Description for MCP';
+  }
+  
+  get openApi() {
+    return {
+      summary: 'Summary',
+      description: 'Description for OpenAPI',
+      responses: { /* manual schema */ }
+    };
+  }
+}
+```
+
+### **Now (New Way):**
+```javascript
+class MyAPI {
+  process(req, res) { /* your logic */ }
+  
+  get openApi() {
+    return {
+      summary: 'Summary',
+      description: 'Single description used by both MCP and OpenAPI'
+      // Response schema auto-generated! 🎉
+    };
+  }
+}
+```
+
+### **Benefits:**
+- ✅ **Single source of truth** - One description for both MCP and OpenAPI
+- ✅ **Auto-generated schemas** - Response schemas created automatically
+- ✅ **Zero duplication** - No need to maintain separate descriptions
+- ✅ **Always in sync** - MCP and OpenAPI always use the same information
 
 ---
 
