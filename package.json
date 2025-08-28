@@ -40,5 +40,8 @@
     "inspector"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
