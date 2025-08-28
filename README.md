@@ -141,6 +141,8 @@ npm start
 ### **Example 1: Hello World**
 ```javascript
 // api/hello/get.js
+const BaseAPI = require('../../src/core/base-api');
+
 /**
  * Hello World API endpoint
  * @description Returns a simple greeting message
@@ -149,7 +151,7 @@ npm start
  * // MCP Tool: get_hello
  * // OpenAPI: Auto-generated documentation
  */
-class HelloWorld {
+class HelloWorld extends BaseAPI {
   /**
    * Process the request and return a greeting
    * @param {Object} req - Express request object
@@ -158,6 +160,10 @@ class HelloWorld {
    */
   process(req, res) {
     res.json({ message: "Hello World!" });
+  }
+  
+  get description() {
+    return 'Returns a simple greeting message from the server';
   }
 }
 
