@@ -49,6 +49,10 @@
   "bugs": {
     "url": "https://github.com/easynet-world/7134-easy-mcp-server/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/easynet-world"
+  },
   "engines": {
     "node": ">=16.0.0"
   }
