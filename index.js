@@ -8,13 +8,13 @@
 // Export the BaseAPI class for easy inheritance
 const BaseAPI = require('./src/core/base-api');
 
-// Export the main server class
-const DynamicAPIServer = require('./server');
-
 // Export key utilities
 const APILoader = require('./src/core/api-loader');
 const OpenAPIGenerator = require('./src/core/openapi-generator');
 const DynamicAPIMCPServer = require('./src/mcp/mcp-server');
+
+// Export the server class without starting it
+const DynamicAPIServer = require('./server');
 
 module.exports = {
   // Main classes

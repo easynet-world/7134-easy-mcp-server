@@ -190,85 +190,92 @@ async function executeAPIEndpoint(route, args, res) {
   }
 }
 
-// Start server
-const host = process.env.SERVER_HOST || '0.0.0.0';
-const port = process.env.SERVER_PORT || 3000;
+// Server startup function
+function startServer() {
+  const host = process.env.SERVER_HOST || '0.0.0.0';
+  const port = process.env.SERVER_PORT || 3000;
 
-// Start MCP server if enabled
-let mcpServer = null;
-let hotReloader = null;
+  // Start MCP server if enabled
+  let mcpServer = null;
+  let hotReloader = null;
 
-if (process.env.MCP_ENABLED !== 'false') {
-  try {
-    mcpServer = new DynamicAPIMCPServer(
-      process.env.MCP_HOST || 'localhost',
-      process.env.MCP_PORT || 3001
-    );
-    
-    // Start MCP server first
-    mcpServer.run().then(() => {
-      console.log('🤖 MCP Server started successfully!');
+  if (process.env.MCP_ENABLED !== 'false') {
+    try {
+      mcpServer = new DynamicAPIMCPServer(
+        process.env.MCP_HOST || 'localhost',
+        process.env.MCP_PORT || 3001
+      );
       
-      // Set the routes for MCP server after it's started
-      mcpServer.setRoutes(loadedRoutes);
-      console.log(`🔌 MCP Server: Routes set (${loadedRoutes.length} routes)`);
-      
-      // Initialize hot reloading after MCP server is ready
-      hotReloader = new HotReloader(apiLoader, mcpServer);
-      hotReloader.startWatching();
-      
-    }).catch(error => {
-      console.warn('⚠️  MCP Server failed to start:', error.message);
-    });
-  } catch (error) {
-    console.warn('⚠️  MCP Server not available:', error.message);
+      // Start MCP server first
+      mcpServer.run().then(() => {
+        console.log('🤖 MCP Server started successfully!');
+        
+        // Set the routes for MCP server after it's started
+        mcpServer.setRoutes(loadedRoutes);
+        console.log(`🔌 MCP Server: Routes set (${loadedRoutes.length} routes)`);
+        
+        // Initialize hot reloading after MCP server is ready
+        hotReloader = new HotReloader(apiLoader, mcpServer);
+        hotReloader.startWatching();
+        
+      }).catch(error => {
+        console.warn('⚠️  MCP Server failed to start:', error.message);
+      });
+    } catch (error) {
+      console.warn('⚠️  MCP Server not available:', error.message);
+    }
   }
+
+  // Start the main server
+  app.listen(port, host, () => {
+    console.log(`🚀 Server starting on ${host}:${port}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📡 Health check: http://localhost:${port}/health`);
+    console.log(`📊 API info: http://localhost:${port}/api-info`);
+    console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
+    console.log(`🤖 MCP tools: http://localhost:${port}/mcp/tools`);
+    if (mcpServer) {
+      console.log(`🔌 MCP server: ws://${process.env.MCP_HOST || 'localhost'}:${process.env.MCP_PORT || 3001}`);
+    }
+    console.log('✅ Working API Framework with MCP support ready!');
+  });
+
+  // Graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('\n🛑 Shutting down servers...');
+    if (hotReloader) {
+      hotReloader.stopWatching();
+    }
+    if (mcpServer) {
+      mcpServer.stop();
+    }
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('\n🛑 Shutting down servers...');
+    if (hotReloader) {
+      hotReloader.stopWatching();
+    }
+    if (mcpServer) {
+      mcpServer.stop();
+    }
+    process.exit(0);
+  });
 }
 
-// Start the main server
-app.listen(port, host, () => {
-  console.log(`🚀 Server starting on ${host}:${port}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📡 Health check: http://localhost:${port}/health`);
-  console.log(`📊 API info: http://localhost:${port}/api-info`);
-  console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
-  console.log(`🤖 MCP tools: http://localhost:${port}/mcp/tools`);
-  if (mcpServer) {
-    console.log(`🔌 MCP server: ws://${process.env.MCP_HOST || 'localhost'}:${process.env.MCP_PORT || 3001}`);
-  }
-  console.log('✅ Working API Framework with MCP support ready!');
-});
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down servers...');
-  if (hotReloader) {
-    hotReloader.stopWatching();
-  }
-  if (mcpServer) {
-    mcpServer.stop();
-  }
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  console.log('\n🛑 Shutting down servers...');
-  if (hotReloader) {
-    hotReloader.stopWatching();
-  }
-  if (mcpServer) {
-    mcpServer.stop();
-  }
-  process.exit(0);
-});
+// Only start server if this file is run directly
+if (require.main === module) {
+  startServer();
+}
 
 // Export functions for external use
 module.exports = {
   app,
   apiLoader,
   openapiGenerator,
-  mcpServer,
-  hotReloader,
+  mcpServer: null, // Will be set when server starts
+  hotReloader: null, // Will be set when server starts
   getLoadedRoutes: () => apiLoader.getRoutes()
 };
 // Version 0.0.1
