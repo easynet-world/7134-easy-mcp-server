@@ -3,8 +3,32 @@ class PutExample {
     res.json({ message: 'PUT request successful', data: req.body, method: 'PUT' });
   }
   
+  get openApi() {
+    return {
+      summary: 'Update entire resource',
+      description: 'Update an entire resource on the server. This endpoint replaces the complete resource with the data provided in the request body.',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              description: 'Complete resource data to replace existing resource'
+            }
+          }
+        }
+      },
+      responses: {
+        '200': {
+          description: 'Resource updated successfully'
+        }
+      }
+    };
+  }
+  
+  // MCP uses the OpenAPI description automatically
   get description() {
-    return 'Update an entire resource on the server. This endpoint replaces the complete resource with the data provided in the request body.';
+    return this.openApi.description;
   }
 }
 module.exports = PutExample;

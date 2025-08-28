@@ -29,9 +29,40 @@ class PostExample {
     res.status(201).json(result);
   }
   
-  // Optional: Describe what this does for AI models
+  // Enhanced OpenAPI documentation
+  get openApi() {
+    return {
+      summary: 'Create greeting',
+      description: 'Create a greeting by sending name and optional message',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['name'],
+              properties: {
+                name: { type: 'string', description: 'Name of the person to greet' },
+                message: { type: 'string', description: 'Optional message to include' }
+              }
+            }
+          }
+        }
+      },
+      responses: {
+        '201': {
+          description: 'Greeting created successfully'
+        },
+        '400': {
+          description: 'Bad request - name is required'
+        }
+      }
+    };
+  }
+  
+  // MCP uses the OpenAPI description automatically
   get description() {
-    return 'Create a greeting by sending name and optional message';
+    return this.openApi.description;
   }
 }
 

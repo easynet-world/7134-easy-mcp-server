@@ -17,9 +17,22 @@ class GetExample {
     });
   }
   
-  // Optional: Describe what this does for AI models
+  // Enhanced OpenAPI documentation
+  get openApi() {
+    return {
+      summary: 'Get greeting message',
+      description: 'Get a simple greeting message from the server with timestamp and magic message',
+      responses: {
+        '200': {
+          description: 'Successful response'
+        }
+      }
+    };
+  }
+  
+  // MCP uses the OpenAPI description automatically
   get description() {
-    return 'Get a simple greeting message from the server';
+    return this.openApi.description;
   }
 }
 

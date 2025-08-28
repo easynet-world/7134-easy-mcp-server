@@ -3,8 +3,21 @@ class DeleteExample {
     res.json({ message: 'DELETE request successful', method: 'DELETE' });
   }
   
+  get openApi() {
+    return {
+      summary: 'Delete a resource',
+      description: 'Remove a resource from the server. This endpoint demonstrates how to handle DELETE requests and return a confirmation message.',
+      responses: {
+        '200': {
+          description: 'Resource deleted successfully'
+        }
+      }
+    };
+  }
+  
+  // MCP uses the OpenAPI description automatically
   get description() {
-    return 'Remove a resource from the server. This endpoint demonstrates how to handle DELETE requests and return a confirmation message.';
+    return this.openApi.description;
   }
 }
 module.exports = DeleteExample;
