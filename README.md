@@ -18,23 +18,38 @@
 
 ```javascript
 // api/hello/get.js
-/**
- * Hello World API endpoint
- * @description Returns a simple greeting message
- * @example
- * // REST API: GET /hello
- * // MCP Tool: get_hello
- * // OpenAPI: Auto-generated documentation
- */
 class HelloWorld {
-  /**
-   * Process the request and return a greeting
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Object} JSON response with greeting message
-   */
   process(req, res) {
     res.json({ message: "Hello World!" });
+  }
+  
+  get description() {
+    return 'Returns a simple greeting message from the server';
+  }
+  
+  get openApi() {
+    return {
+      summary: 'Get greeting message',
+      description: 'Returns a simple hello world message',
+      responses: {
+        '200': {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Hello World!'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
   }
 }
 
@@ -53,27 +68,48 @@ module.exports = HelloWorld;
 ### **Step 1: Write One Function**
 ```javascript
 // api/users/get.js
-/**
- * Get Users API endpoint
- * @description Retrieves a list of all users
- * @example
- * // REST API: GET /users
- * // MCP Tool: get_users
- * // OpenAPI: Auto-generated documentation with response schema
- */
 class GetUsers {
-  /**
-   * Process the request and return user list
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Object} JSON response with array of users
-   */
   process(req, res) {
     const users = [
       { id: 1, name: 'John' },
       { id: 2, name: 'Jane' }
     ];
     res.json({ users });
+  }
+  
+  get description() {
+    return 'Retrieves a list of all users from the server';
+  }
+  
+  get openApi() {
+    return {
+      summary: 'Get all users',
+      description: 'Retrieves a list of all users from the server',
+      responses: {
+        '200': {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  users: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        name: { type: 'string', example: 'John' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
   }
 }
 
@@ -188,24 +224,7 @@ module.exports = HelloWorld;
 ### **Example 2: Create User**
 ```javascript
 // api/users/post.js
-/**
- * Create User API endpoint
- * @description Creates a new user with name and email
- * @example
- * // REST API: POST /users
- * // MCP Tool: post_users
- * // OpenAPI: Auto-generated documentation with request/response schemas
- */
 class CreateUser {
-  /**
-   * Process the request and create a new user
-   * @param {Object} req - Express request object
-   * @param {Object} req.body - Request body containing user data
-   * @param {string} req.body.name - User's name (required)
-   * @param {string} req.body.email - User's email address
-   * @param {Object} res - Express response object
-   * @returns {Object} JSON response with created user or error
-   */
   process(req, res) {
     const { name, email } = req.body;
     
@@ -215,6 +234,76 @@ class CreateUser {
     
     const user = { id: Date.now(), name, email };
     res.status(201).json({ user });
+  }
+  
+  get description() {
+    return 'Creates a new user with name and email on the server';
+  }
+  
+  get openApi() {
+    return {
+      summary: 'Create a new user',
+      description: 'Creates a new user with name and email on the server',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['name'],
+              properties: {
+                name: {
+                  type: 'string',
+                  description: 'User name (required)',
+                  example: 'John Doe'
+                },
+                email: {
+                  type: 'string',
+                  format: 'email',
+                  description: 'User email address',
+                  example: 'john@example.com'
+                }
+              }
+            }
+          }
+        }
+      },
+      responses: {
+        '201': {
+          description: 'User created successfully',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  user: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer', example: 1703123456789 },
+                      name: { type: 'string', example: 'John Doe' },
+                      email: { type: 'string', example: 'john@example.com' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        '400': {
+          description: 'Bad request - name is required',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  error: { type: 'string', example: 'Name required' }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
   }
 }
 
@@ -291,6 +380,18 @@ OpenAPI is the industry standard for API documentation. It provides a machine-re
 - **Testing Tools**: Use tools like Postman or Insomnia
 - **API Documentation**: Professional, interactive documentation
 - **Code Examples**: Generate code samples for any language
+
+**💡 Pro Tip**: Add an `openApi` getter to your classes for enhanced documentation:
+```javascript
+get openApi() {
+  return {
+    summary: 'Brief description',
+    description: 'Detailed description',
+    requestBody: { /* request schema */ },
+    responses: { /* response schemas */ }
+  };
+}
+```
 
 ---
 
