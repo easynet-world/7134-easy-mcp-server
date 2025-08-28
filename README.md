@@ -4,10 +4,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
-# Easy MCP Server
-
-npm version License: MIT Node.js Version
-
 > **🎯 ONE FUNCTION = THREE INTERFACES AUTOMATICALLY**  
 > **Write a single JavaScript function and instantly get REST API + MCP Tool + OpenAPI Documentation**
 
