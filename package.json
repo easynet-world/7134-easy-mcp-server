@@ -46,6 +46,9 @@
     "url": "https://github.com/easynet-world/7134-easy-mcp-server.git"
   },
   "homepage": "https://github.com/easynet-world/7134-easy-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/easynet-world/7134-easy-mcp-server/issues"
+  },
   "engines": {
     "node": ">=16.0.0"
   }
