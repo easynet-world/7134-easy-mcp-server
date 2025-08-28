@@ -102,7 +102,7 @@ describe('Core Modules', () => {
       const info = generator.generateInfo();
     
       expect(info.title).toBe('Easy MCP Framework');
-      expect(info.version).toBe('0.0.2');
+      expect(info.version).toBe('0.1.1');
       expect(info.description).toContain('MCP');
       expect(info.description).toContain('AI models');
     });
