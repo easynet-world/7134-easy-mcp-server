@@ -6,6 +6,12 @@
 > **🎯 ONE FUNCTION = THREE INTERFACES AUTOMATICALLY**  
 > **Write a single JavaScript function and instantly get REST API + MCP Tool + OpenAPI Documentation**
 
+### **What You Get:**
+
+**🌐 REST API** - Standard HTTP endpoints for web and mobile apps  
+**🤖 MCP (Model Context Protocol)** - AI models can call your functions as tools  
+**📚 OpenAPI** - Professional API documentation and client generation
+
 ## 🚀 **The Magic (One Glance)**
 
 **You write ONE JavaScript class with a `process()` method:**
@@ -61,10 +67,11 @@ That's it! The framework automatically:
 curl http://localhost:3000/users
 # Response: {"users": [...]}
 ```
+Standard HTTP endpoints that work with any web framework, mobile app, or frontend.
 
-**🤖 MCP Tool (AI Models):**
+**🤖 MCP (Model Context Protocol):**
 ```json
-// AI can now call your function via MCP
+// AI models can call your functions as tools
 {
   "method": "tools/call",
   "params": {
@@ -73,12 +80,14 @@ curl http://localhost:3000/users
   }
 }
 ```
+MCP is a protocol that allows AI models to discover and call your functions as tools, making your APIs accessible to AI assistants and chatbots.
 
 **📚 OpenAPI Documentation:**
 ```bash
 curl http://localhost:3000/openapi.json
 # Full OpenAPI 3.0 specification
 ```
+Automatically generated API documentation that enables client generation, testing tools, and professional API documentation.
 
 ## 🎯 **The Power: Zero Configuration Magic**
 
@@ -205,6 +214,24 @@ curl http://localhost:3000/openapi.json
 - **Microservices**: Create lightweight, focused API services
 - **AI Tools**: Build custom tools for AI assistants
 - **API Documentation**: Auto-generate complete OpenAPI specs
+
+## 🔍 **What Are MCP and OpenAPI?**
+
+### **🤖 MCP (Model Context Protocol)**
+MCP is an open protocol that enables AI models to discover and use external tools. When you write a function, it automatically becomes available to AI assistants like ChatGPT, Claude, or any MCP-compatible AI model. Your functions appear as tools that AI can call with parameters.
+
+**Benefits:**
+- **AI Integration**: Make your APIs accessible to AI models
+- **Natural Language**: AI can understand and use your functions
+- **Tool Discovery**: AI automatically discovers available functions
+- **Parameter Handling**: AI can pass the right arguments to your functions
+
+### **📚 OpenAPI (Swagger)**
+OpenAPI is the industry standard for API documentation. It provides a machine-readable description of your API that enables:
+- **Client Generation**: Auto-generate SDKs for any programming language
+- **Testing Tools**: Use tools like Postman or Insomnia
+- **API Documentation**: Professional, interactive documentation
+- **Code Examples**: Generate code samples for any language
 
 ---
 
