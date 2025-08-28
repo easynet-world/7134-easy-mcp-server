@@ -10,7 +10,7 @@ class BaseAPI {
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
-  process(req, res) {
+  process(_req, _res) {
     throw new Error('process method must be implemented by subclass');
   }
 

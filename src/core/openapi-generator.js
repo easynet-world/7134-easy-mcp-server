@@ -375,14 +375,14 @@ class OpenAPIGenerator {
     
     // Handle primitive types
     switch (typeof data) {
-      case 'string':
-        return { type: 'string' };
-      case 'number':
-        return Number.isInteger(data) ? { type: 'integer' } : { type: 'number' };
-      case 'boolean':
-        return { type: 'boolean' };
-      default:
-        return { type: 'string' };
+    case 'string':
+      return { type: 'string' };
+    case 'number':
+      return Number.isInteger(data) ? { type: 'integer' } : { type: 'number' };
+    case 'boolean':
+      return { type: 'boolean' };
+    default:
+      return { type: 'string' };
     }
   }
 }
