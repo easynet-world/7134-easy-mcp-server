@@ -18,7 +18,7 @@
 
 ```javascript
 // api/hello/get.js
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class HelloWorld extends BaseAPI {
   process(req, res) {
@@ -45,7 +45,7 @@ module.exports = HelloWorld;
 ### **Step 1: Write One Function**
 ```javascript
 // api/users/get.js
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class GetUsers extends BaseAPI {
   process(req, res) {
@@ -178,7 +178,7 @@ module.exports = HelloWorld;
 ### **Example 2: Create User**
 ```javascript
 // api/users/post.js
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class CreateUser extends BaseAPI {
   process(req, res) {
@@ -228,7 +228,7 @@ class CreateUser extends BaseAPI {
 }
 
 module.exports = CreateUser;
-```
+}
 
 **🎯 What you get automatically:**
 - **REST**: `POST /users` with request body
@@ -303,7 +303,7 @@ OpenAPI is the industry standard for API documentation. It provides a machine-re
 
 **💡 Pro Tip**: Extend the BaseAPI class for the simplest setup:
 ```javascript
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class MyAPI extends BaseAPI {
   process(req, res) { /* your logic */ }
@@ -342,7 +342,7 @@ class MyAPI {
 
 ### **Now (New Way with Base Class):**
 ```javascript
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class MyAPI extends BaseAPI {
   process(req, res) { /* your logic */ }
@@ -352,7 +352,6 @@ class MyAPI extends BaseAPI {
   }
   // Summary and response schema auto-generated! 🎉
 }
-```
 
 ### **Benefits:**
 - ✅ **Single source of truth** - One description for both MCP and OpenAPI

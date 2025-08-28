@@ -2,7 +2,11 @@
   "name": "easy-mcp-server",
   "version": "0.1.1",
   "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
-  "main": "server.js",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./base-api": "./src/core/base-api.js"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",

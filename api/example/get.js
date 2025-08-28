@@ -7,7 +7,7 @@
  * 3. OpenAPI: Complete documentation
  */
 
-const BaseAPI = require('../../src/core/base-api');
+const { BaseAPI } = require('easy-mcp-server');
 
 class GetExample extends BaseAPI {
   // This single method creates everything automatically!
