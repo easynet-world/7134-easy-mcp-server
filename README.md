@@ -18,7 +18,21 @@
 
 ```javascript
 // api/hello/get.js
+/**
+ * Hello World API endpoint
+ * @description Returns a simple greeting message
+ * @example
+ * // REST API: GET /hello
+ * // MCP Tool: get_hello
+ * // OpenAPI: Auto-generated documentation
+ */
 class HelloWorld {
+  /**
+   * Process the request and return a greeting
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} JSON response with greeting message
+   */
   process(req, res) {
     res.json({ message: "Hello World!" });
   }
@@ -39,7 +53,21 @@ module.exports = HelloWorld;
 ### **Step 1: Write One Function**
 ```javascript
 // api/users/get.js
+/**
+ * Get Users API endpoint
+ * @description Retrieves a list of all users
+ * @example
+ * // REST API: GET /users
+ * // MCP Tool: get_users
+ * // OpenAPI: Auto-generated documentation with response schema
+ */
 class GetUsers {
+  /**
+   * Process the request and return user list
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} JSON response with array of users
+   */
   process(req, res) {
     const users = [
       { id: 1, name: 'John' },
@@ -129,7 +157,21 @@ npm start
 ### **Example 1: Hello World**
 ```javascript
 // api/hello/get.js
+/**
+ * Hello World API endpoint
+ * @description Returns a simple greeting message
+ * @example
+ * // REST API: GET /hello
+ * // MCP Tool: get_hello
+ * // OpenAPI: Auto-generated documentation
+ */
 class HelloWorld {
+  /**
+   * Process the request and return a greeting
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} JSON response with greeting message
+   */
   process(req, res) {
     res.json({ message: "Hello World!" });
   }
@@ -146,7 +188,24 @@ module.exports = HelloWorld;
 ### **Example 2: Create User**
 ```javascript
 // api/users/post.js
+/**
+ * Create User API endpoint
+ * @description Creates a new user with name and email
+ * @example
+ * // REST API: POST /users
+ * // MCP Tool: post_users
+ * // OpenAPI: Auto-generated documentation with request/response schemas
+ */
 class CreateUser {
+  /**
+   * Process the request and create a new user
+   * @param {Object} req - Express request object
+   * @param {Object} req.body - Request body containing user data
+   * @param {string} req.body.name - User's name (required)
+   * @param {string} req.body.email - User's email address
+   * @param {Object} res - Express response object
+   * @returns {Object} JSON response with created user or error
+   */
   process(req, res) {
     const { name, email } = req.body;
     
