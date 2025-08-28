@@ -21,12 +21,8 @@ class GetExample {
   get openApi() {
     return {
       summary: 'Get greeting message',
-      description: 'Get a simple greeting message from the server with timestamp and magic message',
-      responses: {
-        '200': {
-          description: 'Successful response'
-        }
-      }
+      description: 'Get a simple greeting message from the server with timestamp and magic message'
+      // Response schema auto-generated from runtime analysis!
     };
   }
   

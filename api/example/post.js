@@ -48,15 +48,8 @@ class PostExample {
             }
           }
         }
-      },
-      responses: {
-        '201': {
-          description: 'Greeting created successfully'
-        },
-        '400': {
-          description: 'Bad request - name is required'
-        }
       }
+      // Response schema auto-generated from runtime analysis!
     };
   }
   

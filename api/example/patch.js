@@ -17,12 +17,8 @@ class PatchExample {
             }
           }
         }
-      },
-      responses: {
-        '200': {
-          description: 'Resource updated successfully'
-        }
       }
+      // Response schema auto-generated from runtime analysis!
     };
   }
   

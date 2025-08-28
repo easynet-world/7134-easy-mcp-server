@@ -58,19 +58,14 @@ class OpenAPIGenerator {
           Object.assign(apiInfo, processor.openApi);
         }
         
-        // Add default responses
-        apiInfo.responses = {
-          '200': {
-            description: 'Successful response',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/Success'
-                }
-              }
-            }
-          },
-          '400': {
+        // Auto-generate response schemas if not provided
+        if (!apiInfo.responses) {
+          apiInfo.responses = this.generateResponseSchema(processor);
+        }
+        
+        // Add default error responses if not provided
+        if (!apiInfo.responses['400']) {
+          apiInfo.responses['400'] = {
             description: 'Bad request',
             content: {
               'application/json': {
@@ -79,8 +74,11 @@ class OpenAPIGenerator {
                 }
               }
             }
-          },
-          '500': {
+          };
+        }
+        
+        if (!apiInfo.responses['500']) {
+          apiInfo.responses['500'] = {
             description: 'Internal server error',
             content: {
               'application/json': {
@@ -89,8 +87,8 @@ class OpenAPIGenerator {
                 }
               }
             }
-          }
-        };
+          };
+        }
         
         paths[route.path][method] = apiInfo;
       } else {
@@ -260,6 +258,132 @@ class OpenAPIGenerator {
     });
     
     return tags;
+  }
+
+  /**
+   * Auto-generate response schema by analyzing the processor
+   * @param {Object} processor - The API processor instance
+   * @returns {Object} OpenAPI response schema
+   */
+  generateResponseSchema(processor) {
+    try {
+      // Try to get a sample response by calling the process method with mock data
+      const mockReq = {
+        body: {},
+        query: {},
+        params: {},
+        headers: {}
+      };
+      
+      const mockRes = {
+        json: (data) => {
+          // Capture the response data
+          mockRes.responseData = data;
+        },
+        status: (code) => {
+          mockRes.statusCode = code;
+          return mockRes;
+        }
+      };
+
+      // Call the process method to get sample response
+      if (typeof processor.process === 'function') {
+        processor.process(mockReq, mockRes);
+        
+        if (mockRes.responseData) {
+          return this.generateSchemaFromData(mockRes.responseData);
+        }
+      }
+    } catch (error) {
+      console.warn(`Warning: Could not auto-generate schema for ${processor.constructor.name}:`, error.message);
+    }
+
+    // Fallback to default success response
+    return {
+      '200': {
+        description: 'Successful response',
+        content: {
+          'application/json': {
+            schema: {
+              $ref: '#/components/schemas/Success'
+            }
+          }
+        }
+      }
+    };
+  }
+
+  /**
+   * Generate OpenAPI schema from response data
+   * @param {*} data - The response data
+   * @returns {Object} OpenAPI response schema
+   */
+  generateSchemaFromData(data) {
+    const schema = this.inferSchemaType(data);
+    
+    return {
+      '200': {
+        description: 'Successful response',
+        content: {
+          'application/json': {
+            schema: schema
+          }
+        }
+      }
+    };
+  }
+
+  /**
+   * Infer OpenAPI schema type from data
+   * @param {*} data - The data to analyze
+   * @returns {Object} OpenAPI schema object
+   */
+  inferSchemaType(data) {
+    if (data === null) {
+      return { type: 'null' };
+    }
+    
+    if (Array.isArray(data)) {
+      if (data.length === 0) {
+        return { type: 'array', items: {} };
+      }
+      return {
+        type: 'array',
+        items: this.inferSchemaType(data[0])
+      };
+    }
+    
+    if (typeof data === 'object') {
+      const properties = {};
+      const required = [];
+      
+      for (const [key, value] of Object.entries(data)) {
+        properties[key] = this.inferSchemaType(value);
+        
+        // Consider primitive values as required
+        if (value !== null && value !== undefined && typeof value !== 'object') {
+          required.push(key);
+        }
+      }
+      
+      return {
+        type: 'object',
+        properties,
+        required: required.length > 0 ? required : undefined
+      };
+    }
+    
+    // Handle primitive types
+    switch (typeof data) {
+      case 'string':
+        return { type: 'string' };
+      case 'number':
+        return Number.isInteger(data) ? { type: 'integer' } : { type: 'number' };
+      case 'boolean':
+        return { type: 'boolean' };
+      default:
+        return { type: 'string' };
+    }
   }
 }
 
