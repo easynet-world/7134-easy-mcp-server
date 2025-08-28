@@ -14,6 +14,9 @@ npm install easy-mcp-server
 
 # 2. Create your first API
 mkdir -p api/hello
+
+# 3. Start server (optional for development)
+npm start
 ```
 
 **Create `api/hello/get.js`:**
