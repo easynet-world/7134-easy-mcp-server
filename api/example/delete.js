@@ -1,12 +1,12 @@
-const { BaseAPI } = require('easy-mcp-server');
+const BaseAPI = require('../../src/core/base-api');
 
+/**
+ * @description Delete an item
+ * @summary Remove item completely
+ */
 class DeleteExample extends BaseAPI {
   process(req, res) {
     res.json({ message: 'Item deleted' });
-  }
-  
-  get description() {
-    return 'Delete an item';
   }
 }
 
