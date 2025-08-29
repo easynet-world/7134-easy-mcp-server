@@ -1,4 +1,4 @@
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class PutExample extends BaseAPI {
   process(req, res) {

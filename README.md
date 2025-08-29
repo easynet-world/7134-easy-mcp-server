@@ -12,8 +12,8 @@
 
 ```bash
 # 1. Install (choose one)
-npm install easy-mcp-server                    # From npmjs.org (recommended)
-npm install easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
+npm install @easynet-world/easy-mcp-server                    # From npmjs.org (recommended)
+npm install @easynet-world/easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
 
 # Package is automatically published to both registries on every release
 ```
@@ -27,7 +27,7 @@ npm start
 
 **Create `api/hello/get.js`:**
 ```javascript
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class HelloWorld extends BaseAPI {
   process(req, res) {
@@ -73,7 +73,7 @@ module.exports = HelloWorld;
 ### **Get Users**
 ```javascript
 // api/users/get.js
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class GetUsers extends BaseAPI {
   process(req, res) {
@@ -100,7 +100,7 @@ module.exports = GetUsers;
 ### **Create User (with request body)**
 ```javascript
 // api/users/post.js
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class CreateUser extends BaseAPI {
   process(req, res) {
@@ -245,7 +245,7 @@ open http://localhost:3000/docs
 
 ### **Simplest Setup**
 ```javascript
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class MyAPI extends BaseAPI {
   process(req, res) { /* your logic */ }

@@ -8,7 +8,7 @@
  */
 
 
-const { BaseAPI } = require('easy-mcp-server');
+const { BaseAPI } = require('@easynet-world/easy-mcp-server');
 
 class PostExample extends BaseAPI {
   // This single method creates everything automatically!
