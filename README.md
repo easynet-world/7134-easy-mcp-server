@@ -83,11 +83,8 @@ npm start
 
 # 📁 **File Structure & Naming Conventions**
 
-## **🎯 How It Works: File Path = API Path, File Name = HTTP Method**
+**File Path = API Path, File Name = HTTP Method**
 
-The framework uses a **convention-based routing system** where your file structure directly maps to your API endpoints:
-
-### **📂 File Path = API Endpoint Path**
 ```
 api/
 ├── users/
@@ -95,45 +92,14 @@ api/
 │   ├── post.js         → POST /users
 │   └── profile/
 │       ├── get.js      → GET /users/profile
-│       ├── put.js      → PUT /users/profile
-│       └── delete.js   → DELETE /users/profile
-├── products/
-│   ├── get.js          → GET /products
-│   └── search/
-│       └── get.js      → GET /products/search
+│       └── put.js      → PUT /users/profile
 └── hello/
     └── get.js          → GET /hello
 ```
 
-### **📄 File Name = HTTP Method**
-- **`get.js`** → **GET** request
-- **`post.js`** → **POST** request  
-- **`put.js`** → **PUT** request
-- **`patch.js`** → **PATCH** request
-- **`delete.js`** → **DELETE** request
-- **`head.js`** → **HEAD** request
-- **`options.js`** → **OPTIONS** request
+**HTTP Methods**: `get.js`, `post.js`, `put.js`, `patch.js`, `delete.js`, `head.js`, `options.js`
 
-### **🔗 Nested Routes with Subfolders**
-Use subfolders to create nested API routes:
-
-```
-api/
-├── users/
-│   ├── get.js          → GET /users
-│   └── profile/
-│       ├── get.js      → GET /users/profile
-│       ├── put.js      → PUT /users/profile
-│       └── delete.js   → DELETE /users/profile
-```
-
-**Example**: `api/users/profile/get.js` creates `GET /users/profile` endpoint.
-
-### **🎯 MCP Tool Names**
-Your API endpoints automatically become MCP tools with names based on the HTTP method and path:
-- `api/hello/get.js` → MCP tool: `get_hello`
-- `api/users/post.js` → MCP tool: `post_users`
-- `api/users/profile/put.js` → MCP tool: `put_users_profile`
+**MCP Tools**: `api/hello/get.js` → `get_hello`, `api/users/post.js` → `post_users`
 
 
 
