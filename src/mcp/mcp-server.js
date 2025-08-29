@@ -463,10 +463,23 @@ class DynamicAPIMCPServer {
       headers: {},
       json: function(data) {
         this.data = data;
+        // Only set statusCode to 200 if it hasn't been explicitly set
+        if (!this._statusSet) {
+          this.statusCode = 200;
+        }
         return this;
       },
       send: function(data) {
         this.data = data;
+        // Only set statusCode to 200 if it hasn't been explicitly set
+        if (!this._statusSet) {
+          this.statusCode = 200;
+        }
+        return this;
+      },
+      status: function(code) {
+        this.statusCode = code;
+        this._statusSet = true;
         return this;
       }
     };
