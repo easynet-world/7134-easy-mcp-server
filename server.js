@@ -67,6 +67,66 @@ app.get('/openapi.json', (req, res) => {
   }
 });
 
+// Swagger UI endpoint
+app.get('/docs', (req, res) => {
+  const swaggerHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Easy MCP Server API Documentation" />
+    <title>Easy MCP Server - API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body { margin:0; background: #fafafa; }
+        .swagger-ui .topbar { display: none; }
+        .swagger-ui .info .title { color: #3b4151; }
+        .swagger-ui .info .description { color: #3b4151; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: '/openapi.json',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                docExpansion: "list",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                tryItOutEnabled: true,
+                requestInterceptor: function(request) {
+                    console.log('Request:', request);
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    console.log('Response:', response);
+                    return response;
+                }
+            });
+        };
+    </script>
+</body>
+</html>`;
+  
+  res.setHeader('Content-Type', 'text/html');
+  res.send(swaggerHtml);
+});
+
 // Load all APIs
 const loadedRoutes = apiLoader.loadAPIs();
 

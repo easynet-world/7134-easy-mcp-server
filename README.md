@@ -148,7 +148,8 @@ npm start
 **Your APIs are now available at:**
 - **REST API**: `http://localhost:3000`
 - **MCP Server**: `ws://localhost:3001`
-- **OpenAPI Docs**: `http://localhost:3000/openapi.json`
+- **OpenAPI JSON**: `http://localhost:3000/openapi.json`
+- **Swagger UI**: `http://localhost:3000/docs` ✨
 
 ## 🔍 **What Are MCP and OpenAPI?**
 
@@ -177,8 +178,11 @@ curl -X POST http://localhost:3001/mcp \
   -H "Content-Type: application/json" \
   -d '{"method":"tools/list"}'
 
-# View OpenAPI docs
+# View OpenAPI JSON
 curl http://localhost:3000/openapi.json
+
+# Open Swagger UI in browser
+open http://localhost:3000/docs
 ```
 
 ## 🎯 **Use Cases**
