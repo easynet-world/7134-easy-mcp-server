@@ -63,6 +63,22 @@ npm start
 | Directory structure | URL routing |
 | Save file | Hot reload + live update |
 
+## 🌐 **HTTP Methods Supported**
+
+**All HTTP methods are supported!** Just create the corresponding file:
+
+| File Name | HTTP Method | Example Endpoint |
+|-----------|-------------|------------------|
+| `get.js` | **GET** | `GET /users` |
+| `post.js` | **POST** | `POST /users` |
+| `put.js` | **PUT** | `PUT /users/:id` |
+| `patch.js` | **PATCH** | `PATCH /users/:id` |
+| `delete.js` | **DELETE** | `DELETE /users/:id` |
+| `head.js` | **HEAD** | `HEAD /users` |
+| `options.js` | **OPTIONS** | `OPTIONS /users` |
+
+**💡 Pro Tip**: You can mix and match methods for the same resource. Create `api/users/get.js` and `api/users/post.js` to handle both reading and creating users!
+
 ---
 
 ## 🔥 **Real Examples**
