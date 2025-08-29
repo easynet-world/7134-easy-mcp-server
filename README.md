@@ -4,7 +4,7 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
 # One Function = API + MCP + OpenAPI + SWAGGER
-> *Description (optional)*
+> *Use annotations instead of description functions*
 
 ---
 
@@ -22,17 +22,17 @@ npm install easy-mcp-server
 mkdir -p api/hello
 
 ```javascript
-// api/hello/get.js`
+// api/hello/get.js
 
 const { BaseAPI } = require('easy-mcp-server');
 
+/**
+ * @description Returns a simple greeting message
+ * @summary Get hello world message
+ */
 class HelloWorld extends BaseAPI {
   process(req, res) {
     res.json({ message: "Hello World!" });
-  }
-
-  get description() {
-    return 'Returns a simple greeting message';
   }
 }
 
@@ -120,6 +120,20 @@ OpenAPI is the industry standard for API documentation. It provides:
 ---
 
 # 💡 **Pro Tips**
+
+## **Using JSDoc Annotations**
+
+```javascript
+/**
+ * @description Returns a list of users with pagination
+ * @summary Get users list
+ */
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    // Your logic here
+  }
+}
+```
 
 ## **Custom Request Body Schema**
 
