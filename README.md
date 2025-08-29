@@ -85,6 +85,7 @@ MCP enables AI models to discover and use your functions as tools. When you writ
 
 **Connection Details:**
 - **MCP Server URL**: `http://localhost:3001`
+- **Connection Type**: Use **Streamable HTTP** type in your MCP client
 - **Port**: 3001 (separate from the main API server on port 3000)
 
 **Benefits:**
