@@ -1,5 +1,5 @@
 {
-  "name": "@easynet-world/easy-mcp-server",
+  "name": "easy-mcp-server",
   "version": "0.1.1",
   "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
   "main": "index.js",
@@ -68,5 +68,8 @@
   ],
   "engines": {
     "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
