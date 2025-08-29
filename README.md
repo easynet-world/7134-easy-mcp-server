@@ -53,16 +53,6 @@ npm start
 
 
 
-## ✨ **How It Works**
-
-| What You Write | What You Get Automatically |
-|----------------|----------------------------|
-| **1 JavaScript file** | **3 Complete Interfaces** |
-| `process(req, res)` method | **REST API endpoint** |
-| File naming (`get.js`) | **HTTP method detection** |
-| Directory structure | **URL routing** |
-| Save file | **Hot reload + live update** |
-
 **🎯 The Magic**: Write one function → Get everything else for free!
 
 **🚀 You Also Get:**
