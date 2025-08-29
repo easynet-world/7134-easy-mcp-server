@@ -28,7 +28,7 @@ mkdir -p api/hello
 npm start
 ```
 
-**Create `api/hello/get.js` file:**
+**Step 4: Create your first API file `api/hello/get.js`:**
 
 ```javascript
 const { BaseAPI } = require('easy-mcp-server');
@@ -37,7 +37,7 @@ class HelloWorld extends BaseAPI {
   process(req, res) {
     res.json({ message: "Hello World!" });
   }
-  
+
   get description() {
     return 'Returns a simple greeting message';
   }
