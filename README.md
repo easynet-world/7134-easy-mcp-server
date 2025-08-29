@@ -93,7 +93,7 @@ api/
 ├── users/
 │   ├── get.js          → GET /users
 │   ├── post.js         → POST /users
-│   └── [id]/
+│   └── id/
 │       ├── get.js      → GET /users/:id
 │       ├── put.js      → PUT /users/:id
 │       └── delete.js   → DELETE /users/:id
@@ -115,25 +115,27 @@ api/
 - **`options.js`** → **OPTIONS** request
 
 ### **🔗 Dynamic Routes with Parameters**
-Use square brackets `[paramName]` in folder names to create dynamic routes:
+Use folder names to create dynamic routes with parameters:
 
 ```
 api/
 ├── users/
 │   ├── get.js          → GET /users
-│   └── [id]/
+│   └── id/
 │       ├── get.js      → GET /users/:id
 │       ├── put.js      → PUT /users/:id
 │       └── delete.js   → DELETE /users/:id
 ```
 
-**Example**: `api/users/[id]/get.js` creates `GET /users/:id` where `:id` is a URL parameter accessible via `req.params.id`.
+**Example**: `api/users/id/get.js` creates `GET /users/:id` where `:id` is a URL parameter accessible via `req.params.id`.
 
 ### **🎯 MCP Tool Names**
 Your API endpoints automatically become MCP tools with names based on the HTTP method and path:
 - `api/hello/get.js` → MCP tool: `get_hello`
 - `api/users/post.js` → MCP tool: `post_users`
-- `api/users/[id]/put.js` → MCP tool: `put_users_by_id`
+- `api/users/id/put.js` → MCP tool: `put_users_by_id`
+
+
 
 
 # 🔍 **What Are MCP and OpenAPI?**
