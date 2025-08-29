@@ -18,15 +18,56 @@ class BaseAPI {
 
   /**
    * Get OpenAPI specification
-   * Auto-generates response schema from runtime analysis
+   * Auto-generates response schema from runtime analysis and annotations
    * @returns {Object} OpenAPI specification
    */
   get openApi() {
-    return {
+    const baseSpec = {
       summary: this.summary || 'API endpoint summary',
       description: this.description || 'API endpoint description',
-      // Response schema auto-generated from runtime analysis!
+      tags: this.tags || ['api'],
+      // Response schema auto-generated from runtime analysis and annotations!
     };
+
+    // Add request body schema if available
+    const requestBody = this.requestBodySchema;
+    if (requestBody) {
+      baseSpec.requestBody = {
+        required: true,
+        content: {
+          'application/json': {
+            schema: requestBody
+          }
+        }
+      };
+    }
+
+    // Add response schemas if available
+    const responseSchema = this.responseSchema;
+    const errorResponses = this.errorResponses;
+    
+    if (responseSchema || errorResponses) {
+      baseSpec.responses = {};
+      
+      // Add success response
+      if (responseSchema) {
+        baseSpec.responses['200'] = {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: responseSchema
+            }
+          }
+        };
+      }
+      
+      // Add error responses
+      if (errorResponses) {
+        Object.assign(baseSpec.responses, errorResponses);
+      }
+    }
+
+    return baseSpec;
   }
 
   /**
@@ -43,6 +84,90 @@ class BaseAPI {
    */
   get summary() {
     return this._getAnnotationValue('summary') || 'API endpoint summary';
+  }
+
+  /**
+   * Get tags from JSDoc annotations or fallback to default
+   * @returns {Array} Tags from @tags annotation or default
+   */
+  get tags() {
+    const tagsValue = this._getAnnotationValue('tags');
+    if (tagsValue) {
+      return tagsValue.split(',').map(tag => tag.trim());
+    }
+    return ['api'];
+  }
+
+  /**
+   * Get request body schema from JSDoc annotations
+   * @returns {Object|null} Request body schema or null if not specified
+   */
+  get requestBodySchema() {
+    const schemaValue = this._getAnnotationValue('requestBody');
+    if (schemaValue) {
+      try {
+        return JSON.parse(schemaValue);
+      } catch (error) {
+        console.warn(`Invalid JSON in @requestBody annotation: ${error.message}`);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get response schema from JSDoc annotations
+   * @returns {Object|null} Response schema or null if not specified
+   */
+  get responseSchema() {
+    const schemaValue = this._getAnnotationValue('responseSchema');
+    if (schemaValue) {
+      try {
+        return JSON.parse(schemaValue);
+      } catch (error) {
+        console.warn(`Invalid JSON in @responseSchema annotation: ${error.message}`);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get error responses from JSDoc annotations
+   * @returns {Object|null} Error responses or null if not specified
+   */
+  get errorResponses() {
+    const responsesValue = this._getAnnotationValue('errorResponses');
+    if (responsesValue) {
+      try {
+        const parsed = JSON.parse(responsesValue);
+        const formattedResponses = {};
+        
+        // Format error responses for OpenAPI
+        Object.entries(parsed).forEach(([statusCode, response]) => {
+          formattedResponses[statusCode] = {
+            description: response.description || `Error ${statusCode}`,
+            content: {
+              'application/json': {
+                schema: response.schema || {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    error: { type: 'string' }
+                  }
+                }
+              }
+            }
+          };
+        });
+        
+        return formattedResponses;
+      } catch (error) {
+        console.warn(`Invalid JSON in @errorResponses annotation: ${error.message}`);
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
@@ -104,11 +229,43 @@ class BaseAPI {
           const jsDoc = match[1];
           
           // Look for the specific annotation
-          const annotationRegex = new RegExp(`@${annotationName}\\s+(.+)`, 'i');
-          const annotationMatch = jsDoc.match(annotationRegex);
-          
-          if (annotationMatch) {
-            return annotationMatch[1].trim();
+          if (annotationName === 'requestBody' || annotationName === 'responseSchema' || annotationName === 'errorResponses') {
+            // For JSON annotations, use manual brace counting for accurate extraction
+            const annotationStart = jsDoc.indexOf(`@${annotationName}`);
+            if (annotationStart !== -1) {
+              const afterAnnotation = jsDoc.substring(annotationStart);
+              const braceStart = afterAnnotation.indexOf('{');
+              if (braceStart !== -1) {
+                let braceCount = 0;
+                let endPos = braceStart;
+                
+                for (let i = braceStart; i < afterAnnotation.length; i++) {
+                  if (afterAnnotation[i] === '{') braceCount++;
+                  if (afterAnnotation[i] === '}') {
+                    braceCount--;
+                    if (braceCount === 0) {
+                      endPos = i;
+                      break;
+                    }
+                  }
+                }
+                
+                const jsonContent = afterAnnotation.substring(braceStart + 1, endPos);
+                // Clean up the captured JSON by removing JSDoc comment markers
+                const cleaned = jsonContent.replace(/^\s*\*\s*/gm, '').trim();
+                // Wrap in braces to make it valid JSON
+                const wrappedJson = `{${cleaned}}`;
+                return wrappedJson;
+              }
+            }
+          } else {
+            // For simple string annotations
+            const annotationRegex = new RegExp(`@${annotationName}\\s+(.+)`, 'i');
+            const annotationMatch = jsDoc.match(annotationRegex);
+            
+            if (annotationMatch) {
+              return annotationMatch[1].trim();
+            }
           }
         }
       }
