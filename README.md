@@ -10,7 +10,7 @@
 
 ## 🚀 **Quick Start (30 seconds)**
 
-> **📦 Dual Publishing**: This package is automatically published to both **npmjs.org** and **GitHub Packages** on every release, giving you installation flexibility.
+> **📦 Dual Publishing**: This package is automatically published to both **npmjs.org** and **GitHub Packages** on every release, giving you installation flexibility and redundancy.
 
 ```bash
 # 1. Install (choose one)
