@@ -12,25 +12,18 @@
 
 > **📦 Dual Publishing**: This package is automatically published to both **npmjs.org** and **GitHub Packages** on every release, giving you installation flexibility and redundancy.
 
-```bash
 # 1. Install (choose one)
-npm install easy-mcp-server                    # From npmjs.org (recommended)
-npm install easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
 
-# Package is automatically published to both registries on every release
-# Both contain identical packages with the same name and version
+```bash
+npm install easy-mcp-server
 ```
 
 # 2. Create your first API
 mkdir -p api/hello
 
-# 3. Start server
-npm start
-```
-
-**Step 4: Create your first API file `api/hello/get.js`:**
-
 ```javascript
+// api/hello/get.js`
+
 const { BaseAPI } = require('easy-mcp-server');
 
 class HelloWorld extends BaseAPI {
@@ -45,14 +38,19 @@ class HelloWorld extends BaseAPI {
 
 module.exports = HelloWorld;
 ```
+# 3. Start server
+npm start
+
 
 **🎉 That's it! You now have:**
-- ✅ **REST API**: `GET /hello` → `{"message": "Hello World!"}`
-- ✅ **MCP Tool**: `get_hello` available to AI models
-- ✅ **OpenAPI Docs**: Complete documentation at `/openapi.json`
-- ✅ **Swagger UI**: Interactive docs at `/docs` ✨
 
-**🚀 Your server is now running at:**
+**✅ What You Get:**
+- **REST API**: `GET /hello` → `{"message": "Hello World!"}`
+- **MCP Tool**: `get_hello` available to AI models
+- **OpenAPI Docs**: Complete documentation at `/openapi.json`
+- **Swagger UI**: Interactive docs at `/docs` ✨
+
+**🚀 Quick Access URLs:**
 - **🌐 REST API**: `http://localhost:3000`
 - **🤖 MCP Server**: `ws://localhost:3001`
 - **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
@@ -207,12 +205,6 @@ OpenAPI is the industry standard for API documentation. It provides:
 ---
 
 ## 🧪 **Test Your Setup**
-
-**🔗 Quick Access URLs:**
-- **🌐 REST API**: `http://localhost:3000`
-- **🤖 MCP Server**: `ws://localhost:3001`
-- **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
-- **✨ Swagger UI**: `http://localhost:3000/docs`
 
 ```bash
 # Test REST API
