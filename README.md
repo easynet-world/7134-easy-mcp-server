@@ -106,39 +106,7 @@ OpenAPI is the industry standard for API documentation. It provides:
 
 ---
 
-# 🔧 **Framework Architecture**
-
-```
-📁 api/
-├── 📄 hello/get.js    → GET /hello (REST) + get_hello (MCP) + OpenAPI
-├── 📄 users/get.js    → GET /users (REST) + get_users (MCP) + OpenAPI
-└── 📄 users/post.js   → POST /users (REST) + post_users (MCP) + OpenAPI
-
-🔄 Auto-Conversion Engine:
-├── 📡 API Loader: Discovers and registers endpoints
-├── 🤖 MCP Server: Exposes functions as AI tools
-├── 📚 OpenAPI Generator: Creates complete documentation
-└── ⚡ Hot Reloader: Updates everything in real-time
-```
-
----
-
 # 💡 **Pro Tips**
-
-## **Simplest Setup**
-
-```javascript
-const { BaseAPI } = require('easy-mcp-server');
-
-class MyAPI extends BaseAPI {
-  process(req, res) { /* your logic */ }
-  
-  get description() {
-    return 'Your API description';
-  }
-  // Summary and response schema auto-generated! 🎉
-}
-```
 
 ## **Custom Request Body Schema**
 
@@ -155,3 +123,7 @@ get openApi() {
 
 **🎯 The Future of API Development: Write Once, Deploy Everywhere**  
 **One function = REST API + MCP Tool + OpenAPI Documentation** 🚀✨
+
+---
+
+**📦 Package Version**: This project uses automated patch releases only. Every commit triggers a new patch version automatically.
