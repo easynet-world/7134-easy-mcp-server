@@ -10,8 +10,6 @@
 
 ## 🚀 **Quick Start (30 seconds)**
 
-> **📦 Simple Installation**: Install directly from npmjs.org for the best experience and reliability.
-
 # 1. Install (choose one)
 
 ```bash
