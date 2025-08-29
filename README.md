@@ -96,7 +96,7 @@ OpenAPI is the industry standard for API documentation. It provides:
 
 
 
-# 🎯 **Use Cases**
+# 🎯 **Use Cases & Applications**
 
 - **AI Integration** - Expose your APIs to AI models via MCP
 - **Rapid Prototyping** - Build APIs in minutes, not hours
