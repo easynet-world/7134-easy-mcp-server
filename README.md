@@ -46,6 +46,8 @@ npm start
 **✅ What You Get:**
 - **REST API**: `GET /hello` → `{"message": "Hello World!"}` at `http://localhost:3000`
 - **MCP Tool**: `get_hello` available to AI models at `ws://localhost:3001`
+- **MCP Connection URL**: `http://localhost:3001`
+- **Connection Type**: Use **Streamable HTTP** type in your MCP client
 - **OpenAPI Docs**: Complete documentation at `http://localhost:3000/openapi.json`
 - **Swagger UI**: Interactive docs at `http://localhost:3000/docs` ✨
 
