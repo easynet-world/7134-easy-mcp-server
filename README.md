@@ -28,7 +28,7 @@ mkdir -p api/hello
 npm start
 ```
 
-**Create `api/hello/get.js`:**
+**Create `api/hello/get.js` file:**
 
 ```javascript
 const { BaseAPI } = require('easy-mcp-server');
