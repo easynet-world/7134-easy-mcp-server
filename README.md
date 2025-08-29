@@ -10,7 +10,7 @@
 
 ## 🚀 **Quick Start (30 seconds)**
 
-> **📦 Dual Publishing**: This package is automatically published to both **npmjs.org** and **GitHub Packages** on every release, giving you installation flexibility and redundancy.
+> **📦 Simple Installation**: Install directly from npmjs.org for the best experience.
 
 # 1. Install (choose one)
 
@@ -39,36 +39,19 @@ class HelloWorld extends BaseAPI {
 module.exports = HelloWorld;
 ```
 # 3. Start server
+```bash
 npm start
+```
 
-
-**🎉 That's it! You now have:**
+# 🎉 That's it! You now have:
 
 **✅ What You Get:**
-- **REST API**: `GET /hello` → `{"message": "Hello World!"}`
-- **MCP Tool**: `get_hello` available to AI models
-- **OpenAPI Docs**: Complete documentation at `/openapi.json`
-- **Swagger UI**: Interactive docs at `/docs` ✨
+- **REST API**: `GET /hello` → `{"message": "Hello World!"}` at `http://localhost:3000`
+- **MCP Tool**: `get_hello` available to AI models at `ws://localhost:3001`
+- **OpenAPI Docs**: Complete documentation at `http://localhost:3000/openapi.json`
+- **Swagger UI**: Interactive docs at `http://localhost:3000/docs` ✨
 
-**🚀 Quick Access URLs:**
-- **🌐 REST API**: `http://localhost:3000`
-- **🤖 MCP Server**: `ws://localhost:3001`
-- **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
-- **✨ Swagger UI**: `http://localhost:3000/docs`
 
----
-
-## 📦 **Dual Publishing Benefits**
-
-| Feature | npmjs.org | GitHub Packages |
-|---------|-----------|-----------------|
-| **Installation** | `npm install easy-mcp-server` | `npm install easy-mcp-server --registry=https://npm.pkg.github.com` |
-| **Speed** | Fast global CDN | Fast for GitHub users |
-| **Availability** | Always available | Alternative option |
-| **Package Name** | `easy-mcp-server` | `easy-mcp-server` |
-| **Version Sync** | ✅ Automatic | ✅ Automatic |
-
----
 
 ## ✨ **How It Works**
 
