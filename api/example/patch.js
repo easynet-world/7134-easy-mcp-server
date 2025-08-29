@@ -6,7 +6,7 @@ const BaseAPI = require('../../src/core/base-api');
  */
 class PatchExample extends BaseAPI {
   process(req, res) {
-  res.json({ message: 'Item patched' });
+    res.json({ message: 'Item patched' });
   }
 }
 
