@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 /**
  * Base API Class
  * Provides common OpenAPI structure and MCP integration for all API endpoints
@@ -62,21 +65,52 @@ class BaseAPI {
       // Get the constructor function
       const constructor = this.constructor;
       
-      // Get the source code as a string
-      const sourceCode = constructor.toString();
+      // Find the module that contains this class
+      let modulePath = null;
+      for (const key in require.cache) {
+        const module = require.cache[key];
+        if (module && module.exports && module.exports === constructor) {
+          modulePath = key;
+          break;
+        }
+      }
       
-      // Look for JSDoc comment above the class
-      const jsDocMatch = sourceCode.match(/\/\*\*([\s\S]*?)\*\/\s*class\s+\w+/);
-      
-      if (jsDocMatch) {
-        const jsDoc = jsDocMatch[1];
+      // If not found in require.cache, try to find it in the current module
+      if (!modulePath) {
+        const stackTrace = new Error().stack;
+        const stackLines = stackTrace.split('\n');
         
-        // Look for the specific annotation
-        const annotationRegex = new RegExp(`@${annotationName}\\s+(.+)`, 'i');
-        const match = jsDoc.match(annotationRegex);
+        // Find the first line that's not from BaseAPI
+        for (const line of stackLines) {
+          if (!line.includes('base-api.js') && line.includes('(')) {
+            const fileMatch = line.match(/\((.+):\d+:\d+\)/);
+            if (fileMatch) {
+              modulePath = fileMatch[1];
+              break;
+            }
+          }
+        }
+      }
+      
+      if (modulePath) {
+        // Read the source file
+        const sourceCode = fs.readFileSync(modulePath, 'utf8');
+        
+        // Find the class definition and its JSDoc comment
+        const className = constructor.name;
+        const classRegex = new RegExp(`(\\/\\*\\*[\\s\\S]*?\\*\\/)\\s*class\\s+${className}\\b`, 'i');
+        const match = sourceCode.match(classRegex);
         
         if (match) {
-          return match[1].trim();
+          const jsDoc = match[1];
+          
+          // Look for the specific annotation
+          const annotationRegex = new RegExp(`@${annotationName}\\s+(.+)`, 'i');
+          const annotationMatch = jsDoc.match(annotationRegex);
+          
+          if (annotationMatch) {
+            return annotationMatch[1].trim();
+          }
         }
       }
       

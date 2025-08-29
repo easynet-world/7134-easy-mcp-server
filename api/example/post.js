@@ -1,5 +1,9 @@
-const { BaseAPI } = require('easy-mcp-server');
+const BaseAPI = require('../../src/core/base-api');
 
+/**
+ * @description Create a greeting with a name
+ * @summary Create personalized greeting
+ */
 class PostExample extends BaseAPI {
   process(req, res) {
     const { name } = req.body;
@@ -9,10 +13,6 @@ class PostExample extends BaseAPI {
     }
     
     res.json({ message: `Hello ${name}!` });
-  }
-  
-  get description() {
-    return 'Create a greeting with a name';
   }
 }
 
