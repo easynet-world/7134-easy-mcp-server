@@ -11,8 +11,9 @@
 ## 🚀 **Quick Start (30 seconds)**
 
 ```bash
-# 1. Install
-npm install easy-mcp-server
+# 1. Install (choose one)
+npm install easy-mcp-server                    # From npmjs.org
+npm install easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
 
 # 2. Create your first API
 mkdir -p api/hello
