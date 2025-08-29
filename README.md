@@ -3,25 +3,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-# One Function = API + MCP + OpenAPI + SWAGGER
-
+## **One Function → API + MCP + OpenAPI + SWAGGER + LLM.txt**
 
 # 🚀 **Quick Start (30 seconds)**
 
 ## 1. Install
-
 ```bash
 npm install easy-mcp-server
 ```
 
-## 2. Create your first API
-mkdir -p api/hello
+## 2. Create process
 
+/api/hello/get.js
 ```javascript
-// api/hello/get.js
-
-const { BaseAPI } = require('easy-mcp-server');
-
 /**
  * @description Returns a simple greeting message
  * @summary Get hello world message
@@ -34,27 +28,20 @@ class HelloWorld extends BaseAPI {
 
 module.exports = HelloWorld;
 ```
+
 ## 3. Start server
 ```bash
 npm start
 ```
 
-## 🎉 That's it! You now have:
-
-**✅ What You Get:**
-- **REST API**: 
-  - **URL**: `http://localhost:3000`
-  - **API**: `GET /hello` → `{"message": "Hello World!"}`
-- **MCP**:
+## 🎉 Done! You now have:
+- **REST API**: `GET http://localhost:3000/hello` → `{"message": "Hello World!"}`
+- **MCP Tools**: Available to AI models
   - **URL**: `http://localhost:3001`
-  - **Connection Type**: **Streamable HTTP**
-  - **Tool**: `get_hello` available to AI models at `ws://localhost:3001`
-- **OpenAPI Docs**:
-  - **URL**: `http://localhost:3000/openapi.json`
-- **Swagger UI**:
-  - **URL**: `http://localhost:3000/docs` ✨
-
-**🎯 The Magic**: Write one function → Get everything else for free!
+  - **Type**: Streamable HTTP
+- **OpenAPI**: `http://localhost:3000/openapi.json`
+- **Swagger UI**: `http://localhost:3000/docs`
+- **LLM.txt**: `http://localhost:3000/LLM.txt` (AI context)
 
 # 🌟 **Key Features**
 
@@ -62,26 +49,10 @@ npm start
 - **🤖 Instant MCP** - Your functions become AI tools in real-time
 - **📚 Auto OpenAPI** - Complete API documentation generated automatically
 - **⚡ Hot Reloading** - Save file = instant update across all interfaces
-- **🛡️ Zero Config** - Works out of the box, no setup required
+- **📝 Annotation Support** - JSDoc annotations for custom schemas
+- **🤖 AI-Native** - LLM.txt support for AI model context
 
-
-# 🌐 **HTTP Methods Supported**
-
-**All HTTP methods are supported!** Just create the corresponding file:
-
-| File Name | HTTP Method | Example Endpoint |
-|-----------|-------------|------------------|
-| `get.js` | **GET** | `GET /users` |
-| `post.js` | **POST** | `POST /users` |
-| `put.js` | **PUT** | `PUT /users/:id` |
-| `patch.js` | **PATCH** | `PATCH /users/:id` |
-| `delete.js` | **DELETE** | `DELETE /users/:id` |
-| `head.js` | **HEAD** | `HEAD /users` |
-| `options.js` | **OPTIONS** | `OPTIONS /users` |
-
-**💡 Pro Tip**: You can mix and match methods for the same resource. Create `api/users/get.js` and `api/users/post.js` to handle both reading and creating users! The framework automatically detects and routes each method. Check the `api/example/` folder for simple examples.
-
-# 📁 **File Structure & Naming Conventions**
+# 📁 **File Structure**
 
 **File Path = API Path, File Name = HTTP Method**
 
@@ -99,35 +70,122 @@ api/
 
 **HTTP Methods**: `get.js`, `post.js`, `put.js`, `patch.js`, `delete.js`, `head.js`, `options.js`
 
-**MCP Tools**: `api/hello/get.js` → `get_hello`, `api/users/post.js` → `post_users`
+# 📝 **Annotation System**
 
+## **Basic Annotations**
+```javascript
+/**
+ * @description Create a new user with validation
+ * @summary Create user endpoint
+ * @tags users,authentication
+ */
+class CreateUser extends BaseAPI {
+  process(req, res) {
+    // Your implementation
+  }
+}
+```
 
+## **Advanced Schema Annotations**
+```javascript
+/**
+ * @requestBody {
+ *   "type": "object",
+ *   "required": ["name", "email"],
+ *   "properties": {
+ *     "name": { "type": "string", "minLength": 2 },
+ *     "email": { "type": "string", "format": "email" }
+ *   }
+ * }
+ * @responseSchema {
+ *   "type": "object",
+ *   "properties": {
+ *     "success": { "type": "boolean" },
+ *     "data": { "type": "object" }
+ *   }
+ * }
+ * @errorResponses {
+ *   "400": { "description": "Validation error" }
+ * }
+ */
+```
 
+# 🔄 **How It Works**
 
-# 🔍 **What Are MCP and OpenAPI?**
+1. **Automatic Discovery** - Scans `api/` directory structure
+2. **Runtime Analysis** - Analyzes response structure and infers types
+3. **Annotation Integration** - Combines JSDoc annotations with auto-generated schemas
+4. **Generated Output** - OpenAPI JSON, Swagger UI, MCP Tools, Type Definitions
 
-## **🤖 MCP (Model Context Protocol)**
-MCP enables AI models to discover and use your functions as tools. When you write a function, it automatically becomes available to AI assistants like ChatGPT, Claude, or any MCP-compatible AI model.
+# 🤖 **AI Integration**
 
-**Connection Details:**
-- **MCP Server URL**: `http://localhost:3001`
-- **Connection Type**: Use **Streamable HTTP** type in your MCP client
-- **Port**: 3001 (separate from the main API server on port 3000)
+**LLM.txt** provides comprehensive framework context to AI models:
+- **Contextual Understanding** - AI models understand framework capabilities
+- **Accurate Code Generation** - Generated code follows conventions
+- **Troubleshooting Support** - AI can help diagnose issues
 
-**Benefits:**
-- **AI Integration** - Make your APIs accessible to AI models
-- **Natural Language** - AI can understand and use your functions
-- **Tool Discovery** - AI automatically discovers available functions
+**Example AI Interaction:**
+**User:** "I want to create an API for managing books. Can you help me?"
 
-## **📚 OpenAPI (Swagger)**
-OpenAPI is the industry standard for API documentation. It provides:
-- **Client Generation** - Auto-generate SDKs for any programming language
-- **Testing Tools** - Use tools like Postman or Insomnia
-- **API Documentation** - Professional, interactive documentation
+**AI Model (using LLM.txt):**
+"I can help you create a book management API! Here's what we need:
 
+1. **Create file structure:**
+   ```bash
+   mkdir -p api/books
+   touch api/books/get.js api/books/post.js
+   ```
 
+2. **Here's the code:**
+   ```javascript
+   const BaseAPI = require('../../src/core/base-api');
 
-# 🎯 **Use Cases & Applications**
+   /**
+    * @description Create a new book
+    * @summary Create book endpoint
+    * @tags books,library
+    * @requestBody {
+    *   "type": "object",
+    *   "required": ["title", "author"],
+    *   "properties": {
+    *     "title": { "type": "string", "minLength": 1 },
+    *     "author": { "type": "string", "minLength": 1 }
+    *   }
+    * }
+    */
+   class CreateBook extends BaseAPI {
+     process(req, res) {
+       const { title, author } = req.body;
+       
+       if (!title || !author) {
+         return res.status(400).json({ 
+           success: false, 
+           error: 'Title and author are required' 
+         });
+       }
+       
+       const book = {
+         id: this.generateUUID(),
+         title,
+         author,
+         createdAt: new Date().toISOString()
+       };
+       
+       res.status(201).json({
+         success: true,
+         data: book,
+         message: 'Book created successfully'
+       });
+     }
+   }
+
+   module.exports = CreateBook;
+   ```
+
+3. **Start server:** `npm start`
+4. **Your API is ready:** `http://localhost:3000/books`"
+
+# 🎯 **Use Cases**
 
 - **AI Integration** - Expose your APIs to AI models via MCP
 - **Rapid Prototyping** - Build APIs in minutes, not hours
@@ -135,40 +193,15 @@ OpenAPI is the industry standard for API documentation. It provides:
 - **AI Tools** - Build custom tools for AI assistants
 - **API Documentation** - Auto-generate complete OpenAPI specs
 
----
+# 💡 **Best Practices**
 
-# 💡 **Pro Tips**
-
-## **Using JSDoc Annotations**
-
-```javascript
-/**
- * @description Returns a list of users with pagination
- * @summary Get users list
- */
-class GetUsers extends BaseAPI {
-  process(req, res) {
-    // Your logic here
-  }
-}
-```
-
-## **Custom Request Body Schema**
-
-```javascript
-get openApi() {
-  return {
-    ...super.openApi,
-    requestBody: { /* your custom schema */ }
-  };
-}
-```
+1. **Use Annotations for Complex Schemas** - When you need specific validation rules
+2. **Rely on Auto-Generation for Simple Cases** - Let the framework infer types for basic CRUD
+3. **Be Consistent** - Use similar annotation patterns across related endpoints
+4. **Document Edge Cases** - Use `@errorResponses` to document error scenarios
+5. **Use Tags** - Group related endpoints with consistent tags
 
 ---
 
 **🎯 The Future of API Development: Write Once, Deploy Everywhere**  
-**One function = REST API + MCP Tool + OpenAPI Documentation** 🚀✨
-
----
-
-**📦 Package Version**: This project uses automated patch releases only. Every commit triggers a new patch version automatically.
+**One function = REST API + MCP Tool + OpenAPI Documentation + AI Context** 🚀✨

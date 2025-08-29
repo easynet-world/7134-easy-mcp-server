@@ -1,0 +1,307 @@
+# Easy MCP Framework - LLM.txt
+
+## Overview
+Easy MCP Framework automatically generates OpenAPI documentation, MCP tools, and REST endpoints from simple JavaScript classes.
+
+## Key Features
+- **Auto Discovery**: Scans `api/` directory to create REST endpoints
+- **OpenAPI Generation**: Automatically generates OpenAPI 3.0 specifications
+- **MCP Integration**: Your APIs become AI tools instantly
+- **Annotation Support**: JSDoc annotations for custom schemas
+- **Hot Reloading**: Real-time updates across all interfaces
+
+## File Structure
+```
+api/                    # API endpoints directory
+├── users/             # Resource-based organization
+│   ├── get.js         # GET /users
+│   ├── post.js        # POST /users
+│   └── profile/
+│       ├── get.js     # GET /users/profile
+│       └── put.js     # PUT /users/profile
+```
+
+## API Development Pattern
+
+### Basic API Class
+```javascript
+const BaseAPI = require('../../src/core/base-api');
+
+/**
+ * @description Brief description of what this endpoint does
+ * @summary Short summary for OpenAPI
+ * @tags category1,category2
+ */
+class MyAPI extends BaseAPI {
+  process(req, res) {
+    // Handle request and send response
+    res.json({ message: 'Success' });
+  }
+}
+
+module.exports = MyAPI;
+```
+
+### Advanced API with Annotations
+```javascript
+const BaseAPI = require('../../src/core/base-api');
+
+/**
+ * @description Create a new user with validation
+ * @summary Create user endpoint
+ * @tags users,authentication
+ * @requestBody {
+ *   "type": "object",
+ *   "required": ["name", "email"],
+ *   "properties": {
+ *     "name": { "type": "string", "minLength": 2, "maxLength": 50 },
+ *     "email": { "type": "string", "format": "email" },
+ *     "age": { "type": "integer", "minimum": 0, "maximum": 120 }
+ *   }
+ * }
+ * @responseSchema {
+ *   "type": "object",
+ *   "properties": {
+ *     "success": { "type": "boolean" },
+ *     "data": {
+ *       "type": "object",
+ *       "properties": {
+ *         "id": { "type": "string", "format": "uuid" },
+ *         "name": { "type": "string" },
+ *         "email": { "type": "string", "format": "email" },
+ *         "createdAt": { "type": "string", "format": "date-time" }
+ *       }
+ *     }
+ *   }
+ * }
+ * @errorResponses {
+ *   "400": { "description": "Validation error" },
+ *   "409": { "description": "User already exists" }
+ * }
+ */
+class CreateUser extends BaseAPI {
+  process(req, res) {
+    const { name, email, age } = req.body;
+    
+    // Validation logic
+    if (!name || name.length < 2) {
+      return res.status(400).json({ error: 'Name must be at least 2 characters long' });
+    }
+    
+    // Business logic
+    const user = { id: this.generateUUID(), name, email, age, createdAt: new Date() };
+    
+    res.status(201).json({
+      success: true,
+      data: user,
+      message: 'User created successfully'
+    });
+  }
+}
+
+module.exports = CreateUser;
+```
+
+## HTTP Method Mapping
+- `get.js` → GET endpoint
+- `post.js` → POST endpoint
+- `put.js` → PUT endpoint
+- `patch.js` → PATCH endpoint
+- `delete.js` → DELETE endpoint
+- `head.js` → HEAD endpoint
+- `options.js` → OPTIONS endpoint
+
+## Available Endpoints
+
+### Framework Endpoints
+- `GET /health` - Health check
+- `GET /api-info` - Framework information
+- `GET /openapi.json` - OpenAPI specification
+- `GET /docs` - Swagger UI documentation
+- `GET /mcp/tools` - Available MCP tools
+- `GET /LLM.txt` - This file (AI context)
+
+### MCP Server
+- **URL**: `http://localhost:3001`
+- **Type**: Streamable HTTP
+- **WebSocket**: `ws://localhost:3001`
+
+## Annotation System
+
+### Supported Annotations
+- `@description` - Detailed description
+- `@summary` - Short summary
+- `@tags` - Comma-separated tags
+- `@requestBody` - JSON schema for request body
+- `@responseSchema` - JSON schema for success response
+- `@errorResponses` - Error response schemas
+
+### Annotation Format
+```javascript
+/**
+ * @requestBody {
+ *   "type": "object",
+ *   "properties": {
+ *     "field": { "type": "string" }
+ *   }
+ * }
+ */
+```
+
+## OpenAPI Generation
+
+### Automatic Features
+- Path discovery from file structure
+- HTTP method mapping
+- Runtime response analysis
+- Schema inference from actual data
+- Default error responses
+
+### Annotation Integration
+- Custom request/response schemas
+- Detailed descriptions and summaries
+- Error response documentation
+- Tag-based API grouping
+
+## MCP Integration
+
+### Tool Generation
+- Automatic tool discovery from API endpoints
+- Tool names: `{method}_{path}` (e.g., `post_users`)
+- Description from annotations or auto-generated
+- Input schema from request body annotations
+
+### Available Commands
+- `list_tools` - Discover available endpoints
+- `call_tool` - Execute specific endpoint
+- `ping` - Health check
+
+## Development Workflow
+
+### 1. Create API Endpoint
+```bash
+mkdir -p api/users
+touch api/users/post.js
+```
+
+### 2. Implement API Class
+```javascript
+// api/users/post.js
+const BaseAPI = require('../../src/core/base-api');
+
+class CreateUser extends BaseAPI {
+  process(req, res) {
+    res.json({ message: 'User created' });
+  }
+}
+
+module.exports = CreateUser;
+```
+
+### 3. Start Server
+```bash
+npm start
+```
+
+### 4. Access Interfaces
+- **REST API**: `http://localhost:3000/users`
+- **OpenAPI**: `http://localhost:3000/openapi.json`
+- **Swagger UI**: `http://localhost:3000/docs`
+- **MCP Tools**: Available to AI models
+
+## Configuration
+
+### Environment Variables
+- `SERVER_PORT` - API server port (default: 3000)
+- `SERVER_HOST` - API server host (default: localhost)
+- `MCP_PORT` - MCP server port (default: 3001)
+- `NODE_ENV` - Environment (development/production)
+
+## Best Practices
+
+### API Design
+1. Use resource-based URLs (`/users`, `/users/:id`)
+2. Follow REST conventions
+3. Use appropriate HTTP methods
+4. Return consistent response formats
+
+### Annotations
+1. Use `@description` for detailed explanations
+2. Use `@tags` to group related endpoints
+3. Define `@requestBody` for POST/PUT endpoints
+4. Document `@errorResponses` for error cases
+5. Keep `@summary` concise
+
+### File Organization
+1. Group related endpoints in directories
+2. Use descriptive file names
+3. Follow the HTTP method naming convention
+4. Keep API classes focused and single-purpose
+
+## Error Handling
+
+### Framework Errors
+- 400: Bad request (validation errors)
+- 404: Endpoint not found
+- 500: Internal server error
+
+### Custom Error Responses
+```javascript
+res.status(400).json({ 
+  success: false, 
+  error: 'Validation failed' 
+});
+```
+
+## Common Issues & Solutions
+
+### Port Conflicts
+- Check if ports 3000/3001 are available
+- Use different ports via environment variables
+
+### File Not Loaded
+- Verify file naming and path structure
+- Check for syntax errors in JavaScript files
+
+### Annotation Errors
+- Verify JSON syntax in annotations
+- Check for proper JSDoc format
+
+### MCP Connection Issues
+- Verify MCP server is running on port 3001
+- Use Streamable HTTP connection type
+- Check WebSocket endpoint accessibility
+
+## Testing
+
+### Running Tests
+```bash
+npm test
+```
+
+### Framework Tests
+- Unit tests for core modules
+- Integration tests for API endpoints
+- MCP protocol tests
+- OpenAPI generation tests
+
+## Deployment
+
+### Production Setup
+1. Set `NODE_ENV=production`
+2. Configure environment variables
+3. Use process manager (PM2, etc.)
+4. Set up reverse proxy (nginx, etc.)
+
+### Docker Support
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3000 3001
+CMD ["npm", "start"]
+```
+
+This framework is designed to make API development as simple as possible while providing powerful features like automatic OpenAPI generation and MCP integration. The annotation system allows for precise control when needed, while the automatic discovery handles the common cases seamlessly.

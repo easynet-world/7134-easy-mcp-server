@@ -34,6 +34,11 @@ jest.mock('../server', () => {
     });
   });
   
+  app.get('/LLM.txt', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.send('# Easy MCP Framework - LLM.txt\n\n## Overview\nEasy MCP Framework is a dynamic API framework...');
+  });
+  
   return app;
 });
 
@@ -77,5 +82,13 @@ describe('Server Basic Functionality', () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('tools');
     expect(Array.isArray(response.body.tools)).toBe(true);
+  });
+
+  test('llm-txt endpoint should return LLM.txt content', async () => {
+    const response = await request(app).get('/LLM.txt');
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toContain('text/plain');
+    expect(response.text).toContain('Easy MCP Framework');
+    expect(response.text).toContain('LLM.txt');
   });
 });

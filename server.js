@@ -127,6 +127,33 @@ app.get('/docs', (req, res) => {
   res.send(swaggerHtml);
 });
 
+// LLM.txt endpoint for AI model context
+app.get('/LLM.txt', (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const llmPath = path.join(__dirname, 'LLM.txt');
+    
+    if (fs.existsSync(llmPath)) {
+      const content = fs.readFileSync(llmPath, 'utf8');
+      res.setHeader('Content-Type', 'text/plain');
+      res.send(content);
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'LLM.txt file not found',
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Failed to read LLM.txt: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Load all APIs
 const loadedRoutes = apiLoader.loadAPIs();
 
