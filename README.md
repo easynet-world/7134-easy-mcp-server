@@ -83,6 +83,11 @@ npm start
 ## **🤖 MCP (Model Context Protocol)**
 MCP enables AI models to discover and use your functions as tools. When you write a function, it automatically becomes available to AI assistants like ChatGPT, Claude, or any MCP-compatible AI model.
 
+**Connection Details:**
+- **MCP Server URL**: `http://localhost:3001`
+- **Connection Type**: Use **Streamable HTTP** type in your MCP client
+- **Port**: 3001 (separate from the main API server on port 3000)
+
 **Benefits:**
 - **AI Integration** - Make your APIs accessible to AI models
 - **Natural Language** - AI can understand and use your functions
