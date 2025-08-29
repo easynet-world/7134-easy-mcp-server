@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-# 🚀 **1 Function + Description = API + MCP  + OpenAPI + SWAGGER ** 🚀
+# 1 Function + Description = API + MCP  + OpenAPI + SWAGGER
 
 ---
 
