@@ -44,6 +44,12 @@ module.exports = HelloWorld;
 - ✅ **OpenAPI Docs**: Complete documentation at `/openapi.json`
 - ✅ **Swagger UI**: Interactive docs at `/docs` ✨
 
+**🚀 Your server is now running at:**
+- **🌐 REST API**: `http://localhost:3000`
+- **🤖 MCP Server**: `ws://localhost:3001`
+- **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
+- **✨ Swagger UI**: `http://localhost:3000/docs`
+
 ---
 
 ## ✨ **How It Works**
@@ -156,11 +162,7 @@ npm install easy-mcp-server
 npm start
 ```
 
-**Your APIs are now available at:**
-- **REST API**: `http://localhost:3000`
-- **MCP Server**: `ws://localhost:3001`
-- **OpenAPI JSON**: `http://localhost:3000/openapi.json`
-- **Swagger UI**: `http://localhost:3000/docs` ✨
+**Your APIs are now available at the URLs shown in Quick Start above! 🚀**
 
 ---
 
@@ -183,6 +185,12 @@ OpenAPI is the industry standard for API documentation. It provides:
 ---
 
 ## 🧪 **Test Your Setup**
+
+**🔗 Quick Access URLs:**
+- **🌐 REST API**: `http://localhost:3000`
+- **🤖 MCP Server**: `ws://localhost:3001`
+- **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
+- **✨ Swagger UI**: `http://localhost:3000/docs`
 
 ```bash
 # Test REST API
