@@ -1,4 +1,3 @@
-const fs = require('fs');
 const AnnotationParser = require('../utils/annotation-parser');
 
 /**
