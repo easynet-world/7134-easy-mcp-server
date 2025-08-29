@@ -3,7 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-> **1 function + Description = REST API + MCP Tool + OpenAPI Documentation + SWAGGER UI Support**
+# 🚀 **1 function + Description = REST API + MCP Tool + OpenAPI Documentation + SWAGGER UI Support** 🚀
+
+---
 
 ---
 
