@@ -65,6 +65,11 @@ npm start
 
 **🎯 The Magic**: Write one function → Get everything else for free!
 
+**🚀 You Also Get:**
+- **🤖 MCP Tools** - AI models can use your functions
+- **📚 OpenAPI Documentation** - Complete API specs
+- **✨ Swagger UI** - Interactive API explorer
+
 ## 🌐 **HTTP Methods Supported**
 
 **All HTTP methods are supported!** Just create the corresponding file:
