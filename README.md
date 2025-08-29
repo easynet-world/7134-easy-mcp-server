@@ -10,12 +10,15 @@
 
 ## 🚀 **Quick Start (30 seconds)**
 
+> **📦 Dual Publishing**: This package is automatically published to both **npmjs.org** and **GitHub Packages** on every release, giving you installation flexibility.
+
 ```bash
 # 1. Install (choose one)
 npm install easy-mcp-server                    # From npmjs.org (recommended)
 npm install easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
 
 # Package is automatically published to both registries on every release
+# Both contain identical packages with the same name and version
 ```
 
 # 2. Create your first API
@@ -53,6 +56,18 @@ module.exports = HelloWorld;
 - **🤖 MCP Server**: `ws://localhost:3001`
 - **📚 OpenAPI JSON**: `http://localhost:3000/openapi.json`
 - **✨ Swagger UI**: `http://localhost:3000/docs`
+
+---
+
+## 📦 **Dual Publishing Benefits**
+
+| Feature | npmjs.org | GitHub Packages |
+|---------|-----------|-----------------|
+| **Installation** | `npm install easy-mcp-server` | `npm install easy-mcp-server --registry=https://npm.pkg.github.com` |
+| **Speed** | Fast global CDN | Fast for GitHub users |
+| **Availability** | Always available | Alternative option |
+| **Package Name** | `easy-mcp-server` | `easy-mcp-server` |
+| **Version Sync** | ✅ Automatic | ✅ Automatic |
 
 ---
 
