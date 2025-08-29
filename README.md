@@ -93,10 +93,10 @@ api/
 ├── users/
 │   ├── get.js          → GET /users
 │   ├── post.js         → POST /users
-│   └── id/
-│       ├── get.js      → GET /users/:id
-│       ├── put.js      → PUT /users/:id
-│       └── delete.js   → DELETE /users/:id
+│   └── profile/
+│       ├── get.js      → GET /users/profile
+│       ├── put.js      → PUT /users/profile
+│       └── delete.js   → DELETE /users/profile
 ├── products/
 │   ├── get.js          → GET /products
 │   └── search/
@@ -114,26 +114,26 @@ api/
 - **`head.js`** → **HEAD** request
 - **`options.js`** → **OPTIONS** request
 
-### **🔗 Dynamic Routes with Parameters**
-Use folder names to create dynamic routes with parameters:
+### **🔗 Nested Routes with Subfolders**
+Use subfolders to create nested API routes:
 
 ```
 api/
 ├── users/
 │   ├── get.js          → GET /users
-│   └── id/
-│       ├── get.js      → GET /users/:id
-│       ├── put.js      → PUT /users/:id
-│       └── delete.js   → DELETE /users/:id
+│   └── profile/
+│       ├── get.js      → GET /users/profile
+│       ├── put.js      → PUT /users/profile
+│       └── delete.js   → DELETE /users/profile
 ```
 
-**Example**: `api/users/id/get.js` creates `GET /users/:id` where `:id` is a URL parameter accessible via `req.params.id`.
+**Example**: `api/users/profile/get.js` creates `GET /users/profile` endpoint.
 
 ### **🎯 MCP Tool Names**
 Your API endpoints automatically become MCP tools with names based on the HTTP method and path:
 - `api/hello/get.js` → MCP tool: `get_hello`
 - `api/users/post.js` → MCP tool: `post_users`
-- `api/users/id/put.js` → MCP tool: `put_users_by_id`
+- `api/users/profile/put.js` → MCP tool: `put_users_profile`
 
 
 
