@@ -77,7 +77,7 @@ npm start
 | `head.js` | **HEAD** | `HEAD /users` |
 | `options.js` | **OPTIONS** | `OPTIONS /users` |
 
-**💡 Pro Tip**: You can mix and match methods for the same resource. Create `api/users/get.js` and `api/users/post.js` to handle both reading and creating users! The framework automatically detects and routes each method.
+**💡 Pro Tip**: You can mix and match methods for the same resource. Create `api/users/get.js` and `api/users/post.js` to handle both reading and creating users! The framework automatically detects and routes each method. Check the `api/example/` folder for simple examples.
 
 ---
 
