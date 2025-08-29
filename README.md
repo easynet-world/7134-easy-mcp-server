@@ -52,13 +52,8 @@ npm start
 - **Swagger UI**: Interactive docs at `http://localhost:3000/docs` ✨
 
 
-
 **🎯 The Magic**: Write one function → Get everything else for free!
 
-**🚀 You Also Get:**
-- **🤖 MCP Tools** - AI models can use your functions
-- **📚 OpenAPI Documentation** - Complete API specs
-- **✨ Swagger UI** - Interactive API explorer
 
 ## 🌐 **HTTP Methods Supported**
 
