@@ -1,5 +1,6 @@
 const { parse } = require('comment-parser');
 const fs = require('fs');
+const path = require('path');
 
 /**
  * Utility class for parsing JSDoc annotations from source files
@@ -38,23 +39,23 @@ class AnnotationParser {
         const tagName = tag.tag;
         
         switch (tagName) {
-        case 'description':
-          annotations.description = tag.name || tag.description;
-          break;
-        case 'summary':
-          annotations.summary = tag.name || tag.description;
-          break;
-        case 'tags':
-          annotations.tags = tag.name ? tag.name.split(',').map(t => t.trim()) : [];
-          break;
-        case 'requestBody':
-        case 'responseSchema':
-        case 'errorResponses':
-          annotations[tagName] = this.parseJsonAnnotation(tag);
-          break;
-        default:
-          // Store any other annotations
-          annotations[tagName] = tag.name || tag.description || tag.type;
+          case 'description':
+            annotations.description = tag.name || tag.description;
+            break;
+          case 'summary':
+            annotations.summary = tag.name || tag.description;
+            break;
+          case 'tags':
+            annotations.tags = tag.name ? tag.name.split(',').map(t => t.trim()) : [];
+            break;
+          case 'requestBody':
+          case 'responseSchema':
+          case 'errorResponses':
+            annotations[tagName] = this.parseJsonAnnotation(tag);
+            break;
+          default:
+            // Store any other annotations
+            annotations[tagName] = tag.name || tag.description || tag.type;
         }
       });
 
