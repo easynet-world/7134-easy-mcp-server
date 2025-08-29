@@ -1,4 +1,5 @@
 const fs = require('fs');
+const AnnotationParser = require('../utils/annotation-parser');
 
 /**
  * Base API Class
@@ -92,8 +93,8 @@ class BaseAPI {
    */
   get tags() {
     const tagsValue = this._getAnnotationValue('tags');
-    if (tagsValue) {
-      return tagsValue.split(',').map(tag => tag.trim());
+    if (tagsValue && Array.isArray(tagsValue)) {
+      return tagsValue;
     }
     return ['api'];
   }
@@ -103,16 +104,7 @@ class BaseAPI {
    * @returns {Object|null} Request body schema or null if not specified
    */
   get requestBodySchema() {
-    const schemaValue = this._getAnnotationValue('requestBody');
-    if (schemaValue) {
-      try {
-        return JSON.parse(schemaValue);
-      } catch (error) {
-        console.warn(`Invalid JSON in @requestBody annotation: ${error.message}`);
-        return null;
-      }
-    }
-    return null;
+    return this._getAnnotationValue('requestBody');
   }
 
   /**
@@ -120,16 +112,7 @@ class BaseAPI {
    * @returns {Object|null} Response schema or null if not specified
    */
   get responseSchema() {
-    const schemaValue = this._getAnnotationValue('responseSchema');
-    if (schemaValue) {
-      try {
-        return JSON.parse(schemaValue);
-      } catch (error) {
-        console.warn(`Invalid JSON in @responseSchema annotation: ${error.message}`);
-        return null;
-      }
-    }
-    return null;
+    return this._getAnnotationValue('responseSchema');
   }
 
   /**
@@ -139,33 +122,27 @@ class BaseAPI {
   get errorResponses() {
     const responsesValue = this._getAnnotationValue('errorResponses');
     if (responsesValue) {
-      try {
-        const parsed = JSON.parse(responsesValue);
-        const formattedResponses = {};
-        
-        // Format error responses for OpenAPI
-        Object.entries(parsed).forEach(([statusCode, response]) => {
-          formattedResponses[statusCode] = {
-            description: response.description || `Error ${statusCode}`,
-            content: {
-              'application/json': {
-                schema: response.schema || {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: false },
-                    error: { type: 'string' }
-                  }
+      const formattedResponses = {};
+      
+      // Format error responses for OpenAPI
+      Object.entries(responsesValue).forEach(([statusCode, response]) => {
+        formattedResponses[statusCode] = {
+          description: response.description || `Error ${statusCode}`,
+          content: {
+            'application/json': {
+              schema: response.schema || {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: false },
+                  error: { type: 'string' }
                 }
               }
             }
-          };
-        });
-        
-        return formattedResponses;
-      } catch (error) {
-        console.warn(`Invalid JSON in @errorResponses annotation: ${error.message}`);
-        return null;
-      }
+          }
+        };
+      });
+      
+      return formattedResponses;
     }
     return null;
   }
@@ -179,9 +156,9 @@ class BaseAPI {
   }
 
   /**
-   * Extract value from JSDoc annotation
+   * Extract value from JSDoc annotation using AnnotationParser
    * @param {string} annotationName - Name of the annotation (e.g., 'description', 'summary')
-   * @returns {string|null} Value of the annotation or null if not found
+   * @returns {any} Value of the annotation or null if not found
    * @private
    */
   _getAnnotationValue(annotationName) {
@@ -217,57 +194,8 @@ class BaseAPI {
       }
       
       if (modulePath) {
-        // Read the source file
-        const sourceCode = fs.readFileSync(modulePath, 'utf8');
-        
-        // Find the class definition and its JSDoc comment
         const className = constructor.name;
-        const classRegex = new RegExp(`(\\/\\*\\*[\\s\\S]*?\\*\\/)\\s*class\\s+${className}\\b`, 'i');
-        const match = sourceCode.match(classRegex);
-        
-        if (match) {
-          const jsDoc = match[1];
-          
-          // Look for the specific annotation
-          if (annotationName === 'requestBody' || annotationName === 'responseSchema' || annotationName === 'errorResponses') {
-            // For JSON annotations, use manual brace counting for accurate extraction
-            const annotationStart = jsDoc.indexOf(`@${annotationName}`);
-            if (annotationStart !== -1) {
-              const afterAnnotation = jsDoc.substring(annotationStart);
-              const braceStart = afterAnnotation.indexOf('{');
-              if (braceStart !== -1) {
-                let braceCount = 0;
-                let endPos = braceStart;
-                
-                for (let i = braceStart; i < afterAnnotation.length; i++) {
-                  if (afterAnnotation[i] === '{') braceCount++;
-                  if (afterAnnotation[i] === '}') {
-                    braceCount--;
-                    if (braceCount === 0) {
-                      endPos = i;
-                      break;
-                    }
-                  }
-                }
-                
-                const jsonContent = afterAnnotation.substring(braceStart + 1, endPos);
-                // Clean up the captured JSON by removing JSDoc comment markers
-                const cleaned = jsonContent.replace(/^\s*\*\s*/gm, '').trim();
-                // Wrap in braces to make it valid JSON
-                const wrappedJson = `{${cleaned}}`;
-                return wrappedJson;
-              }
-            }
-          } else {
-            // For simple string annotations
-            const annotationRegex = new RegExp(`@${annotationName}\\s+(.+)`, 'i');
-            const annotationMatch = jsDoc.match(annotationRegex);
-            
-            if (annotationMatch) {
-              return annotationMatch[1].trim();
-            }
-          }
-        }
+        return AnnotationParser.getAnnotationValue(className, annotationName, modulePath);
       }
       
       return null;
