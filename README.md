@@ -4,11 +4,7 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
 # One Function = API + MCP + OpenAPI + SWAGGER
-> *Use annotations instead of description functions*
 
----
-
----
 
 # 🚀 **Quick Start (30 seconds)**
 
@@ -84,6 +80,60 @@ npm start
 | `options.js` | **OPTIONS** | `OPTIONS /users` |
 
 **💡 Pro Tip**: You can mix and match methods for the same resource. Create `api/users/get.js` and `api/users/post.js` to handle both reading and creating users! The framework automatically detects and routes each method. Check the `api/example/` folder for simple examples.
+
+# 📁 **File Structure & Naming Conventions**
+
+## **🎯 How It Works: File Path = API Path, File Name = HTTP Method**
+
+The framework uses a **convention-based routing system** where your file structure directly maps to your API endpoints:
+
+### **📂 File Path = API Endpoint Path**
+```
+api/
+├── users/
+│   ├── get.js          → GET /users
+│   ├── post.js         → POST /users
+│   └── [id]/
+│       ├── get.js      → GET /users/:id
+│       ├── put.js      → PUT /users/:id
+│       └── delete.js   → DELETE /users/:id
+├── products/
+│   ├── get.js          → GET /products
+│   └── search/
+│       └── get.js      → GET /products/search
+└── hello/
+    └── get.js          → GET /hello
+```
+
+### **📄 File Name = HTTP Method**
+- **`get.js`** → **GET** request
+- **`post.js`** → **POST** request  
+- **`put.js`** → **PUT** request
+- **`patch.js`** → **PATCH** request
+- **`delete.js`** → **DELETE** request
+- **`head.js`** → **HEAD** request
+- **`options.js`** → **OPTIONS** request
+
+### **🔗 Dynamic Routes with Parameters**
+Use square brackets `[paramName]` in folder names to create dynamic routes:
+
+```
+api/
+├── users/
+│   ├── get.js          → GET /users
+│   └── [id]/
+│       ├── get.js      → GET /users/:id
+│       ├── put.js      → PUT /users/:id
+│       └── delete.js   → DELETE /users/:id
+```
+
+**Example**: `api/users/[id]/get.js` creates `GET /users/:id` where `:id` is a URL parameter accessible via `req.params.id`.
+
+### **🎯 MCP Tool Names**
+Your API endpoints automatically become MCP tools with names based on the HTTP method and path:
+- `api/hello/get.js` → MCP tool: `get_hello`
+- `api/users/post.js` → MCP tool: `post_users`
+- `api/users/[id]/put.js` → MCP tool: `put_users_by_id`
 
 
 # 🔍 **What Are MCP and OpenAPI?**
