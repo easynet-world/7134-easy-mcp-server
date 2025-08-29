@@ -255,6 +255,15 @@ function startServer() {
   const host = process.env.SERVER_HOST || '0.0.0.0';
   const port = process.env.SERVER_PORT || 3000;
 
+  // Display startup banner
+  console.log('\n');
+  console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
+  console.log('  ║                                                                                                      ║');
+  console.log('  ║  🚀  STARTING EASY MCP SERVER...                                                                      ║');
+  console.log('  ║                                                                                                      ║');
+  console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
+  console.log('');
+
   // Start MCP server if enabled
   let mcpServer = null;
   let hotReloader = null;
@@ -268,11 +277,10 @@ function startServer() {
       
       // Start MCP server first
       mcpServer.run().then(() => {
-        console.log('🤖 MCP Server started successfully!');
+        console.log('🤖  MCP Server initialized successfully');
         
         // Set the routes for MCP server after it's started
         mcpServer.setRoutes(loadedRoutes);
-        console.log(`🔌 MCP Server: Routes set (${loadedRoutes.length} routes)`);
         
         // Initialize hot reloading after MCP server is ready
         hotReloader = new HotReloader(apiLoader, mcpServer);
@@ -288,16 +296,43 @@ function startServer() {
 
   // Start the main server
   app.listen(port, host, () => {
-    console.log(`🚀 Server starting on ${host}:${port}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📡 Health check: http://localhost:${port}/health`);
-    console.log(`📊 API info: http://localhost:${port}/api-info`);
-    console.log(`📚 OpenAPI spec: http://localhost:${port}/openapi.json`);
-    console.log(`🤖 MCP tools: http://localhost:${port}/mcp/tools`);
+    console.log('\n');
+    console.log('  ███████╗ █████╗ ███████╗██╗   ██╗    ███╗   ███╗ ██████╗ ██████╗     ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ ');
+    console.log('  ██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝    ████╗ ████║██╔═══██╗██╔══██╗    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗');
+    console.log('  ███████╗███████║███████╗ ╚████╔╝     ██╔████╔██║██║   ██║██████╔╝    ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝');
+    console.log('  ╚════██║██╔══██║╚════██║  ╚██╔╝      ██║╚██╔╝██║██║   ██║██╔══██╗    ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗');
+    console.log('  ███████║██║  ██║███████║   ██║       ██║ ╚═╝ ██║╚██████╔╝██║  ██║    ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║');
+    console.log('  ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝');
+    console.log('');
+    console.log('  🚀  SERVER STARTED SUCCESSFULLY');
+    console.log('  ' + '═'.repeat(78));
+    console.log(`  📍 Server Address: ${host}:${port}`);
+    console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('');
+    console.log('  📡  API ENDPOINTS:');
+    console.log(`     • Health Check:     http://localhost:${port}/health`);
+    console.log(`     • API Information:  http://localhost:${port}/api-info`);
+    console.log(`     • MCP Tools:        http://localhost:${port}/mcp/tools`);
+    console.log('');
+    console.log('  📚  DOCUMENTATION:');
+    console.log(`     • OpenAPI JSON:     http://localhost:${port}/openapi.json`);
+    console.log(`     • Swagger UI:       http://localhost:${port}/docs ✨`);
+    console.log('');
     if (mcpServer) {
-      console.log(`🔌 MCP server: ws://${process.env.MCP_HOST || 'localhost'}:${process.env.MCP_PORT || 3001}`);
+      console.log('  🤖  MCP SERVER:');
+      console.log(`     • WebSocket:       ws://${process.env.MCP_HOST || 'localhost'}:${process.env.MCP_PORT || 3001}`);
+      console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
+      console.log('');
     }
-    console.log('✅ Working API Framework with MCP support ready!');
+    console.log('  ⚡  FEATURES:');
+    console.log('     • Auto-discovery of API endpoints');
+    console.log('     • Real-time MCP tool generation');
+    console.log('     • Automatic OpenAPI documentation');
+    console.log('     • Hot reloading enabled');
+    console.log('');
+    console.log('  🎯  Ready to serve your APIs!');
+    console.log('  ' + '═'.repeat(78));
+    console.log('');
   });
 
   // Graceful shutdown
