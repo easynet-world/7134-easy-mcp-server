@@ -6,6 +6,8 @@
 > **🎯 Write ONE function → Get THREE interfaces automatically**  
 > **REST API + MCP Tool + OpenAPI Documentation**
 
+---
+
 ## 🚀 **Quick Start (30 seconds)**
 
 ```bash
@@ -15,7 +17,7 @@ npm install easy-mcp-server
 # 2. Create your first API
 mkdir -p api/hello
 
-# 3. Start server (optional for development)
+# 3. Start server
 npm start
 ```
 
@@ -40,6 +42,9 @@ module.exports = HelloWorld;
 - ✅ **REST API**: `GET /hello` → `{"message": "Hello World!"}`
 - ✅ **MCP Tool**: `get_hello` available to AI models
 - ✅ **OpenAPI Docs**: Complete documentation at `/openapi.json`
+- ✅ **Swagger UI**: Interactive docs at `/docs` ✨
+
+---
 
 ## ✨ **How It Works**
 
@@ -50,6 +55,8 @@ module.exports = HelloWorld;
 | File naming (`get.js`) | HTTP method detection |
 | Directory structure | URL routing |
 | Save file | Hot reload + live update |
+
+---
 
 ## 🔥 **Real Examples**
 
@@ -127,6 +134,8 @@ class CreateUser extends BaseAPI {
 module.exports = CreateUser;
 ```
 
+---
+
 ## 🌟 **Key Features**
 
 - **🔍 Auto Discovery** - Scan `api/` directory, find endpoints automatically
@@ -134,6 +143,8 @@ module.exports = CreateUser;
 - **📚 Auto OpenAPI** - Complete API documentation generated automatically
 - **⚡ Hot Reloading** - Save file = instant update across all interfaces
 - **🛡️ Zero Config** - Works out of the box, no setup required
+
+---
 
 ## 🚀 **Installation & Setup**
 
@@ -151,6 +162,8 @@ npm start
 - **OpenAPI JSON**: `http://localhost:3000/openapi.json`
 - **Swagger UI**: `http://localhost:3000/docs` ✨
 
+---
+
 ## 🔍 **What Are MCP and OpenAPI?**
 
 ### **🤖 MCP (Model Context Protocol)**
@@ -166,6 +179,8 @@ OpenAPI is the industry standard for API documentation. It provides:
 - **Client Generation** - Auto-generate SDKs for any programming language
 - **Testing Tools** - Use tools like Postman or Insomnia
 - **API Documentation** - Professional, interactive documentation
+
+---
 
 ## 🧪 **Test Your Setup**
 
@@ -185,6 +200,8 @@ curl http://localhost:3000/openapi.json
 open http://localhost:3000/docs
 ```
 
+---
+
 ## 🎯 **Use Cases**
 
 - **AI Integration** - Expose your APIs to AI models via MCP
@@ -192,6 +209,8 @@ open http://localhost:3000/docs
 - **Microservices** - Create lightweight, focused API services
 - **AI Tools** - Build custom tools for AI assistants
 - **API Documentation** - Auto-generate complete OpenAPI specs
+
+---
 
 ## 🔧 **Framework Architecture**
 
@@ -207,6 +226,8 @@ open http://localhost:3000/docs
 ├── 📚 OpenAPI Generator: Creates complete documentation
 └── ⚡ Hot Reloader: Updates everything in real-time
 ```
+
+---
 
 ## 💡 **Pro Tips**
 
