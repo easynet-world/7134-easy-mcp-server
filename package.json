@@ -1,6 +1,6 @@
 {
   "name": "easy-mcp-server",
-  "version": "0.1.1",
+  "version": "0.6.13",
   "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
   "main": "index.js",
   "exports": {
@@ -50,7 +50,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/easynet-world/7134-easy-mcp-server.git"
+    "url": "git+https://github.com/easynet-world/7134-easy-mcp-server.git"
   },
   "homepage": "https://github.com/easynet-world/7134-easy-mcp-server#readme",
   "bugs": {
