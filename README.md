@@ -14,6 +14,8 @@
 # 1. Install (choose one)
 npm install easy-mcp-server                    # From npmjs.org (recommended)
 npm install easy-mcp-server --registry=https://npm.pkg.github.com  # From GitHub Packages
+
+# Package is automatically published to both registries on every release
 ```
 
 # 2. Create your first API
