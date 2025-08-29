@@ -29,6 +29,7 @@ npm start
 ```
 
 **Create `api/hello/get.js`:**
+
 ```javascript
 const { BaseAPI } = require('easy-mcp-server');
 
@@ -86,6 +87,7 @@ module.exports = HelloWorld;
 ## 🔥 **Real Examples**
 
 ### **Get Users**
+
 ```javascript
 // api/users/get.js
 const { BaseAPI } = require('easy-mcp-server');
@@ -113,6 +115,7 @@ module.exports = GetUsers;
 - Complete OpenAPI documentation
 
 ### **Create User (with request body)**
+
 ```javascript
 // api/users/post.js
 const { BaseAPI } = require('easy-mcp-server');
@@ -259,6 +262,7 @@ open http://localhost:3000/docs
 ## 💡 **Pro Tips**
 
 ### **Simplest Setup**
+
 ```javascript
 const { BaseAPI } = require('easy-mcp-server');
 
@@ -273,6 +277,7 @@ class MyAPI extends BaseAPI {
 ```
 
 ### **Custom Request Body Schema**
+
 ```javascript
 get openApi() {
   return {
