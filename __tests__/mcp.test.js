@@ -81,4 +81,87 @@ describe('MCP (Model Context Protocol) Support', () => {
       mcpServer.processMCPRequest(request);
     }).not.toThrow();
   });
+
+  test('MCP server executeAPIEndpoint supports res.status method', async () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const mcpServer = new DynamicAPIMCPServer();
+    
+    // Create a mock API processor that uses res.status
+    class MockProcessor {
+      process(req, res) {
+        res.status(400).json({ error: 'Bad request' });
+      }
+    }
+    
+    const route = {
+      method: 'GET',
+      path: '/test',
+      processorInstance: new MockProcessor()
+    };
+    
+    const args = { body: {}, query: {}, headers: {} };
+    
+    const result = await mcpServer.executeAPIEndpoint(route, args);
+    expect(result.success).toBe(true);
+    expect(result.statusCode).toBe(400);
+    expect(result.data).toEqual({ error: 'Bad request' });
+  });
+
+  test('MCP server executeAPIEndpoint supports chaining res.status().json()', async () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const mcpServer = new DynamicAPIMCPServer();
+    
+    // Create a mock API processor that chains res.status().json()
+    class MockProcessor {
+      process(req, res) {
+        res.status(404).json({ error: 'Not found' });
+      }
+    }
+    
+    const route = {
+      method: 'GET',
+      path: '/test',
+      processorInstance: new MockProcessor()
+    };
+    
+    const args = { body: {}, query: {}, headers: {} };
+    
+    const result = await mcpServer.executeAPIEndpoint(route, args);
+    expect(result.success).toBe(true);
+    expect(result.statusCode).toBe(404);
+    expect(result.data).toEqual({ error: 'Not found' });
+  });
+
+  test('MCP server executeAPIEndpoint handles multiple status codes correctly', async () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const mcpServer = new DynamicAPIMCPServer();
+    
+    // Test different status codes
+    const testCases = [
+      { status: 400, expectedData: { error: 'Bad request' } },
+      { status: 404, expectedData: { error: 'Not found' } },
+      { status: 500, expectedData: { error: 'Internal server error' } }
+    ];
+    
+    for (const testCase of testCases) {
+      class MockProcessor {
+        process(req, res) {
+          res.status(testCase.status).json(testCase.expectedData);
+        }
+      }
+      
+      const route = {
+        method: 'GET',
+        path: '/test',
+        processorInstance: new MockProcessor()
+      };
+      
+      const args = { body: {}, query: {}, headers: {} };
+      
+      const result = await mcpServer.executeAPIEndpoint(route, args);
+      expect(result.success).toBe(true);
+      expect(result.statusCode).toBe(testCase.status);
+      expect(result.data).toEqual(testCase.expectedData);
+    }
+  });
 });
