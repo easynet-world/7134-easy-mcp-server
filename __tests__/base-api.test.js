@@ -98,6 +98,132 @@ describe('BaseAPI Class', () => {
       expect(spec.responses['200']).toBeDefined();
       expect(spec.responses['200'].content['application/json'].schema).toBeDefined();
     });
+
+    test('should handle complex @responseSchema annotations', () => {
+      // Mock the responseSchema getter with complex schema
+      Object.defineProperty(baseAPI, 'responseSchema', {
+        get: () => ({
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', format: 'uuid' },
+                name: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+                age: { type: 'integer' },
+                isActive: { type: 'boolean' },
+                createdAt: { type: 'string', format: 'date-time' }
+              }
+            },
+            message: { type: 'string' }
+          }
+        })
+      });
+
+      const spec = baseAPI.openApi;
+      
+      expect(spec.responses).toBeDefined();
+      expect(spec.responses['200']).toBeDefined();
+      
+      const responseSchema = spec.responses['200'].content['application/json'].schema;
+      expect(responseSchema.type).toBe('object');
+      expect(responseSchema.properties.success).toBeDefined();
+      expect(responseSchema.properties.data).toBeDefined();
+      expect(responseSchema.properties.message).toBeDefined();
+      expect(responseSchema.properties.data.properties.id.format).toBe('uuid');
+      expect(responseSchema.properties.data.properties.email.format).toBe('email');
+    });
+
+    test('should handle @errorResponses annotations correctly', () => {
+      // Mock the errorResponses getter
+      Object.defineProperty(baseAPI, 'errorResponses', {
+        get: () => ({
+          '400': {
+            description: 'Validation error',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    error: { type: 'string' }
+                  }
+                }
+              }
+            }
+          },
+          '409': {
+            description: 'User already exists',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    error: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        })
+      });
+
+      const spec = baseAPI.openApi;
+      
+      expect(spec.responses).toBeDefined();
+      expect(spec.responses['400']).toBeDefined();
+      expect(spec.responses['409']).toBeDefined();
+      
+      // Should use annotation-based error responses
+      expect(spec.responses['400'].description).toBe('Validation error');
+      expect(spec.responses['409'].description).toBe('User already exists');
+    });
+
+    test('should prioritize @responseSchema over auto-generated schemas', () => {
+      // Mock both responseSchema and errorResponses
+      Object.defineProperty(baseAPI, 'responseSchema', {
+        get: () => ({
+          type: 'object',
+          properties: {
+            customField: { type: 'string' }
+          }
+        })
+      });
+
+      Object.defineProperty(baseAPI, 'errorResponses', {
+        get: () => ({
+          '400': {
+            description: 'Custom error',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    customError: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        })
+      });
+
+      const spec = baseAPI.openApi;
+      
+      expect(spec.responses).toBeDefined();
+      expect(spec.responses['200']).toBeDefined();
+      expect(spec.responses['400']).toBeDefined();
+      
+      // Should use annotation-based schemas, not auto-generated ones
+      const successSchema = spec.responses['200'].content['application/json'].schema;
+      expect(successSchema.properties.customField).toBeDefined();
+      expect(successSchema.properties).not.toHaveProperty('success');
+      expect(successSchema.properties).not.toHaveProperty('timestamp');
+      
+      const errorSchema = spec.responses['400'].content['application/json'].schema;
+      expect(errorSchema.properties.customError).toBeDefined();
+    });
   });
 
   describe('MCP Integration', () => {

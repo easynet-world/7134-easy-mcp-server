@@ -584,6 +584,244 @@ describe('OpenAPIGenerator', () => {
     });
   });
 
+  describe('@responseSchema Annotation Processing', () => {
+    test('should prioritize @responseSchema annotation over auto-generated schemas', () => {
+      const mockProcessor = {
+        openApi: {
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          name: { type: 'string' },
+                          email: { type: 'string', format: 'email' },
+                          age: { type: 'integer' },
+                          isActive: { type: 'boolean' },
+                          createdAt: { type: 'string', format: 'date-time' }
+                        }
+                      },
+                      message: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'POST',
+        path: '/example',
+        processorInstance: mockProcessor
+      }]);
+      
+      const postEndpoint = paths['/example'].post;
+      expect(postEndpoint.responses).toBeDefined();
+      expect(postEndpoint.responses['200']).toBeDefined();
+      
+      // Should use annotation-based schema, not auto-generated
+      const responseSchema = postEndpoint.responses['200'].content['application/json'].schema;
+      expect(responseSchema.type).toBe('object');
+      expect(responseSchema.properties.success).toBeDefined();
+      expect(responseSchema.properties.data).toBeDefined();
+      expect(responseSchema.properties.message).toBeDefined();
+      expect(responseSchema.properties.data.properties.id.format).toBe('uuid');
+      expect(responseSchema.properties.data.properties.email.format).toBe('email');
+    });
+
+    test('should not override @responseSchema with auto-generated schemas', () => {
+      const mockProcessor = {
+        openApi: {
+          responses: {
+            '200': {
+              description: 'Custom response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      customField: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'GET',
+        path: '/custom',
+        processorInstance: mockProcessor
+      }]);
+      
+      const getEndpoint = paths['/custom'].get;
+      expect(getEndpoint.responses['200'].content['application/json'].schema.properties.customField).toBeDefined();
+      
+      // Should not have auto-generated schema properties
+      const responseSchema = getEndpoint.responses['200'].content['application/json'].schema;
+      expect(responseSchema.properties).not.toHaveProperty('success');
+      expect(responseSchema.properties).not.toHaveProperty('timestamp');
+    });
+
+    test('should handle @errorResponses annotation correctly', () => {
+      const mockProcessor = {
+        openApi: {
+          responses: {
+            '400': {
+              description: 'Validation error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            },
+            '409': {
+              description: 'User already exists',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'POST',
+        path: '/example',
+        processorInstance: mockProcessor
+      }]);
+      
+      const postEndpoint = paths['/example'].post;
+      expect(postEndpoint.responses['400']).toBeDefined();
+      expect(postEndpoint.responses['409']).toBeDefined();
+      
+      // Should use annotation-based error responses
+      expect(postEndpoint.responses['400'].description).toBe('Validation error');
+      expect(postEndpoint.responses['409'].description).toBe('User already exists');
+    });
+
+    test('should fall back to auto-generated schemas when no annotations present', () => {
+      const mockProcessor = {
+        // No openApi property
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'GET',
+        path: '/fallback',
+        processorInstance: mockProcessor
+      }]);
+      
+      const getEndpoint = paths['/fallback'].get;
+      expect(getEndpoint.responses).toBeDefined();
+      expect(getEndpoint.responses['200']).toBeDefined();
+      
+      // Should use auto-generated schema
+      const responseSchema = getEndpoint.responses['200'].content['application/json'].schema;
+      expect(responseSchema).toBeDefined();
+    });
+
+    test('should handle mixed annotation and auto-generation scenarios', () => {
+      const mockProcessor = {
+        openApi: {
+          summary: 'Mixed endpoint',
+          description: 'Has some annotations but not all',
+          // No responses property - should auto-generate
+        }
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'PUT',
+        path: '/mixed',
+        processorInstance: mockProcessor
+      }]);
+      
+      const putEndpoint = paths['/mixed'].put;
+      expect(putEndpoint.summary).toBe('Mixed endpoint');
+      expect(putEndpoint.description).toBe('Has some annotations but not all');
+      
+      // Should auto-generate responses since none provided
+      expect(putEndpoint.responses).toBeDefined();
+      expect(putEndpoint.responses['200']).toBeDefined();
+    });
+
+    test('should preserve all annotation properties when present', () => {
+      const mockProcessor = {
+        openApi: {
+          summary: 'Complete endpoint',
+          description: 'Full description',
+          tags: ['users', 'admin'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      result: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      
+      const paths = openapiGenerator.generatePaths([{
+        method: 'POST',
+        path: '/complete',
+        processorInstance: mockProcessor
+      }]);
+      
+      const postEndpoint = paths['/complete'].post;
+      
+      // Should preserve all annotation properties
+      expect(postEndpoint.summary).toBe('Complete endpoint');
+      expect(postEndpoint.description).toBe('Full description');
+      expect(postEndpoint.tags).toEqual(['users', 'admin']);
+      expect(postEndpoint.requestBody).toBeDefined();
+      expect(postEndpoint.responses).toBeDefined();
+      expect(postEndpoint.responses['200'].content['application/json'].schema.properties.result).toBeDefined();
+    });
+  });
+
   describe('Performance and Memory', () => {
     test('should handle large numbers of routes efficiently', () => {
       const largeRoutes = Array.from({ length: 1000 }, (_, i) => ({

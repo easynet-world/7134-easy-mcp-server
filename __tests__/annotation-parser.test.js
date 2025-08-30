@@ -491,6 +491,217 @@ describe('AnnotationParser', () => {
     });
   });
 
+  describe('@responseSchema Annotation Parsing', () => {
+    test('should parse complex @responseSchema with nested structures', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "properties": {
+         *     "success": { "type": "boolean" },
+         *     "data": {
+         *       "type": "object",
+         *       "properties": {
+         *         "id": { "type": "string", "format": "uuid" },
+         *         "name": { "type": "string" },
+         *         "email": { "type": "string", "format": "email" },
+         *         "age": { "type": "integer" },
+         *         "isActive": { "type": "boolean" },
+         *         "createdAt": { "type": "string", "format": "date-time" }
+         *       }
+         *     },
+         *     "message": { "type": "string" }
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('responseSchema');
+      
+      const responseSchema = result.responseSchema;
+      expect(responseSchema.type).toBe('object');
+      expect(responseSchema.properties.success).toBeDefined();
+      expect(responseSchema.properties.data).toBeDefined();
+      expect(responseSchema.properties.message).toBeDefined();
+      expect(responseSchema.properties.data.properties.id.format).toBe('uuid');
+      expect(responseSchema.properties.data.properties.email.format).toBe('email');
+    });
+
+    test('should parse @responseSchema with array types', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "properties": {
+         *     "items": {
+         *       "type": "array",
+         *       "items": {
+         *         "type": "object",
+         *         "properties": {
+         *           "id": { "type": "string" },
+         *           "name": { "type": "string" }
+         *         }
+         *       }
+         *     }
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('responseSchema');
+      
+      const responseSchema = result.responseSchema;
+      expect(responseSchema.properties.items.type).toBe('array');
+      expect(responseSchema.properties.items.items.type).toBe('object');
+      expect(responseSchema.properties.items.items.properties.id).toBeDefined();
+    });
+
+    test('should parse @responseSchema with required fields', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "required": ["success", "data"],
+         *   "properties": {
+         *     "success": { "type": "boolean" },
+         *     "data": { "type": "object" },
+         *     "message": { "type": "string" }
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('responseSchema');
+      
+      const responseSchema = result.responseSchema;
+      expect(responseSchema.required).toEqual(['success', 'data']);
+      expect(responseSchema.properties.success).toBeDefined();
+      expect(responseSchema.properties.data).toBeDefined();
+      expect(responseSchema.properties.message).toBeDefined();
+    });
+
+    test('should parse @responseSchema with format specifications', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "properties": {
+         *     "id": { "type": "string", "format": "uuid" },
+         *     "email": { "type": "string", "format": "email" },
+         *     "date": { "type": "string", "format": "date-time" },
+         *     "age": { "type": "integer", "minimum": 0, "maximum": 120 }
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('responseSchema');
+      
+      const responseSchema = result.responseSchema;
+      expect(responseSchema.properties.id.format).toBe('uuid');
+      expect(responseSchema.properties.email.format).toBe('email');
+      expect(responseSchema.properties.date.format).toBe('date-time');
+      expect(responseSchema.properties.age.minimum).toBe(0);
+      expect(responseSchema.properties.age.maximum).toBe(120);
+    });
+
+    test('should handle malformed @responseSchema gracefully', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "properties": {
+         *     "field": { "type": "string"
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      // Should handle gracefully and return null for malformed JSON
+      expect(result).toBeDefined();
+      expect(result.responseSchema).toBeNull();
+    });
+
+    test('should parse @responseSchema with examples', () => {
+      const sourceCode = `
+        /**
+         * @responseSchema {
+         *   "type": "object",
+         *   "properties": {
+         *     "message": { 
+         *       "type": "string",
+         *       "example": "User created successfully"
+         *     },
+         *     "statusCode": { 
+         *       "type": "integer",
+         *       "example": 201
+         *     }
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('responseSchema');
+      
+      const responseSchema = result.responseSchema;
+      expect(responseSchema.properties.message.example).toBe('User created successfully');
+      expect(responseSchema.properties.statusCode.example).toBe(201);
+    });
+  });
+
   describe('Performance and Memory', () => {
     test('should handle large files efficiently', () => {
       const largeContent = '// Large file content\n'.repeat(10000) + `
