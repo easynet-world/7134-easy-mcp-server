@@ -51,9 +51,12 @@ const setupTestEnvironment = () => {
     jest.resetModules();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+    
+    // Wait a bit for any remaining async operations
+    await waitForAsync(50);
   });
 
   afterAll(() => {
@@ -95,6 +98,26 @@ const createMockRoute = (method = 'GET', path = '/test', processor = null) => ({
   path,
   processorInstance: processor || createMockProcessorClass()
 });
+
+// Hot reloader cleanup helper
+const cleanupHotReloader = async (hotReloader) => {
+  if (hotReloader) {
+    if (hotReloader.isActive()) {
+      hotReloader.stopWatching();
+    }
+    // Clear any pending timeouts
+    if (hotReloader.debounceTimer) {
+      clearTimeout(hotReloader.debounceTimer);
+      hotReloader.debounceTimer = null;
+    }
+    // Clear the reload queue
+    if (hotReloader.reloadQueue) {
+      hotReloader.reloadQueue = [];
+    }
+    // Wait for cleanup
+    await waitForAsync(150);
+  }
+};
 
 // Error simulation helpers
 const simulateError = (errorType, message) => {
@@ -171,5 +194,8 @@ module.exports = {
   
   // Validation helpers
   expectValidRoute,
-  expectValidOpenAPISpec
+  expectValidOpenAPISpec,
+  
+  // Cleanup helpers
+  cleanupHotReloader
 };
