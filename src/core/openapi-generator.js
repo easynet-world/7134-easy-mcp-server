@@ -32,7 +32,14 @@ class OpenAPIGenerator {
   generatePaths(routes) {
     const paths = {};
     
+    if (!routes || !Array.isArray(routes)) {
+      return paths;
+    }
+    
     routes.forEach(route => {
+      if (!route || !route.path || !route.method) {
+        return; // Skip malformed routes
+      }
       if (!paths[route.path]) {
         paths[route.path] = {};
       }
@@ -45,7 +52,7 @@ class OpenAPIGenerator {
         const apiInfo = {
           summary: `${route.method} ${route.path}`,
           tags: ['api'],
-          operationId: `${method}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`
+          operationId: `${method}_${route.path.replace(/\//g, '_').replace(/^_/, '').replace(/\{([^}]+)\}/g, '_$1_')}`
         };
         
         // Add description if available
@@ -99,7 +106,7 @@ class OpenAPIGenerator {
         paths[route.path][method] = {
           summary: `${route.method} ${route.path}`,
           tags: ['api'],
-          operationId: `${method}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          operationId: `${method}_${route.path.replace(/\//g, '_').replace(/^_/, '').replace(/\{([^}]+)\}/g, '_$1_')}`,
           responses: {
             '200': {
               description: 'Successful response',
@@ -125,7 +132,7 @@ class OpenAPIGenerator {
   generateInfo() {
     const packageJson = require('../../package.json');
     return {
-      title: 'Easy MCP Framework',
+      title: 'Easy MCP Server API',
       version: packageJson.version,
       description: 'A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models. Includes LLM.txt support for AI model context.',
       contact: {
@@ -153,11 +160,7 @@ class OpenAPIGenerator {
     return [
       {
         url: `http://${host}:${port}`,
-        description: 'Development server'
-      },
-      {
-        url: `https://${host}:${port}`,
-        description: 'Production server (HTTPS)'
+        description: 'Local development server'
       }
     ];
   }
@@ -249,6 +252,10 @@ class OpenAPIGenerator {
         description: 'Dynamic API endpoints'
       }
     ];
+    
+    if (!routes || !Array.isArray(routes)) {
+      return tags;
+    }
     
     // Extract unique tags from routes
     const routeTags = new Set();

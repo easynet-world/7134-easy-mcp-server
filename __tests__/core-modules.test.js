@@ -101,7 +101,7 @@ describe('Core Modules', () => {
       const generator = new OpenAPIGenerator(mockApiLoader);
       const info = generator.generateInfo();
     
-      expect(info.title).toBe('Easy MCP Framework');
+      expect(info.title).toBe('Easy MCP Server API');
       expect(info.version).toBe('0.6.13');
       expect(info.description).toContain('MCP');
       expect(info.description).toContain('AI models');

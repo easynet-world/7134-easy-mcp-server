@@ -129,7 +129,33 @@ class APILoader {
    * Get all loaded routes
    */
   getRoutes() {
-    return this.routes;
+    return [...this.routes];
+  }
+
+  /**
+   * Validate all loaded routes
+   */
+  validateRoutes() {
+    const issues = [];
+    
+    this.routes.forEach((route, index) => {
+      if (!route.method || !route.path) {
+        issues.push(`Route ${index}: Missing method or path`);
+      }
+      
+      if (!route.processorInstance || typeof route.processorInstance.process !== 'function') {
+        issues.push(`Route ${index}: Invalid processor instance`);
+      }
+    });
+    
+    return issues;
+  }
+
+  /**
+   * Get all loading errors
+   */
+  getErrors() {
+    return [...this.errors];
   }
 
   /**
@@ -145,54 +171,28 @@ class APILoader {
   }
 
   /**
-   * Clear require cache for hot reloading
+   * Clear cache for a specific file
    */
   clearCache(filePath) {
     try {
       delete require.cache[require.resolve(filePath)];
     } catch (error) {
-      console.warn(`⚠️  Could not clear cache for ${filePath}: ${error.message}`);
+      // File might not be cached or resolved
     }
   }
 
   /**
-   * Reload APIs (for hot reloading)
+   * Reload all APIs (clear cache and reload)
    */
   reloadAPIs() {
-    try {
-      this.loadAPIs();
-      return this.routes;
-    } catch (error) {
-      console.error('❌ Failed to reload APIs:', error.message);
-      return this.routes;
-    }
-  }
-
-  /**
-   * Get loading errors
-   */
-  getErrors() {
-    return this.errors;
-  }
-
-  /**
-   * Validate route configuration
-   */
-  validateRoutes() {
-    const issues = [];
-    
-    // Check for duplicate routes
-    const routeMap = new Map();
-    this.routes.forEach(route => {
-      const key = `${route.method}:${route.path}`;
-      if (routeMap.has(key)) {
-        issues.push(`Duplicate route: ${route.method} ${route.path}`);
-      } else {
-        routeMap.set(key, route);
+    // Clear all cached modules
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('api/')) {
+        delete require.cache[key];
       }
     });
     
-    return issues;
+    return this.loadAPIs();
   }
 }
 
