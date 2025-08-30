@@ -5,7 +5,8 @@ const {
   createMockMcpServer, 
   createMockWatcher,
   setupTestEnvironment,
-  waitForAsync
+  waitForAsync,
+  cleanupHotReloader
 } = require('../src/utils/test-utils');
 
 // Mock chokidar
@@ -34,11 +35,8 @@ describe('HotReloader', () => {
   });
 
   afterEach(async () => {
-    // Ensure hot reloader is stopped
-    if (hotReloader && hotReloader.isActive()) {
-      hotReloader.stopWatching();
-      await waitForAsync(50); // Wait for cleanup
-    }
+    // Use the dedicated cleanup function
+    await cleanupHotReloader(hotReloader);
   });
 
   describe('Constructor and Initialization', () => {
