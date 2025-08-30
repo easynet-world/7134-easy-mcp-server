@@ -1,107 +1,89 @@
+/**
+ * API Examples Tests
+ * Tests the example API implementations efficiently
+ */
+
+const { setupTestEnvironment, createMockProcessorClass } = require('../src/utils/test-utils');
+
 describe('API Examples', () => {
-  test('GetExample class should have process method', () => {
-    const GetExample = require('../api/example/get');
-    const instance = new GetExample();
-    
-    expect(typeof instance.process).toBe('function');
-    expect(instance.process).toBeDefined();
-  });
-  
-  test('PostExample class should have process method', () => {
-    const PostExample = require('../api/example/post');
-    const instance = new PostExample();
-    
-    expect(typeof instance.process).toBe('function');
-    expect(instance.process).toBeDefined();
-  });
-  
-  test('PutExample class should have process method', () => {
-    const PutExample = require('../api/example/put');
-    const instance = new PutExample();
-    
-    expect(typeof instance.process).toBe('function');
-    expect(instance.process).toBeDefined();
-  });
-  
-  test('PatchExample class should have process method', () => {
-    const PatchExample = require('../api/example/patch');
-    const instance = new PatchExample();
-    
-    expect(typeof instance.process).toBe('function');
-    expect(instance.process).toBeDefined();
-  });
-  
-  test('DeleteExample class should have process method', () => {
-    const DeleteExample = require('../api/example/delete');
-    const instance = new DeleteExample();
-    
-    expect(typeof instance.process).toBe('function');
-    expect(instance.process).toBeDefined();
-  });
-  
-  test('All examples should have description getter', () => {
-    const examples = [
-      require('../api/example/get'),
-      require('../api/example/post'),
-      require('../api/example/put'),
-      require('../api/example/patch'),
-      require('../api/example/delete')
-    ];
-    
-    examples.forEach(ExampleClass => {
+  setupTestEnvironment();
+
+  // Define all example APIs to test
+  const exampleAPIs = [
+    { name: 'GetExample', path: '../api/example/get', method: 'GET' },
+    { name: 'PostExample', path: '../api/example/post', method: 'POST' },
+    { name: 'PutExample', path: '../api/example/put', method: 'PUT' },
+    { name: 'PatchExample', path: '../api/example/patch', method: 'PATCH' },
+    { name: 'DeleteExample', path: '../api/example/delete', method: 'DELETE' }
+  ];
+
+  describe('API Structure Validation', () => {
+    test.each(exampleAPIs)('$name should be a valid API class', ({ name, path }) => {
+      const ExampleClass = require(path);
+      
+      expect(typeof ExampleClass).toBe('function');
+      expect(ExampleClass.prototype).toBeDefined();
+    });
+
+    test.each(exampleAPIs)('$name should be instantiable', ({ name, path }) => {
+      const ExampleClass = require(path);
+      
+      expect(() => {
+        new ExampleClass();
+      }).not.toThrow();
+    });
+
+    test.each(exampleAPIs)('$name should have required methods', ({ name, path }) => {
+      const ExampleClass = require(path);
       const instance = new ExampleClass();
+      
+      expect(typeof instance.process).toBe('function');
+      expect(instance.process).toBeDefined();
+    });
+  });
+
+  describe('API Functionality', () => {
+    test.each(exampleAPIs)('$name should have process method with correct signature', ({ name, path }) => {
+      const ExampleClass = require(path);
+      const instance = new ExampleClass();
+      const processMethod = instance.process;
+      
+      expect(typeof processMethod).toBe('function');
+      expect(processMethod.length).toBe(2); // req, res parameters
+    });
+
+    test.each(exampleAPIs)('$name should have description property', ({ name, path }) => {
+      const ExampleClass = require(path);
+      const instance = new ExampleClass();
+      
       expect(instance.description).toBeDefined();
       expect(typeof instance.description).toBe('string');
       expect(instance.description.length).toBeGreaterThan(0);
     });
   });
 
-  test('All examples should be classes', () => {
-    const examples = [
-      require('../api/example/get'),
-      require('../api/example/post'),
-      require('../api/example/put'),
-      require('../api/example/patch'),
-      require('../api/example/delete')
-    ];
-    
-    examples.forEach(ExampleClass => {
-      expect(typeof ExampleClass).toBe('function');
-      expect(ExampleClass.prototype).toBeDefined();
-    });
-  });
-
-  test('All examples should be instantiable', () => {
-    const examples = [
-      require('../api/example/get'),
-      require('../api/example/post'),
-      require('../api/example/put'),
-      require('../api/example/patch'),
-      require('../api/example/delete')
-    ];
-    
-    examples.forEach(ExampleClass => {
-      expect(() => {
-        new ExampleClass();
-      }).not.toThrow();
-    });
-  });
-
-  test('All examples should have process method that accepts req and res', () => {
-    const examples = [
-      require('../api/example/get'),
-      require('../api/example/post'),
-      require('../api/example/put'),
-      require('../api/example/patch'),
-      require('../api/example/delete')
-    ];
-    
-    examples.forEach(ExampleClass => {
-      const instance = new ExampleClass();
-      const processMethod = instance.process;
+  describe('API Consistency', () => {
+    test('all examples should follow consistent structure', () => {
+      const examples = exampleAPIs.map(({ path }) => require(path));
       
-      expect(typeof processMethod).toBe('function');
-      expect(processMethod.length).toBe(2); // req, res parameters
+      examples.forEach(ExampleClass => {
+        const instance = new ExampleClass();
+        
+        // Check required properties
+        expect(instance).toHaveProperty('process');
+        expect(instance).toHaveProperty('description');
+        
+        // Check method signatures
+        expect(typeof instance.process).toBe('function');
+        expect(typeof instance.description).toBe('string');
+      });
+    });
+
+    test('all examples should be independent classes', () => {
+      const examples = exampleAPIs.map(({ path }) => require(path));
+      const uniqueClasses = new Set(examples);
+      
+      expect(uniqueClasses.size).toBe(examples.length);
     });
   });
 });

@@ -43,16 +43,21 @@ const createMockProcessorClass = () => class TestAPI {
   }
 };
 
-// Common test setup
+// Enhanced test setup with better cleanup
 const setupTestEnvironment = () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+    jest.resetModules();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 };
 
@@ -98,16 +103,73 @@ const simulateError = (errorType, message) => {
   return error;
 };
 
+// Test data generators
+const createTestRoutes = (count = 3) => {
+  const routes = [];
+  for (let i = 0; i < count; i++) {
+    routes.push(createMockRoute('GET', `/test${i}`));
+  }
+  return routes;
+};
+
+const createTestAnnotations = (overrides = {}) => ({
+  summary: 'Test API',
+  description: 'Test API description',
+  tags: ['test'],
+  ...overrides
+});
+
+// Mock cleanup helpers
+const cleanupMocks = () => {
+  jest.clearAllMocks();
+  jest.clearAllTimers();
+  jest.resetModules();
+};
+
+// Validation helpers
+const expectValidRoute = (route) => {
+  expect(route).toHaveProperty('method');
+  expect(route).toHaveProperty('path');
+  expect(typeof route.method).toBe('string');
+  expect(typeof route.path).toBe('string');
+};
+
+const expectValidOpenAPISpec = (spec) => {
+  expect(spec).toHaveProperty('openapi');
+  expect(spec).toHaveProperty('info');
+  expect(spec).toHaveProperty('servers');
+  expect(spec).toHaveProperty('paths');
+  expect(spec.openapi).toBe('3.0.0');
+};
+
 module.exports = {
+  // Core mocks
   createMockApp,
   createMockApiLoader,
   createMockMcpServer,
   createMockWatcher,
   createMockProcessorClass,
   createMockRoute,
+  
+  // Test setup
   setupTestEnvironment,
+  cleanupMocks,
+  
+  // Async helpers
   waitForAsync,
   waitForCondition,
+  
+  // File system
   createMockFs,
-  simulateError
+  
+  // Error handling
+  simulateError,
+  
+  // Test data
+  createTestRoutes,
+  createTestAnnotations,
+  
+  // Validation helpers
+  expectValidRoute,
+  expectValidOpenAPISpec
 };
