@@ -122,17 +122,21 @@ class HotReloader {
       }
       
       // Validate routes
-      const validationIssues = this.apiLoader.validateRoutes();
-      if (validationIssues.length > 0) {
-        console.warn('⚠️  Route validation issues:');
-        validationIssues.forEach(issue => console.warn(`  - ${issue}`));
+      if (this.apiLoader.validateRoutes) {
+        const validationIssues = this.apiLoader.validateRoutes();
+        if (validationIssues.length > 0) {
+          console.warn('⚠️  Route validation issues:');
+          validationIssues.forEach(issue => console.warn(`  - ${issue}`));
+        }
       }
       
       // Check for loading errors
-      const errors = this.apiLoader.getErrors();
-      if (errors.length > 0) {
-        console.warn('⚠️  API loading errors:');
-        errors.forEach(error => console.warn(`  - ${error}`));
+      if (this.apiLoader.getErrors) {
+        const errors = this.apiLoader.getErrors();
+        if (errors.length > 0) {
+          console.warn('⚠️  API loading errors:');
+          errors.forEach(error => console.warn(`  - ${error}`));
+        }
       }
       
       console.log(`✅ Hot reload complete: ${newRoutes.length} routes loaded`);
