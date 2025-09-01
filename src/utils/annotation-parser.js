@@ -39,10 +39,18 @@ class AnnotationParser {
         
         switch (tagName) {
         case 'description':
-          annotations.description = tag.name || tag.description;
+          // Combine name and description for full text
+          const fullDescription = tag.name && tag.description ? 
+            `${tag.name} ${tag.description}` : 
+            (tag.name || tag.description);
+          annotations.description = fullDescription;
           break;
         case 'summary':
-          annotations.summary = tag.name || tag.description;
+          // Combine name and description for full text
+          const fullSummary = tag.name && tag.description ? 
+            `${tag.name} ${tag.description}` : 
+            (tag.name || tag.description);
+          annotations.summary = fullSummary;
           break;
         case 'tags':
           annotations.tags = tag.name ? tag.name.split(',').map(t => t.trim()) : [];

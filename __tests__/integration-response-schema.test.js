@@ -400,9 +400,9 @@ describe('@responseSchema Integration Tests', () => {
       // Parse annotations
       const annotations = AnnotationParser.parseClassAnnotations('TestMixedAPI', tempFilePath);
       
-      // Valid annotations should work (note: comment-parser only takes first word)
-      expect(annotations.description).toBe('Valid');
-      expect(annotations.summary).toBe('Valid');
+      // Valid annotations should work (full description and summary are now extracted)
+      expect(annotations.description).toBe('Valid description');
+      expect(annotations.summary).toBe('Valid summary');
       expect(annotations.tags).toEqual(['valid', 'tags']);
       expect(annotations.requestBody).toBeDefined();
       
