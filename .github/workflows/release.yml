@@ -23,8 +23,25 @@ jobs:
       - name: Run linting
         run: npm run lint
 
+      - name: Setup npm authentication
+        run: |
+          # Create .npmrc with proper authentication
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
+          echo "always-auth=true" >> .npmrc
+          
+          # Verify npm authentication
+          /opt/homebrew/bin/npm whoami
+          
+          # Show npm configuration
+          /opt/homebrew/bin/npm config list
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_ENV: production
+          PATH: /opt/homebrew/bin:$PATH
         run: npx semantic-release
