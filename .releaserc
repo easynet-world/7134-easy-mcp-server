@@ -20,7 +20,9 @@
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     ["@semantic-release/npm", {
-      "npmPublish": true
+      "npmPublish": true,
+      "registry": "https://registry.npmjs.org/",
+      "access": "public"
     }],
     "@semantic-release/github"
   ]
