@@ -5,7 +5,7 @@
 
 ### **One Function → API + MCP + OpenAPI + SWAGGER + LLM.txt**
 
-> **Latest**: Fixed semantic-release configuration for self-hosted runners
+> **Latest**: Fixed semantic-release configuration for self-hosted runners and npm paths
 
 # 🚀 **Quick Start (30 seconds)**
 
