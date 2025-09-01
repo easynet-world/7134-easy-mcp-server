@@ -35,6 +35,7 @@ class DynamicAPIMCPServer {
    * Create HTTP and WebSocket server
    */
   createServer() {
+    // Create HTTP server with explicit IPv4 binding
     this.server = http.createServer();
     
     // Add HTTP endpoints for MCP Inspector compatibility
@@ -42,7 +43,24 @@ class DynamicAPIMCPServer {
       this.handleHTTPRequest(req, res);
     });
     
-    this.wss = new WebSocket.Server({ server: this.server });
+    // Log the host configuration for debugging
+    console.log(`🔌 MCP Server: Host configured as: ${this.host}`);
+  }
+  
+  /**
+   * Create WebSocket server after HTTP server is bound
+   */
+  createWebSocketServer() {
+    // Create WebSocket server with explicit host binding
+    // Try to force IPv4 binding by creating server independently
+    this.wss = new WebSocket.Server({ 
+      server: this.server,
+      host: this.host,  // Explicitly set the host for WebSocket binding
+      family: 4,  // Force IPv4 family
+      // Additional options to force IPv4 binding
+      perMessageDeflate: false,
+      clientTracking: true
+    });
     
     this.wss.on('connection', (ws) => {
       console.log('🔌 New MCP WebSocket client connected');
@@ -548,7 +566,17 @@ class DynamicAPIMCPServer {
         family: 4  // Force IPv4
       };
       
+      // Ensure we're binding to all interfaces for IPv4
+      if (this.host === '0.0.0.0') {
+        listenOptions.host = '0.0.0.0';
+        // Force IPv4 binding more explicitly
+        listenOptions.family = 4;
+      }
+      
       this.server.listen(listenOptions, () => {
+        // Create WebSocket server after HTTP server is bound
+        this.createWebSocketServer();
+        
         console.log('🚀 MCP Server started successfully!');
         console.log(`📡 WebSocket server listening on ws://${this.host}:${this.port} (IPv4)`);
         console.log('🌐 HTTP endpoints available:');
@@ -556,7 +584,7 @@ class DynamicAPIMCPServer {
         console.log('  - POST /mcp  - HTTP MCP requests');
         console.log('  - POST /     - StreamableHttp for Inspector');
         console.log('🔧 Available MCP commands:');
-        console.log('  - list_tools: Discover available API endpoints');
+        console.log('  - list_tools: Discover available API endpoint');
         console.log('  - call_tool: Execute a specific API endpoint');
         console.log('  - ping: Health check');
         resolve();
