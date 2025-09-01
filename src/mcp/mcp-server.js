@@ -7,7 +7,7 @@ const WebSocket = require('ws');
 const http = require('http');
 
 class DynamicAPIMCPServer {
-  constructor(host = 'localhost', port = 3001) {
+  constructor(host = '0.0.0.0', port = 3001) {
     this.host = host;
     this.port = port;
     this.wss = null;
