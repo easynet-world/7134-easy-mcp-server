@@ -164,4 +164,24 @@ describe('MCP (Model Context Protocol) Support', () => {
       expect(result.data).toEqual(testCase.expectedData);
     }
   });
+
+  test('MCP server binds to all interfaces by default for Kubernetes compatibility', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    
+    // Test default constructor binds to 0.0.0.0
+    const mcpServerDefault = new DynamicAPIMCPServer();
+    expect(mcpServerDefault.host).toBe('0.0.0.0');
+    
+    // Test explicit binding to all interfaces
+    const mcpServerAllInterfaces = new DynamicAPIMCPServer('0.0.0.0', 3001);
+    expect(mcpServerAllInterfaces.host).toBe('0.0.0.0');
+    
+    // Test that localhost still works when explicitly specified
+    const mcpServerLocalhost = new DynamicAPIMCPServer('localhost', 3001);
+    expect(mcpServerLocalhost.host).toBe('localhost');
+    
+    // Test that custom host still works
+    const mcpServerCustom = new DynamicAPIMCPServer('192.168.1.100', 3001);
+    expect(mcpServerCustom.host).toBe('192.168.1.100');
+  });
 });
