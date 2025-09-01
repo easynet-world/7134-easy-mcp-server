@@ -5,6 +5,8 @@
 
 ### **One Function → API + MCP + OpenAPI + SWAGGER + LLM.txt**
 
+> **Latest**: Fixed semantic-release configuration for self-hosted runners
+
 # 🚀 **Quick Start (30 seconds)**
 
 ## 1. Install
