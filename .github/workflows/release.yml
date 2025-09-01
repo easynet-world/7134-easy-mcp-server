@@ -31,10 +31,10 @@ jobs:
           echo "always-auth=true" >> .npmrc
           
           # Verify npm authentication
-          /opt/homebrew/bin/npm whoami
+          npm whoami
           
           # Show npm configuration
-          /opt/homebrew/bin/npm config list
+          npm config list
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -43,5 +43,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_ENV: production
-          PATH: /opt/homebrew/bin:$PATH
         run: npx semantic-release
