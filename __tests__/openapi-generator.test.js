@@ -311,7 +311,7 @@ describe('OpenAPIGenerator', () => {
       const info = openapiGenerator.generateInfo();
       
       expect(info.title).toBe('Easy MCP Server API');
-      expect(info.version).toBe('0.6.15');
+      expect(info.version).toBe('0.6.16');
       expect(info.description).toContain('MCP');
     });
   });
