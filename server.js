@@ -322,7 +322,7 @@ function startServer() {
   }
 
   // Start the main server
-  app.listen(port, host, () => {
+  app.listen(port, host, { family: 4 }, () => {
     console.log('\n');
     console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
     console.log('  ║                                                                                                      ║');

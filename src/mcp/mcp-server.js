@@ -376,7 +376,7 @@ class DynamicAPIMCPServer {
       
       const tools = routes.map(route => ({
         name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-        description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+        description: route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
         method: route.method,
         path: route.path,
         processor: route.processor
@@ -509,7 +509,7 @@ class DynamicAPIMCPServer {
       params: {
         tools: routes.map(route => ({
           name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-          description: route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
+          description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
           method: route.method,
           path: route.path
         }))
@@ -541,9 +541,16 @@ class DynamicAPIMCPServer {
     this.createServer();
     
     return new Promise((resolve, reject) => {
-      this.server.listen(this.port, this.host, () => {
+      // Force IPv4 binding to avoid IPv6 issues
+      const listenOptions = {
+        host: this.host,
+        port: this.port,
+        family: 4  // Force IPv4
+      };
+      
+      this.server.listen(listenOptions, () => {
         console.log('🚀 MCP Server started successfully!');
-        console.log(`📡 WebSocket server listening on ws://${this.host}:${this.port}`);
+        console.log(`📡 WebSocket server listening on ws://${this.host}:${this.port} (IPv4)`);
         console.log('🌐 HTTP endpoints available:');
         console.log('  - GET  /sse  - Server-Sent Events for Inspector');
         console.log('  - POST /mcp  - HTTP MCP requests');
