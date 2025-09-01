@@ -298,7 +298,7 @@ function startServer() {
   if (process.env.MCP_ENABLED !== 'false') {
     try {
       mcpServer = new DynamicAPIMCPServer(
-        process.env.MCP_HOST || '127.0.0.1',
+        process.env.MCP_HOST || '0.0.0.0',
         process.env.MCP_PORT || 3001
       );
       
@@ -346,7 +346,7 @@ function startServer() {
     console.log('');
     if (mcpServer) {
       console.log('  🤖  MCP SERVER:');
-      console.log(`     • WebSocket:       ws://${process.env.MCP_HOST || '127.0.0.1'}:${process.env.MCP_PORT || 3001}`);
+      console.log(`     • WebSocket:       ws://${process.env.MCP_HOST || '0.0.0.0'}:${process.env.MCP_PORT || 3001}`);
       console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
     }
