@@ -399,4 +399,4 @@ module.exports = {
   hotReloader: null, // Will be set when server starts
   getLoadedRoutes: () => apiLoader.getRoutes()
 };
-// Version 0.0.1
+// Version 0.6.14
