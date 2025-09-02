@@ -319,8 +319,14 @@ class DynamicAPIMCPServer {
         inputSchema.required = ['body'];
       }
 
-      // Create enhanced description that includes response schema info
+      // Create enhanced description that includes both request and response schema info
       let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
+        
+      // Add request body schema information to description if available
+      if (openApi?.requestBody?.content?.['application/json']?.schema) {
+        const requestSchema = openApi.requestBody.content['application/json'].schema;
+        enhancedDescription += `\n\n**Request Body Schema:**\n\`\`\`json\n${JSON.stringify(requestSchema, null, 2)}\n\`\`\``;
+      }
         
       // Add response schema information to description if available
       if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
@@ -621,8 +627,14 @@ class DynamicAPIMCPServer {
             inputSchema.required = ['body'];
           }
           
-          // Create enhanced description that includes response schema info
+          // Create enhanced description that includes both request and response schema info
           let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
+          
+          // Add request body schema information to description if available
+          if (openApi?.requestBody?.content?.['application/json']?.schema) {
+            const requestSchema = openApi.requestBody.content['application/json'].schema;
+            enhancedDescription += `\n\n**Request Body Schema:**\n\`\`\`json\n${JSON.stringify(requestSchema, null, 2)}\n\`\`\``;
+          }
           
           // Add response schema information to description if available
           if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
