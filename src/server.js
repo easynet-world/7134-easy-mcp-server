@@ -6,8 +6,8 @@ const cors = require('cors');
 const path = require('path');
 const APILoader = require(path.join(__dirname, 'core', 'api-loader'));
 const OpenAPIGenerator = require(path.join(__dirname, 'core', 'openapi-generator'));
-const DynamicAPIMCPServer = require(path.join(__dirname, '..', 'mcp', 'mcp-server'));
-const HotReloader = require(path.join(__dirname, '..', 'utils', 'hot-reloader'));
+const DynamicAPIMCPServer = require(path.join(__dirname, 'mcp', 'mcp-server'));
+const HotReloader = require(path.join(__dirname, 'utils', 'hot-reloader'));
 
 // Create Express app
 const app = express();
