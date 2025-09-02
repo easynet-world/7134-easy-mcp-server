@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Initialize core services
-const apiLoader = new APILoader(app);
+const apiLoader = new APILoader(app, process.env.API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
 
 // Health check endpoint

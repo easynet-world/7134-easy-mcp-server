@@ -446,35 +446,33 @@ function startServer() {
   } else if (fs.existsSync(apiPath)) {
     console.log('📁 Found api/ directory - starting automatic server');
     
-    // Start the server using the DynamicAPIServer for generated projects
+    // Start the server using the full-featured server.js from source
     try {
-      console.log('🚀 Starting DynamicAPIServer with API discovery...');
+      console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
       
-      const { DynamicAPIServer } = require('easy-mcp-server');
-      const path = require('path');
+      // Change to the main project directory and start the full server
+      const originalCwd = process.cwd();
+      const mainProjectPath = path.join(__dirname, '..');
+      process.chdir(mainProjectPath);
       
-      const server = new DynamicAPIServer({
-        port: process.env.PORT || 3000,
-        apiPath: path.join(process.cwd(), 'api'),
-        cors: {
-          origin: process.env.API_CORS_ORIGIN || '*',
-          methods: process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE',
-          credentials: process.env.API_CORS_CREDENTIALS === 'true'
+      // Start the full server with the user's API path
+      const { spawn } = require('child_process');
+      const serverProcess = spawn('node', ['src/core/server.js'], {
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          API_PATH: originalCwd + '/api' // Pass the user's API path
         }
       });
       
-      server.start()
-        .then(() => {
-          console.log(`🚀 Easy MCP Server running on port ${server.port}`);
-          console.log(`📚 API Documentation: http://localhost:${server.port}/docs`);
-          console.log(`🔍 Health Check: http://localhost:${server.port}/health`);
-          console.log(`🤖 MCP Tools: http://localhost:${server.port}/mcp/tools`);
-          console.log(`📊 API Info: http://localhost:${server.port}/api-info`);
-        })
-        .catch((error) => {
-          console.error('❌ Failed to start server:', error.message);
-          process.exit(1);
-        });
+      // Handle server process
+      serverProcess.on('error', (error) => {
+        console.error('❌ Failed to start server:', error.message);
+        process.exit(1);
+      });
+      
+      // Change back to original directory
+      process.chdir(originalCwd);
     } catch (error) {
       console.error('❌ Failed to start server:', error.message);
       process.exit(1);
