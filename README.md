@@ -299,3 +299,4 @@ easy-mcp-server --help               # Show all options
 # Trigger npm release
 # Test npm publishing with new token
 # Trigger new release
+# Ensure latest fixes are included
