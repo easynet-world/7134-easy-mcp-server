@@ -255,7 +255,3 @@ easy-mcp-server --help               # Show all options
 
 **🎯 The Future of API Development: Write Once, Deploy Everywhere**  
 **One function = REST API + MCP Tool + OpenAPI Documentation + AI Context** 🚀✨
-# Trigger npm release
-# Test npm publishing with new token
-# Trigger new release
-# Ensure latest fixes are included
