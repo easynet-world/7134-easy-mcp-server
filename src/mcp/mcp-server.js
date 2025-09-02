@@ -292,18 +292,47 @@ class DynamicAPIMCPServer {
     const routes = this.getLoadedRoutes();
     console.log('🔍 MCP HTTP: Routes loaded:', routes.length);
     
-    const tools = routes.map(route => ({
-      name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-      description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          body: { type: 'object', description: 'Request body' },
-          query: { type: 'object', description: 'Query parameters' },
-          headers: { type: 'object', description: 'Request headers' }
+      const tools = routes.map(route => {
+        const processor = route.processorInstance;
+        const openApi = processor?.openApi;
+        
+
+        
+        // Build rich input schema with request body and other details
+        let inputSchema = {
+          type: 'object',
+          properties: {
+            body: { type: 'object', description: 'Request body' },
+            query: { type: 'object', description: 'Query parameters' },
+            headers: { type: 'object', description: 'Request headers' }
+          }
+        };
+        
+        // Add request body schema if available from annotations
+        if (openApi?.requestBody?.content?.['application/json']?.schema) {
+          inputSchema.properties.body = {
+            ...inputSchema.properties.body,
+            ...openApi.requestBody.content['application/json'].schema
+          };
         }
-      }
-    }));
+        
+        // Add required fields if specified
+        if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
+          inputSchema.required = ['body'];
+        }
+        
+        return {
+          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+          inputSchema: inputSchema,
+          // Add response schema information
+          responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+          // Add additional metadata
+          method: route.method,
+          path: route.path,
+          tags: openApi?.tags || ['api']
+        };
+      });
     
     return {
       jsonrpc: '2.0',
@@ -392,13 +421,46 @@ class DynamicAPIMCPServer {
       console.log('🔍 MCP Server: Routes loaded:', routes.length);
       console.log('🔍 MCP Server: Route details:', routes.map(r => ({ method: r.method, path: r.path })));
       
-      const tools = routes.map(route => ({
-        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-        description: route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
-        method: route.method,
-        path: route.path,
-        processor: route.processor
-      }));
+      const tools = routes.map(route => {
+        const processor = route.processorInstance;
+        const openApi = processor?.openApi;
+        
+        // Build rich input schema with request body and other details
+        let inputSchema = {
+          type: 'object',
+          properties: {
+            body: { type: 'object', description: 'Request body' },
+            query: { type: 'object', description: 'Query parameters' },
+            headers: { type: 'object', description: 'Request headers' }
+          }
+        };
+        
+        // Add request body schema if available from annotations
+        if (openApi?.requestBody?.content?.['application/json']?.schema) {
+          inputSchema.properties.body = {
+            ...inputSchema.properties.body,
+            ...openApi.requestBody.content['application/json'].schema
+          };
+        }
+        
+        // Add required fields if specified
+        if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
+          inputSchema.required = ['body'];
+        }
+        
+        return {
+          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+          inputSchema: inputSchema,
+          // Add response schema information
+          responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+          // Add additional metadata
+          method: route.method,
+          path: route.path,
+          tags: openApi?.tags || ['api'],
+          processor: route.processor
+        };
+      });
       
       ws.send(JSON.stringify({
         type: 'list_tools_response',
@@ -525,12 +587,45 @@ class DynamicAPIMCPServer {
       jsonrpc: '2.0',
       method: 'notifications/toolsChanged',
       params: {
-        tools: routes.map(route => ({
-          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-          description: route.processorInstance?.mcpDescription || route.processorInstance?.openApi?.description || route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
-          method: route.method,
-          path: route.path
-        }))
+        tools: routes.map(route => {
+          const processor = route.processorInstance;
+          const openApi = processor?.openApi;
+          
+          // Build rich input schema with request body and other details
+          let inputSchema = {
+            type: 'object',
+            properties: {
+              body: { type: 'object', description: 'Request body' },
+              query: { type: 'object', description: 'Query parameters' },
+              headers: { type: 'object', description: 'Request headers' }
+            }
+          };
+          
+          // Add request body schema if available from annotations
+          if (openApi?.requestBody?.content?.['application/json']?.schema) {
+            inputSchema.properties.body = {
+              ...inputSchema.properties.body,
+              ...openApi.requestBody.content['application/json'].schema
+            };
+          }
+          
+          // Add required fields if specified
+          if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
+            inputSchema.required = ['body'];
+          }
+          
+          return {
+            name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+            description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+            inputSchema: inputSchema,
+            // Add response schema information
+            responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+            // Add additional metadata
+            method: route.method,
+            path: route.path,
+            tags: openApi?.tags || ['api']
+          };
+        })
       }
     };
 
