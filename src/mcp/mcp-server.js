@@ -292,47 +292,45 @@ class DynamicAPIMCPServer {
     const routes = this.getLoadedRoutes();
     console.log('🔍 MCP HTTP: Routes loaded:', routes.length);
     
-      const tools = routes.map(route => {
-        const processor = route.processorInstance;
-        const openApi = processor?.openApi;
-        
+    const tools = routes.map(route => {
+      const processor = route.processorInstance;
+      const openApi = processor?.openApi;
 
-        
-        // Build rich input schema with request body and other details
-        let inputSchema = {
-          type: 'object',
-          properties: {
-            body: { type: 'object', description: 'Request body' },
-            query: { type: 'object', description: 'Query parameters' },
-            headers: { type: 'object', description: 'Request headers' }
-          }
-        };
-        
-        // Add request body schema if available from annotations
-        if (openApi?.requestBody?.content?.['application/json']?.schema) {
-          inputSchema.properties.body = {
-            ...inputSchema.properties.body,
-            ...openApi.requestBody.content['application/json'].schema
-          };
+      // Build rich input schema with request body and other details
+      const inputSchema = {
+        type: 'object',
+        properties: {
+          body: { type: 'object', description: 'Request body' },
+          query: { type: 'object', description: 'Query parameters' },
+          headers: { type: 'object', description: 'Request headers' }
         }
-        
-        // Add required fields if specified
-        if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
-          inputSchema.required = ['body'];
-        }
-        
-        return {
-          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-          description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
-          inputSchema: inputSchema,
-          // Add response schema information
-          responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
-          // Add additional metadata
-          method: route.method,
-          path: route.path,
-          tags: openApi?.tags || ['api']
+      };
+
+      // Add request body schema if available from annotations
+      if (openApi?.requestBody?.content?.['application/json']?.schema) {
+        inputSchema.properties.body = {
+          ...inputSchema.properties.body,
+          ...openApi.requestBody.content['application/json'].schema
         };
-      });
+      }
+
+      // Add required fields if specified
+      if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
+        inputSchema.required = ['body'];
+      }
+
+      return {
+        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+        description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+        inputSchema: inputSchema,
+        // Add response schema information
+        responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+        // Add additional metadata
+        method: route.method,
+        path: route.path,
+        tags: openApi?.tags || ['api']
+      };
+    });
     
     return {
       jsonrpc: '2.0',
@@ -426,7 +424,7 @@ class DynamicAPIMCPServer {
         const openApi = processor?.openApi;
         
         // Build rich input schema with request body and other details
-        let inputSchema = {
+        const inputSchema = {
           type: 'object',
           properties: {
             body: { type: 'object', description: 'Request body' },
@@ -592,7 +590,7 @@ class DynamicAPIMCPServer {
           const openApi = processor?.openApi;
           
           // Build rich input schema with request body and other details
-          let inputSchema = {
+          const inputSchema = {
             type: 'object',
             properties: {
               body: { type: 'object', description: 'Request body' },
