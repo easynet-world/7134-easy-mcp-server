@@ -66,27 +66,27 @@ function initProject() {
   
   // Create package.json
   const packageJson = {
-    "name": projectName,
-    "version": "1.0.0",
-    "description": "Easy MCP Server project",
-    "main": "index.js",
-    "scripts": {
-      "start": "easy-mcp-server",
-      "dev": "easy-mcp-server",
-      "test": "jest"
+    'name': projectName,
+    'version': '1.0.0',
+    'description': 'Easy MCP Server project',
+    'main': 'index.js',
+    'scripts': {
+      'start': 'easy-mcp-server',
+      'dev': 'easy-mcp-server',
+      'test': 'jest'
     },
-    "dependencies": {
-      "easy-mcp-server": "^1.0.38",
-      "express": "^4.18.2",
-      "cors": "^2.8.5",
-      "dotenv": "^16.3.1"
+    'dependencies': {
+      'easy-mcp-server': '^1.0.38',
+      'express': '^4.18.2',
+      'cors': '^2.8.5',
+      'dotenv': '^16.3.1'
     },
-    "devDependencies": {
-      "nodemon": "^3.1.10",
-      "jest": "^29.7.0"
+    'devDependencies': {
+      'nodemon': '^3.1.10',
+      'jest': '^29.7.0'
     },
-    "keywords": ["mcp", "api", "framework"],
-    "license": "MIT"
+    'keywords': ['mcp', 'api', 'framework'],
+    'license': 'MIT'
   };
   
   fs.writeFileSync(
@@ -491,17 +491,17 @@ function main() {
   }
   
   switch (command) {
-    case 'init':
-      initProject();
-      break;
-    case 'start':
-    case undefined:
-      startServer();
-      break;
-    default:
-      console.error(`❌ Unknown command: ${command}`);
-      console.log('💡 Run "easy-mcp-server --help" for usage information');
-      process.exit(1);
+  case 'init':
+    initProject();
+    break;
+  case 'start':
+  case undefined:
+    startServer();
+    break;
+  default:
+    console.error(`❌ Unknown command: ${command}`);
+    console.log('💡 Run "easy-mcp-server --help" for usage information');
+    process.exit(1);
   }
 }
 
