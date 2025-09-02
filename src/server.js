@@ -3,10 +3,11 @@ const express = require('express');
 const cors = require('cors');
 
 // Import core modules
-const APILoader = require('./core/api-loader');
-const OpenAPIGenerator = require('./core/openapi-generator');
-const DynamicAPIMCPServer = require('../mcp/mcp-server');
-const HotReloader = require('../utils/hot-reloader');
+const path = require('path');
+const APILoader = require(path.join(__dirname, 'core', 'api-loader'));
+const OpenAPIGenerator = require(path.join(__dirname, 'core', 'openapi-generator'));
+const DynamicAPIMCPServer = require(path.join(__dirname, '..', 'mcp', 'mcp-server'));
+const HotReloader = require(path.join(__dirname, '..', 'utils', 'hot-reloader'));
 
 // Create Express app
 const app = express();
