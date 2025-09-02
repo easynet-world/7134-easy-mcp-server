@@ -7,8 +7,9 @@ const fs = require('fs');
 const path = require('path');
 
 class APILoader {
-  constructor(app) {
+  constructor(app, apiPath = null) {
     this.app = app;
+    this.apiPath = apiPath || path.join(process.cwd(), 'api');
     this.routes = [];
     this.processors = new Map();
     this.errors = [];
@@ -18,10 +19,12 @@ class APILoader {
    * Load all APIs from the api/ directory
    */
   loadAPIs() {
-    const apiDir = path.join(process.cwd(), 'api');
+    const apiDir = this.apiPath;
+    
+    console.log(`🔍 Loading APIs from: ${apiDir}`);
     
     if (!fs.existsSync(apiDir)) {
-      console.log('⚠️  No api/ directory found');
+      console.log(`⚠️  No api/ directory found at: ${apiDir}`);
       return [];
     }
 

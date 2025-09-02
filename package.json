@@ -3,6 +3,9 @@
   "version": "1.0.38",
   "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
   "main": "index.js",
+  "bin": {
+    "easy-mcp-server": "./bin/easy-mcp-server.js"
+  },
   "exports": {
     ".": "./index.js",
     "./base-api": "./src/core/base-api.js"
