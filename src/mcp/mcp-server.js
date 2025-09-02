@@ -319,17 +319,26 @@ class DynamicAPIMCPServer {
         inputSchema.required = ['body'];
       }
 
-      return {
-        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-        description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
-        inputSchema: inputSchema,
-        // Add response schema information
-        responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
-        // Add additional metadata
-        method: route.method,
-        path: route.path,
-        tags: openApi?.tags || ['api']
-      };
+        // Create enhanced description that includes response schema info
+        let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
+        
+        // Add response schema information to description if available
+        if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
+          const responseSchema = openApi.responses['200'].content['application/json'].schema;
+          enhancedDescription += `\n\n**Response Schema:**\n\`\`\`json\n${JSON.stringify(responseSchema, null, 2)}\n\`\`\``;
+        }
+
+        return {
+          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          description: enhancedDescription,
+          inputSchema: inputSchema,
+          // Add response schema information as separate field for compatibility
+          responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+          // Add additional metadata
+          method: route.method,
+          path: route.path,
+          tags: openApi?.tags || ['api']
+        };
     });
     
     return {
@@ -612,11 +621,20 @@ class DynamicAPIMCPServer {
             inputSchema.required = ['body'];
           }
           
+          // Create enhanced description that includes response schema info
+          let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
+          
+          // Add response schema information to description if available
+          if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
+            const responseSchema = openApi.responses['200'].content['application/json'].schema;
+            enhancedDescription += `\n\n**Response Schema:**\n\`\`\`json\n${JSON.stringify(responseSchema, null, 2)}\n\`\`\``;
+          }
+
           return {
             name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
-            description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+            description: enhancedDescription,
             inputSchema: inputSchema,
-            // Add response schema information
+            // Add response schema information as separate field for compatibility
             responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
             // Add additional metadata
             method: route.method,
