@@ -10,57 +10,21 @@
 
 # 🚀 **Quick Start (30 seconds)**
 
-## Option 1: Initialize New Project (Recommended)
+## 1. Install
 ```bash
-# Install globally for easy access
 npm install -g easy-mcp-server
+```
 
-# Create a new project with all necessary files
+## 2. Create New Project
+```bash
 easy-mcp-server init my-api-project
-
-# Navigate to project and install dependencies
 cd my-api-project
 npm install
-
-# Start the server
-easy-mcp-server
-# or
-npm start
 ```
 
-## Option 2: Manual Setup
+## 3. Start Server
 ```bash
-# Install package
-npm install easy-mcp-server
-
-# Create api directory structure
-mkdir -p api/hello
-
-# Create your first API endpoint
-# /api/hello/get.js
-```
-
-```javascript
-/**
- * @description Returns a simple greeting message
- * @summary Get hello world message
- */
-class HelloWorld extends BaseAPI {
-  process(req, res) {
-    res.json({ message: "Hello World!" });
-  }
-}
-
-module.exports = HelloWorld;
-```
-
-## 3. Start server
-```bash
-# If you have a server.js file, it will use that
-# If you have an api/ directory, it will auto-start
 easy-mcp-server
-# or
-npm start
 ```
 
 ## 🎉 Done! You now have:
