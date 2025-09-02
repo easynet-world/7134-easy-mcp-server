@@ -446,31 +446,51 @@ function startServer() {
   } else if (fs.existsSync(apiPath)) {
     console.log('📁 Found api/ directory - starting automatic server');
     
-    // Start the server using the DynamicAPIServer class
+    // Start the server using the full-featured server.js implementation
     try {
-      const { DynamicAPIServer } = require('easy-mcp-server');
-      const path = require('path');
+      // Check if we're in the main project directory (has server.js)
+      const mainProjectServerPath = path.join(__dirname, '..', 'server.js');
       
-      const server = new DynamicAPIServer({
-        port: process.env.PORT || 3000,
-        apiPath: path.join(process.cwd(), 'api'),
-        cors: {
-          origin: process.env.API_CORS_ORIGIN || '*',
-          methods: process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE',
-          credentials: process.env.API_CORS_CREDENTIALS === 'true'
-        }
-      });
-      
-      server.start()
-        .then(() => {
-          console.log(`🚀 Easy MCP Server running on port ${server.port}`);
-          console.log(`📚 API Documentation: http://localhost:${server.port}/docs`);
-          console.log(`🔍 Health Check: http://localhost:${server.port}/health`);
-        })
-        .catch((error) => {
-          console.error('❌ Failed to start server:', error.message);
-          process.exit(1);
+      if (fs.existsSync(mainProjectServerPath)) {
+        console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
+        
+        // Change to the main project directory and start the full server
+        const originalCwd = process.cwd();
+        process.chdir(path.join(__dirname, '..'));
+        
+        // Start the full server
+        require('./server.js');
+        
+        // Change back to original directory
+        process.chdir(originalCwd);
+      } else {
+        // Fallback to DynamicAPIServer if server.js not available
+        console.log('📁 Using DynamicAPIServer (basic mode)...');
+        
+        const { DynamicAPIServer } = require('easy-mcp-server');
+        const path = require('path');
+        
+        const server = new DynamicAPIServer({
+          port: process.env.PORT || 3000,
+          apiPath: path.join(process.cwd(), 'api'),
+          cors: {
+            origin: process.env.API_CORS_ORIGIN || '*',
+            methods: process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            credentials: process.env.API_CORS_CREDENTIALS === 'true'
+          }
         });
+        
+        server.start()
+          .then(() => {
+            console.log(`🚀 Easy MCP Server running on port ${server.port}`);
+            console.log(`📚 API Documentation: http://localhost:${server.port}/docs`);
+            console.log(`🔍 Health Check: http://localhost:${server.port}/health`);
+          })
+          .catch((error) => {
+            console.error('❌ Failed to start server:', error.message);
+            process.exit(1);
+          });
+      }
     } catch (error) {
       console.error('❌ Failed to start server:', error.message);
       process.exit(1);
