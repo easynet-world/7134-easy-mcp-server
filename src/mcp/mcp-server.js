@@ -319,19 +319,19 @@ class DynamicAPIMCPServer {
         inputSchema.required = ['body'];
       }
 
-      // Create enhanced description that includes both request and response schema info
+      // Create concise description without embedding full schemas
       let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
-        
-      // Add request body schema information to description if available
+      
+      // Add brief schema information to description if available (without full JSON)
       if (openApi?.requestBody?.content?.['application/json']?.schema) {
         const requestSchema = openApi.requestBody.content['application/json'].schema;
-        enhancedDescription += `\n\n**Request Body Schema:**\n\`\`\`json\n${JSON.stringify(requestSchema, null, 2)}\n\`\`\``;
+        const requiredFields = requestSchema.required ? ` (required: ${requestSchema.required.join(', ')})` : '';
+        enhancedDescription += `\n\n**Request Body**: ${requestSchema.type || 'object'}${requiredFields}`;
       }
         
-      // Add response schema information to description if available
       if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
         const responseSchema = openApi.responses['200'].content['application/json'].schema;
-        enhancedDescription += `\n\n**Response Schema:**\n\`\`\`json\n${JSON.stringify(responseSchema, null, 2)}\n\`\`\``;
+        enhancedDescription += `\n\n**Response**: ${responseSchema.type || 'object'}`;
       }
 
       return {
@@ -627,19 +627,19 @@ class DynamicAPIMCPServer {
             inputSchema.required = ['body'];
           }
           
-          // Create enhanced description that includes both request and response schema info
+          // Create concise description without embedding full schemas
           let enhancedDescription = processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`;
           
-          // Add request body schema information to description if available
+          // Add brief schema information to description if available (without full JSON)
           if (openApi?.requestBody?.content?.['application/json']?.schema) {
             const requestSchema = openApi.requestBody.content['application/json'].schema;
-            enhancedDescription += `\n\n**Request Body Schema:**\n\`\`\`json\n${JSON.stringify(requestSchema, null, 2)}\n\`\`\``;
+            const requiredFields = requestSchema.required ? ` (required: ${requestSchema.required.join(', ')})` : '';
+            enhancedDescription += `\n\n**Request Body**: ${requestSchema.type || 'object'}${requiredFields}`;
           }
           
-          // Add response schema information to description if available
           if (openApi?.responses?.['200']?.content?.['application/json']?.schema) {
             const responseSchema = openApi.responses['200'].content['application/json'].schema;
-            enhancedDescription += `\n\n**Response Schema:**\n\`\`\`json\n${JSON.stringify(responseSchema, null, 2)}\n\`\`\``;
+            enhancedDescription += `\n\n**Response**: ${responseSchema.type || 'object'}`;
           }
 
           return {
