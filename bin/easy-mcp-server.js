@@ -457,7 +457,7 @@ function startServer() {
       
       // Start the full server with the user's API path
       const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['src/core/server.js'], {
+      const serverProcess = spawn('node', ['src/server.js'], {
         stdio: 'inherit',
         env: {
           ...process.env,
