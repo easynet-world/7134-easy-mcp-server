@@ -298,3 +298,4 @@ easy-mcp-server --help               # Show all options
 **One function = REST API + MCP Tool + OpenAPI Documentation + AI Context** 🚀✨
 # Trigger npm release
 # Test npm publishing with new token
+# Trigger new release
