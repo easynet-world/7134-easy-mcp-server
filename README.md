@@ -64,20 +64,28 @@ my-api-project/
     └── server.test.js   # Basic server tests
 ```
 
-## **Manual Setup Structure**
+## **Dynamic API Discovery & Hot Reloading**
 **File Path = API Path, File Name = HTTP Method**
+
+The framework **dynamically identifies** API paths and HTTP methods at runtime and **automatically reloads** when files change.
 
 ```
 api/
 ├── users/
-│   ├── get.js          → GET /users
-│   ├── post.js         → POST /users
+│   ├── get.js          → GET /users (auto-discovered)
+│   ├── post.js         → POST /users (auto-discovered)
 │   └── profile/
-│       ├── get.js      → GET /users/profile
-│       └── put.js      → PUT /users/profile
+│       ├── get.js      → GET /users/profile (auto-discovered)
+│       └── put.js      → PUT /users/profile (auto-discovered)
 └── hello/
-    └── get.js          → GET /hello
+    └── get.js          → GET /hello (auto-discovered)
 ```
+
+**✨ Dynamic Features:**
+- **Auto-discovery**: Scans `api/` directory and maps file structure to endpoints
+- **Real-time reloading**: Save any file = instant API update (no server restart)
+- **Live MCP tools**: AI models get new tools immediately
+- **Instant OpenAPI**: Documentation updates automatically
 
 **HTTP Methods**: `get.js`, `post.js`, `put.js`, `patch.js`, `delete.js`, `head.js`, `options.js`
 
