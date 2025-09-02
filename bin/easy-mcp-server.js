@@ -420,6 +420,20 @@ describe('Easy MCP Server', () => {
    - Server: http://localhost:3000
    - API Docs: http://localhost:3000/docs
    - Health Check: http://localhost:3000/health
+   - OpenAPI Spec: http://localhost:3000/openapi.json
+   - API Info: http://localhost:3000/api-info
+
+🔌 MCP (Model Context Protocol) Integration:
+   - MCP Server: ws://localhost:3000/mcp
+   - MCP Tools: http://localhost:3000/mcp/tools
+   - MCP Schema: http://localhost:3000/mcp/schema
+
+⚙️ Server Type: Full-featured Easy MCP Server with:
+   - Dynamic API discovery and loading
+   - Hot reloading for development
+   - CORS support
+   - Comprehensive logging
+   - MCP protocol support for AI models
 
 🎉 Happy coding with Easy MCP Server!
 `);
