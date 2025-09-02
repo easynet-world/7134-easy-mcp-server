@@ -13,8 +13,8 @@ const APILoader = require('./src/core/api-loader');
 const OpenAPIGenerator = require('./src/core/openapi-generator');
 const DynamicAPIMCPServer = require('./src/mcp/mcp-server');
 
-// Export the server class without starting it
-const DynamicAPIServer = require('./server');
+// Export the server class
+const DynamicAPIServer = require('./src/core/dynamic-api-server');
 
 module.exports = {
   // Main classes
