@@ -424,9 +424,11 @@ describe('Easy MCP Server', () => {
    - API Info: http://localhost:3000/api-info
 
 🔌 MCP (Model Context Protocol) Integration:
-   - MCP Server: ws://localhost:3000/mcp
+   - MCP Server: http://localhost:3001
    - MCP Tools: http://localhost:3000/mcp/tools
    - MCP Schema: http://localhost:3000/mcp/schema
+   - Transport Types: Streamable HTTP, Server-Sent Events (SSE)
+   - MCP Endpoints: GET /sse, POST /mcp, POST / (StreamableHttp)
 
 ⚙️ Server Type: Full-featured Easy MCP Server with:
    - Dynamic API discovery and loading
