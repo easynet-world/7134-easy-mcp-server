@@ -72,52 +72,49 @@ api/
 
 **HTTP Methods**: `get.js`, `post.js`, `put.js`, `patch.js`, `delete.js`, `head.js`, `options.js`
 
-# 📝 **Annotation System**
+# 📝 **Annotations**
 
-## **Basic Annotations**
+JSDoc annotations automatically generate OpenAPI specs, MCP tools, and documentation.
+
+## **Supported Annotations**
+
 ```javascript
 /**
- * @description Create a new user with validation
- * @summary Create user endpoint
- * @tags users,authentication
+ * @description Detailed endpoint description
+ * @summary Short summary for UI
+ * @tags users,api
+ * @requestBody { "type": "object", "properties": {...} }
+ * @responseSchema { "type": "object", "properties": {...} }
+ * @errorResponses { "400": {"description": "Bad request"} }
  */
-class CreateUser extends BaseAPI {
-  process(req, res) {
-    // Your implementation
-  }
-}
 ```
 
-## **Advanced Schema Annotations**
+## **Quick Example**
+
 ```javascript
 /**
+ * @description Create user with validation
+ * @summary Create user endpoint
+ * @tags users
  * @requestBody {
  *   "type": "object",
  *   "required": ["name", "email"],
  *   "properties": {
- *     "name": { "type": "string", "minLength": 2 },
- *     "email": { "type": "string", "format": "email" }
+ *     "name": {"type": "string", "minLength": 2},
+ *     "email": {"type": "string", "format": "email"}
  *   }
- * }
- * @responseSchema {
- *   "type": "object",
- *   "properties": {
- *     "success": { "type": "boolean" },
- *     "data": { "type": "object" }
- *   }
- * }
- * @errorResponses {
- *   "400": { "description": "Validation error" }
  * }
  */
+class CreateUser extends BaseAPI {
+  process(req, res) { /* implementation */ }
+}
 ```
 
 # 🔄 **How It Works**
 
-1. **Automatic Discovery** - Scans `api/` directory structure
-2. **Runtime Analysis** - Analyzes response structure and infers types
-3. **Annotation Integration** - Combines JSDoc annotations with auto-generated schemas
-4. **Generated Output** - OpenAPI JSON, Swagger UI, MCP Tools, Type Definitions
+1. **Scan** `api/` directory for endpoint files
+2. **Parse** JSDoc annotations for schemas
+3. **Generate** OpenAPI specs + MCP tools + documentation
 
 # 🤖 **AI Integration**
 
@@ -197,11 +194,10 @@ class CreateUser extends BaseAPI {
 
 # 💡 **Best Practices**
 
-1. **Use Annotations for Complex Schemas** - When you need specific validation rules
-2. **Rely on Auto-Generation for Simple Cases** - Let the framework infer types for basic CRUD
-3. **Be Consistent** - Use similar annotation patterns across related endpoints
-4. **Document Edge Cases** - Use `@errorResponses` to document error scenarios
-5. **Use Tags** - Group related endpoints with consistent tags
+- **Use annotations** for complex schemas, **rely on auto-generation** for simple cases
+- **Be consistent** with annotation patterns across related endpoints
+- **Document errors** with `@errorResponses` for better API understanding
+- **Use tags** to group related endpoints together
 
 ---
 
