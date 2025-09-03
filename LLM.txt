@@ -167,7 +167,7 @@ module.exports = CreateUser;
 
 ### Tool Generation
 - Automatic tool discovery from API endpoints
-- Tool names: `{method}_{path}` (e.g., `post_users`)
+- Tool names: `{path}_{method}` (e.g., `users_post`)
 - Description from annotations or auto-generated
 - Input schema from request body annotations
 

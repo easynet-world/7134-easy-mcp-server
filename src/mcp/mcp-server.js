@@ -497,8 +497,10 @@ class DynamicAPIMCPServer {
     try {
       const { name, arguments: args } = data;
       
-      // Parse the tool name to get method and path
-      const [method, ...pathParts] = name.split('_');
+      // Parse the tool name to get method and path (method is now at the end)
+      const parts = name.split('_');
+      const method = parts[parts.length - 1]; // Last part is the method
+      const pathParts = parts.slice(0, -1); // Everything except the last part is the path
       const path = '/' + pathParts.join('/');
       
       console.log('🔍 MCP Server: Tool call request:', { name, method, path });
@@ -508,7 +510,7 @@ class DynamicAPIMCPServer {
       console.log('🔍 MCP Server: Available routes:', routes.map(r => ({ method: r.method, path: r.path })));
       
       const route = routes.find(r => 
-        r.method.toLowerCase() === method.toUpperCase() && 
+        r.method.toUpperCase() === method.toUpperCase() && 
         r.path === path
       );
       
@@ -643,7 +645,7 @@ class DynamicAPIMCPServer {
           }
 
           return {
-            name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+            name: `${route.path.replace(/\//g, '_').replace(/^_/, '')}_${route.method.toLowerCase()}`,
             description: enhancedDescription,
             inputSchema: inputSchema,
             // Add response schema information as separate field for compatibility
