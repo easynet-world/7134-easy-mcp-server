@@ -72,7 +72,7 @@ describe('MCP (Model Context Protocol) Support', () => {
       id: 1,
       method: 'tools/call',
       params: {
-        name: 'get_test',
+        name: 'test_get',
         arguments: {}
       }
     };
