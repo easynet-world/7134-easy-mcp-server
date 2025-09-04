@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy MCP Server</title>
+    <title>Easy MCP Server - Powered by easynet.world</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,152 +13,523 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 70%, #f5576c 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 3rem;
-            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(25px);
+            border-radius: 32px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            padding: 3.5rem;
+            max-width: 900px;
             width: 90%;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: containerFloat 6s ease-in-out infinite;
+        }
+        
+        @keyframes containerFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #667eea);
+            background-size: 300% 100%;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -300% 0; }
+            100% { background-position: 300% 0; }
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .brain-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4aa, #ff6b6b);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 
+                0 15px 35px rgba(0, 212, 170, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: logoPulse 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .brain-logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+            animation: logoShine 2s ease-in-out infinite;
+        }
+        
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes logoShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         
         .logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-size: 4.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        
+        @keyframes logoGlow {
+            0% { 
+                filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.4));
+                background-position: 0% 50%;
+            }
+            100% { 
+                filter: drop-shadow(0 0 25px rgba(245, 87, 108, 0.6));
+                background-position: 100% 50%;
+            }
         }
         
         h1 {
-            color: #2d3748;
+            color: #1a202c;
             margin-bottom: 1rem;
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: titleSlide 1s ease-out;
+        }
+        
+        @keyframes titleSlide {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
         
         .subtitle {
-            color: #718096;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 2.5rem;
+            font-size: 1.3rem;
+            font-weight: 500;
+            opacity: 0.9;
+            animation: subtitleFade 1s ease-out 0.3s both;
+        }
+        
+        @keyframes subtitleFade {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 0.9; }
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24, #ff8a80, #ff6b6b);
+            background-size: 200% 200%;
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2.5rem;
+            font-weight: 600;
+            box-shadow: 
+                0 15px 35px rgba(255, 107, 107, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: warningPulse 2s ease-in-out infinite, warningSlide 1s ease-out 0.6s both;
+        }
+        
+        @keyframes warningPulse {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes warningSlide {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .warning::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: warningShine 3s ease-in-out infinite;
+        }
+        
+        @keyframes warningShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .info-box {
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
             text-align: left;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: infoBoxSlide 1s ease-out both;
+        }
+        
+        .info-box:nth-child(1) { animation-delay: 0.8s; }
+        .info-box:nth-child(2) { animation-delay: 1s; }
+        .info-box:nth-child(3) { animation-delay: 1.2s; }
+        .info-box:nth-child(4) { animation-delay: 1.4s; }
+        
+        @keyframes infoBoxSlide {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .info-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .info-box:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 20px 45px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        
+        .info-box:hover::before {
+            opacity: 1;
         }
         
         .info-box h3 {
-            color: #2d3748;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
+            color: #1a202c;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .info-box p {
             color: #4a5568;
-            margin-bottom: 0.5rem;
-            line-height: 1.5;
-        }
-        
-        .code {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin: 0.25rem 0;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-weight: 500;
         }
         
         .endpoint {
-            background: #edf2f7;
-            border-left: 4px solid #667eea;
-            padding: 1rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 1.2rem 1.5rem;
+            border-radius: 16px;
             margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 600;
         }
         
-        .endpoint strong {
-            color: #2d3748;
+        .endpoint:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
         }
         
-        .warning {
-            background: #fff5f5;
-            border: 2px solid #fed7d7;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem 0;
+        .code {
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            color: #e2e8f0;
+            padding: 1.2rem 1.5rem;
+            border-radius: 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 1rem 0;
+            display: inline-block;
+            border: 1px solid #4a5568;
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
         }
         
-        .warning h3 {
-            color: #c53030;
-            margin-bottom: 1rem;
-        }
-        
-        .warning p {
-            color: #742a2a;
+        .code::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
         }
         
         .links {
-            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 3rem 0;
+            animation: linksFade 1s ease-out 1.6s both;
+        }
+        
+        @keyframes linksFade {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
         
         .links a {
-            color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 300% 300%;
+            color: white;
             text-decoration: none;
-            font-weight: 500;
-            margin: 0 1rem;
-            transition: color 0.2s;
+            padding: 1.2rem 2.5rem;
+            border-radius: 35px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 12px 30px rgba(102, 126, 234, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: linkPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes linkPulse {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         
         .links a:hover {
-            color: #764ba2;
+            transform: translateY(-5px) scale(1.08);
+            box-shadow: 
+                0 20px 45px rgba(102, 126, 234, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .links a:hover::before {
+            left: 100%;
         }
         
         .footer {
-            margin-top: 2rem;
-            color: #a0aec0;
-            font-size: 0.9rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(102, 126, 234, 0.15);
+            color: #4a5568;
+            font-weight: 500;
+            animation: footerFade 1s ease-out 1.8s both;
+        }
+        
+        @keyframes footerFade {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .footer a:hover {
+            color: #764ba2;
+            text-shadow: 0 0 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .footer a:hover::after {
+            width: 100%;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2.5rem 2rem;
+                margin: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .logo {
+                font-size: 3.5rem;
+            }
+            
+            .brain-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .links a {
+                width: 100%;
+                max-width: 350px;
+                text-align: center;
+            }
+        }
+        
+        /* Floating particles effect */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.1) 2px, transparent 2px);
+            background-size: 60px 60px, 80px 80px;
+            animation: float 25s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-60px, -60px) rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🚀</div>
-        <h1>Easy MCP Server</h1>
-        <p class="subtitle">
-            This is a Model Context Protocol (MCP) server that converts REST API endpoints into MCP tools for AI models.
-        </p>
+        <div class="logo-container">
+            <div class="brain-logo">🧠</div>
+            <div class="logo">Easy MCP Server</div>
+        </div>
+        
+        <h1>Model Context Protocol Server</h1>
+        <p class="subtitle">Transform your REST APIs into AI-powered MCP tools with ease</p>
         
         <div class="warning">
-            <h3>⚠️ This is not a web application</h3>
-            <p>This server is designed to be used by MCP clients, not web browsers. You need to connect using an MCP client to interact with the available tools.</p>
+            ⚠️ This is an MCP (Model Context Protocol) server, not a web application. Use MCP clients to connect and interact with the available tools.
         </div>
         
         <div class="info-box">
-            <h3>🔧 Available Endpoints</h3>
+            <h3>🚀 What is Easy MCP Server?</h3>
+            <p>Easy MCP Server is a powerful framework that automatically converts your REST API endpoints into MCP tools that AI models can understand and use. It provides seamless integration between your existing APIs and AI applications.</p>
+            <p><strong>Key Features:</strong></p>
+            <div class="endpoint">✨ Automatic OpenAPI documentation generation</div>
+            <div class="endpoint">🔄 Real-time hot reloading during development</div>
+            <div class="endpoint">🌐 Multiple transport protocols (HTTP, WebSocket, SSE)</div>
+            <div class="endpoint">🛠️ Built-in MCP tool discovery and execution</div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🔗 Available Endpoints</h3>
             <div class="endpoint">
-                <strong>POST /</strong> - StreamableHttp transport for MCP Inspector
+                <strong>GET /</strong> - This information page
             </div>
             <div class="endpoint">
-                <strong>POST /mcp</strong> - HTTP MCP requests
+                <strong>POST /mcp</strong> - MCP protocol endpoint
             </div>
             <div class="endpoint">
                 <strong>GET /sse</strong> - Server-Sent Events for real-time updates
@@ -211,6 +583,7 @@
         
         <div class="footer">
             <p>Easy MCP Server v1.0.64 - Converting REST APIs to MCP Tools</p>
+            <p>Powered by <a href="https://easynet.world" target="_blank">easynet.world</a> technology</p>
         </div>
     </div>
 </body>
