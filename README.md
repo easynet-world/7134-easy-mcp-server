@@ -28,7 +28,34 @@ easy-mcp-server
 ```
 
 ## 🎉 Done! You now have:
-- **REST API**: `GET http://localhost:3000/hello` → `{"message": "Hello World!"}`
+
+### **Hello World API Example**
+Your project includes a working example at `api/example/get.js`:
+
+```javascript
+const BaseAPI = require('../../src/core/base-api');
+
+/**
+ * @description Get a greeting message
+ * @summary Get hello world message
+ */
+class GetExample extends BaseAPI {
+  process(req, res) {
+    res.json({ message: 'Hello World' });
+  }
+}
+
+module.exports = GetExample;
+```
+
+### **Available Endpoints:**
+- **REST API**: `GET http://localhost:3000/example` → `{"message": "Hello World"}`
+- **POST** `/example` → `{"success": true, "data": {...}, "message": "User created successfully"}`
+- **PUT** `/example` → `{"message": "Item updated"}`
+- **PATCH** `/example` → `{"message": "Item patched"}`
+- **DELETE** `/example` → `{"message": "Item deleted"}`
+
+### **Additional Services:**
 - **MCP Tools**: Available to AI models
   - **URL**: `http://localhost:3001`
   - **Type**: Streamable HTTP
