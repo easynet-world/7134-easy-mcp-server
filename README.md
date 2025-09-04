@@ -48,13 +48,6 @@ class GetExample extends BaseAPI {
 module.exports = GetExample;
 ```
 
-### **Available Endpoints:**
-- **REST API**: `GET http://localhost:3000/example` → `{"message": "Hello World"}`
-- **POST** `/example` → `{"success": true, "data": {...}, "message": "User created successfully"}`
-- **PUT** `/example` → `{"message": "Item updated"}`
-- **PATCH** `/example` → `{"message": "Item patched"}`
-- **DELETE** `/example` → `{"message": "Item deleted"}`
-
 ### **Additional Services:**
 - **MCP Tools**: Available to AI models
   - **URL**: `http://localhost:3001`
@@ -71,10 +64,6 @@ module.exports = GetExample;
 - **⚡ Hot Reloading** - Save file = instant update across all interfaces
 - **📝 Annotation Support** - JSDoc annotations for custom schemas
 - **🤖 AI-Native** - LLM.txt support for AI model context
-
-# 📁 **File Structure**
-
-
 
 ## **Dynamic API Discovery & Hot Reloading**
 **File Path = API Path, File Name = HTTP Method**
