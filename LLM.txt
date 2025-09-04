@@ -25,7 +25,7 @@ api/                    # API endpoints directory
 
 ### Basic API Class
 ```javascript
-const BaseAPI = require('../../src/core/base-api');
+const BaseAPI = require('easy-mcp-server/base-api');
 
 /**
  * @description Brief description of what this endpoint does
@@ -44,7 +44,7 @@ module.exports = MyAPI;
 
 ### Advanced API with Annotations
 ```javascript
-const BaseAPI = require('../../src/core/base-api');
+const BaseAPI = require('easy-mcp-server/base-api');
 
 /**
  * @description Create a new user with validation
@@ -187,7 +187,7 @@ touch api/users/post.js
 ### 2. Implement API Class
 ```javascript
 // api/users/post.js
-const BaseAPI = require('../../src/core/base-api');
+const BaseAPI = require('easy-mcp-server/base-api');
 
 class CreateUser extends BaseAPI {
   process(req, res) {
@@ -200,7 +200,7 @@ module.exports = CreateUser;
 
 ### 3. Start Server
 ```bash
-npm start
+easy-mcp-server
 ```
 
 ### 4. Access Interfaces
@@ -301,7 +301,7 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 3000 3001
-CMD ["npm", "start"]
+CMD ["easy-mcp-server"]
 ```
 
 This framework is designed to make API development as simple as possible while providing powerful features like automatic OpenAPI generation and MCP integration. The annotation system allows for precise control when needed, while the automatic discovery handles the common cases seamlessly.

@@ -140,14 +140,6 @@ Creates a new project with all necessary files:
 - Example API endpoints
 - Test files
 
-## **easy-mcp-server start** or **easy-mcp-server**
-Starts the server with intelligent detection:
-1. **If `server.js` exists** → Uses your custom server configuration
-2. **If `api/` directory exists** → Auto-starts with DynamicAPIServer
-3. **If neither exists** → Shows helpful error message and tips
-
-## **easy-mcp-server --help**
-Shows comprehensive usage information and examples.
 
 # 🔄 **How It Works**
 
@@ -244,13 +236,6 @@ API_CORS_ORIGIN=*
 API_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
 API_CORS_CREDENTIALS=false
 ```
-
-## **Server Starting Behavior**
-The `easy-mcp-server` command intelligently detects your setup:
-
-- **Custom Server**: If `server.js` exists, it will `require()` and execute it
-- **Auto-Start**: If only `api/` directory exists, it starts `DynamicAPIServer`
-- **Smart Fallback**: Provides helpful error messages and suggestions
 
 ## **CLI Options**
 ```bash
