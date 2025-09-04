@@ -519,7 +519,7 @@
         
         <div class="info-box">
             <h3>🚀 What is Easy MCP Server?</h3>
-            <p>Easy MCP Server is a powerful framework that automatically generates MCP tools from your JavaScript API classes. It creates both REST endpoints and MCP tools that AI models can understand and use, providing seamless integration between your APIs and AI applications.</p>
+            <p>Easy MCP Server is a powerful framework that automatically generates MCP tools from your JavaScript API classes. Simply create files in the <span class="code">api/</span> directory where the file path represents the API endpoint and the filename represents the HTTP method (get.js, post.js, etc.). It creates both REST endpoints and MCP tools that AI models can understand and use.</p>
             <p><strong>Key Features:</strong></p>
             <div class="endpoint">✨ Automatic OpenAPI documentation generation</div>
             <div class="endpoint">🔄 Real-time hot reloading during development</div>
@@ -583,6 +583,12 @@
             
             <p><strong>Quick Start:</strong></p>
             <div class="code">npx easy-mcp-server</div>
+            
+            <p><strong>How it works:</strong></p>
+            <p>Create API files in the <span class="code">api/</span> directory:</p>
+            <div class="code">api/users/get.js     → GET /users
+api/users/post.js    → POST /users
+api/orders/put.js    → PUT /orders</div>
             
             <p><strong>Or use our live demo:</strong></p>
             <p>Visit <a href="https://mcp.easynet.world" target="_blank" style="color: #64748b;">https://mcp.easynet.world</a> to see Easy MCP Server in action!</p>
