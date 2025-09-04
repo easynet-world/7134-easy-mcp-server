@@ -1,6 +1,6 @@
 {
   "name": "easy-mcp-server",
-  "version": "1.0.41",
+  "version": "1.0.64",
   "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
   "main": "index.js",
   "bin": {
