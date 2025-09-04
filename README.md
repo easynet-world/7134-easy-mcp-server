@@ -52,6 +52,7 @@ module.exports = GetExample;
 - **MCP Tools**: Available to AI models
   - **URL**: `http://localhost:3001`
   - **Type**: Streamable HTTP
+  - **Inspector**: Use `npx @modelcontextprotocol/inspector` to inspect MCP tools and features
 - **OpenAPI**: `http://localhost:3000/openapi.json`
 - **Swagger UI**: `http://localhost:3000/docs`
 - **LLM.txt**: `http://localhost:3000/LLM.txt` (AI context)
