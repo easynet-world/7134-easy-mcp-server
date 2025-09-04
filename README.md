@@ -33,7 +33,7 @@ easy-mcp-server
 Your project includes a working example at `api/example/get.js`:
 
 ```javascript
-const BaseAPI = require('../../src/core/base-api');
+const BaseAPI = require('easy-mcp-server/base-api');
 
 /**
  * @description Get a greeting message
@@ -186,7 +186,7 @@ Shows comprehensive usage information and examples.
 
 2. **Here's the code:**
    ```javascript
-   const BaseAPI = require('../../src/core/base-api');
+   const BaseAPI = require('easy-mcp-server/base-api');
 
    /**
     * @description Create a new book

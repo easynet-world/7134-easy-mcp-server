@@ -1,4 +1,4 @@
-const BaseAPI = require('../../src/core/base-api');
+const BaseAPI = require('easy-mcp-server/base-api');
 
 /**
  * @description Create a new user with validation
