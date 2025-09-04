@@ -288,6 +288,16 @@
             gap: 12px;
         }
         
+        .info-box h4 {
+            color: #374151;
+            margin: 1.5rem 0 0.8rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
         .info-box p {
             color: #4a5568;
             line-height: 1.8;
@@ -515,16 +525,8 @@
         
         <div class="info-box">
             <h3>🚀 What is Easy MCP Server?</h3>
-            <p>Easy MCP Server is a powerful framework that automatically generates MCP tools from your JavaScript API classes. Create files in the <span class="code">api/</span> directory following this simple pattern:</p>
-            <p><strong>File path = API endpoint</strong><br>
-            <strong>File name = HTTP method</strong></p>
-            <p><strong>Example:</strong> <span class="code">/api/youtube/info/get.js</span> → API will be <span class="code">GET /youtube/info</span></p>
-            <p>All APIs are automatically hot-reloaded during runtime, so you can develop and test your endpoints instantly. The framework creates both REST endpoints and MCP tools that AI models can understand and use.</p>
-            <p><strong>Key Features:</strong></p>
-            <div class="endpoint">✨ Automatic OpenAPI documentation generation</div>
-            <div class="endpoint">🔄 Real-time hot reloading during development</div>
-            <div class="endpoint">🌐 Multiple transport protocols (HTTP, WebSocket, SSE)</div>
-            <div class="endpoint">🛠️ Built-in MCP tool discovery and execution</div>
+            <p>Easy MCP Server is a powerful framework that automatically generates MCP tools from your JavaScript API classes. It creates both REST endpoints and MCP tools that AI models can understand and use.</p>
+            <p>For detailed installation and usage instructions, please check the <a href="https://www.npmjs.com/package/easy-mcp-server" target="_blank" style="color: #64748b;">NPM package README</a>.</p>
         </div>
         
         <div class="info-box">
@@ -542,15 +544,18 @@
         
         <div class="info-box">
             <h3>🤖 How to Connect</h3>
-            <p><strong>1. Using MCP Inspector:</strong></p>
+            
+            <h4>🔧 Development Tools</h4>
+            <p><strong>MCP Inspector:</strong></p>
             <div class="code">npx @modelcontextprotocol/inspector</div>
             <p>Then use URL: <span class="code">http://localhost:3001</span></p>
             
-            <p><strong>2. Using Claude Desktop:</strong></p>
+            <h4>💻 AI Applications</h4>
+            <p><strong>Claude Desktop:</strong></p>
             <p>Add this server to your Claude Desktop configuration:</p>
             <div class="code">http://localhost:3001</div>
             
-            <p><strong>3. Using Cursor IDE:</strong></p>
+            <p><strong>Cursor IDE:</strong></p>
             <p>Add to your Cursor MCP configuration file:</p>
             <div class="code">~/.cursor/mcp.json</div>
             <p>Configuration:</p>
@@ -563,11 +568,11 @@
   }
 }</div>
             
-            <p><strong>4. Try our live demo:</strong></p>
+            <h4>🌐 Live Demo</h4>
             <p>Experience Easy MCP Server in action at:</p>
             <div class="code">https://mcp.easynet.world</div>
             
-            <p><strong>5. Using other MCP clients:</strong></p>
+            <h4>🔌 Other Clients</h4>
             <p>Connect to this server using the MCP protocol over HTTP.</p>
         </div>
         
@@ -578,24 +583,6 @@
             <p><strong>ping</strong> - Health check</p>
         </div>
         
-        <div class="info-box">
-            <h3>📦 Installation & Usage</h3>
-            <p><strong>Install via NPM:</strong></p>
-            <div class="code">npm install easy-mcp-server</div>
-            
-            <p><strong>Quick Start:</strong></p>
-            <div class="code">npx easy-mcp-server</div>
-            
-            <p><strong>How it works:</strong></p>
-            <p>Create API files in the <span class="code">api/</span> directory:</p>
-            <div class="code">api/users/get.js     → GET /users
-api/users/post.js    → POST /users
-api/orders/put.js    → PUT /orders</div>
-            <p>All changes are automatically detected and reloaded in real-time during development.</p>
-            
-            <p><strong>Or use our live demo:</strong></p>
-            <p>Visit <a href="https://mcp.easynet.world" target="_blank" style="color: #64748b;">https://mcp.easynet.world</a> to see Easy MCP Server in action!</p>
-        </div>
         
         <div class="links">
             <a href="https://github.com/easynet-world/7134-easy-mcp-server" target="_blank">GitHub Repository</a>
