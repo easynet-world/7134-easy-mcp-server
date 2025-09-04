@@ -172,9 +172,10 @@ module.exports = CreateUser;
 - Input schema from request body annotations
 
 ### Available Commands
-- `list_tools` - Discover available endpoints
-- `call_tool` - Execute specific endpoint
+- `tools/list` - Discover available endpoints
+- `tools/call` - Execute specific endpoint
 - `ping` - Health check
+
 
 ## Development Workflow
 
@@ -208,6 +209,15 @@ easy-mcp-server
 - **OpenAPI**: `http://localhost:3000/openapi.json`
 - **Swagger UI**: `http://localhost:3000/docs`
 - **MCP Tools**: Available to AI models
+### 5. Using MCP with AI Models
+Connect your server to AI models:
+
+```bash
+# Connect to MCP Inspector
+npx @modelcontextprotocol/inspector
+# Use URL: http://localhost:3001
+# Type: Streamable HTTP
+```
 
 ## Configuration
 

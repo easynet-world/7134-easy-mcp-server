@@ -205,8 +205,7 @@ class DynamicAPIMCPServer {
             result: {
               protocolVersion: '2024-11-05',
               capabilities: {
-                tools: {},
-                prompts: {}
+                tools: {}
               },
               serverInfo: {
                 name: 'easy-mcp-server',
@@ -709,8 +708,8 @@ class DynamicAPIMCPServer {
         console.log('  - POST /mcp  - HTTP MCP requests');
         console.log('  - POST /     - StreamableHttp for Inspector');
         console.log('🔧 Available MCP commands:');
-        console.log('  - list_tools: Discover available API endpoint');
-        console.log('  - call_tool: Execute a specific API endpoint');
+        console.log('  - tools/list: Discover available API endpoints');
+        console.log('  - tools/call: Execute a specific API endpoint');
         console.log('  - ping: Health check');
         resolve();
       });
