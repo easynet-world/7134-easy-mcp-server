@@ -104,9 +104,32 @@ class DynamicAPIMCPServer {
     } else if (req.url === '/' && req.method === 'POST') {
       // StreamableHttp transport
       this.handleStreamableHttpRequest(req, res);
+    } else if (req.url === '/' && req.method === 'GET') {
+      // Serve MCP server info page
+      this.handleMCPInfoPage(req, res);
     } else {
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Not found' }));
+    }
+  }
+
+  /**
+   * Handle MCP server info page
+   */
+  handleMCPInfoPage(req, res) {
+    const fs = require('fs');
+    const path = require('path');
+    
+    try {
+      const htmlPath = path.join(__dirname, 'mcp-info.html');
+      const html = fs.readFileSync(htmlPath, 'utf8');
+      
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(html);
+    } catch (error) {
+      console.error('❌ Error reading MCP info page:', error);
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Error loading MCP server info page');
     }
   }
 

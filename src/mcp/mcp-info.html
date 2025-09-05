@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy MCP Server - Powered by easynet.world</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #334155;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brain-logo {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+        }
+
+        .brain-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: -0.025em;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 400;
+            margin-bottom: 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 2rem 0;
+            color: #92400e;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning::before {
+            content: "⚠️";
+            font-size: 1.1rem;
+        }
+
+        .info-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .info-box:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .info-box h4 {
+            color: #1e293b;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            color: #475569;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .code {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 0.25rem 0;
+            display: inline-block;
+            border: 1px solid #e2e8f0;
+            white-space: pre;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .links a {
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+        .links a:hover {
+            color: #1e293b;
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            color: #1e293b;
+        }
+
+        .footer p {
+            margin-bottom: 0.25rem;
+        }
+
+        .footer p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .container {
+                padding: 2rem 1.5rem;
+                border-radius: 12px;
+            }
+
+            .logo-container {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .logo {
+                font-size: 1.75rem;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .info-box {
+                padding: 1.25rem;
+            }
+
+            .links {
+                flex-direction: column;
+            }
+
+            .links a {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+            }
+
+            .info-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="brain-logo">
+                    <img src="https://www.easynet.world/wp-content/uploads/2025/04/cropped-ChatGPT-Image-Apr-18-2025-06_16_36-PM-32x32.png" 
+                         alt="EasyNet.world Logo" 
+                         width="32" 
+                         height="32" />
+                </div>
+                <div class="logo">Easy MCP Server</div>
+            </div>
+            
+            <h1>Model Context Protocol Server</h1>
+            <p class="subtitle">Build AI-powered MCP tools from your JavaScript APIs with ease</p>
+        </div>
+        
+        <div class="warning">
+            This is an MCP (Model Context Protocol) server, not a web application. Use MCP clients to connect and interact with the available tools.
+        </div>
+        
+        <div class="info-box">
+            <h4>🔧 Development Tools</h4>
+            <p><strong>MCP Inspector:</strong></p>
+            <div class="code">npx @modelcontextprotocol/inspector</div>
+            <p>Then use URL: <span class="code">http://localhost:3001</span></p>
+            <p><em>Uses streamable HTTP transport for real-time MCP communication</em></p>
+        </div>
+        
+        <div class="info-box">
+            <h4>🎯 Cursor IDE</h4>
+            <p>Add to your Cursor MCP configuration file:</p>
+            <div class="code">~/.cursor/mcp.json</div>
+            <p>Configuration:</p>
+            <div class="code">{
+  "mcpServers": {
+    "easynet": {
+      "url": "https://mcp.easynet.world/",
+      "transport": "http"
+    }
+  }
+}</div>
+            <p><em>Streamable HTTP transport enables real-time MCP communication</em></p>
+        </div>
+        
+        <div class="info-box">
+            <h4>💻 AI Applications</h4>
+            <p><strong>Claude Desktop:</strong></p>
+            <p>Add this server to your Claude Desktop configuration:</p>
+            <div class="code">http://localhost:3001</div>
+            <p><em>Supports streamable HTTP for efficient MCP communication</em></p>
+        </div>
+        
+        <div class="info-box">
+            <h4>🌐 Live Demo</h4>
+            <p>Experience Easy MCP Server in action at:</p>
+            <div class="code">https://mcp.easynet.world</div>
+        </div>
+        
+        <div class="links">
+            <a href="https://github.com/easynet-world/7134-easy-mcp-server" target="_blank">GitHub Repository</a>
+            <a href="https://www.npmjs.com/package/easy-mcp-server" target="_blank">NPM Package</a>
+            <a href="https://mcp.easynet.world" target="_blank">Live Demo</a>
+            <a href="https://github.com/modelcontextprotocol/inspector" target="_blank">MCP Inspector</a>
+            <a href="https://modelcontextprotocol.io" target="_blank">MCP Documentation</a>
+        </div>
+        
+        <div class="footer">
+            <p>Easy MCP Server - Building AI-powered MCP Tools from JavaScript APIs</p>
+            <p>Powered by <a href="https://easynet.world" target="_blank">easynet.world</a> technology</p>
+        </div>
+    </div>
+</body>
+</html>
