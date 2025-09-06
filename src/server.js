@@ -132,7 +132,7 @@ app.get('/LLM.txt', (req, res) => {
   try {
     const fs = require('fs');
     const path = require('path');
-    const llmPath = path.join(__dirname, 'LLM.txt');
+    const llmPath = path.join(__dirname, '..', 'LLM.txt');
     
     if (fs.existsSync(llmPath)) {
       const content = fs.readFileSync(llmPath, 'utf8');
@@ -149,6 +149,33 @@ app.get('/LLM.txt', (req, res) => {
     res.status(500).json({
       success: false,
       error: `Failed to read LLM.txt: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Agent.md endpoint for AI agent context
+app.get('/Agent.md', (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const agentPath = path.join(__dirname, '..', 'Agent.md');
+    
+    if (fs.existsSync(agentPath)) {
+      const content = fs.readFileSync(agentPath, 'utf8');
+      res.setHeader('Content-Type', 'text/markdown');
+      res.send(content);
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Agent.md file not found',
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Failed to read Agent.md: ${error.message}`,
       timestamp: new Date().toISOString()
     });
   }
@@ -346,6 +373,8 @@ function startServer() {
     console.log('  📚  DOCUMENTATION:');
     console.log(`     • OpenAPI JSON:     http://localhost:${port}/openapi.json`);
     console.log(`     • Swagger UI:       http://localhost:${port}/docs ✨`);
+    console.log(`     • LLM Context:      http://localhost:${port}/LLM.txt`);
+    console.log(`     • Agent Context:    http://localhost:${port}/Agent.md`);
     console.log('');
     if (mcpServer) {
       console.log('  🤖  MCP SERVER:');
