@@ -1,6 +1,4 @@
 const AnnotationParser = require('../src/utils/annotation-parser');
-const fs = require('fs');
-const path = require('path');
 
 // Mock fs module
 jest.mock('fs');

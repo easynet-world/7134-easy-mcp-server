@@ -12,7 +12,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Get command line arguments
 const args = process.argv.slice(2);

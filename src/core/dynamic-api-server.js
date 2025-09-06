@@ -6,12 +6,10 @@
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 
 // Import core modules
 const APILoader = require('./api-loader');
 const OpenAPIGenerator = require('./openapi-generator');
-const DynamicAPIMCPServer = require('../mcp/mcp-server');
 const HotReloader = require('../utils/hot-reloader');
 
 class DynamicAPIServer {

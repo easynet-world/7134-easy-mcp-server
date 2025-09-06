@@ -3,7 +3,7 @@
  * Tests the example API implementations efficiently
  */
 
-const { setupTestEnvironment, createMockProcessorClass } = require('../src/utils/test-utils');
+const { setupTestEnvironment } = require('../src/utils/test-utils');
 
 describe('API Examples', () => {
   setupTestEnvironment();
@@ -18,14 +18,14 @@ describe('API Examples', () => {
   ];
 
   describe('API Structure Validation', () => {
-    test.each(exampleAPIs)('$name should be a valid API class', ({ name, path }) => {
+    test.each(exampleAPIs)('$name should be a valid API class', ({ name: _name, path }) => {
       const ExampleClass = require(path);
       
       expect(typeof ExampleClass).toBe('function');
       expect(ExampleClass.prototype).toBeDefined();
     });
 
-    test.each(exampleAPIs)('$name should be instantiable', ({ name, path }) => {
+    test.each(exampleAPIs)('$name should be instantiable', ({ name: _name, path }) => {
       const ExampleClass = require(path);
       
       expect(() => {
@@ -33,7 +33,7 @@ describe('API Examples', () => {
       }).not.toThrow();
     });
 
-    test.each(exampleAPIs)('$name should have required methods', ({ name, path }) => {
+    test.each(exampleAPIs)('$name should have required methods', ({ name: _name, path }) => {
       const ExampleClass = require(path);
       const instance = new ExampleClass();
       
@@ -43,7 +43,7 @@ describe('API Examples', () => {
   });
 
   describe('API Functionality', () => {
-    test.each(exampleAPIs)('$name should have process method with correct signature', ({ name, path }) => {
+    test.each(exampleAPIs)('$name should have process method with correct signature', ({ name: _name, path }) => {
       const ExampleClass = require(path);
       const instance = new ExampleClass();
       const processMethod = instance.process;
@@ -52,7 +52,7 @@ describe('API Examples', () => {
       expect(processMethod.length).toBe(2); // req, res parameters
     });
 
-    test.each(exampleAPIs)('$name should have description property', ({ name, path }) => {
+    test.each(exampleAPIs)('$name should have description property', ({ name: _name, path }) => {
       const ExampleClass = require(path);
       const instance = new ExampleClass();
       
