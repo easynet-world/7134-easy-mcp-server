@@ -210,11 +210,11 @@ class DynamicAPIMCPServer {
       method: 'notifications/initialized',
       params: {
         protocolVersion: '2024-11-05',
-              capabilities: {
-                tools: {},
-                prompts: {},
-                resources: {}
-              },
+        capabilities: {
+          tools: {},
+          prompts: {},
+          resources: {}
+        },
         serverInfo: {
           name: 'easy-mcp-server',
           version: require('../../package.json').version

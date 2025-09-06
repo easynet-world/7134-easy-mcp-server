@@ -840,14 +840,6 @@ describe('OpenAPIGenerator', () => {
     });
 
     test('should not leak memory on repeated generation', () => {
-      const mockRoutes = [
-        {
-          method: 'GET',
-          path: '/api/test',
-          processorInstance: {}
-        }
-      ];
-      
       const initialMemory = process.memoryUsage().heapUsed;
       
       // Generate specs multiple times

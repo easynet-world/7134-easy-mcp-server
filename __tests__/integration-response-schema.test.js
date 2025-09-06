@@ -4,9 +4,7 @@
  */
 
 const fs = require('fs');
-const path = require('path');
 const AnnotationParser = require('../src/utils/annotation-parser');
-const BaseAPI = require('../src/core/base-api');
 const OpenAPIGenerator = require('../src/core/openapi-generator');
 
 // Mock fs module
