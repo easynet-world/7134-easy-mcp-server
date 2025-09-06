@@ -1,259 +1,361 @@
 # Easy MCP Server
 
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-### **One Function → API + MCP + OpenAPI + SWAGGER + LLM.txt**
+## 🚀 **One Function → Everything**
 
-> **Latest**: Fixed semantic-release configuration for self-hosted runners and npm paths
+**Write ONE function, get ALL of this:**
+- ✅ **REST API** - Instant HTTP endpoints
+- ✅ **MCP Tools** - AI models can call your functions
+- ✅ **MCP Prompts** - Template-based prompts with parameters
+- ✅ **MCP Resources** - Documentation and data access
+- ✅ **OpenAPI** - Complete API documentation
+- ✅ **Swagger UI** - Interactive API explorer
+- ✅ **LLM.txt** - AI context and framework info
+- ✅ **Agent.md** - Comprehensive agent context
 
-# 🚀 **Quick Start (30 seconds)**
+---
 
-## 1. Install
-```bash
-npm install -g easy-mcp-server
+## ⚡ **Extremely Simple Rules**
+
+### **File Path = API Path**
+```
+api/users/profile/get.js  →  GET /users/profile
+api/products/post.js      →  POST /products
+api/orders/123/put.js     →  PUT /orders/123
 ```
 
-## 2. Create New Project
-```bash
-easy-mcp-server init my-api-project
-cd my-api-project
-npm install
+### **File Name = HTTP Method**
+```
+get.js     →  GET
+post.js    →  POST
+put.js     →  PUT
+patch.js   →  PATCH
+delete.js  →  DELETE
 ```
 
-## 3. Start Server
-```bash
-easy-mcp-server
-```
-
-## 🎉 Done! You now have:
-
-### **Hello World API Example**
-Your project includes a working example at `api/example/get.js`:
-
+### **One Function = Everything**
 ```javascript
 const BaseAPI = require('easy-mcp-server/base-api');
 
-/**
- * @description Get a greeting message
- * @summary Get hello world message
- */
-class GetExample extends BaseAPI {
+class MyAPI extends BaseAPI {
   process(req, res) {
     res.json({ message: 'Hello World' });
   }
 }
 
-module.exports = GetExample;
+module.exports = MyAPI;
 ```
 
-### **Additional Services:**
-- **MCP Tools**: Available to AI models
-  - **URL**: `http://localhost:3001`
-  - **Type**: Streamable HTTP
-  - **Inspector**: Use `npx @modelcontextprotocol/inspector` to inspect MCP tools and features
+**That's it!** You now have:
+- REST endpoint at `/my-api`
+- MCP tool for AI models
+- OpenAPI documentation
+- Swagger UI integration
+
+---
+
+## 🎯 **Quick Start (30 seconds)**
+
+### 1. Install
+```bash
+npm install -g easy-mcp-server
+```
+
+### 2. Create Project
+```bash
+easy-mcp-server init my-api
+cd my-api
+npm install
+```
+
+### 3. Start Server
+```bash
+easy-mcp-server
+```
+
+### 4. Access Everything
+- **REST API**: `http://localhost:3000`
+- **MCP Server**: `http://localhost:3001` (for AI models)
 - **OpenAPI**: `http://localhost:3000/openapi.json`
 - **Swagger UI**: `http://localhost:3000/docs`
-- **LLM.txt**: `http://localhost:3000/LLM.txt` (AI context)
+- **LLM Context**: `http://localhost:3000/LLM.txt`
+- **Agent Context**: `http://localhost:3000/Agent.md`
+- **MCP Inspector**: `npx @modelcontextprotocol/inspector`
 
-# 🌟 **Key Features**
+---
+
+## 💬 **MCP Support (New Standard)**
+
+### **MCP Tools** - AI Models Call Your Functions
+```javascript
+// Your function automatically becomes an MCP tool
+class UserAPI extends BaseAPI {
+  process(req, res) {
+    const { name, email } = req.body;
+    res.json({ user: { name, email, id: Date.now() } });
+  }
+}
+// AI models can now call this function via MCP!
+```
+
+### **MCP Prompts** - Template-Based Prompts
+```javascript
+class PromptAPI extends BaseAPI {
+  constructor() {
+    super();
+    this.prompts = [{
+      name: 'code_review',
+      description: 'Review code for best practices',
+      template: 'Please review this {{language}} code:\n\n```{{language}}\n{{code}}\n```',
+      arguments: [
+        { name: 'language', description: 'Programming language', required: true },
+        { name: 'code', description: 'Code to review', required: true }
+      ]
+    }];
+  }
+}
+```
+
+### **MCP Resources** - Documentation & Data Access
+```javascript
+class ResourceAPI extends BaseAPI {
+  constructor() {
+    super();
+    this.resources = [{
+      uri: 'config://server-settings',
+      name: 'Server Configuration',
+      description: 'Current server settings',
+      mimeType: 'application/json',
+      content: JSON.stringify({ port: 3000, features: ['tools', 'prompts', 'resources'] })
+    }];
+  }
+}
+```
+
+---
+
+## 📝 **Annotations (Optional)**
+
+Add JSDoc annotations for rich schemas:
+
+```javascript
+/**
+ * @description Create a new user with validation
+ * @summary Create user endpoint
+ * @tags users,authentication
+ * @requestBody {
+ *   "type": "object",
+ *   "required": ["name", "email"],
+ *   "properties": {
+ *     "name": { "type": "string", "minLength": 2 },
+ *     "email": { "type": "string", "format": "email" }
+ *   }
+ * }
+ * @responseSchema {
+ *   "type": "object",
+ *   "properties": {
+ *     "success": { "type": "boolean" },
+ *     "data": { "type": "object" }
+ *   }
+ * }
+ */
+class CreateUser extends BaseAPI {
+  process(req, res) {
+    const { name, email } = req.body;
+    res.json({ success: true, data: { name, email, id: Date.now() } });
+  }
+}
+```
+
+---
+
+## 🔥 **Key Features**
 
 - **🔍 Auto Discovery** - Scan `api/` directory, find endpoints automatically
 - **🤖 Instant MCP** - Your functions become AI tools in real-time
 - **📚 Auto OpenAPI** - Complete API documentation generated automatically
 - **⚡ Hot Reloading** - Save file = instant update across all interfaces
+- **💬 MCP Prompts** - Template-based prompts with parameter substitution
+- **📄 MCP Resources** - Access to documentation, configuration, and data
+- **🌐 Multiple Transports** - HTTP, WebSocket, Server-Sent Events
 - **📝 Annotation Support** - JSDoc annotations for custom schemas
-- **🤖 AI-Native** - LLM.txt support for AI model context
+- **🤖 AI Context** - LLM.txt and Agent.md for comprehensive AI integration
 
-## **Dynamic API Discovery & Hot Reloading**
-**File Path = API Path, File Name = HTTP Method**
+---
 
-The framework **dynamically identifies** API paths and HTTP methods at runtime and **automatically reloads** when files change.
-
-```
-api/
-├── users/
-│   ├── get.js          → GET /users (auto-discovered)
-│   ├── post.js         → POST /users (auto-discovered)
-│   └── profile/
-│       ├── get.js      → GET /users/profile (auto-discovered)
-│       └── put.js      → PUT /users/profile (auto-discovered)
-└── hello/
-    └── get.js          → GET /hello (auto-discovered)
-```
-
-**✨ Dynamic Features:**
-- **Auto-discovery**: Scans `api/` directory and maps file structure to endpoints
-- **Real-time reloading**: Save any file = instant API update (no server restart)
-- **Live MCP tools**: AI models get new tools immediately
-- **Instant OpenAPI**: Documentation updates automatically
-
-**HTTP Methods**: `get.js`, `post.js`, `put.js`, `patch.js`, `delete.js`, `head.js`, `options.js`
-
-# 📝 **Annotations**
-
-JSDoc annotations automatically generate OpenAPI specs, MCP tools, and documentation.
-
-## **Supported Annotations**
-
-```javascript
-/**
- * @description Detailed endpoint description
- * @summary Short summary for UI
- * @tags users,api
- * @requestBody { "type": "object", "properties": {...} }
- * @responseSchema { "type": "object", "properties": {...} }
- * @errorResponses { "400": {"description": "Bad request"} }
- */
-```
-
-## **Quick Example**
-
-```javascript
-/**
- * @description Create user with validation
- * @summary Create user endpoint
- * @tags users
- * @requestBody {
- *   "type": "object",
- *   "required": ["name", "email"],
- *   "properties": {
- *     "name": {"type": "string", "minLength": 2},
- *     "email": {"type": "string", "format": "email"}
- *   }
- * }
- */
-class CreateUser extends BaseAPI {
-  process(req, res) { /* implementation */ }
-}
-```
-
-# 🖥️ **CLI Commands**
-
-## **easy-mcp-server init [project-name]**
-Creates a new project with all necessary files:
-- `package.json` with proper dependencies
-- `api/` directory structure
-- `.env` configuration file
-- `.gitignore` for Node.js projects
-- Example API endpoints
-- Test files
-
-
-# 🔄 **How It Works**
-
-1. **Scan** `api/` directory for endpoint files
-2. **Parse** JSDoc annotations for schemas
-3. **Generate** OpenAPI specs + MCP tools + documentation
-
-# 🤖 **AI Integration**
-
-**LLM.txt** provides comprehensive framework context to AI models:
-- **Contextual Understanding** - AI models understand framework capabilities
-- **Accurate Code Generation** - Generated code follows conventions
-- **Troubleshooting Support** - AI can help diagnose issues
-
-**Example AI Interaction:**
-**User:** "I want to create an API for managing books. Can you help me?"
-
-**AI Model (using LLM.txt):**
-"I can help you create a book management API! Here's what we need:
-
-1. **Create file structure:**
-   ```bash
-   mkdir -p api/books
-   touch api/books/get.js api/books/post.js
-   ```
-
-2. **Here's the code:**
-   ```javascript
-   const BaseAPI = require('easy-mcp-server/base-api');
-
-   /**
-    * @description Create a new book
-    * @summary Create book endpoint
-    * @tags books,library
-    * @requestBody {
-    *   "type": "object",
-    *   "required": ["title", "author"],
-    *   "properties": {
-    *     "title": { "type": "string", "minLength": 1 },
-    *     "author": { "type": "string", "minLength": 1 }
-    *   }
-    * }
-    */
-   class CreateBook extends BaseAPI {
-     process(req, res) {
-       const { title, author } = req.body;
-       
-       if (!title || !author) {
-         return res.status(400).json({ 
-           success: false, 
-           error: 'Title and author are required' 
-         });
-       }
-       
-       const book = {
-         id: this.generateUUID(),
-         title,
-         author,
-         createdAt: new Date().toISOString()
-       };
-       
-       res.status(201).json({
-         success: true,
-         data: book,
-         message: 'Book created successfully'
-       });
-     }
-   }
-
-   module.exports = CreateBook;
-   ```
-
-3. **Start server:** `npm start`
-4. **Your API is ready:** `http://localhost:3000/books`"
-
-# 🎯 **Use Cases**
+## 🎯 **Use Cases**
 
 - **AI Integration** - Expose your APIs to AI models via MCP
 - **Rapid Prototyping** - Build APIs in minutes, not hours
 - **Microservices** - Create lightweight, focused API services
 - **AI Tools** - Build custom tools for AI assistants
 - **API Documentation** - Auto-generate complete OpenAPI specs
-
-# ⚙️ **Server Configuration**
-
-## **Environment Variables (.env)**
-```bash
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# CORS Configuration
-API_CORS_ORIGIN=*
-API_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
-API_CORS_CREDENTIALS=false
-```
-
-## **CLI Options**
-```bash
-easy-mcp-server --port 8080          # Custom port
-easy-mcp-server --cors               # Enable CORS
-easy-mcp-server --hot-reload         # Enable hot reloading
-easy-mcp-server --help               # Show all options
-```
-
-# 💡 **Best Practices**
-
-- **Use annotations** for complex schemas, **rely on auto-generation** for simple cases
-- **Be consistent** with annotation patterns across related endpoints
-- **Document errors** with `@errorResponses` for better API understanding
-- **Use tags** to group related endpoints together
-- **Use `easy-mcp-server init`** for new projects to get started quickly
+- **AI Prompt Engineering** - Create reusable prompt templates
+- **Knowledge Management** - Provide AI models access to documentation
 
 ---
 
-**🎯 The Future of API Development: Write Once, Deploy Everywhere**  
-**One function = REST API + MCP Tool + OpenAPI Documentation + AI Context** 🚀✨
+## 🖥️ **CLI Commands**
+
+```bash
+easy-mcp-server                    # Start server
+easy-mcp-server init <project>     # Create new project
+easy-mcp-server --port 8080        # Custom port
+easy-mcp-server --help             # Show all options
+```
+
+---
+
+## ⚙️ **Configuration**
+
+### Environment Variables (.env)
+```bash
+PORT=3000                          # API server port
+MCP_PORT=3001                      # MCP server port
+NODE_ENV=development               # Environment
+```
+
+---
+
+## 🤖 **AI Model Integration**
+
+### **AI Context Files**
+Easy MCP Server provides comprehensive context for AI models:
+
+- **`/LLM.txt`** - Framework context and usage patterns for LLMs
+- **`/Agent.md`** - Detailed agent context with implementation examples
+- **MCP Integration** - Full MCP 2024-11-05 compliance with tools, prompts, and resources
+
+### **MCP Inspector** (Recommended)
+```bash
+npx @modelcontextprotocol/inspector
+# Connect to: http://localhost:3001
+# Type: Streamable HTTP
+```
+
+### **Available MCP Commands**
+- `tools/list` - List all API endpoints as tools
+- `tools/call` - Execute an API endpoint
+- `prompts/list` - List all prompt templates
+- `prompts/get` - Get prompt with parameter substitution
+- `resources/list` - List all available resources
+- `resources/read` - Read resource content
+- `ping` - Health check
+
+### **Example MCP Usage**
+```json
+// List all tools
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list"
+}
+
+// Call a tool
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "post_users",
+    "arguments": {
+      "body": { "name": "John", "email": "john@example.com" }
+    }
+  }
+}
+
+// Get a prompt
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "prompts/get",
+  "params": {
+    "name": "code_review",
+    "arguments": {
+      "language": "javascript",
+      "code": "console.log('hello');"
+    }
+  }
+}
+```
+
+---
+
+## 📁 **Project Structure**
+
+```
+my-api/
+├── api/                          # API endpoints
+│   ├── users/
+│   │   ├── get.js               # GET /users
+│   │   ├── post.js              # POST /users
+│   │   └── profile/
+│   │       ├── get.js           # GET /users/profile
+│   │       └── put.js           # PUT /users/profile
+│   └── products/
+│       ├── get.js               # GET /products
+│       └── post.js              # POST /products
+├── package.json
+└── .env
+```
+
+---
+
+## 💡 **Best Practices**
+
+### **File Organization**
+- Group related endpoints in directories
+- Use descriptive file names
+- Follow REST conventions
+
+### **API Design**
+- Use resource-based URLs (`/users`, `/users/:id`)
+- Return consistent response formats
+- Use appropriate HTTP methods
+
+### **Annotations**
+- Use `@description` for detailed explanations
+- Use `@tags` to group related endpoints
+- Define `@requestBody` for POST/PUT endpoints
+- Document `@errorResponses` for error cases
+
+---
+
+## 🚀 **Examples Included**
+
+The project includes working examples:
+
+- **`api/example/`** - Basic API endpoints (GET, POST, PUT, PATCH, DELETE)
+- **`api/prompt-example/`** - MCP prompts with template substitution
+- **`api/resource-example/`** - MCP resources with multiple MIME types
+
+---
+
+## 🔧 **How It Works**
+
+1. **Scan** `api/` directory for endpoint files
+2. **Parse** JSDoc annotations for schemas
+3. **Generate** OpenAPI specs + MCP tools + documentation
+4. **Serve** everything on multiple ports and protocols
+
+---
+
+## 🎯 **The Future of API Development**
+
+**Write Once, Deploy Everywhere**
+
+**One function = REST API + MCP Tools + MCP Prompts + MCP Resources + OpenAPI Documentation + LLM Context + Agent Context**
+
+### **Complete MCP 2024-11-05 Support**
+- ✅ **Tools** - Auto-discovery of API endpoints as MCP tools
+- ✅ **Prompts** - Template-based prompts with parameter substitution  
+- ✅ **Resources** - Access to documentation, configuration, and data
+- ✅ **Multiple Transports** - HTTP, WebSocket, and Server-Sent Events
+- ✅ **Real-time Updates** - Hot reloading across all MCP interfaces
+- ✅ **Rich Schemas** - OpenAPI integration for input/output validation
+
+---
+
+**🎉 Start building AI-integrated APIs in seconds!**

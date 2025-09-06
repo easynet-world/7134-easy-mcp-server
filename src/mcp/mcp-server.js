@@ -17,6 +17,10 @@ class DynamicAPIMCPServer {
     
     // Don't import server module to avoid circular dependency
     this.getLoadedRoutes = () => [];
+    
+    // Initialize prompts and resources storage
+    this.prompts = new Map();
+    this.resources = new Map();
   }
 
   /**
@@ -27,8 +31,61 @@ class DynamicAPIMCPServer {
     console.log('🔌 MCP Server: Route details:', routes.map(r => ({ method: r.method, path: r.path })));
     this.getLoadedRoutes = () => routes;
     
+    // Auto-discover prompts and resources from API routes
+    this.discoverPromptsAndResources(routes);
+    
     // Notify all connected clients about route changes
     this.notifyRouteChanges(routes);
+  }
+
+  /**
+   * Add a prompt to the server
+   */
+  addPrompt(prompt) {
+    this.prompts.set(prompt.name, prompt);
+    console.log('🔌 MCP Server: Added prompt:', prompt.name);
+  }
+
+  /**
+   * Add a resource to the server
+   */
+  addResource(resource) {
+    this.resources.set(resource.uri, resource);
+    console.log('🔌 MCP Server: Added resource:', resource.uri);
+  }
+
+  /**
+   * Discover prompts and resources from API routes
+   */
+  discoverPromptsAndResources(routes) {
+    routes.forEach(route => {
+      const processor = route.processorInstance;
+      
+      // Check if processor has prompts
+      if (processor && processor.prompts) {
+        processor.prompts.forEach(prompt => {
+          this.addPrompt({
+            name: prompt.name || `${route.path.replace(/\//g, '_').replace(/^_/, '')}_${route.method.toLowerCase()}_prompt`,
+            description: prompt.description || `Prompt for ${route.method} ${route.path}`,
+            template: prompt.template,
+            arguments: prompt.arguments || []
+          });
+        });
+      }
+      
+      // Check if processor has resources
+      if (processor && processor.resources) {
+        processor.resources.forEach(resource => {
+          this.addResource({
+            uri: resource.uri || `${route.path}/resource`,
+            name: resource.name || `${route.path} resource`,
+            description: resource.description || `Resource for ${route.method} ${route.path}`,
+            mimeType: resource.mimeType || 'text/plain',
+            content: resource.content || ''
+          });
+        });
+      }
+    });
   }
 
   /**
@@ -153,10 +210,11 @@ class DynamicAPIMCPServer {
       method: 'notifications/initialized',
       params: {
         protocolVersion: '2024-11-05',
-        capabilities: {
-          tools: {},
-          prompts: {}
-        },
+              capabilities: {
+                tools: {},
+                prompts: {},
+                resources: {}
+              },
         serverInfo: {
           name: 'easy-mcp-server',
           version: require('../../package.json').version
@@ -228,7 +286,9 @@ class DynamicAPIMCPServer {
             result: {
               protocolVersion: '2024-11-05',
               capabilities: {
-                tools: {}
+                tools: {},
+                prompts: {},
+                resources: {}
               },
               serverInfo: {
                 name: 'easy-mcp-server',
@@ -279,6 +339,14 @@ class DynamicAPIMCPServer {
         return await this.processListTools(data);
       } else if (data.method === 'tools/call') {
         return await this.processCallTool(data);
+      } else if (data.method === 'prompts/list') {
+        return await this.processListPrompts(data);
+      } else if (data.method === 'prompts/get') {
+        return await this.processGetPrompt(data);
+      } else if (data.method === 'resources/list') {
+        return await this.processListResources(data);
+      } else if (data.method === 'resources/read') {
+        return await this.processReadResource(data);
       } else if (data.method === 'ping') {
         return { 
           jsonrpc: '2.0', 
@@ -429,6 +497,18 @@ class DynamicAPIMCPServer {
       case 'call_tool':
         this.handleCallTool(ws, data);
         break;
+      case 'list_prompts':
+        this.handleListPrompts(ws, data);
+        break;
+      case 'get_prompt':
+        this.handleGetPrompt(ws, data);
+        break;
+      case 'list_resources':
+        this.handleListResources(ws, data);
+        break;
+      case 'read_resource':
+        this.handleReadResource(ws, data);
+        break;
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong', id: data.id }));
         break;
@@ -559,6 +639,260 @@ class DynamicAPIMCPServer {
         error: `Error executing API endpoint: ${error.message}`
       }));
     }
+  }
+
+  /**
+   * Handle WebSocket prompts/list request
+   */
+  async handleListPrompts(ws, data) {
+    try {
+      const prompts = Array.from(this.prompts.values()).map(prompt => ({
+        name: prompt.name,
+        description: prompt.description,
+        arguments: prompt.arguments || []
+      }));
+      
+      ws.send(JSON.stringify({
+        type: 'list_prompts_response',
+        id: data.id,
+        prompts,
+        totalPrompts: prompts.length
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'error',
+        id: data.id,
+        error: `Failed to list prompts: ${error.message}`
+      }));
+    }
+  }
+
+  /**
+   * Handle WebSocket prompts/get request
+   */
+  async handleGetPrompt(ws, data) {
+    try {
+      const { name, arguments: args } = data;
+      const prompt = this.prompts.get(name);
+      
+      if (!prompt) {
+        throw new Error(`Prompt not found: ${name}`);
+      }
+      
+      // Process template with arguments if provided
+      let processedTemplate = prompt.template;
+      if (args && prompt.arguments) {
+        prompt.arguments.forEach(arg => {
+          if (args[arg.name] !== undefined) {
+            const placeholder = new RegExp(`{{${arg.name}}}`, 'g');
+            processedTemplate = processedTemplate.replace(placeholder, args[arg.name]);
+          }
+        });
+      }
+      
+      ws.send(JSON.stringify({
+        type: 'get_prompt_response',
+        id: data.id,
+        result: {
+          description: prompt.description,
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: processedTemplate
+              }
+            }
+          ]
+        }
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'error',
+        id: data.id,
+        error: `Error getting prompt: ${error.message}`
+      }));
+    }
+  }
+
+  /**
+   * Handle WebSocket resources/list request
+   */
+  async handleListResources(ws, data) {
+    try {
+      const resources = Array.from(this.resources.values()).map(resource => ({
+        uri: resource.uri,
+        name: resource.name,
+        description: resource.description,
+        mimeType: resource.mimeType
+      }));
+      
+      ws.send(JSON.stringify({
+        type: 'list_resources_response',
+        id: data.id,
+        resources,
+        totalResources: resources.length
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'error',
+        id: data.id,
+        error: `Failed to list resources: ${error.message}`
+      }));
+    }
+  }
+
+  /**
+   * Handle WebSocket resources/read request
+   */
+  async handleReadResource(ws, data) {
+    try {
+      const { uri } = data;
+      const resource = this.resources.get(uri);
+      
+      if (!resource) {
+        throw new Error(`Resource not found: ${uri}`);
+      }
+      
+      ws.send(JSON.stringify({
+        type: 'read_resource_response',
+        id: data.id,
+        result: {
+          contents: [
+            {
+              uri: resource.uri,
+              mimeType: resource.mimeType,
+              text: resource.content
+            }
+          ]
+        }
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'error',
+        id: data.id,
+        error: `Error reading resource: ${error.message}`
+      }));
+    }
+  }
+
+  /**
+   * Process prompts/list request
+   */
+  async processListPrompts(data) {
+    const prompts = Array.from(this.prompts.values()).map(prompt => ({
+      name: prompt.name,
+      description: prompt.description,
+      arguments: prompt.arguments || []
+    }));
+    
+    return {
+      jsonrpc: '2.0',
+      id: data.id,
+      result: {
+        prompts
+      }
+    };
+  }
+
+  /**
+   * Process prompts/get request
+   */
+  async processGetPrompt(data) {
+    const { name, arguments: args } = data.params || data;
+    const prompt = this.prompts.get(name);
+    
+    if (!prompt) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32602,
+          message: `Prompt not found: ${name}`
+        }
+      };
+    }
+    
+    // Process template with arguments if provided
+    let processedTemplate = prompt.template;
+    if (args && prompt.arguments) {
+      prompt.arguments.forEach(arg => {
+        if (args[arg.name] !== undefined) {
+          const placeholder = new RegExp(`{{${arg.name}}}`, 'g');
+          processedTemplate = processedTemplate.replace(placeholder, args[arg.name]);
+        }
+      });
+    }
+    
+    return {
+      jsonrpc: '2.0',
+      id: data.id,
+      result: {
+        description: prompt.description,
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: processedTemplate
+            }
+          }
+        ]
+      }
+    };
+  }
+
+  /**
+   * Process resources/list request
+   */
+  async processListResources(data) {
+    const resources = Array.from(this.resources.values()).map(resource => ({
+      uri: resource.uri,
+      name: resource.name,
+      description: resource.description,
+      mimeType: resource.mimeType
+    }));
+    
+    return {
+      jsonrpc: '2.0',
+      id: data.id,
+      result: {
+        resources
+      }
+    };
+  }
+
+  /**
+   * Process resources/read request
+   */
+  async processReadResource(data) {
+    const { uri } = data.params || data;
+    const resource = this.resources.get(uri);
+    
+    if (!resource) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32602,
+          message: `Resource not found: ${uri}`
+        }
+      };
+    }
+    
+    return {
+      jsonrpc: '2.0',
+      id: data.id,
+      result: {
+        contents: [
+          {
+            uri: resource.uri,
+            mimeType: resource.mimeType,
+            text: resource.content
+          }
+        ]
+      }
+    };
   }
 
   /**

@@ -167,13 +167,29 @@ module.exports = CreateUser;
 
 ### Tool Generation
 - Automatic tool discovery from API endpoints
-- Tool names: `{path}_{method}` (e.g., `users_post`)
+- Tool names: `{method}_{path}` (e.g., `get_users`)
 - Description from annotations or auto-generated
 - Input schema from request body annotations
+
+### Prompt Support
+- Template-based prompt system with parameter substitution
+- Prompts defined in API processor classes
+- Support for structured arguments with validation
+- Auto-discovery from API endpoints
+
+### Resource Support
+- Access to documentation, configuration, and data
+- Multiple MIME types (JSON, Markdown, Plain Text)
+- Dynamic content updates
+- URI-based resource identification
 
 ### Available Commands
 - `tools/list` - Discover available endpoints
 - `tools/call` - Execute specific endpoint
+- `prompts/list` - List available prompt templates
+- `prompts/get` - Get prompt with parameter substitution
+- `resources/list` - List available resources
+- `resources/read` - Read resource content
 - `ping` - Health check
 
 
@@ -191,6 +207,48 @@ touch api/users/post.js
 const BaseAPI = require('easy-mcp-server/base-api');
 
 class CreateUser extends BaseAPI {
+  constructor() {
+    super();
+    
+    // Define prompts for this API
+    this.prompts = [
+      {
+        name: 'user_creation_prompt',
+        description: 'Generate user creation documentation',
+        template: 'Create a user with name: {{name}} and email: {{email}}',
+        arguments: [
+          {
+            name: 'name',
+            description: 'User name',
+            required: true
+          },
+          {
+            name: 'email',
+            description: 'User email',
+            required: true
+          }
+        ]
+      }
+    ];
+    
+    // Define resources for this API
+    this.resources = [
+      {
+        uri: 'users://schema',
+        name: 'User Schema',
+        description: 'User data structure',
+        mimeType: 'application/json',
+        content: JSON.stringify({
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' }
+          }
+        })
+      }
+    ];
+  }
+
   process(req, res) {
     res.json({ message: 'User created' });
   }
@@ -210,6 +268,86 @@ easy-mcp-server
 - **Swagger UI**: `http://localhost:3000/docs`
 - **MCP Tools**: Available to AI models
 ### 5. Using MCP with AI Models
+
+#### Tool Usage
+- Execute API endpoints as MCP tools
+- Automatic input schema validation
+- Rich response formatting
+
+#### Prompt Usage
+- Access template-based prompts
+- Parameter substitution support
+- Context-aware prompt generation
+
+#### Resource Usage
+- Access documentation and schemas
+- Real-time configuration data
+- Multi-format content support
+
+## MCP Client Examples
+
+### Using MCP Inspector
+```bash
+npx @modelcontextprotocol/inspector
+# Connect to: http://localhost:3001
+```
+
+### Cursor IDE Configuration
+```json
+{
+  "mcpServers": {
+    "easy-mcp-server": {
+      "url": "http://localhost:3001/",
+      "transport": "http"
+    }
+  }
+}
+```
+
+### Direct API Usage
+```javascript
+// List all prompts
+POST http://localhost:3001/
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "prompts/list"
+}
+
+// Get a prompt with parameters
+POST http://localhost:3001/
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "prompts/get",
+  "params": {
+    "name": "user_creation_prompt",
+    "arguments": {
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  }
+}
+
+// List all resources
+POST http://localhost:3001/
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "resources/list"
+}
+
+// Read a resource
+POST http://localhost:3001/
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "resources/read",
+  "params": {
+    "uri": "users://schema"
+  }
+}
+```
 Connect your server to AI models:
 
 ```bash
