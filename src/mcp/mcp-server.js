@@ -178,8 +178,29 @@ class DynamicAPIMCPServer {
     const path = require('path');
     
     try {
-      const htmlPath = path.join(__dirname, 'mcp-info.html');
-      const html = fs.readFileSync(htmlPath, 'utf8');
+      // Check for custom HTML file paths in order of priority:
+      // 1. Environment variable MCP_INFO_HTML_PATH
+      // 2. Custom file in project root (mcp-info.html)
+      // 3. Default file in src/mcp directory
+      const envHtmlPath = process.env.MCP_INFO_HTML_PATH;
+      const customHtmlPath = path.join(process.cwd(), 'mcp-info.html');
+      const defaultHtmlPath = path.join(__dirname, 'mcp-info.html');
+      
+      let htmlPath;
+      let html;
+      
+      if (envHtmlPath && fs.existsSync(envHtmlPath)) {
+        htmlPath = envHtmlPath;
+        console.log('🔧 Using custom MCP info page from environment:', htmlPath);
+      } else if (fs.existsSync(customHtmlPath)) {
+        htmlPath = customHtmlPath;
+        console.log('🔧 Using custom MCP info page from project root:', htmlPath);
+      } else {
+        htmlPath = defaultHtmlPath;
+        console.log('🔧 Using default MCP info page:', htmlPath);
+      }
+      
+      html = fs.readFileSync(htmlPath, 'utf8');
       
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(html);
