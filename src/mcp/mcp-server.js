@@ -187,7 +187,6 @@ class DynamicAPIMCPServer {
       const defaultHtmlPath = path.join(__dirname, 'mcp-info.html');
       
       let htmlPath;
-      let html;
       
       if (envHtmlPath && fs.existsSync(envHtmlPath)) {
         htmlPath = envHtmlPath;
@@ -200,7 +199,7 @@ class DynamicAPIMCPServer {
         console.log('🔧 Using default MCP info page:', htmlPath);
       }
       
-      html = fs.readFileSync(htmlPath, 'utf8');
+      const html = fs.readFileSync(htmlPath, 'utf8');
       
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(html);
