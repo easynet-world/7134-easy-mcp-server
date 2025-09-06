@@ -215,7 +215,37 @@ easy-mcp-server --help             # Show all options
 PORT=3000                          # API server port
 MCP_PORT=3001                      # MCP server port
 NODE_ENV=development               # Environment
+MCP_INFO_HTML_PATH=/path/to/custom.html  # Custom MCP info page
 ```
+
+### Custom MCP Info Page
+
+You can customize the MCP info page that's served at `http://localhost:3001/` in three ways:
+
+#### 1. **Project Root File** (Recommended)
+Create a `mcp-info.html` file in your project root:
+```bash
+# Create your custom HTML file
+touch mcp-info.html
+```
+
+#### 2. **Environment Variable**
+Set the `MCP_INFO_HTML_PATH` environment variable:
+```bash
+export MCP_INFO_HTML_PATH="/path/to/your/custom.html"
+```
+
+#### 3. **Example Template**
+Use the provided example as a starting point:
+```bash
+cp mcp-info-example.html mcp-info.html
+# Edit mcp-info.html with your custom content
+```
+
+**Priority Order:**
+1. Environment variable `MCP_INFO_HTML_PATH`
+2. `mcp-info.html` in project root
+3. Default built-in page
 
 ---
 
