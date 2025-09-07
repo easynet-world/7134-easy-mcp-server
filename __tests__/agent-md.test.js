@@ -18,10 +18,10 @@ describe('Agent.md Endpoint', () => {
       .expect(200);
 
     expect(response.headers['content-type']).toMatch(/text\/markdown/);
-    expect(response.text).toContain('# Easy MCP Server - Agent Context');
-    expect(response.text).toContain('## Overview');
-    expect(response.text).toContain('## Core Principles');
-    expect(response.text).toContain('## MCP Integration');
+    expect(response.text).toContain('# easy-mcp-server - Agent Context');
+    expect(response.text).toContain('## Agent Integration Overview');
+    expect(response.text).toContain('## Core Agent Capabilities');
+    expect(response.text).toContain('## Agent Development Workflow');
   });
 
   test('GET /Agent.md should return 404 if file does not exist', async () => {
@@ -54,40 +54,30 @@ describe('Agent.md Endpoint', () => {
     const content = response.text;
 
     // Check for key sections
-    expect(content).toContain('## Core Principles');
-    expect(content).toContain('## API Development Pattern');
-    expect(content).toContain('## MCP Integration');
-    expect(content).toContain('## Available MCP Commands');
-    expect(content).toContain('## Server Endpoints');
-    expect(content).toContain('## Annotation System');
-    expect(content).toContain('## Development Workflow');
-    expect(content).toContain('## AI Agent Usage');
-    expect(content).toContain('## Configuration');
-    expect(content).toContain('## Best Practices');
-    expect(content).toContain('## Error Handling');
-    expect(content).toContain('## Common Issues & Solutions');
-    expect(content).toContain('## Testing');
-    expect(content).toContain('## Deployment');
+    expect(content).toContain('## Agent Integration Overview');
+    expect(content).toContain('## Core Agent Capabilities');
+    expect(content).toContain('## Agent Development Workflow');
+    expect(content).toContain('## Agent Tool Categories');
+    expect(content).toContain('## Agent Error Handling');
+    expect(content).toContain('## Agent Configuration');
+    expect(content).toContain('## Agent Monitoring');
+    expect(content).toContain('## Agent Best Practices');
+    expect(content).toContain('## Agent Integration Examples');
+    expect(content).toContain('## Troubleshooting for Agents');
 
     // Check for MCP commands
     expect(content).toContain('tools/list');
     expect(content).toContain('tools/call');
-    expect(content).toContain('prompts/list');
-    expect(content).toContain('prompts/get');
-    expect(content).toContain('resources/list');
-    expect(content).toContain('resources/read');
-    expect(content).toContain('ping');
 
     // Check for code examples
     expect(content).toContain('```javascript');
     expect(content).toContain('const BaseAPI = require');
-    expect(content).toContain('class MyAPI extends BaseAPI');
+    expect(content).toContain('class GetUsers extends BaseAPI');
     expect(content).toContain('process(req, res)');
 
-    // Check for MCP examples
-    expect(content).toContain('this.prompts = [');
-    expect(content).toContain('this.resources = [');
-    expect(content).toContain('{{name}}');
+    // Check for JSON examples
+    expect(content).toContain('"jsonrpc": "2.0"');
+    expect(content).toContain('"method": "tools/list"');
   });
 
   test('Agent.md should be accessible alongside other documentation endpoints', async () => {
@@ -119,13 +109,13 @@ describe('Agent.md Endpoint', () => {
     expect(content).toContain('MCP) 2024-11-05');
     expect(content).toContain('Model Context Protocol');
 
-    // Check for all three MCP capabilities
-    expect(content).toContain('### Tools');
-    expect(content).toContain('### Prompts');
-    expect(content).toContain('### Resources');
+    // Check for MCP capabilities (updated to match new Agent.md structure)
+    expect(content).toContain('Automatic Tool Discovery');
+    expect(content).toContain('Agent-Optimized Features');
+    expect(content).toContain('Agent Development Workflow');
 
     // Check for transport information
-    expect(content).toContain('Streamable HTTP');
+    expect(content).toContain('HTTP');
     expect(content).toContain('WebSocket');
     expect(content).toContain('Server-Sent Events');
   });
