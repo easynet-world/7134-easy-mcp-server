@@ -2,14 +2,14 @@
  * Tests for BaseAPIEnhanced
  */
 
-const BaseAPIEnhanced = require('../lib/base-api-enhanced');
+const BaseAPIEnhanced = require('../src/lib/base-api-enhanced');
 
 // Mock dependencies
-jest.mock('../lib/redis-client');
-jest.mock('../lib/logger');
-jest.mock('../lib/llm-service');
-jest.mock('../lib/mcp/resource-loader');
-jest.mock('../lib/wordpress-source-manager');
+jest.mock('../src/lib/redis-client');
+jest.mock('../src/utils/logger');
+jest.mock('../src/lib/llm-service');
+jest.mock('../src/utils/resource-loader');
+jest.mock('../src/lib/wordpress-source-manager');
 
 describe('BaseAPIEnhanced', () => {
   let api;

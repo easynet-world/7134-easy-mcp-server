@@ -17,14 +17,14 @@ const path = require('path');
 class MCPResourceLoader {
   /**
    * Create a new MCPResourceLoader instance
-   * @param {string} basePath - Base path for resources (default: './lib/mcp')
+   * @param {string} basePath - Base path for resources (default: './src')
    * @param {Object} logger - Logger instance (optional)
    * @param {Object} options - Configuration options
    * @param {string} options.userPath - User's custom MCP path (default: './mcp')
    * @param {boolean} options.loadDefaults - Load framework defaults (default: true)
    * @param {boolean} options.loadUser - Load user customizations (default: true)
    */
-  constructor(basePath = './lib/mcp', logger = null, options = {}) {
+  constructor(basePath = './src', logger = null, options = {}) {
     this.basePath = path.resolve(basePath);
     this.userPath = path.resolve(options.userPath || './mcp');
     this.loadDefaults = options.loadDefaults !== false;

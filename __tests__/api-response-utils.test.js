@@ -2,7 +2,7 @@
  * Tests for APIResponseUtils
  */
 
-const APIResponseUtils = require('../lib/api-response-utils');
+const APIResponseUtils = require('../src/lib/api-response-utils');
 
 describe('APIResponseUtils', () => {
   let mockRes;

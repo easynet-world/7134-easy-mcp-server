@@ -9,13 +9,13 @@
   "exports": {
     ".": "./index.js",
     "./base-api": "./src/core/base-api.js",
-    "./lib/api-response-utils": "./lib/api-response-utils.js",
-    "./lib/base-api-enhanced": "./lib/base-api-enhanced.js",
-    "./lib/redis-client": "./lib/redis-client.js",
-    "./lib/llm-service": "./lib/llm-service.js",
-    "./lib/logger": "./lib/logger.js",
-    "./lib/wordpress-source-manager": "./lib/wordpress-source-manager.js",
-    "./lib/mcp/resource-loader": "./lib/mcp/resource-loader.js"
+    "./lib/api-response-utils": "./src/lib/api-response-utils.js",
+    "./lib/base-api-enhanced": "./src/lib/base-api-enhanced.js",
+    "./lib/redis-client": "./src/lib/redis-client.js",
+    "./lib/llm-service": "./src/lib/llm-service.js",
+    "./utils/logger": "./src/utils/logger.js",
+    "./lib/wordpress-source-manager": "./src/lib/wordpress-source-manager.js",
+    "./utils/mcp-resource-loader": "./src/utils/resource-loader.js"
   },
   "scripts": {
     "start": "node server.js",

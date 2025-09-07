@@ -2,7 +2,7 @@
  * Tests for RedisClient
  */
 
-const RedisClient = require('../lib/redis-client');
+const RedisClient = require('../src/lib/redis-client');
 
 describe('RedisClient', () => {
   let redisClient;
@@ -348,7 +348,7 @@ describe('RedisClient', () => {
         throw new Error('Module not found');
       });
       
-      const RedisClient = require('../lib/redis-client');
+      const RedisClient = require('../src/lib/redis-client');
       const client = new RedisClient('test-service');
       
       expect(client.client).toBeDefined();

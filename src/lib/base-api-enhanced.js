@@ -13,11 +13,11 @@
  * @version 1.0.0
  */
 
-const BaseAPI = require('../src/core/base-api');
+const BaseAPI = require('../core/base-api');
 const APIResponseUtils = require('./api-response-utils');
 const RedisClient = require('./redis-client');
-const Logger = require('./logger');
-const MCPResourceLoader = require('./mcp/resource-loader');
+const Logger = require('../utils/logger');
+const MCPResourceLoader = require('../utils/resource-loader');
 const { createLLMService } = require('./llm-service');
 const WordPressSourceManager = require('./wordpress-source-manager');
 
@@ -158,7 +158,7 @@ class BaseAPIEnhanced extends BaseAPI {
    * @private
    */
   async _initializeResourceLoader() {
-    const resourcePath = this.options.resourcePath || './lib/mcp';
+    const resourcePath = this.options.resourcePath || './src';
     this.resourceLoader = new MCPResourceLoader(resourcePath, this.logger);
     this.logger.info('Resource loader initialized');
   }

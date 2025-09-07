@@ -359,7 +359,7 @@ const result = await llm.generate('Hello world');
 
 ### **Logger** - Structured Logging
 ```javascript
-const Logger = require('easy-mcp-server/lib/logger');
+const Logger = require('easy-mcp-server/utils/logger');
 
 const logger = new Logger({ service: 'my-api', level: 'info' });
 logger.info('Request processed', { userId: 123 });
@@ -398,16 +398,18 @@ my-api/
 my-api/
 ├── api/                          # API endpoints
 ├── mcp/                          # Custom MCP content
-├── lib/                          # Framework utilities (auto-loaded)
-│   ├── api-response-utils.js     # Standardized responses
-│   ├── base-api-enhanced.js      # Enhanced API class
-│   ├── redis-client.js           # Redis integration
-│   ├── llm-service.js            # LLM integration
-│   ├── logger.js                 # Structured logging
-│   └── mcp/
-│       ├── resource-loader.js    # MCP resource management
-│       ├── prompts/              # Framework default prompts
-│       └── resources/            # Framework default resources
+├── src/                          # Framework source code
+│   ├── lib/                      # Core library utilities
+│   │   ├── api-response-utils.js # Standardized responses
+│   │   ├── base-api-enhanced.js  # Enhanced API class
+│   │   ├── redis-client.js       # Redis integration
+│   │   ├── llm-service.js        # LLM integration
+│   │   └── wordpress-source-manager.js # WordPress integration
+│   ├── utils/                    # Utility classes
+│   │   ├── logger.js             # Structured logging
+│   │   └── resource-loader.js    # MCP resource management
+│   ├── prompts/                  # Framework default prompts
+│   └── resources/                # Framework default resources
 ├── package.json
 └── .env
 ```
