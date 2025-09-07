@@ -1,12 +1,16 @@
 # easy-mcp-server Health Monitoring Guide
 
-## Overview
-This guide provides comprehensive information about monitoring easy-mcp-server applications using the framework's built-in health monitoring capabilities, including automatic health endpoints, service status monitoring, and enhanced component health checks.
+> **Comprehensive health monitoring for easy-mcp-server applications**
 
-## easy-mcp-server Built-in Health Monitoring
+## 🎯 **Overview**
+
+This guide covers monitoring easy-mcp-server applications using built-in health monitoring capabilities, including automatic health endpoints, service status monitoring, and enhanced component health checks.
+
+## 🏥 **Built-in Health Monitoring**
 
 ### Automatic Health Endpoint
-The framework provides an automatic `/health` endpoint that returns:
+The framework provides an automatic `/health` endpoint:
+
 ```json
 {
   "status": "healthy",
@@ -17,25 +21,25 @@ The framework provides an automatic `/health` endpoint that returns:
 ```
 
 ### Service Status Monitoring (BaseAPIEnhanced)
-Use `getServiceStatus()` to monitor all components:
 ```javascript
 const status = await api.getServiceStatus();
 // Returns: { serviceName, isInitialized, components: { logger, llm, resourceLoader } }
 ```
 
 ### Metrics Collection
-Use `getMetrics()` for performance data:
 ```javascript
 const metrics = await api.getMetrics();
 // Returns: { serviceName, uptime, memory, timestamp, components: {...} }
 ```
 
 ### Component Health Checks
-- **Logger**: Always available, structured logging with context
-- **LLM Service**: Provider status, response times, error rates
-- **Resource Loader**: MCP resource availability, prompt loading status
+| Component | Status | Description |
+|-----------|--------|-------------|
+| **Logger** | Always available | Structured logging with context |
+| **LLM Service** | Provider status | Response times, error rates |
+| **Resource Loader** | MCP resource availability | Prompt loading status |
 
-## Implementation Examples
+## 🛠 **Implementation Examples**
 
 ### Basic Health Check Endpoint
 ```javascript
@@ -83,60 +87,58 @@ const mcpHealth = await this.resourceLoader?.getStats();
 // Returns: { loadedPrompts, loadedResources, lastReload }
 ```
 
-## Best Practices
+## ✅ **Best Practices**
 
-1. **Set Appropriate Thresholds**
-   - Define clear alerting thresholds
-   - Use different severity levels (warning, critical)
-   - Implement escalation procedures
+| Practice | Description | Benefit |
+|----------|-------------|---------|
+| **Set Appropriate Thresholds** | Define clear alerting thresholds with severity levels | Prevent false alarms |
+| **Monitor Dependencies** | Track external API calls and database connections | Early failure detection |
+| **Implement Circuit Breakers** | Prevent cascade failures with graceful degradation | System resilience |
+| **Log Aggregation** | Centralized logging with structured formats | Better debugging |
 
-2. **Monitor Dependencies**
-   - Track external API calls
-   - Monitor database connections
-   - Check third-party service availability
+## 🚨 **Alerting Strategies**
 
-3. **Implement Circuit Breakers**
-   - Prevent cascade failures
-   - Graceful degradation
-   - Automatic recovery mechanisms
+| Alert Type | Triggers | Response |
+|------------|----------|----------|
+| **Immediate** | Service down, High error rates (>5%), Critical resource exhaustion | Automated recovery attempts |
+| **Warning** | Response time degradation, Memory usage trends, Disk space warnings | On-call engineer notification |
+| **Escalation** | Level 1 fails, Critical system failure | Management escalation |
 
-4. **Log Aggregation**
-   - Centralized logging system
-   - Structured log formats
-   - Real-time log analysis
+## 📋 **Implementation Checklist**
 
-## Alerting Strategies
+| Task | Status | Priority |
+|------|--------|----------|
+| Set up monitoring infrastructure | ⬜ | High |
+| Configure health check endpoints | ⬜ | High |
+| Implement metrics collection | ⬜ | High |
+| Create monitoring dashboards | ⬜ | Medium |
+| Set up alerting rules | ⬜ | Medium |
+| Test alerting procedures | ⬜ | Medium |
+| Document runbooks | ⬜ | Low |
+| Train operations team | ⬜ | Low |
 
-### Immediate Alerts
-- Service down
-- High error rates (>5%)
-- Critical resource exhaustion
+## ⚠️ **Common Pitfalls**
 
-### Warning Alerts
-- Response time degradation
-- Memory usage trends
-- Disk space warnings
+| Pitfall | Impact | Solution |
+|---------|--------|----------|
+| **Alert Fatigue** | Too many non-critical alerts | Set appropriate thresholds |
+| **Insufficient Context** | Alerts without enough information | Include relevant context |
+| **Missing Dependencies** | Not monitoring external services | Monitor all dependencies |
+| **Poor Thresholds** | Inappropriate alerting thresholds | Test and adjust thresholds |
+| **No Runbooks** | Missing incident response procedures | Create detailed runbooks |
 
-### Escalation Procedures
-1. **Level 1**: Automated recovery attempts
-2. **Level 2**: On-call engineer notification
-3. **Level 3**: Management escalation
+---
 
-## Implementation Checklist
+## 📚 **Related Documentation**
 
-- [ ] Set up monitoring infrastructure
-- [ ] Configure health check endpoints
-- [ ] Implement metrics collection
-- [ ] Create monitoring dashboards
-- [ ] Set up alerting rules
-- [ ] Test alerting procedures
-- [ ] Document runbooks
-- [ ] Train operations team
+| Document | Purpose | Best For |
+|----------|---------|----------|
+| **[README](README.md)** | Quick start and overview | Getting started |
+| **[Framework Guide](easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
+| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
 
-## Common Pitfalls
-
-1. **Alert Fatigue**: Too many non-critical alerts
-2. **Insufficient Context**: Alerts without enough information
-3. **Missing Dependencies**: Not monitoring external services
-4. **Poor Thresholds**: Inappropriate alerting thresholds
-5. **No Runbooks**: Missing incident response procedures
+### 📋 **Quick Reference**
+- **Getting Started**: [README Quick Start](README.md#-quick-start) → [Framework Guide](easy-mcp-server.md)
+- **Framework Details**: [Framework Guide](easy-mcp-server.md) → [Health Monitoring](#-built-in-health-monitoring)
+- **AI Integration**: [Agent Context](Agent.md) → [Agent Monitoring](#-agent-monitoring)
+- **Production**: [Production Deployment](easy-mcp-server.md#-production-deployment) → [Implementation Examples](#-implementation-examples)
