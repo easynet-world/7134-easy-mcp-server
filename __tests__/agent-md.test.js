@@ -18,10 +18,10 @@ describe('Agent.md Endpoint', () => {
       .expect(200);
 
     expect(response.headers['content-type']).toMatch(/text\/markdown/);
-    expect(response.text).toContain('# easy-mcp-server - Agent Context');
-    expect(response.text).toContain('## Agent Integration Overview');
-    expect(response.text).toContain('## Core Agent Capabilities');
-    expect(response.text).toContain('## Agent Development Workflow');
+    expect(response.text).toContain('# easy-mcp-server - Agent Integration Guide');
+    expect(response.text).toContain('## 🎯 **Agent Capabilities**');
+    expect(response.text).toContain('## 🚀 **Quick Start for Agents**');
+    expect(response.text).toContain('## 🛠 **Agent API Patterns**');
   });
 
   test('GET /Agent.md should return 404 if file does not exist', async () => {
@@ -54,16 +54,16 @@ describe('Agent.md Endpoint', () => {
     const content = response.text;
 
     // Check for key sections
-    expect(content).toContain('## Agent Integration Overview');
-    expect(content).toContain('## Core Agent Capabilities');
-    expect(content).toContain('## Agent Development Workflow');
-    expect(content).toContain('## Agent Tool Categories');
-    expect(content).toContain('## Agent Error Handling');
-    expect(content).toContain('## Agent Configuration');
-    expect(content).toContain('## Agent Monitoring');
-    expect(content).toContain('## Agent Best Practices');
-    expect(content).toContain('## Agent Integration Examples');
-    expect(content).toContain('## Troubleshooting for Agents');
+    expect(content).toContain('## 🎯 **Agent Capabilities**');
+    expect(content).toContain('## 🚀 **Quick Start for Agents**');
+    expect(content).toContain('## 🛠 **Agent API Patterns**');
+    expect(content).toContain('## 🛠 **Agent Tool Categories**');
+    expect(content).toContain('## ⚠️ **Agent Error Handling**');
+    expect(content).toContain('## ⚙️ **Agent Configuration**');
+    expect(content).toContain('## 📊 **Agent Monitoring**');
+    expect(content).toContain('## ✅ **Agent Best Practices**');
+    expect(content).toContain('## 🔗 **Integration Examples**');
+    expect(content).toContain('## 🔧 **Troubleshooting**');
 
     // Check for MCP commands
     expect(content).toContain('tools/list');
@@ -105,14 +105,14 @@ describe('Agent.md Endpoint', () => {
 
     const content = response.text;
 
-    // Check for MCP 2024-11-05 compliance
-    expect(content).toContain('MCP) 2024-11-05');
+    // Check for MCP integration
+    expect(content).toContain('MCP integration');
     expect(content).toContain('Model Context Protocol');
 
     // Check for MCP capabilities (updated to match new Agent.md structure)
-    expect(content).toContain('Automatic Tool Discovery');
-    expect(content).toContain('Agent-Optimized Features');
-    expect(content).toContain('Agent Development Workflow');
+    expect(content).toContain('Auto Tool Discovery');
+    expect(content).toContain('Schema Generation');
+    expect(content).toContain('Context Awareness');
 
     // Check for transport information
     expect(content).toContain('HTTP');
