@@ -60,7 +60,7 @@ class BaseLLMService extends EventEmitter {
    * @param {Object} options - Generation options
    * @returns {Promise<string>} Generated text
    */
-  async generate(prompt, options = {}) {
+  async generate(_prompt, _options = {}) {
     throw new Error('generate method must be implemented by subclass');
   }
 
@@ -71,7 +71,8 @@ class BaseLLMService extends EventEmitter {
    * @param {Object} options - Generation options
    * @returns {AsyncGenerator<string>} Streaming text generator
    */
-  async *generateStream(prompt, options = {}) {
+  async *generateStream(_prompt, _options = {}) {
+    yield 'generateStream method must be implemented by subclass';
     throw new Error('generateStream method must be implemented by subclass');
   }
 
@@ -350,20 +351,20 @@ function createLLMService(config = {}, logger = null) {
   const provider = config.provider || 'auto';
 
   switch (provider) {
-    case 'openai':
+  case 'openai':
+    return new OpenAILLMService(config, logger);
+  
+  case 'mock':
+    return new MockLLMService(config, logger);
+  
+  case 'auto':
+  default:
+    // Auto-detect based on available API keys
+    if (config.apiKey || process.env.OPENAI_API_KEY) {
       return new OpenAILLMService(config, logger);
-    
-    case 'mock':
+    } else {
       return new MockLLMService(config, logger);
-    
-    case 'auto':
-    default:
-      // Auto-detect based on available API keys
-      if (config.apiKey || process.env.OPENAI_API_KEY) {
-        return new OpenAILLMService(config, logger);
-      } else {
-        return new MockLLMService(config, logger);
-      }
+    }
   }
 }
 
