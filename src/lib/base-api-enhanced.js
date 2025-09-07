@@ -19,7 +19,6 @@ const RedisClient = require('./redis-client');
 const Logger = require('../utils/logger');
 const MCPResourceLoader = require('../utils/resource-loader');
 const { createLLMService } = require('./llm-service');
-const WordPressSourceManager = require('./wordpress-source-manager');
 
 class BaseAPIEnhanced extends BaseAPI {
   /**
@@ -43,7 +42,6 @@ class BaseAPIEnhanced extends BaseAPI {
     this.redis = null;
     this.llm = null;
     this.resourceLoader = null;
-    this.wordpressSourceManager = null;
     this.responseUtils = APIResponseUtils;
     
     // MCP resources and prompts
@@ -90,9 +88,6 @@ class BaseAPIEnhanced extends BaseAPI {
       
       // Initialize resource loader
       await this._initializeResourceLoader();
-      
-      // Initialize WordPress source manager
-      await this._initializeWordPressSourceManager();
       
       // Setup MCP resources and prompts
       await this.setupMCPResources();
@@ -163,25 +158,6 @@ class BaseAPIEnhanced extends BaseAPI {
     this.logger.info('Resource loader initialized');
   }
 
-  /**
-   * Initialize WordPress source manager
-   * @private
-   */
-  async _initializeWordPressSourceManager() {
-    if (this.redis && this.options.wordpress !== false) {
-      const wpOptions = {
-        serviceName: this.serviceName,
-        ...this.options.wordpress
-      };
-      
-      this.wordpressSourceManager = new WordPressSourceManager(
-        this.redis, 
-        this.logger, 
-        wpOptions
-      );
-      this.logger.info('WordPress source manager initialized');
-    }
-  }
 
   /**
    * Setup MCP resources and prompts
@@ -384,34 +360,6 @@ class BaseAPIEnhanced extends BaseAPI {
     }
   }
 
-  /**
-   * Check for duplicate WordPress content
-   * @param {string} content - Content to check
-   * @param {Object} metadata - Content metadata
-   * @returns {Promise<Object>} Duplicate check result
-   */
-  async checkWordPressDuplicate(content, metadata = {}) {
-    if (!this.wordpressSourceManager) {
-      return { isDuplicate: false, sourceKey: null };
-    }
-
-    return await this.wordpressSourceManager.checkForDuplicate(content, metadata);
-  }
-
-  /**
-   * Register WordPress content
-   * @param {string} content - Content to register
-   * @param {Object} metadata - Content metadata
-   * @param {number} ttl - Time to live in seconds
-   * @returns {Promise<Object>} Registration result
-   */
-  async registerWordPressContent(content, metadata = {}, ttl = null) {
-    if (!this.wordpressSourceManager) {
-      return { success: false, error: 'WordPress source manager not available' };
-    }
-
-    return await this.wordpressSourceManager.registerContent(content, metadata, ttl);
-  }
 
   /**
    * Get MCP resource by URI
@@ -460,11 +408,11 @@ class BaseAPIEnhanced extends BaseAPI {
    * @param {string} name - Prompt name
    * @param {string} description - Prompt description
    * @param {string} instructions - Prompt instructions
-   * @param {Object} arguments - Prompt arguments schema
+   * @param {Object} args - Prompt arguments schema
    * @returns {Object} MCP prompt object
    */
-  createPrompt(name, description, instructions, arguments) {
-    return this.resourceLoader?.createPrompt(name, description, instructions, arguments);
+  createPrompt(name, description, instructions, args) {
+    return this.resourceLoader?.createPrompt(name, description, instructions, args);
   }
 
   /**
@@ -479,8 +427,7 @@ class BaseAPIEnhanced extends BaseAPI {
         logger: !!this.logger,
         redis: this.redis?.getStatus() || null,
         llm: this.llm?.getStatus() || null,
-        resourceLoader: this.resourceLoader?.getStats() || null,
-        wordpressSourceManager: this.wordpressSourceManager?.getConfig() || null
+        resourceLoader: this.resourceLoader?.getStats() || null
       },
       resources: {
         prompts: this.prompts.length,
@@ -519,8 +466,7 @@ class BaseAPIEnhanced extends BaseAPI {
       components: {
         redis: this.redis?.getStatus() || null,
         llm: this.llm?.getStatus() || null,
-        resourceLoader: this.resourceLoader?.getStats() || null,
-        wordpressSourceManager: this.wordpressSourceManager?.getStatistics() || null
+        resourceLoader: this.resourceLoader?.getStats() || null
       }
     };
   }

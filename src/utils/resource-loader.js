@@ -230,14 +230,14 @@ class MCPResourceLoader {
    * @param {string} name - Prompt name
    * @param {string} description - Prompt description
    * @param {string} instructions - Prompt instructions
-   * @param {Object} arguments - Prompt arguments schema (optional)
+   * @param {Object} args - Prompt arguments schema (optional)
    * @returns {Object} MCP prompt object
    */
-  createPrompt(name, description, instructions, arguments = null) {
+  createPrompt(name, description, instructions, args = null) {
     const prompt = {
       name,
       description,
-      arguments: arguments || {
+      arguments: args || {
         type: 'object',
         properties: {},
         required: []

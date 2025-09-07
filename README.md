@@ -184,7 +184,6 @@ class CreateUser extends BaseAPI {
 - **🤖 AI Context** - LLM.txt and Agent.md for comprehensive AI integration
 - **🚀 Enhanced Utilities** - Redis caching, LLM integration, structured logging
 - **📊 Standardized Responses** - Consistent API response formatting
-- **🔧 WordPress Integration** - Source management and duplicate detection
 
 ---
 
@@ -400,18 +399,17 @@ my-api/
 ├── mcp/                          # Custom MCP content (examples included)
 │   ├── prompts/                  # Your custom prompts
 │   │   ├── health-service-monitoring.json
-│   │   ├── wordpress-content-creation.json
-│   │   └── youtube-video-analysis.json
+│   │   ├── api-documentation-generator.json
+│   │   └── mcp-tool-generator.json
 │   └── resources/                # Your custom resources
 │       ├── health-monitoring-guide.md
-│       └── wordpress-content-guide.md
+│       └── easy-mcp-server-guide.md
 ├── src/                          # Framework source code
 │   ├── lib/                      # Core library utilities
 │   │   ├── api-response-utils.js # Standardized responses
 │   │   ├── base-api-enhanced.js  # Enhanced API class
 │   │   ├── redis-client.js       # Redis integration
 │   │   ├── llm-service.js        # LLM integration
-│   │   └── wordpress-source-manager.js # WordPress integration
 │   └── utils/                    # Utility classes
 │       ├── logger.js             # Structured logging
 │       └── resource-loader.js    # MCP resource management

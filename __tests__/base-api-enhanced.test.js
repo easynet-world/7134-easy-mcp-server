@@ -9,7 +9,18 @@ jest.mock('../src/lib/redis-client');
 jest.mock('../src/utils/logger');
 jest.mock('../src/lib/llm-service');
 jest.mock('../src/utils/resource-loader');
-jest.mock('../src/lib/wordpress-source-manager');
+
+// Mock LLM service
+const { createLLMService } = require('../src/lib/llm-service');
+createLLMService.mockImplementation(() => ({
+  initialize: jest.fn().mockResolvedValue(),
+  generate: jest.fn().mockResolvedValue('Mock response'),
+  generateStream: jest.fn().mockImplementation(async function* () {
+    yield 'Mock';
+    yield ' response';
+  }),
+  getStatus: jest.fn().mockReturnValue({ status: 'ready' })
+}));
 
 describe('BaseAPIEnhanced', () => {
   let api;
@@ -101,6 +112,7 @@ describe('BaseAPIEnhanced', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Test error',
+        errorCode: 'INTERNAL_ERROR',
         timestamp: expect.any(String)
       });
     });
@@ -237,37 +249,6 @@ describe('BaseAPIEnhanced', () => {
     });
   });
 
-  describe('WordPress integration', () => {
-    beforeEach(async () => {
-      await api.initialize();
-    });
-
-    it('should check for WordPress duplicate', async () => {
-      const content = 'Test content';
-      const metadata = { source: 'test' };
-      const duplicateResult = { isDuplicate: false };
-
-      api.wordpressSourceManager.checkForDuplicate.mockResolvedValue(duplicateResult);
-
-      const result = await api.checkWordPressDuplicate(content, metadata);
-
-      expect(api.wordpressSourceManager.checkForDuplicate).toHaveBeenCalledWith(content, metadata);
-      expect(result).toEqual(duplicateResult);
-    });
-
-    it('should register WordPress content', async () => {
-      const content = 'Test content';
-      const metadata = { source: 'test' };
-      const registerResult = { success: true };
-
-      api.wordpressSourceManager.registerContent.mockResolvedValue(registerResult);
-
-      const result = await api.registerWordPressContent(content, metadata);
-
-      expect(api.wordpressSourceManager.registerContent).toHaveBeenCalledWith(content, metadata, null);
-      expect(result).toEqual(registerResult);
-    });
-  });
 
   describe('MCP resources', () => {
     beforeEach(async () => {
@@ -370,7 +351,6 @@ describe('BaseAPIEnhanced', () => {
           redis: expect.any(Object),
           llm: expect.any(Object),
           resourceLoader: expect.any(Object),
-          wordpressSourceManager: expect.any(Object)
         },
         resources: {
           prompts: 0,
@@ -397,7 +377,6 @@ describe('BaseAPIEnhanced', () => {
           redis: expect.any(Object),
           llm: expect.any(Object),
           resourceLoader: expect.any(Object),
-          wordpressSourceManager: expect.any(Object)
         }
       });
     });

@@ -14,7 +14,6 @@
     "./lib/redis-client": "./src/lib/redis-client.js",
     "./lib/llm-service": "./src/lib/llm-service.js",
     "./utils/logger": "./src/utils/logger.js",
-    "./lib/wordpress-source-manager": "./src/lib/wordpress-source-manager.js",
     "./utils/mcp-resource-loader": "./src/utils/resource-loader.js"
   },
   "scripts": {
