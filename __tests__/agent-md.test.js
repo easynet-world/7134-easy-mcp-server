@@ -107,7 +107,7 @@ describe('Agent.md Endpoint', () => {
 
     // Check for MCP integration
     expect(content).toContain('MCP integration');
-    expect(content).toContain('Model Context Protocol');
+    expect(content).toContain('automatic MCP integration');
 
     // Check for MCP capabilities (updated to match new Agent.md structure)
     expect(content).toContain('Auto Tool Discovery');
