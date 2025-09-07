@@ -5,6 +5,8 @@
 
 const WebSocket = require('ws');
 const http = require('http');
+const fs = require('fs').promises;
+const path = require('path');
 
 class DynamicAPIMCPServer {
   constructor(host = '0.0.0.0', port = 3001) {
@@ -33,6 +35,9 @@ class DynamicAPIMCPServer {
     
     // Auto-discover prompts and resources from API routes
     this.discoverPromptsAndResources(routes);
+    
+    // Load prompts and resources from filesystem
+    this.loadPromptsAndResourcesFromFilesystem();
     
     // Notify all connected clients about route changes
     this.notifyRouteChanges(routes);
@@ -86,6 +91,140 @@ class DynamicAPIMCPServer {
         });
       }
     });
+  }
+
+  /**
+   * Load prompts and resources from filesystem
+   */
+  async loadPromptsAndResourcesFromFilesystem() {
+    try {
+      const mcpPath = path.join(process.cwd(), 'mcp');
+      
+      // Load prompts from mcp/prompts directory
+      await this.loadPromptsFromDirectory(path.join(mcpPath, 'prompts'));
+      
+      // Load resources from mcp/resources directory
+      await this.loadResourcesFromDirectory(path.join(mcpPath, 'resources'));
+      
+      console.log(`🔌 MCP Server: Loaded ${this.prompts.size} prompts and ${this.resources.size} resources from filesystem`);
+    } catch (error) {
+      console.warn('⚠️  MCP Server: Failed to load prompts and resources from filesystem:', error.message);
+    }
+  }
+
+  /**
+   * Load prompts from a directory recursively
+   */
+  async loadPromptsFromDirectory(dirPath) {
+    try {
+      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        
+        if (entry.isDirectory()) {
+          // Recursively load subdirectories
+          await this.loadPromptsFromDirectory(fullPath);
+        } else if (entry.isFile() && path.extname(entry.name) === '.json') {
+          // Load JSON prompt files
+          await this.loadPromptFromFile(fullPath);
+        }
+      }
+    } catch (error) {
+      // Directory doesn't exist or can't be read - this is normal
+      console.log('🔌 MCP Server: No prompts directory found or accessible');
+    }
+  }
+
+  /**
+   * Load a single prompt from a JSON file
+   */
+  async loadPromptFromFile(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      const promptData = JSON.parse(content);
+      
+      // Generate a name from the file path if not provided
+      const relativePath = path.relative(path.join(process.cwd(), 'mcp', 'prompts'), filePath);
+      const name = promptData.name || relativePath.replace(/\.json$/, '').replace(/\//g, '_');
+      
+      const prompt = {
+        name: name,
+        description: promptData.description || `Prompt from ${relativePath}`,
+        template: promptData.instructions || promptData.template || '',
+        arguments: promptData.arguments?.properties ? 
+          Object.keys(promptData.arguments.properties).map(key => ({
+            name: key,
+            description: promptData.arguments.properties[key].description || '',
+            required: promptData.arguments.required?.includes(key) || false
+          })) : []
+      };
+      
+      this.addPrompt(prompt);
+    } catch (error) {
+      console.warn(`⚠️  MCP Server: Failed to load prompt from ${filePath}:`, error.message);
+    }
+  }
+
+  /**
+   * Load resources from a directory recursively
+   */
+  async loadResourcesFromDirectory(dirPath) {
+    try {
+      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        
+        if (entry.isDirectory()) {
+          // Recursively load subdirectories
+          await this.loadResourcesFromDirectory(fullPath);
+        } else if (entry.isFile() && (path.extname(entry.name) === '.md' || path.extname(entry.name) === '.json')) {
+          // Load markdown and JSON resource files
+          await this.loadResourceFromFile(fullPath);
+        }
+      }
+    } catch (error) {
+      // Directory doesn't exist or can't be read - this is normal
+      console.log('🔌 MCP Server: No resources directory found or accessible');
+    }
+  }
+
+  /**
+   * Load a single resource from a file
+   */
+  async loadResourceFromFile(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      const relativePath = path.relative(path.join(process.cwd(), 'mcp', 'resources'), filePath);
+      const ext = path.extname(filePath);
+      
+      // Generate URI from file path
+      const uri = `resource://${relativePath.replace(/\//g, '/')}`;
+      
+      // Determine MIME type based on file extension
+      let mimeType = 'text/plain';
+      if (ext === '.md') {
+        mimeType = 'text/markdown';
+      } else if (ext === '.json') {
+        mimeType = 'application/json';
+      }
+      
+      // Generate name from file path
+      const name = relativePath.replace(/\//g, ' - ').replace(/\.(md|json)$/, '');
+      
+      const resource = {
+        uri: uri,
+        name: name,
+        description: `Resource from ${relativePath}`,
+        mimeType: mimeType,
+        content: content
+      };
+      
+      this.addResource(resource);
+    } catch (error) {
+      console.warn(`⚠️  MCP Server: Failed to load resource from ${filePath}:`, error.message);
+    }
   }
 
   /**
