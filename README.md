@@ -173,23 +173,33 @@ api/users/profile/put.js  →  PUT /users/profile
 ```
 
 ### MCP Prompts & Resources
-**Prompts** - Template-based AI prompts:
-```
-mcp/prompts/category/prompt.json
-```
 
-**Resources** - Documentation & data:
+**Auto-Discovery**: Automatically loads prompts and resources from `mcp/prompts/` and `mcp/resources/` directories.
+
+**Supported Formats**: JSON, YAML, Markdown, Text files
+
+**Hot Reloading**: File changes are detected automatically - no server restart needed!
+
+**Example Structure:**
 ```
-mcp/resources/category/resource.md
+mcp/
+├── prompts/
+│   ├── youtube-analysis.yaml
+│   └── content-creation.json
+└── resources/
+    ├── api-guide.md
+    └── languages.yaml
 ```
 
 **Example Prompt:**
-```json
-{
-  "description": "Generate API documentation",
-  "arguments": { "type": "object", "properties": { "endpoint": { "type": "string" } } },
-  "instructions": "You are an API expert..."
-}
+```yaml
+name: youtube_analysis
+description: Analyze YouTube videos
+template: "Analyze {{url}} and extract {{language}} subtitles"
+arguments:
+  properties:
+    url: { type: "string", description: "Video URL" }
+    language: { type: "string", description: "Subtitle language" }
 ```
 
 ---
@@ -199,11 +209,11 @@ mcp/resources/category/resource.md
 | Feature | Description |
 |---------|-------------|
 | **Hot Reloading** | Instant updates during development |
+| **Auto-Discovery** | Automatic loading of prompts and resources |
 | **MCP Protocol** | Full AI model integration |
 | **LLM Integration** | AI service integration |
 | **Health Monitoring** | Built-in health checks |
 | **Structured Logging** | Comprehensive logging |
-| **Rate Limiting** | Built-in rate limiting |
 
 ---
 

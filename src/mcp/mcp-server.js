@@ -7,9 +7,11 @@ const WebSocket = require('ws');
 const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
+const yaml = require('js-yaml');
+const chokidar = require('chokidar');
 
 class DynamicAPIMCPServer {
-  constructor(host = '0.0.0.0', port = 3001) {
+  constructor(host = '0.0.0.0', port = 3001, options = {}) {
     this.host = host;
     this.port = port;
     this.wss = null;
@@ -23,6 +25,28 @@ class DynamicAPIMCPServer {
     // Initialize prompts and resources storage
     this.prompts = new Map();
     this.resources = new Map();
+    
+    // Configuration options
+    this.config = {
+      mcp: {
+        prompts: {
+          enabled: options.prompts?.enabled !== false,
+          directory: options.prompts?.directory || './mcp/prompts',
+          watch: options.prompts?.watch !== false,
+          formats: options.prompts?.formats || ['json', 'yaml', 'yml']
+        },
+        resources: {
+          enabled: options.resources?.enabled !== false,
+          directory: options.resources?.directory || './mcp/resources',
+          watch: options.resources?.watch !== false,
+          formats: options.resources?.formats || ['json', 'yaml', 'yml', 'md', 'txt']
+        }
+      }
+    };
+    
+    // File watchers
+    this.promptsWatcher = null;
+    this.resourcesWatcher = null;
   }
 
   /**
@@ -98,15 +122,27 @@ class DynamicAPIMCPServer {
    */
   async loadPromptsAndResourcesFromFilesystem() {
     try {
-      const mcpPath = path.join(process.cwd(), 'mcp');
+      // Load prompts if enabled
+      if (this.config.mcp.prompts.enabled) {
+        const promptsPath = path.resolve(process.cwd(), this.config.mcp.prompts.directory);
+        await this.loadPromptsFromDirectory(promptsPath);
+      }
       
-      // Load prompts from mcp/prompts directory
-      await this.loadPromptsFromDirectory(path.join(mcpPath, 'prompts'));
-      
-      // Load resources from mcp/resources directory
-      await this.loadResourcesFromDirectory(path.join(mcpPath, 'resources'));
+      // Load resources if enabled
+      if (this.config.mcp.resources.enabled) {
+        const resourcesPath = path.resolve(process.cwd(), this.config.mcp.resources.directory);
+        await this.loadResourcesFromDirectory(resourcesPath);
+      }
       
       console.log(`🔌 MCP Server: Loaded ${this.prompts.size} prompts and ${this.resources.size} resources from filesystem`);
+      
+      // Setup file watchers if enabled
+      if (this.config.mcp.prompts.watch && this.config.mcp.prompts.enabled) {
+        this.setupPromptsWatcher();
+      }
+      if (this.config.mcp.resources.watch && this.config.mcp.resources.enabled) {
+        this.setupResourcesWatcher();
+      }
     } catch (error) {
       console.warn('⚠️  MCP Server: Failed to load prompts and resources from filesystem:', error.message);
     }
@@ -125,9 +161,12 @@ class DynamicAPIMCPServer {
         if (entry.isDirectory()) {
           // Recursively load subdirectories
           await this.loadPromptsFromDirectory(fullPath);
-        } else if (entry.isFile() && path.extname(entry.name) === '.json') {
-          // Load JSON prompt files
-          await this.loadPromptFromFile(fullPath);
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          // Load supported prompt file formats
+          if (this.config.mcp.prompts.formats.includes(ext.substring(1))) {
+            await this.loadPromptFromFile(fullPath);
+          }
         }
       }
     } catch (error) {
@@ -137,16 +176,25 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Load a single prompt from a JSON file
+   * Load a single prompt from a file (JSON or YAML)
    */
   async loadPromptFromFile(filePath) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const promptData = JSON.parse(content);
+      const ext = path.extname(filePath).toLowerCase();
+      
+      let promptData;
+      if (ext === '.json') {
+        promptData = JSON.parse(content);
+      } else if (ext === '.yaml' || ext === '.yml') {
+        promptData = yaml.load(content);
+      } else {
+        throw new Error(`Unsupported file format: ${ext}`);
+      }
       
       // Generate a name from the file path if not provided
-      const relativePath = path.relative(path.join(process.cwd(), 'mcp', 'prompts'), filePath);
-      const name = promptData.name || relativePath.replace(/\.json$/, '').replace(/\//g, '_');
+      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
+      const name = promptData.name || relativePath.replace(/\.(json|yaml|yml)$/, '').replace(/\//g, '_');
       
       const prompt = {
         name: name,
@@ -179,9 +227,12 @@ class DynamicAPIMCPServer {
         if (entry.isDirectory()) {
           // Recursively load subdirectories
           await this.loadResourcesFromDirectory(fullPath);
-        } else if (entry.isFile() && (path.extname(entry.name) === '.md' || path.extname(entry.name) === '.json')) {
-          // Load markdown and JSON resource files
-          await this.loadResourceFromFile(fullPath);
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          // Load supported resource file formats
+          if (this.config.mcp.resources.formats.includes(ext.substring(1))) {
+            await this.loadResourceFromFile(fullPath);
+          }
         }
       }
     } catch (error) {
@@ -196,35 +247,223 @@ class DynamicAPIMCPServer {
   async loadResourceFromFile(filePath) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const relativePath = path.relative(path.join(process.cwd(), 'mcp', 'resources'), filePath);
-      const ext = path.extname(filePath);
+      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.resources.directory), filePath);
+      const ext = path.extname(filePath).toLowerCase();
       
       // Generate URI from file path
       const uri = `resource://${relativePath.replace(/\//g, '/')}`;
       
-      // Determine MIME type based on file extension
+      // Determine MIME type and process content based on file extension
       let mimeType = 'text/plain';
+      let processedContent = content;
+      let resourceName = null;
+      let resourceDescription = null;
+      
       if (ext === '.md') {
         mimeType = 'text/markdown';
       } else if (ext === '.json') {
         mimeType = 'application/json';
+        // Try to parse and re-stringify JSON for validation
+        try {
+          const jsonData = JSON.parse(content);
+          processedContent = JSON.stringify(jsonData, null, 2);
+          // Extract name and description from JSON if available
+          if (jsonData.name) resourceName = jsonData.name;
+          if (jsonData.description) resourceDescription = jsonData.description;
+          if (jsonData.mimeType) mimeType = jsonData.mimeType;
+        } catch (parseError) {
+          console.warn(`⚠️  MCP Server: Invalid JSON in ${filePath}, treating as plain text`);
+        }
+      } else if (ext === '.yaml' || ext === '.yml') {
+        mimeType = 'application/x-yaml';
+        // Try to parse YAML for validation
+        try {
+          const yamlData = yaml.load(content);
+          processedContent = yaml.dump(yamlData, { indent: 2 });
+          // Extract name and description from YAML if available
+          if (yamlData.name) resourceName = yamlData.name;
+          if (yamlData.description) resourceDescription = yamlData.description;
+          if (yamlData.mimeType) mimeType = yamlData.mimeType;
+        } catch (parseError) {
+          console.warn(`⚠️  MCP Server: Invalid YAML in ${filePath}, treating as plain text`);
+        }
+      } else if (ext === '.txt') {
+        mimeType = 'text/plain';
       }
       
-      // Generate name from file path
-      const name = relativePath.replace(/\//g, ' - ').replace(/\.(md|json)$/, '');
+      // Generate name from file path if not provided in content
+      const name = resourceName || relativePath.replace(/\//g, ' - ').replace(/\.(md|json|yaml|yml|txt)$/, '');
+      const description = resourceDescription || `Resource from ${relativePath}`;
       
       const resource = {
         uri: uri,
         name: name,
-        description: `Resource from ${relativePath}`,
+        description: description,
         mimeType: mimeType,
-        content: content
+        content: processedContent
       };
       
       this.addResource(resource);
     } catch (error) {
       console.warn(`⚠️  MCP Server: Failed to load resource from ${filePath}:`, error.message);
     }
+  }
+
+  /**
+   * Setup file watcher for prompts directory
+   */
+  setupPromptsWatcher() {
+    if (this.promptsWatcher) {
+      this.promptsWatcher.close();
+    }
+    
+    const promptsPath = path.resolve(process.cwd(), this.config.mcp.prompts.directory);
+    
+    this.promptsWatcher = chokidar.watch(promptsPath, {
+      ignored: /(^|[/\\])\../, // ignore dotfiles
+      persistent: true,
+      ignoreInitial: true
+    });
+    
+    this.promptsWatcher
+      .on('add', (filePath) => {
+        console.log(`🔌 MCP Server: New prompt file added: ${filePath}`);
+        this.loadPromptFromFile(filePath);
+        this.notifyPromptsChanged();
+      })
+      .on('change', (filePath) => {
+        console.log(`🔌 MCP Server: Prompt file changed: ${filePath}`);
+        this.loadPromptFromFile(filePath);
+        this.notifyPromptsChanged();
+      })
+      .on('unlink', (filePath) => {
+        console.log(`🔌 MCP Server: Prompt file removed: ${filePath}`);
+        this.removePromptByFilePath(filePath);
+        this.notifyPromptsChanged();
+      })
+      .on('error', (error) => {
+        console.error('❌ MCP Server: Prompts watcher error:', error);
+      });
+    
+    console.log(`🔌 MCP Server: Watching prompts directory: ${promptsPath}`);
+  }
+
+  /**
+   * Setup file watcher for resources directory
+   */
+  setupResourcesWatcher() {
+    if (this.resourcesWatcher) {
+      this.resourcesWatcher.close();
+    }
+    
+    const resourcesPath = path.resolve(process.cwd(), this.config.mcp.resources.directory);
+    
+    this.resourcesWatcher = chokidar.watch(resourcesPath, {
+      ignored: /(^|[/\\])\../, // ignore dotfiles
+      persistent: true,
+      ignoreInitial: true
+    });
+    
+    this.resourcesWatcher
+      .on('add', (filePath) => {
+        console.log(`🔌 MCP Server: New resource file added: ${filePath}`);
+        this.loadResourceFromFile(filePath);
+        this.notifyResourcesChanged();
+      })
+      .on('change', (filePath) => {
+        console.log(`🔌 MCP Server: Resource file changed: ${filePath}`);
+        this.loadResourceFromFile(filePath);
+        this.notifyResourcesChanged();
+      })
+      .on('unlink', (filePath) => {
+        console.log(`🔌 MCP Server: Resource file removed: ${filePath}`);
+        this.removeResourceByFilePath(filePath);
+        this.notifyResourcesChanged();
+      })
+      .on('error', (error) => {
+        console.error('❌ MCP Server: Resources watcher error:', error);
+      });
+    
+    console.log(`🔌 MCP Server: Watching resources directory: ${resourcesPath}`);
+  }
+
+  /**
+   * Remove a prompt by file path
+   */
+  removePromptByFilePath(filePath) {
+    const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
+    const name = relativePath.replace(/\.(json|yaml|yml)$/, '').replace(/\//g, '_');
+    this.prompts.delete(name);
+  }
+
+  /**
+   * Remove a resource by file path
+   */
+  removeResourceByFilePath(filePath) {
+    const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.resources.directory), filePath);
+    const uri = `resource://${relativePath.replace(/\//g, '/')}`;
+    this.resources.delete(uri);
+  }
+
+  /**
+   * Notify clients about prompts changes
+   */
+  notifyPromptsChanged() {
+    const notification = {
+      jsonrpc: '2.0',
+      method: 'notifications/promptsChanged',
+      params: {
+        prompts: Array.from(this.prompts.values()).map(prompt => ({
+          name: prompt.name,
+          description: prompt.description,
+          arguments: prompt.arguments || []
+        }))
+      }
+    };
+
+    this.broadcastNotification(notification);
+  }
+
+  /**
+   * Notify clients about resources changes
+   */
+  notifyResourcesChanged() {
+    const notification = {
+      jsonrpc: '2.0',
+      method: 'notifications/resourcesChanged',
+      params: {
+        resources: Array.from(this.resources.values()).map(resource => ({
+          uri: resource.uri,
+          name: resource.name,
+          description: resource.description,
+          mimeType: resource.mimeType
+        }))
+      }
+    };
+
+    this.broadcastNotification(notification);
+  }
+
+  /**
+   * Broadcast notification to all connected clients
+   */
+  broadcastNotification(notification) {
+    // Notify WebSocket clients
+    this.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(notification));
+      }
+    });
+
+    // Notify HTTP clients
+    this.httpClients.forEach((res, clientId) => {
+      try {
+        res.write(`data: ${JSON.stringify(notification)}\n\n`);
+      } catch (error) {
+        // Remove disconnected clients
+        this.httpClients.delete(clientId);
+      }
+    });
   }
 
   /**
@@ -1238,6 +1477,14 @@ class DynamicAPIMCPServer {
    * Stop the MCP server
    */
   stop() {
+    // Close file watchers
+    if (this.promptsWatcher) {
+      this.promptsWatcher.close();
+    }
+    if (this.resourcesWatcher) {
+      this.resourcesWatcher.close();
+    }
+    
     if (this.wss) {
       this.wss.close();
     }
