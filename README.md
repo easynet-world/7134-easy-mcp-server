@@ -398,8 +398,8 @@ my-api/
 ├── api/                          # API endpoints
 ├── mcp/                          # Custom MCP content (examples included)
 │   ├── prompts/                  # Your custom prompts
-│   │   ├── health-service-monitoring.json
 │   │   ├── api-documentation-generator.json
+│   │   ├── health-service-monitoring.json
 │   │   └── mcp-tool-generator.json
 │   └── resources/                # Your custom resources
 │       ├── health-monitoring-guide.md
