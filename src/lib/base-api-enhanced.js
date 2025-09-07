@@ -193,7 +193,7 @@ class BaseAPIEnhanced extends BaseAPI {
    * @param {Object} res - Express response object
    * @returns {Promise<any>} Response
    */
-  async handleRequest(req, res) {
+  async handleRequest(_req, _res) {
     throw new Error('handleRequest method must be implemented by subclass');
   }
 
