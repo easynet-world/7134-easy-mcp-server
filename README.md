@@ -182,7 +182,7 @@ class CreateUser extends BaseAPI {
 - **🌐 Multiple Transports** - HTTP, WebSocket, Server-Sent Events
 - **📝 Annotation Support** - JSDoc annotations for custom schemas
 - **🤖 AI Context** - LLM.txt and Agent.md for comprehensive AI integration
-- **🚀 Enhanced Utilities** - Redis caching, LLM integration, structured logging
+- **🚀 Enhanced Utilities** - LLM integration, structured logging
 - **📊 Standardized Responses** - Consistent API response formatting
 
 ---
@@ -305,13 +305,12 @@ const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 class MyAPI extends BaseAPIEnhanced {
   constructor() {
     super('my-service', {
-      redis: { host: 'localhost', port: 6379 },
       llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
     });
   }
 
   async handleRequest(req, res) {
-    // Redis caching available via this.redis
+    // LLM integration available via this.llm
     // LLM services available via this.llm
     // Standardized responses via this.responseUtils
     // MCP resources via this.prompts and this.resources
@@ -332,17 +331,6 @@ APIResponseUtils.sendSuccessResponse(res, { data: result });
 APIResponseUtils.sendPaginatedResponse(res, data, pagination);
 ```
 
-### **RedisClient** - Caching & Session Management
-```javascript
-const RedisClient = require('easy-mcp-server/lib/redis-client');
-
-const redis = new RedisClient('my-service');
-await redis.init();
-
-// Automatic JSON serialization/deserialization
-await redis.set('key', { data: 'value' }, 3600);
-const data = await redis.get('key');
-```
 
 ### **LLMService** - AI Integration
 ```javascript
@@ -408,7 +396,6 @@ my-api/
 │   ├── lib/                      # Core library utilities
 │   │   ├── api-response-utils.js # Standardized responses
 │   │   ├── base-api-enhanced.js  # Enhanced API class
-│   │   ├── redis-client.js       # Redis integration
 │   │   ├── llm-service.js        # LLM integration
 │   └── utils/                    # Utility classes
 │       ├── logger.js             # Structured logging

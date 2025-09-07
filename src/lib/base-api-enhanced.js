@@ -2,12 +2,10 @@
  * BaseAPIEnhanced - Enhanced Base API Class
  * 
  * Enhanced version of BaseAPI with:
- * - Redis client integration
  * - MCP resource and prompt management
  * - Standardized response handling
  * - Service initialization utilities
  * - LLM service integration
- * - WordPress source management
  * 
  * @author EasyNet World
  * @version 1.0.0
@@ -15,7 +13,6 @@
 
 const BaseAPI = require('../core/base-api');
 const APIResponseUtils = require('./api-response-utils');
-const RedisClient = require('./redis-client');
 const Logger = require('../utils/logger');
 const MCPResourceLoader = require('../utils/resource-loader');
 const { createLLMService } = require('./llm-service');
@@ -25,10 +22,8 @@ class BaseAPIEnhanced extends BaseAPI {
    * Create a new BaseAPIEnhanced instance
    * @param {string} serviceName - Name of the service
    * @param {Object} options - Configuration options
-   * @param {Object} options.redis - Redis configuration
    * @param {Object} options.logger - Logger configuration
    * @param {Object} options.llm - LLM service configuration
-   * @param {Object} options.wordpress - WordPress source manager configuration
    * @param {string} options.resourcePath - Path to MCP resources
    */
   constructor(serviceName, options = {}) {
@@ -39,7 +34,6 @@ class BaseAPIEnhanced extends BaseAPI {
     
     // Initialize components
     this.logger = null;
-    this.redis = null;
     this.llm = null;
     this.resourceLoader = null;
     this.responseUtils = APIResponseUtils;
@@ -80,9 +74,6 @@ class BaseAPIEnhanced extends BaseAPI {
       // Initialize logger first
       await this._initializeLogger();
       
-      // Initialize Redis client
-      await this._initializeRedis();
-      
       // Initialize LLM service
       await this._initializeLLM();
       
@@ -114,22 +105,6 @@ class BaseAPIEnhanced extends BaseAPI {
     this.logger.info(`Logger initialized for service: ${this.serviceName}`);
   }
 
-  /**
-   * Initialize Redis client
-   * @private
-   */
-  async _initializeRedis() {
-    if (this.options.redis !== false) {
-      const redisOptions = {
-        serviceName: this.serviceName,
-        ...this.options.redis
-      };
-      
-      this.redis = new RedisClient(this.serviceName, redisOptions, this.logger);
-      await this.redis.init();
-      this.logger.info('Redis client initialized');
-    }
-  }
 
   /**
    * Initialize LLM service
@@ -264,48 +239,6 @@ class BaseAPIEnhanced extends BaseAPI {
     return this.responseUtils.sendValidationErrorResponse(res, errors, message);
   }
 
-  /**
-   * Cache data with Redis
-   * @param {string} key - Cache key
-   * @param {any} data - Data to cache
-   * @param {number} ttl - Time to live in seconds
-   * @returns {Promise<boolean>} True if cached successfully
-   */
-  async cacheData(key, data, ttl = 3600) {
-    if (!this.redis) {
-      this.logger?.warn('Redis not available for caching');
-      return false;
-    }
-
-    try {
-      await this.redis.set(key, data, ttl);
-      this.logger?.logCacheOperation('SET', key, { ttl });
-      return true;
-    } catch (error) {
-      this.logger?.error(`Failed to cache data: ${error.message}`);
-      return false;
-    }
-  }
-
-  /**
-   * Get cached data from Redis
-   * @param {string} key - Cache key
-   * @returns {Promise<any>} Cached data or null
-   */
-  async getCachedData(key) {
-    if (!this.redis) {
-      return null;
-    }
-
-    try {
-      const data = await this.redis.get(key);
-      this.logger?.logCacheOperation('GET', key, { hit: data !== null });
-      return data;
-    } catch (error) {
-      this.logger?.error(`Failed to get cached data: ${error.message}`);
-      return null;
-    }
-  }
 
   /**
    * Generate text using LLM service
@@ -425,7 +358,6 @@ class BaseAPIEnhanced extends BaseAPI {
       isInitialized: this.isInitialized,
       components: {
         logger: !!this.logger,
-        redis: this.redis?.getStatus() || null,
         llm: this.llm?.getStatus() || null,
         resourceLoader: this.resourceLoader?.getStats() || null
       },
@@ -445,8 +377,7 @@ class BaseAPIEnhanced extends BaseAPI {
   async healthCheck(req, res) {
     const status = this.getServiceStatus();
     const isHealthy = status.isInitialized && 
-                     status.components.logger && 
-                     (status.components.redis?.isConnected !== false);
+                     status.components.logger;
 
     return this.sendSuccessResponse(res, status, 
       isHealthy ? 'Service is healthy' : 'Service has issues', 
@@ -464,7 +395,6 @@ class BaseAPIEnhanced extends BaseAPI {
       memory: process.memoryUsage(),
       timestamp: new Date().toISOString(),
       components: {
-        redis: this.redis?.getStatus() || null,
         llm: this.llm?.getStatus() || null,
         resourceLoader: this.resourceLoader?.getStats() || null
       }
@@ -477,9 +407,6 @@ class BaseAPIEnhanced extends BaseAPI {
    */
   async cleanup() {
     try {
-      if (this.redis) {
-        await this.redis.disconnect();
-      }
       
       this.logger?.info(`Service cleanup completed: ${this.serviceName}`);
     } catch (error) {

@@ -20,7 +20,7 @@ The framework provides an automatic `/health` endpoint that returns:
 Use `getServiceStatus()` to monitor all components:
 ```javascript
 const status = await api.getServiceStatus();
-// Returns: { serviceName, isInitialized, components: { logger, redis, llm, resourceLoader } }
+// Returns: { serviceName, isInitialized, components: { logger, llm, resourceLoader } }
 ```
 
 ### Metrics Collection
@@ -32,7 +32,6 @@ const metrics = await api.getMetrics();
 
 ### Component Health Checks
 - **Logger**: Always available, structured logging with context
-- **Redis**: Connection status, performance metrics, cache hit rates
 - **LLM Service**: Provider status, response times, error rates
 - **Resource Loader**: MCP resource availability, prompt loading status
 
@@ -60,7 +59,6 @@ const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 class EnhancedHealthCheck extends BaseAPIEnhanced {
   constructor() {
     super('health-service', {
-      redis: { host: 'localhost', port: 6379 },
       llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
     });
   }

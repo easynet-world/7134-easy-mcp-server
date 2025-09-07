@@ -5,7 +5,6 @@
 const BaseAPIEnhanced = require('../src/lib/base-api-enhanced');
 
 // Mock dependencies
-jest.mock('../src/lib/redis-client');
 jest.mock('../src/utils/logger');
 jest.mock('../src/lib/llm-service');
 jest.mock('../src/utils/resource-loader');
@@ -45,7 +44,6 @@ describe('BaseAPIEnhanced', () => {
 
     // Create API instance
     api = new BaseAPIEnhanced('test-service', {
-      redis: { host: 'localhost', port: 6379 },
       logger: { level: 'info' },
       llm: { provider: 'mock' }
     });
@@ -71,7 +69,6 @@ describe('BaseAPIEnhanced', () => {
 
       expect(api.isInitialized).toBe(true);
       expect(api.logger).toBeDefined();
-      expect(api.redis).toBeDefined();
       expect(api.llm).toBeDefined();
       expect(api.resourceLoader).toBeDefined();
     });
@@ -169,42 +166,6 @@ describe('BaseAPIEnhanced', () => {
     });
   });
 
-  describe('caching', () => {
-    beforeEach(async () => {
-      await api.initialize();
-    });
-
-    it('should cache data', async () => {
-      const key = 'test-key';
-      const data = { test: 'data' };
-      const ttl = 3600;
-
-      const result = await api.cacheData(key, data, ttl);
-
-      expect(api.redis.set).toHaveBeenCalledWith(key, data, ttl);
-      expect(result).toBe(true);
-    });
-
-    it('should get cached data', async () => {
-      const key = 'test-key';
-      const cachedData = { test: 'data' };
-      
-      api.redis.get.mockResolvedValue(cachedData);
-
-      const result = await api.getCachedData(key);
-
-      expect(api.redis.get).toHaveBeenCalledWith(key);
-      expect(result).toEqual(cachedData);
-    });
-
-    it('should return false when Redis is not available', async () => {
-      api.redis = null;
-
-      const result = await api.cacheData('key', 'data');
-
-      expect(result).toBe(false);
-    });
-  });
 
   describe('LLM integration', () => {
     beforeEach(async () => {
@@ -301,8 +262,6 @@ describe('BaseAPIEnhanced', () => {
     });
 
     it('should return healthy status', async () => {
-      api.redis.getStatus.mockReturnValue({ isConnected: true });
-
       await api.healthCheck(mockReq, mockRes);
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -318,7 +277,8 @@ describe('BaseAPIEnhanced', () => {
     });
 
     it('should return unhealthy status', async () => {
-      api.redis.getStatus.mockReturnValue({ isConnected: false });
+      // Simulate unhealthy state by setting isInitialized to false
+      api.isInitialized = false;
 
       await api.healthCheck(mockReq, mockRes);
 
@@ -329,7 +289,7 @@ describe('BaseAPIEnhanced', () => {
         timestamp: expect.any(String),
         data: expect.objectContaining({
           serviceName: 'test-service',
-          isInitialized: true
+          isInitialized: false
         })
       });
     });
@@ -348,7 +308,6 @@ describe('BaseAPIEnhanced', () => {
         isInitialized: true,
         components: {
           logger: true,
-          redis: expect.any(Object),
           llm: expect.any(Object),
           resourceLoader: expect.any(Object),
         },
@@ -374,7 +333,6 @@ describe('BaseAPIEnhanced', () => {
         memory: expect.any(Object),
         timestamp: expect.any(String),
         components: {
-          redis: expect.any(Object),
           llm: expect.any(Object),
           resourceLoader: expect.any(Object),
         }
@@ -390,7 +348,6 @@ describe('BaseAPIEnhanced', () => {
     it('should cleanup resources', async () => {
       await api.cleanup();
 
-      expect(api.redis.disconnect).toHaveBeenCalled();
     });
   });
 });
