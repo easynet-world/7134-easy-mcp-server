@@ -1,50 +1,72 @@
 # easy-mcp-server Framework Guide
 
-## Overview
-This comprehensive guide covers all aspects of building APIs with the easy-mcp-server framework, including MCP integration, API design, deployment strategies, and advanced features.
+> **Complete guide to building APIs with automatic MCP integration**
 
-## Table of Contents
-1. [Framework Features](#framework-features)
-2. [API Design Best Practices](#api-design-best-practices)
-3. [MCP Integration](#mcp-integration)
-4. [Development Workflow](#development-workflow)
-5. [Production Deployment](#production-deployment)
-6. [Monitoring and Logging](#monitoring-and-logging)
-7. [Security Considerations](#security-considerations)
-8. [Troubleshooting](#troubleshooting)
-9. [Best Practices Summary](#best-practices-summary)
+## 📋 **Table of Contents**
 
-## Framework Features
+| Section | Description | Best For |
+|---------|-------------|----------|
+| [🚀 Quick Start](#-quick-start) | Get up and running in minutes | New users |
+| [🛠 Framework Features](#-framework-features) | Core capabilities overview | Understanding features |
+| [📝 API Design](#-api-design-best-practices) | Best practices and patterns | API development |
+| [🤖 MCP Integration](#-mcp-integration) | AI model integration | AI-powered apps |
+| [🏗 Development Workflow](#-development-workflow) | Development process | Daily development |
+| [🚀 Production Deployment](#-production-deployment) | Production setup | Deployment |
+| [📊 Monitoring](#-monitoring-and-logging) | Observability | Production monitoring |
+| [🔒 Security](#-security-considerations) | Security best practices | Security |
+| [🔧 Troubleshooting](#-troubleshooting) | Common issues and solutions | Problem solving |
 
-### Core Capabilities
-- **Dynamic API Discovery** - Automatic endpoint scanning from file structure
-- **MCP Integration** - Your APIs become AI tools automatically
-- **OpenAPI Generation** - Complete API documentation generated automatically
-- **Hot Reloading** - Instant updates during development
-- **Multiple Transports** - HTTP, WebSocket, and Server-Sent Events
+## 🚀 **Quick Start**
 
-### Enhanced Utilities
-- **BaseAPIEnhanced** - Enhanced API class with Redis, LLM, and logging
-- **APIResponseUtils** - Standardized response formatting
-- **RedisClient** - Caching and session management
-- **LLMService** - AI integration with OpenAI and mock services
-- **Logger** - Structured logging with context awareness
+### 1. Install & Create API
+```bash
+npm install easy-mcp-server
+mkdir -p api/users && touch api/users/get.js
+```
+
+### 2. Write Your First API
+```javascript
+// api/users/get.js
+const BaseAPI = require('easy-mcp-server/base-api');
+
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+}
+
+module.exports = GetUsers;
+```
+
+### 3. Start & Access
+```bash
+npx easy-mcp-server
+```
+- 🌐 **REST API**: http://localhost:3000
+- 🤖 **MCP Server**: http://localhost:3001
+- 📚 **OpenAPI**: http://localhost:3000/openapi.json
+- 🔍 **Swagger UI**: http://localhost:3000/docs
+
+---
+
+## 🛠 **Framework Features**
+
+| Feature | Description | Auto-Generated |
+|---------|-------------|----------------|
+| **Dynamic API Discovery** | Endpoints from file structure | ✅ |
+| **MCP Integration** | APIs become AI tools | ✅ |
+| **OpenAPI Generation** | Complete API documentation | ✅ |
+| **Hot Reloading** | Instant updates during development | ✅ |
+| **Enhanced Utilities** | LLM integration and logging | ✅ |
 
 ### File Structure Rules
-- **File Path = API Path**: `api/users/profile/get.js` → `GET /users/profile`
-- **File Name = HTTP Method**: `get.js` → `GET`, `post.js` → `POST`, etc.
-- **One Function = Everything**: A single `process()` method generates REST API, MCP tools, OpenAPI docs, and more
+| Rule | Example | Result |
+|------|---------|--------|
+| **File Path = API Path** | `api/users/profile/get.js` | `GET /users/profile` |
+| **File Name = HTTP Method** | `post.js` | `POST` |
+| **One Function = Everything** | `process(req, res)` | REST + MCP + OpenAPI |
 
-### Supported HTTP Methods
-- `get.js` → GET
-- `post.js` → POST  
-- `put.js` → PUT
-- `patch.js` → PATCH
-- `delete.js` → DELETE
-- `head.js` → HEAD
-- `options.js` → OPTIONS
-
-## API Design Best Practices
+## 📝 **API Design Best Practices**
 
 ### File Structure
 ```
@@ -61,11 +83,13 @@ api/
 ```
 
 ### HTTP Methods
-- **GET** - Retrieve data
-- **POST** - Create new resources
-- **PUT** - Update entire resources
-- **PATCH** - Partial updates
-- **DELETE** - Remove resources
+| Method | Purpose | Example |
+|--------|---------|---------|
+| **GET** | Retrieve data | `api/users/get.js` |
+| **POST** | Create resources | `api/users/post.js` |
+| **PUT** | Update resources | `api/users/put.js` |
+| **PATCH** | Partial updates | `api/users/patch.js` |
+| **DELETE** | Remove resources | `api/users/delete.js` |
 
 ### Response Standards
 ```javascript
@@ -92,26 +116,11 @@ api/
  * @description Get user information with optional filtering
  * @summary Retrieve user details
  * @tags users,data-access
- * @requestBody {
- *   "type": "object",
- *   "properties": {
- *     "limit": { "type": "number", "default": 10 },
- *     "offset": { "type": "number", "default": 0 },
- *     "filter": { "type": "string" }
- *   }
- * }
- * @responseSchema {
- *   "type": "object",
- *   "properties": {
- *     "success": { "type": "boolean" },
- *     "data": { "type": "object" },
- *     "message": { "type": "string" }
- *   }
- * }
+ * @requestBody { "type": "object", "properties": { "limit": { "type": "number", "default": 10 } } }
  */
 ```
 
-## MCP Integration
+## 🤖 **MCP Integration**
 
 ### Automatic Tool Generation
 Your API endpoints automatically become MCP tools that AI models can call:
@@ -124,7 +133,7 @@ class GetUsers extends BaseAPI {
   }
 }
 
-// Becomes this MCP tool
+// Becomes this MCP tool automatically
 {
   "name": "get_users",
   "description": "Get all users",
@@ -133,30 +142,24 @@ class GetUsers extends BaseAPI {
 ```
 
 ### MCP Server Endpoints
-- **Tools Discovery**: `tools/list` - Discover all available API endpoints as tools
-- **Tool Execution**: `tools/call` - Execute specific API endpoints with parameters
-- **Prompts Management**: `prompts/list` and `prompts/get` - Access template-based prompts
-- **Resources Access**: `resources/list` and `resources/read` - Access documentation and data
+| Endpoint | Purpose |
+|----------|---------|
+| `tools/list` | Discover all available API endpoints as tools |
+| `tools/call` | Execute specific API endpoints with parameters |
+| `prompts/list` | Access template-based prompts |
+| `resources/list` | Access documentation and data |
 
-### Custom Prompts
-Create reusable prompt templates:
-
+### Custom Prompts & Resources
 ```javascript
+// Custom prompts
 this.prompts = [{
   name: 'code_review',
   description: 'Review code for best practices',
   template: 'Please review this {{language}} code...',
-  arguments: [
-    { name: 'language', required: true },
-    { name: 'code', required: true }
-  ]
+  arguments: [{ name: 'language', required: true }]
 }];
-```
 
-### Custom Resources
-Provide documentation and data access:
-
-```javascript
+// Custom resources
 this.resources = [{
   uri: 'resource://api-docs',
   name: 'API Documentation',
@@ -166,7 +169,7 @@ this.resources = [{
 }];
 ```
 
-## Development Workflow
+## 🏗 **Development Workflow**
 
 ### 1. Create API Endpoints
 ```javascript
@@ -187,29 +190,15 @@ module.exports = MyAPI;
  * @description Get user information
  * @summary Retrieve user details
  * @tags users
- * @requestBody {
- *   "type": "object",
- *   "required": ["userId"],
- *   "properties": {
- *     "userId": { "type": "string" }
- *   }
- * }
+ * @requestBody { "type": "object", "required": ["userId"], "properties": { "userId": { "type": "string" } } }
  */
 ```
 
-### 3. Start Development Server
+### 3. Start & Test
 ```bash
+# Start development server
 easy-mcp-server
-```
 
-### 4. Access Everything
-- **REST API**: `http://localhost:3000`
-- **MCP Server**: `http://localhost:3001`
-- **OpenAPI**: `http://localhost:3000/openapi.json`
-- **Swagger UI**: `http://localhost:3000/docs`
-
-### 5. Test Your APIs
-```bash
 # Test REST API
 curl http://localhost:3000/users
 
@@ -219,14 +208,19 @@ curl -X POST http://localhost:3001/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-## Production Deployment
+### 4. Access Points
+- 🌐 **REST API**: http://localhost:3000
+- 🤖 **MCP Server**: http://localhost:3001
+- 📚 **OpenAPI**: http://localhost:3000/openapi.json
+- 🔍 **Swagger UI**: http://localhost:3000/docs
+
+## 🚀 **Production Deployment**
 
 ### Environment Configuration
 ```bash
 PORT=3000
 MCP_PORT=3001
 NODE_ENV=production
-REDIS_URL=redis://localhost:6379
 OPENAI_API_KEY=your-key-here
 ```
 
@@ -237,13 +231,11 @@ const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 class ProductionAPI extends BaseAPIEnhanced {
   constructor() {
     super('my-service', {
-      redis: { host: 'localhost', port: 6379 },
       llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
     });
   }
 
   async handleRequest(req, res) {
-    // Redis caching available via this.redis
     // LLM services available via this.llm
     // Standardized responses via this.responseUtils
   }
@@ -253,14 +245,11 @@ class ProductionAPI extends BaseAPIEnhanced {
 ### Docker Deployment
 ```dockerfile
 FROM node:18-alpine
-
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
-
 COPY . .
 EXPOSE 3000 3001
-
 CMD ["npx", "easy-mcp-server"]
 ```
 
@@ -289,11 +278,9 @@ spec:
         env:
         - name: NODE_ENV
           value: "production"
-        - name: REDIS_URL
-          value: "redis://redis-service:6379"
 ```
 
-## Monitoring and Logging
+## 📊 **Monitoring and Logging**
 
 ### Health Checks
 ```javascript
@@ -312,10 +299,12 @@ logger.logMCPCall('tool', params, result, duration);
 ```
 
 ### Performance Monitoring
-- Response time tracking
-- Error rate monitoring
-- MCP call analytics
-- Resource utilization
+| Metric | Description |
+|--------|-------------|
+| **Response Time** | API endpoint response times |
+| **Error Rate** | Error rate monitoring |
+| **MCP Calls** | MCP call analytics |
+| **Resource Usage** | Memory and CPU utilization |
 
 ### Metrics Collection
 ```javascript
@@ -324,16 +313,12 @@ const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 class MetricsAPI extends BaseAPIEnhanced {
   async process(req, res) {
     const metrics = await this.getMetrics();
-    
-    this.responseUtils.sendSuccessResponse(res, {
-      metrics: metrics,
-      timestamp: new Date().toISOString()
-    });
+    this.responseUtils.sendSuccessResponse(res, { metrics });
   }
 }
 ```
 
-## Security Considerations
+## 🔒 **Security Considerations**
 
 ### Input Validation
 ```javascript
@@ -347,8 +332,8 @@ if (!validation.isValid) {
 
 ### Rate Limiting
 ```javascript
-// Built-in rate limiting with Redis
-await this.redis.set(`rate_limit:${req.ip}`, count, 60);
+// Built-in rate limiting
+await this.rateLimit.check(req.ip);
 ```
 
 ### Authentication
@@ -377,24 +362,20 @@ app.use(cors({
 }));
 ```
 
-## Troubleshooting
+## 🔧 **Troubleshooting**
 
 ### Common Issues
-1. **Port conflicts** - Check if ports 3000/3001 are available
-2. **File not found** - Ensure API files are in the `api/` directory
-3. **MCP connection** - Verify MCP server is running on correct port
-4. **Redis connection** - Check Redis server status
-5. **Validation errors** - Verify request body matches schema
+| Issue | Solution |
+|-------|----------|
+| **Port conflicts** | Check if ports 3000/3001 are available |
+| **File not found** | Ensure API files are in the `api/` directory |
+| **MCP connection** | Verify MCP server is running on correct port |
+| **Validation errors** | Verify request body matches schema |
 
 ### Debug Mode
 ```bash
 DEBUG=* easy-mcp-server
 ```
-
-### Logs
-- Application logs: Console output
-- MCP logs: MCP server console
-- Error logs: Structured error reporting
 
 ### Health Check
 ```bash
@@ -402,7 +383,7 @@ curl http://localhost:3000/health
 curl http://localhost:3001/health
 ```
 
-## Advanced Features
+## 🚀 **Advanced Features**
 
 ### Custom Middleware
 ```javascript
@@ -420,16 +401,6 @@ class CustomMiddlewareAPI extends BaseAPI {
     console.log(`${req.method} ${req.path}`);
     next();
   }
-
-  validateAuth(req, res, next) {
-    // Authentication logic
-    next();
-  }
-
-  rateLimit(req, res, next) {
-    // Rate limiting logic
-    next();
-  }
 }
 ```
 
@@ -437,42 +408,16 @@ class CustomMiddlewareAPI extends BaseAPI {
 ```javascript
 class WebSocketAPI extends BaseAPI {
   process(req, res) {
-    // WebSocket upgrade
     if (req.headers.upgrade === 'websocket') {
       this.handleWebSocket(req, res);
     } else {
       res.json({ message: 'WebSocket endpoint' });
     }
   }
-
-  handleWebSocket(req, res) {
-    // WebSocket handling logic
-  }
 }
 ```
 
-### Server-Sent Events
-```javascript
-class SSEAPI extends BaseAPI {
-  process(req, res) {
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    });
-
-    const interval = setInterval(() => {
-      res.write(`data: ${JSON.stringify({ timestamp: new Date() })}\n\n`);
-    }, 1000);
-
-    req.on('close', () => {
-      clearInterval(interval);
-    });
-  }
-}
-```
-
-## Best Practices Summary
+## ✅ **Best Practices Summary**
 
 1. **Use descriptive file names** that match your API paths
 2. **Follow REST conventions** for HTTP methods and status codes
@@ -485,73 +430,7 @@ class SSEAPI extends BaseAPI {
 9. **Use environment variables** for configuration
 10. **Implement proper security** measures
 
-## API Examples
-
-### Basic CRUD Operations
-```javascript
-// GET /users
-class GetUsers extends BaseAPI {
-  process(req, res) {
-    res.json({ users: [] });
-  }
-}
-
-// POST /users
-class CreateUser extends BaseAPI {
-  process(req, res) {
-    const { name, email } = req.body;
-    res.json({ id: 1, name, email });
-  }
-}
-
-// PUT /users/:id
-class UpdateUser extends BaseAPI {
-  process(req, res) {
-    const { id } = req.params;
-    const updateData = req.body;
-    res.json({ id, ...updateData });
-  }
-}
-
-// DELETE /users/:id
-class DeleteUser extends BaseAPI {
-  process(req, res) {
-    const { id } = req.params;
-    res.json({ message: `User ${id} deleted` });
-  }
-}
-```
-
-### Advanced API with Validation
-```javascript
-class AdvancedAPI extends BaseAPI {
-  process(req, res) {
-    const { body, params, query } = req;
-    
-    // Input validation
-    if (!body.name || body.name.length < 2) {
-      return res.status(400).json({
-        success: false,
-        error: 'Name must be at least 2 characters',
-        errorCode: 'VALIDATION_ERROR'
-      });
-    }
-    
-    // Process request
-    const result = this.processData(body, params, query);
-    
-    // Success response
-    res.json({
-      success: true,
-      data: result,
-      message: 'Operation completed successfully',
-      timestamp: new Date().toISOString()
-    });
-  }
-}
-```
-
-## Configuration Reference
+## 📋 **Configuration Reference**
 
 ### Environment Variables
 ```bash
@@ -560,12 +439,6 @@ PORT=3000                    # REST API port
 MCP_PORT=3001               # MCP server port
 HOST=0.0.0.0                # Server host
 NODE_ENV=production         # Environment
-
-# Redis Configuration
-REDIS_URL=redis://localhost:6379
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
 
 # LLM Configuration
 OPENAI_API_KEY=your-key-here
@@ -597,4 +470,22 @@ Options:
   --help                 Show help
 ```
 
-This comprehensive guide covers all aspects of the easy-mcp-server framework. For specific use cases, refer to the specialized guides in the resources directory.
+---
+
+## 📚 **Related Documentation**
+
+| Document | Purpose | Best For |
+|----------|---------|----------|
+| **[README](README.md)** | Quick start and overview | Getting started |
+| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
+| **[Health Monitoring](health-monitoring.md)** | Monitoring and observability | Production monitoring |
+
+### 📋 **Quick Reference**
+- **Getting Started**: [README Quick Start](README.md#-quick-start) → [Framework Quick Start](#-quick-start)
+- **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
+- **Production**: [Health Monitoring](health-monitoring.md) → [Production Deployment](#-production-deployment)
+- **Advanced**: [Advanced Features](#-advanced-features) → [Best Practices](#-best-practices-summary)
+
+---
+
+**📚 This comprehensive guide covers all aspects of the easy-mcp-server framework. For specific use cases, refer to the specialized guides in the resources directory.**
