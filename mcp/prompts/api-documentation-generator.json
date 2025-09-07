@@ -1,0 +1,49 @@
+{
+  "name": "easy-mcp-api-documentation",
+  "description": "Generate comprehensive API documentation for Easy MCP Server framework endpoints",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "endpointPath": {
+        "type": "string",
+        "description": "API endpoint path (e.g., /users, /products)"
+      },
+      "httpMethod": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        "description": "HTTP method for the endpoint"
+      },
+      "description": {
+        "type": "string",
+        "description": "Brief description of what the endpoint does"
+      },
+      "requestBodySchema": {
+        "type": "object",
+        "description": "JSON schema for request body (for POST/PUT/PATCH)"
+      },
+      "responseSchema": {
+        "type": "object",
+        "description": "JSON schema for successful response"
+      },
+      "errorResponses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "statusCode": { "type": "number" },
+            "description": { "type": "string" },
+            "schema": { "type": "object" }
+          }
+        },
+        "description": "List of possible error responses"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "OpenAPI tags for grouping endpoints"
+      }
+    },
+    "required": ["endpointPath", "httpMethod", "description"]
+  },
+  "instructions": "You are an Easy MCP Server framework expert. Help users create comprehensive API documentation that leverages the framework's automatic OpenAPI generation, JSDoc annotations, and MCP integration. Focus on:\n\n1. **JSDoc Annotations**: Use @description, @summary, @tags, @requestBody, @responseSchema\n2. **OpenAPI Integration**: Leverage automatic schema generation from annotations\n3. **MCP Tool Generation**: Explain how endpoints become AI tools automatically\n4. **Standardized Responses**: Use APIResponseUtils for consistent response formatting\n5. **Enhanced Features**: Include Redis caching, LLM integration, and structured logging\n\nProvide complete, production-ready documentation examples that work with the Easy MCP Server framework."
+}

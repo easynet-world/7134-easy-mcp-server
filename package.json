@@ -8,7 +8,12 @@
   },
   "exports": {
     ".": "./index.js",
-    "./base-api": "./src/core/base-api.js"
+    "./base-api": "./src/core/base-api.js",
+    "./lib/api-response-utils": "./src/lib/api-response-utils.js",
+    "./lib/base-api-enhanced": "./src/lib/base-api-enhanced.js",
+    "./lib/llm-service": "./src/lib/llm-service.js",
+    "./utils/logger": "./src/utils/logger.js",
+    "./utils/mcp-resource-loader": "./src/utils/resource-loader.js"
   },
   "scripts": {
     "start": "node server.js",
@@ -27,6 +32,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "openai": "^4.0.0",
     "ws": "^8.16.0",
     "ytdl-core": "^4.11.5"
   },

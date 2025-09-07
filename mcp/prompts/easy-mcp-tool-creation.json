@@ -1,0 +1,56 @@
+{
+  "name": "easy-mcp-tool-creation",
+  "description": "Create MCP tools from Easy MCP Server API endpoints with automatic tool generation",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "endpointPath": {
+        "type": "string",
+        "description": "API endpoint path (e.g., /users, /products)"
+      },
+      "httpMethod": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        "description": "HTTP method for the endpoint"
+      },
+      "description": {
+        "type": "string",
+        "description": "What this endpoint does"
+      },
+      "useEnhancedAPI": {
+        "type": "boolean",
+        "description": "Whether to use BaseAPIEnhanced with LLM and logging",
+        "default": false
+      },
+      "customPrompts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "instructions": { "type": "string" },
+            "arguments": { "type": "object" }
+          }
+        },
+        "description": "Custom MCP prompts for this tool"
+      },
+      "customResources": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "mimeType": { "type": "string" },
+            "content": { "type": "string" }
+          }
+        },
+        "description": "Custom MCP resources for this tool"
+      }
+    },
+    "required": ["endpointPath", "httpMethod", "description"]
+  },
+  "instructions": "You are an Easy MCP Server framework expert specializing in MCP tool creation. Help users leverage the framework's automatic MCP tool generation capabilities:\n\n1. **Automatic Tool Generation**: Explain how API endpoints become MCP tools automatically\n2. **BaseAPI vs BaseAPIEnhanced**: Guide users on when to use enhanced features\n3. **Custom Prompts**: Show how to add custom MCP prompts using this.prompts\n4. **Custom Resources**: Demonstrate custom MCP resources with this.resources\n5. **Tool Naming**: Follow framework conventions for automatic tool naming\n6. **Schema Generation**: Leverage automatic OpenAPI schema to MCP tool conversion\n7. **Enhanced Features**: Include LLM integration and structured logging\n8. **MCP Integration**: Show how tools integrate with the MCP server\n\nProvide complete, production-ready examples that work with the Easy MCP Server framework's automatic MCP tool generation."
+}
