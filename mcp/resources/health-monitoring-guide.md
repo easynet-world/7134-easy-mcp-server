@@ -1,43 +1,89 @@
-# Health Service Monitoring Guide
+# Easy MCP Server Health Monitoring Guide
 
 ## Overview
-This guide provides comprehensive information about monitoring health services and endpoints in production environments.
+This guide provides comprehensive information about monitoring Easy MCP Server applications using the framework's built-in health monitoring capabilities, including automatic health endpoints, service status monitoring, and enhanced component health checks.
 
-## Key Metrics to Monitor
+## Easy MCP Server Built-in Health Monitoring
 
-### Response Time
-- **Average Response Time**: Track the mean response time across all requests
-- **95th Percentile**: Monitor the 95th percentile response time for performance outliers
-- **99th Percentile**: Track extreme performance cases
+### Automatic Health Endpoint
+The framework provides an automatic `/health` endpoint that returns:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 3600,
+  "version": "1.0.67"
+}
+```
 
-### Availability
-- **Uptime Percentage**: Monitor service availability over time
-- **Error Rate**: Track the percentage of failed requests
-- **MTTR (Mean Time To Recovery)**: Measure how quickly issues are resolved
+### Service Status Monitoring (BaseAPIEnhanced)
+Use `getServiceStatus()` to monitor all components:
+```javascript
+const status = await api.getServiceStatus();
+// Returns: { serviceName, isInitialized, components: { logger, redis, llm, resourceLoader } }
+```
 
-### Resource Utilization
-- **CPU Usage**: Monitor CPU consumption patterns
-- **Memory Usage**: Track memory allocation and garbage collection
-- **Disk I/O**: Monitor disk read/write operations
-- **Network I/O**: Track network traffic and bandwidth usage
+### Metrics Collection
+Use `getMetrics()` for performance data:
+```javascript
+const metrics = await api.getMetrics();
+// Returns: { serviceName, uptime, memory, timestamp, components: {...} }
+```
 
-## Monitoring Tools
+### Component Health Checks
+- **Logger**: Always available, structured logging with context
+- **Redis**: Connection status, performance metrics, cache hit rates
+- **LLM Service**: Provider status, response times, error rates
+- **Resource Loader**: MCP resource availability, prompt loading status
 
-### Prometheus
-- Time-series database for metrics collection
-- Powerful query language (PromQL)
-- Excellent for alerting and visualization
+## Implementation Examples
 
-### Grafana
-- Visualization and dashboard platform
-- Integrates well with Prometheus
-- Customizable dashboards and alerts
+### Basic Health Check Endpoint
+```javascript
+const BaseAPI = require('easy-mcp-server/base-api');
 
-### Custom Health Checks
-- Implement `/health` endpoints
-- Database connectivity checks
-- External service dependency checks
-- Resource availability verification
+class HealthCheck extends BaseAPI {
+  process(req, res) {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  }
+}
+```
+
+### Enhanced Health Monitoring
+```javascript
+const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+
+class EnhancedHealthCheck extends BaseAPIEnhanced {
+  constructor() {
+    super('health-service', {
+      redis: { host: 'localhost', port: 6379 },
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
+    });
+  }
+
+  async process(req, res) {
+    const status = await this.getServiceStatus();
+    const metrics = await this.getMetrics();
+    
+    this.responseUtils.sendSuccessResponse(res, {
+      status: status.isInitialized ? 'healthy' : 'degraded',
+      components: status.components,
+      metrics: metrics
+    });
+  }
+}
+```
+
+### MCP Health Monitoring
+```javascript
+// Monitor MCP server health
+const mcpHealth = await this.resourceLoader?.getStats();
+// Returns: { loadedPrompts, loadedResources, lastReload }
+```
 
 ## Best Practices
 

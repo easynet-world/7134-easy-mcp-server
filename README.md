@@ -398,9 +398,9 @@ my-api/
 ├── api/                          # API endpoints
 ├── mcp/                          # Custom MCP content (examples included)
 │   ├── prompts/                  # Your custom prompts
-│   │   ├── api-documentation-generator.json
-│   │   ├── health-service-monitoring.json
-│   │   └── mcp-tool-generator.json
+│   │   ├── easy-mcp-api-documentation.json
+│   │   ├── easy-mcp-health-monitoring.json
+│   │   └── easy-mcp-tool-creation.json
 │   └── resources/                # Your custom resources
 │       ├── health-monitoring-guide.md
 │       └── easy-mcp-server-guide.md
