@@ -86,6 +86,38 @@ npx easy-mcp-server
 - **OpenAPI**: `http://localhost:3000/openapi.json`
 - **Swagger UI**: `http://localhost:3000/docs`
 
+### 6. Add MCP Prompts (Optional)
+```bash
+mkdir -p mcp/prompts/my-category
+touch mcp/prompts/my-category/my-prompt.json
+```
+
+```json
+{
+  "description": "My custom prompt for AI models",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "input": { "type": "string", "description": "Input text" }
+    },
+    "required": ["input"]
+  },
+  "instructions": "You are a helpful assistant..."
+}
+```
+
+### 7. Add MCP Resources (Optional)
+```bash
+mkdir -p mcp/resources/docs
+touch mcp/resources/docs/my-guide.md
+```
+
+```markdown
+# My Guide
+
+This is a resource that AI models can access...
+```
+
 ---
 
 ## 📚 **Documentation**
@@ -188,6 +220,13 @@ Your APIs become AI tools automatically:
 }
 ```
 
+### Automatic MCP Prompts & Resources
+Your prompts and resources become available to AI models:
+- **Prompts**: Parameterized templates with JSON schema validation
+- **Resources**: Documentation, guides, and data files
+- **Auto-discovery**: Automatically loaded from `mcp/` directory
+- **MCP Protocol**: Available to AI models via standard MCP interface
+
 ### Automatic OpenAPI Documentation
 Complete API documentation generated automatically with:
 - Request/response schemas
@@ -195,12 +234,91 @@ Complete API documentation generated automatically with:
 - Error responses
 - Interactive Swagger UI
 
+### MCP Prompts Support
+Create reusable prompt templates for AI models:
+
+**File Structure:**
+```
+mcp/prompts/
+├── api-documentation/
+│   ├── easy-mcp-server.json    # API documentation prompt
+│   └── generator.json          # Documentation generator prompt
+├── health-monitoring/
+│   └── easy-mcp-server.json    # Health monitoring prompt
+└── tool-creation/
+    └── easy-mcp-server.json    # Tool creation prompt
+```
+
+**Prompt Format:**
+```json
+{
+  "description": "Generate comprehensive API documentation",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "endpointPath": {
+        "type": "string",
+        "description": "API endpoint path"
+      },
+      "httpMethod": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      }
+    },
+    "required": ["endpointPath", "httpMethod"]
+  },
+  "instructions": "You are an easy-mcp-server framework expert..."
+}
+```
+
+**Usage:**
+- Prompts are automatically loaded from `mcp/prompts/` directory
+- Organized by category (path = category, filename = prompt name)
+- Available to AI models via MCP protocol
+- Support parameterized templates with JSON schema validation
+
+### MCP Resources Support
+Provide documentation and data access to AI models:
+
+**File Structure:**
+```
+mcp/resources/
+└── guides/
+    ├── easy-mcp-server.md      # Framework guide
+    └── health-monitoring.md    # Health monitoring guide
+```
+
+**Resource Types:**
+- **Markdown files** (`.md`) - Documentation and guides
+- **JSON files** (`.json`) - Structured data and configurations
+- **Text files** (`.txt`) - Plain text resources
+
+**Usage:**
+- Resources are automatically loaded from `mcp/resources/` directory
+- Organized by category (path = category, filename = resource name)
+- Available to AI models via MCP protocol
+- Support multiple content types and formats
+
+**Example Resource:**
+```markdown
+# Framework Guide
+
+## Overview
+This guide covers the easy-mcp-server framework...
+
+## Getting Started
+1. Install the package
+2. Create your API structure
+3. Start the server
+```
+
 ---
 
 ## 🚀 **Production Ready**
 
 - **Hot Reloading** - Instant updates during development
 - **Multiple Transports** - HTTP, WebSocket, and Server-Sent Events
+- **MCP Protocol** - Full Model Context Protocol support for AI models
 - **Redis Integration** - Caching and session management
 - **LLM Integration** - AI service integration
 - **Structured Logging** - Comprehensive logging with context
