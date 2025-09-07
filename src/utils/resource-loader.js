@@ -17,17 +17,17 @@ const path = require('path');
 class MCPResourceLoader {
   /**
    * Create a new MCPResourceLoader instance
-   * @param {string} basePath - Base path for resources (default: './src')
+   * @param {string} basePath - Base path for framework resources (default: './src')
    * @param {Object} logger - Logger instance (optional)
    * @param {Object} options - Configuration options
    * @param {string} options.userPath - User's custom MCP path (default: './mcp')
-   * @param {boolean} options.loadDefaults - Load framework defaults (default: true)
+   * @param {boolean} options.loadDefaults - Load framework defaults (default: false)
    * @param {boolean} options.loadUser - Load user customizations (default: true)
    */
   constructor(basePath = './src', logger = null, options = {}) {
     this.basePath = path.resolve(basePath);
     this.userPath = path.resolve(options.userPath || './mcp');
-    this.loadDefaults = options.loadDefaults !== false;
+    this.loadDefaults = options.loadDefaults === true; // Default to false
     this.loadUser = options.loadUser !== false;
     this.logger = logger;
     this.resources = new Map();
@@ -342,7 +342,7 @@ class MCPResourceLoader {
   }
 
   /**
-   * Load default resources and prompts
+   * Load user resources and prompts
    * @returns {Promise<Object>} Object containing loaded resources and prompts
    */
   async loadDefaults() {
@@ -350,13 +350,17 @@ class MCPResourceLoader {
     const allPrompts = [];
     
     try {
-      // Load framework defaults
+      // Load framework defaults (if enabled)
       if (this.loadDefaults) {
-        const frameworkResources = await this.loadDirectory('resources');
-        const frameworkPrompts = await this.loadDirectory('prompts');
-        allResources.push(...frameworkResources);
-        allPrompts.push(...frameworkPrompts);
-        this.log('info', `Loaded ${frameworkResources.length} framework resources and ${frameworkPrompts.length} framework prompts`);
+        try {
+          const frameworkResources = await this.loadDirectory('resources');
+          const frameworkPrompts = await this.loadDirectory('prompts');
+          allResources.push(...frameworkResources);
+          allPrompts.push(...frameworkPrompts);
+          this.log('info', `Loaded ${frameworkResources.length} framework resources and ${frameworkPrompts.length} framework prompts`);
+        } catch (error) {
+          this.log('debug', `No framework resources found at ${this.basePath}`);
+        }
       }
       
       // Load user customizations

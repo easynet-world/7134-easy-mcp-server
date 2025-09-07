@@ -397,7 +397,14 @@ my-api/
 ```
 my-api/
 ├── api/                          # API endpoints
-├── mcp/                          # Custom MCP content
+├── mcp/                          # Custom MCP content (examples included)
+│   ├── prompts/                  # Your custom prompts
+│   │   ├── health-service-monitoring.json
+│   │   ├── wordpress-content-creation.json
+│   │   └── youtube-video-analysis.json
+│   └── resources/                # Your custom resources
+│       ├── health-monitoring-guide.md
+│       └── wordpress-content-guide.md
 ├── src/                          # Framework source code
 │   ├── lib/                      # Core library utilities
 │   │   ├── api-response-utils.js # Standardized responses
@@ -405,11 +412,9 @@ my-api/
 │   │   ├── redis-client.js       # Redis integration
 │   │   ├── llm-service.js        # LLM integration
 │   │   └── wordpress-source-manager.js # WordPress integration
-│   ├── utils/                    # Utility classes
-│   │   ├── logger.js             # Structured logging
-│   │   └── resource-loader.js    # MCP resource management
-│   ├── prompts/                  # Framework default prompts
-│   └── resources/                # Framework default resources
+│   └── utils/                    # Utility classes
+│       ├── logger.js             # Structured logging
+│       └── resource-loader.js    # MCP resource management
 ├── package.json
 └── .env
 ```
