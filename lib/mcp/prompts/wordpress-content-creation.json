@@ -1,0 +1,31 @@
+{
+  "name": "wordpress-content-creation",
+  "description": "Prompt for WordPress content creation and management",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "contentType": {
+        "type": "string",
+        "enum": ["post", "page", "custom"],
+        "description": "Type of content to create"
+      },
+      "title": {
+        "type": "string",
+        "description": "Content title"
+      },
+      "content": {
+        "type": "string",
+        "description": "Content body"
+      },
+      "seoKeywords": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "SEO keywords for the content"
+      }
+    },
+    "required": ["contentType", "title", "content"]
+  },
+  "instructions": "You are a WordPress content creation expert. Help users create high-quality, SEO-optimized content for WordPress. Provide guidance on content structure, SEO best practices, and WordPress-specific features."
+}

@@ -1,0 +1,27 @@
+
+{
+  "name": "youtube-video-analysis",
+  "description": "Prompt for analyzing YouTube videos and extracting insights",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "videoUrl": {
+        "type": "string",
+        "format": "uri",
+        "description": "YouTube video URL to analyze"
+      },
+      "analysisType": {
+        "type": "string",
+        "enum": ["metadata", "transcript", "sentiment", "keywords", "summary"],
+        "description": "Type of analysis to perform"
+      },
+      "language": {
+        "type": "string",
+        "description": "Preferred language for analysis",
+        "default": "en"
+      }
+    },
+    "required": ["videoUrl", "analysisType"]
+  },
+  "instructions": "You are a YouTube video analysis expert. Help users extract valuable insights from YouTube videos including metadata, transcripts, sentiment analysis, and content summaries. Provide comprehensive analysis based on the video content."
+}

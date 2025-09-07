@@ -182,6 +182,9 @@ class CreateUser extends BaseAPI {
 - **🌐 Multiple Transports** - HTTP, WebSocket, Server-Sent Events
 - **📝 Annotation Support** - JSDoc annotations for custom schemas
 - **🤖 AI Context** - LLM.txt and Agent.md for comprehensive AI integration
+- **🚀 Enhanced Utilities** - Redis caching, LLM integration, structured logging
+- **📊 Standardized Responses** - Consistent API response formatting
+- **🔧 WordPress Integration** - Source management and duplicate detection
 
 ---
 
@@ -292,8 +295,83 @@ npx @modelcontextprotocol/inspector
 
 ---
 
+## 🚀 **Enhanced Utilities (New!)**
+
+Easy MCP Server now includes powerful utilities for production-ready applications:
+
+### **BaseAPIEnhanced** - Enhanced API Class
+```javascript
+const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+
+class MyAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('my-service', {
+      redis: { host: 'localhost', port: 6379 },
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
+    });
+  }
+
+  async handleRequest(req, res) {
+    // Redis caching available via this.redis
+    // LLM services available via this.llm
+    // Standardized responses via this.responseUtils
+    // MCP resources via this.prompts and this.resources
+  }
+}
+```
+
+### **APIResponseUtils** - Standardized Responses
+```javascript
+const APIResponseUtils = require('easy-mcp-server/lib/api-response-utils');
+
+// Standardized error responses
+APIResponseUtils.sendValidationErrorResponse(res, errors);
+APIResponseUtils.sendNotFoundResponse(res, 'User');
+
+// Success responses
+APIResponseUtils.sendSuccessResponse(res, { data: result });
+APIResponseUtils.sendPaginatedResponse(res, data, pagination);
+```
+
+### **RedisClient** - Caching & Session Management
+```javascript
+const RedisClient = require('easy-mcp-server/lib/redis-client');
+
+const redis = new RedisClient('my-service');
+await redis.init();
+
+// Automatic JSON serialization/deserialization
+await redis.set('key', { data: 'value' }, 3600);
+const data = await redis.get('key');
+```
+
+### **LLMService** - AI Integration
+```javascript
+const { createLLMService } = require('easy-mcp-server/lib/llm-service');
+
+const llm = createLLMService({
+  provider: 'openai',
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const result = await llm.generate('Hello world');
+```
+
+### **Logger** - Structured Logging
+```javascript
+const Logger = require('easy-mcp-server/lib/logger');
+
+const logger = new Logger({ service: 'my-api', level: 'info' });
+logger.info('Request processed', { userId: 123 });
+logger.logRequest(req);
+logger.logMCPCall('tool', params, result, duration);
+```
+
+---
+
 ## 📁 **Project Structure**
 
+### **Basic Structure**
 ```
 my-api/
 ├── api/                          # API endpoints
@@ -306,6 +384,30 @@ my-api/
 │   └── products/
 │       ├── get.js               # GET /products
 │       └── post.js              # POST /products
+├── mcp/                          # Custom MCP content (optional)
+│   ├── prompts/                 # Your custom prompts
+│   │   └── my-prompt.json
+│   └── resources/               # Your custom resources
+│       └── my-guide.md
+├── package.json
+└── .env
+```
+
+### **Enhanced Structure (with utilities)**
+```
+my-api/
+├── api/                          # API endpoints
+├── mcp/                          # Custom MCP content
+├── lib/                          # Framework utilities (auto-loaded)
+│   ├── api-response-utils.js     # Standardized responses
+│   ├── base-api-enhanced.js      # Enhanced API class
+│   ├── redis-client.js           # Redis integration
+│   ├── llm-service.js            # LLM integration
+│   ├── logger.js                 # Structured logging
+│   └── mcp/
+│       ├── resource-loader.js    # MCP resource management
+│       ├── prompts/              # Framework default prompts
+│       └── resources/            # Framework default resources
 ├── package.json
 └── .env
 ```

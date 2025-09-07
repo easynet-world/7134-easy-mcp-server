@@ -8,7 +8,14 @@
   },
   "exports": {
     ".": "./index.js",
-    "./base-api": "./src/core/base-api.js"
+    "./base-api": "./src/core/base-api.js",
+    "./lib/api-response-utils": "./lib/api-response-utils.js",
+    "./lib/base-api-enhanced": "./lib/base-api-enhanced.js",
+    "./lib/redis-client": "./lib/redis-client.js",
+    "./lib/llm-service": "./lib/llm-service.js",
+    "./lib/logger": "./lib/logger.js",
+    "./lib/wordpress-source-manager": "./lib/wordpress-source-manager.js",
+    "./lib/mcp/resource-loader": "./lib/mcp/resource-loader.js"
   },
   "scripts": {
     "start": "node server.js",
@@ -27,6 +34,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "openai": "^4.0.0",
+    "redis": "^4.6.0",
     "ws": "^8.16.0",
     "ytdl-core": "^4.11.5"
   },

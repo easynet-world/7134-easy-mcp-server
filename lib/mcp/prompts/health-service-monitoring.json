@@ -1,0 +1,27 @@
+{
+  "name": "health-service-monitoring",
+  "description": "Prompt for monitoring health services and endpoints",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "serviceName": {
+        "type": "string",
+        "description": "Name of the service to monitor"
+      },
+      "endpoints": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of endpoints to monitor"
+      },
+      "checkInterval": {
+        "type": "number",
+        "description": "Check interval in seconds",
+        "default": 60
+      }
+    },
+    "required": ["serviceName", "endpoints"]
+  },
+  "instructions": "You are a health monitoring assistant. Help users set up comprehensive health monitoring for their services. Provide guidance on monitoring strategies, alerting thresholds, and best practices for service reliability."
+}
