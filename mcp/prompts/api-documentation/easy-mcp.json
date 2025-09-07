@@ -1,5 +1,4 @@
 {
-  "name": "easy-mcp-api-documentation",
   "description": "Generate comprehensive API documentation for Easy MCP Server framework endpoints",
   "arguments": {
     "type": "object",

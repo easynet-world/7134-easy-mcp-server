@@ -1,27 +1,29 @@
-# Easy MCP Framework - LLM.txt
+# easy-mcp-server - LLM Context
 
-## Overview
-Easy MCP Framework automatically generates OpenAPI documentation, MCP tools, and REST endpoints from simple JavaScript classes.
+## Framework Overview
+easy-mcp-server is a dynamic API framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI models with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard.
 
-## Key Features
-- **Auto Discovery**: Scans `api/` directory to create REST endpoints
-- **OpenAPI Generation**: Automatically generates OpenAPI 3.0 specifications
-- **MCP Integration**: Your APIs become AI tools instantly
-- **Annotation Support**: JSDoc annotations for custom schemas
-- **Hot Reloading**: Real-time updates across all interfaces
+## Key LLM Integration Features
 
-## File Structure
-```
-api/                    # API endpoints directory
-├── users/             # Resource-based organization
-│   ├── get.js         # GET /users
-│   ├── post.js        # POST /users
-│   └── profile/
-│       ├── get.js     # GET /users/profile
-│       └── put.js     # PUT /users/profile
-```
+### Automatic MCP Tool Generation
+- **API Endpoints → MCP Tools**: Every API endpoint automatically becomes an MCP tool
+- **Schema Generation**: OpenAPI schemas are automatically converted to MCP tool schemas
+- **Parameter Validation**: Request parameters are automatically validated
+- **Response Formatting**: Standardized response formats for consistent AI interactions
 
-## API Development Pattern
+### MCP Server Capabilities
+- **Tools Discovery**: `tools/list` - Discover all available API endpoints as tools
+- **Tool Execution**: `tools/call` - Execute specific API endpoints with parameters
+- **Prompts Management**: `prompts/list` and `prompts/get` - Access template-based prompts
+- **Resources Access**: `resources/list` and `resources/read` - Access documentation and data
+
+### LLM-Optimized Features
+- **Structured Responses**: All API responses follow consistent JSON schemas
+- **Error Handling**: Standardized error responses with clear error codes
+- **Context Awareness**: Built-in logging and context tracking for AI interactions
+- **Hot Reloading**: Real-time updates to tools and resources without restart
+
+## API Development Pattern for LLMs
 
 ### Basic API Class
 ```javascript
@@ -54,46 +56,29 @@ const BaseAPI = require('easy-mcp-server/base-api');
  *   "type": "object",
  *   "required": ["name", "email"],
  *   "properties": {
- *     "name": { "type": "string", "minLength": 2, "maxLength": 50 },
- *     "email": { "type": "string", "format": "email" },
- *     "age": { "type": "integer", "minimum": 0, "maximum": 120 }
+ *     "name": { "type": "string", "minLength": 2 },
+ *     "email": { "type": "string", "format": "email" }
  *   }
  * }
  * @responseSchema {
  *   "type": "object",
  *   "properties": {
  *     "success": { "type": "boolean" },
- *     "data": {
- *       "type": "object",
- *       "properties": {
- *         "id": { "type": "string", "format": "uuid" },
- *         "name": { "type": "string" },
- *         "email": { "type": "string", "format": "email" },
- *         "createdAt": { "type": "string", "format": "date-time" }
- *       }
- *     }
+ *     "data": { "type": "object" },
+ *     "message": { "type": "string" }
  *   }
- * }
- * @errorResponses {
- *   "400": { "description": "Validation error" },
- *   "409": { "description": "User already exists" }
  * }
  */
 class CreateUser extends BaseAPI {
   process(req, res) {
-    const { name, email, age } = req.body;
+    const { name, email } = req.body;
     
-    // Validation logic
-    if (!name || name.length < 2) {
-      return res.status(400).json({ error: 'Name must be at least 2 characters long' });
-    }
+    // Validation is automatic based on @requestBody annotation
+    // Response schema is automatically documented
     
-    // Business logic
-    const user = { id: this.generateUUID(), name, email, age, createdAt: new Date() };
-    
-    res.status(201).json({
+    res.json({
       success: true,
-      data: user,
+      data: { id: 1, name, email },
       message: 'User created successfully'
     });
   }
@@ -102,354 +87,304 @@ class CreateUser extends BaseAPI {
 module.exports = CreateUser;
 ```
 
-## HTTP Method Mapping
-- `get.js` → GET endpoint
-- `post.js` → POST endpoint
-- `put.js` → PUT endpoint
-- `patch.js` → PATCH endpoint
-- `delete.js` → DELETE endpoint
-- `head.js` → HEAD endpoint
-- `options.js` → OPTIONS endpoint
+## MCP Tool Examples
 
-## Available Endpoints
-
-### Framework Endpoints
-- `GET /health` - Health check
-- `GET /api-info` - Framework information
-- `GET /openapi.json` - OpenAPI specification
-- `GET /docs` - Swagger UI documentation
-- `GET /mcp/tools` - Available MCP tools
-- `GET /LLM.txt` - This file (AI context)
-
-### MCP Server
-- **URL**: `http://localhost:3001`
-- **Type**: Streamable HTTP
-- **WebSocket**: `ws://localhost:3001`
-
-## Annotation System
-
-### Supported Annotations
-- `@description` - Detailed description
-- `@summary` - Short summary
-- `@tags` - Comma-separated tags
-- `@requestBody` - JSON schema for request body
-- `@responseSchema` - JSON schema for success response
-- `@errorResponses` - Error response schemas
-
-### Annotation Format
-```javascript
-/**
- * @requestBody {
- *   "type": "object",
- *   "properties": {
- *     "field": { "type": "string" }
- *   }
- * }
- */
-```
-
-## OpenAPI Generation
-
-### Automatic Features
-- Path discovery from file structure
-- HTTP method mapping
-- Runtime response analysis
-- Schema inference from actual data
-- Default error responses
-
-### Annotation Integration
-- Custom request/response schemas
-- Detailed descriptions and summaries
-- Error response documentation
-- Tag-based API grouping
-
-## MCP Integration
-
-### Tool Generation
-- Automatic tool discovery from API endpoints
-- Tool names: `{method}_{path}` (e.g., `get_users`)
-- Description from annotations or auto-generated
-- Input schema from request body annotations
-
-### Prompt Support
-- Template-based prompt system with parameter substitution
-- Prompts defined in API processor classes
-- Support for structured arguments with validation
-- Auto-discovery from API endpoints
-
-### Resource Support
-- Access to documentation, configuration, and data
-- Multiple MIME types (JSON, Markdown, Plain Text)
-- Dynamic content updates
-- URI-based resource identification
-
-### Available Commands
-- `tools/list` - Discover available endpoints
-- `tools/call` - Execute specific endpoint
-- `prompts/list` - List available prompt templates
-- `prompts/get` - Get prompt with parameter substitution
-- `resources/list` - List available resources
-- `resources/read` - Read resource content
-- `ping` - Health check
-
-
-## Development Workflow
-
-### 1. Create API Endpoint
-```bash
-mkdir -p api/users
-touch api/users/post.js
-```
-
-### 2. Implement API Class
-```javascript
-// api/users/post.js
-const BaseAPI = require('easy-mcp-server/base-api');
-
-class CreateUser extends BaseAPI {
-  constructor() {
-    super();
-    
-    // Define prompts for this API
-    this.prompts = [
-      {
-        name: 'user_creation_prompt',
-        description: 'Generate user creation documentation',
-        template: 'Create a user with name: {{name}} and email: {{email}}',
-        arguments: [
-          {
-            name: 'name',
-            description: 'User name',
-            required: true
-          },
-          {
-            name: 'email',
-            description: 'User email',
-            required: true
-          }
-        ]
-      }
-    ];
-    
-    // Define resources for this API
-    this.resources = [
-      {
-        uri: 'users://schema',
-        name: 'User Schema',
-        description: 'User data structure',
-        mimeType: 'application/json',
-        content: JSON.stringify({
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            email: { type: 'string', format: 'email' }
-          }
-        })
-      }
-    ];
-  }
-
-  process(req, res) {
-    res.json({ message: 'User created' });
-  }
-}
-
-module.exports = CreateUser;
-```
-
-### 3. Start Server
-```bash
-easy-mcp-server
-```
-
-### 4. Access Interfaces
-- **REST API**: `http://localhost:3000/users`
-- **OpenAPI**: `http://localhost:3000/openapi.json`
-- **Swagger UI**: `http://localhost:3000/docs`
-- **MCP Tools**: Available to AI models
-### 5. Using MCP with AI Models
-
-#### Tool Usage
-- Execute API endpoints as MCP tools
-- Automatic input schema validation
-- Rich response formatting
-
-#### Prompt Usage
-- Access template-based prompts
-- Parameter substitution support
-- Context-aware prompt generation
-
-#### Resource Usage
-- Access documentation and schemas
-- Real-time configuration data
-- Multi-format content support
-
-## MCP Client Examples
-
-### Using MCP Inspector
-```bash
-npx @modelcontextprotocol/inspector
-# Connect to: http://localhost:3001
-```
-
-### Cursor IDE Configuration
+### Tool Discovery
 ```json
-{
-  "mcpServers": {
-    "easy-mcp-server": {
-      "url": "http://localhost:3001/",
-      "transport": "http"
-    }
-  }
-}
-```
-
-### Direct API Usage
-```javascript
-// List all prompts
-POST http://localhost:3001/
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "prompts/list"
+  "method": "tools/list"
 }
+```
 
-// Get a prompt with parameters
-POST http://localhost:3001/
+### Tool Execution
+```json
 {
   "jsonrpc": "2.0",
-  "id": 2,
-  "method": "prompts/get",
+  "id": 1,
+  "method": "tools/call",
   "params": {
-    "name": "user_creation_prompt",
+    "name": "create_user",
     "arguments": {
       "name": "John Doe",
       "email": "john@example.com"
     }
   }
 }
+```
 
-// List all resources
-POST http://localhost:3001/
+### Prompts Access
+```json
 {
   "jsonrpc": "2.0",
-  "id": 3,
-  "method": "resources/list"
-}
-
-// Read a resource
-POST http://localhost:3001/
-{
-  "jsonrpc": "2.0",
-  "id": 4,
-  "method": "resources/read",
+  "id": 1,
+  "method": "prompts/get",
   "params": {
-    "uri": "users://schema"
+    "name": "api-documentation-generator",
+    "arguments": {
+      "endpointPath": "/users",
+      "httpMethod": "GET",
+      "description": "Get all users"
+    }
   }
 }
 ```
-Connect your server to AI models:
 
-```bash
-# Connect to MCP Inspector
-npx @modelcontextprotocol/inspector
-# Use URL: http://localhost:3001
-# Type: Streamable HTTP
+### Resources Access
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "resources/read",
+  "params": {
+    "uri": "resource://easy-mcp-server-guide"
+  }
+}
 ```
 
-## Configuration
+## Enhanced Features for AI Integration
 
-### Environment Variables
-- `SERVER_PORT` - API server port (default: 3000)
-- `SERVER_HOST` - API server host (default: localhost)
-- `MCP_PORT` - MCP server port (default: 3001)
-- `NODE_ENV` - Environment (development/production)
-
-## Best Practices
-
-### API Design
-1. Use resource-based URLs (`/users`, `/users/:id`)
-2. Follow REST conventions
-3. Use appropriate HTTP methods
-4. Return consistent response formats
-
-### Annotations
-1. Use `@description` for detailed explanations
-2. Use `@tags` to group related endpoints
-3. Define `@requestBody` for POST/PUT endpoints
-4. Document `@errorResponses` for error cases
-5. Keep `@summary` concise
-
-### File Organization
-1. Group related endpoints in directories
-2. Use descriptive file names
-3. Follow the HTTP method naming convention
-4. Keep API classes focused and single-purpose
-
-## Error Handling
-
-### Framework Errors
-- 400: Bad request (validation errors)
-- 404: Endpoint not found
-- 500: Internal server error
-
-### Custom Error Responses
+### BaseAPIEnhanced with LLM Services
 ```javascript
-res.status(400).json({ 
-  success: false, 
-  error: 'Validation failed' 
+const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+
+class AIEnhancedAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('ai-service', {
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
+    });
+  }
+
+  async process(req, res) {
+    // LLM service available via this.llm
+    const response = await this.llm.generateResponse({
+      prompt: 'Analyze this data: ' + JSON.stringify(req.body),
+      model: 'gpt-4'
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { analysis: response });
+  }
+}
+```
+
+### Structured Logging for AI Context
+```javascript
+const Logger = require('easy-mcp-server/utils/logger');
+const logger = new Logger({ service: 'ai-api' });
+
+class LoggedAPI extends BaseAPI {
+  process(req, res) {
+    logger.info('AI request received', { 
+      endpoint: req.path,
+      method: req.method,
+      userAgent: req.get('User-Agent')
+    });
+    
+    // Process request
+    res.json({ result: 'success' });
+    
+    logger.info('AI request completed', { 
+      statusCode: res.statusCode,
+      responseTime: Date.now() - req.startTime
+    });
+  }
+}
+```
+
+## File Structure for LLM Tools
+
+### Automatic Tool Naming
+```
+api/
+├── users/
+│   ├── get.js          → MCP tool: "get_users"
+│   ├── post.js         → MCP tool: "post_users"
+│   └── profile/
+│       ├── get.js      → MCP tool: "get_users_profile"
+│       └── put.js      → MCP tool: "put_users_profile"
+└── products/
+    ├── get.js          → MCP tool: "get_products"
+    └── post.js         → MCP tool: "post_products"
+```
+
+### Tool Schema Generation
+The framework automatically generates MCP tool schemas from:
+- JSDoc annotations (`@requestBody`, `@responseSchema`)
+- File structure (path and method)
+- Parameter validation rules
+- Response format standards
+
+## Error Handling for AI Models
+
+### Standardized Error Responses
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "errorCode": "VALIDATION_ERROR",
+  "details": {
+    "field": "email",
+    "message": "Invalid email format"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### Common Error Codes
+- `VALIDATION_ERROR` - Request validation failed
+- `NOT_FOUND` - Resource not found
+- `UNAUTHORIZED` - Authentication required
+- `FORBIDDEN` - Access denied
+- `RATE_LIMITED` - Too many requests
+- `INTERNAL_ERROR` - Server error
+
+## Best Practices for LLM Integration
+
+### 1. Use Descriptive Annotations
+```javascript
+/**
+ * @description Analyze user sentiment from text input
+ * @summary Sentiment analysis endpoint
+ * @tags ai,analysis
+ */
+```
+
+### 2. Provide Clear Error Messages
+```javascript
+if (!req.body.text) {
+  return res.status(400).json({
+    success: false,
+    error: "Text input is required",
+    errorCode: "MISSING_TEXT"
+  });
+}
+```
+
+### 3. Use Standardized Response Formats
+```javascript
+res.json({
+  success: true,
+  data: { sentiment: 'positive', confidence: 0.95 },
+  message: 'Analysis completed',
+  timestamp: new Date().toISOString()
 });
 ```
 
-## Common Issues & Solutions
+### 4. Implement Proper Validation
+```javascript
+const { body } = req;
+if (!body.text || typeof body.text !== 'string') {
+  return res.status(400).json({
+    success: false,
+    error: "Invalid text input",
+    errorCode: "INVALID_INPUT"
+  });
+}
+```
 
-### Port Conflicts
-- Check if ports 3000/3001 are available
-- Use different ports via environment variables
+## MCP Server Endpoints
 
-### File Not Loaded
-- Verify file naming and path structure
-- Check for syntax errors in JavaScript files
+### HTTP Endpoints
+- `POST /mcp` - MCP JSON-RPC requests
+- `GET /sse` - Server-Sent Events for real-time updates
+- `GET /health` - Health check endpoint
 
-### Annotation Errors
-- Verify JSON syntax in annotations
-- Check for proper JSDoc format
+### WebSocket Support
+- `ws://localhost:3001` - WebSocket MCP server
+- Real-time tool updates
+- Bidirectional communication
 
-### MCP Connection Issues
-- Verify MCP server is running on port 3001
-- Use Streamable HTTP connection type
-- Check WebSocket endpoint accessibility
+## Configuration for AI Models
 
-## Testing
-
-### Running Tests
+### Environment Variables
 ```bash
-npm test
+MCP_PORT=3001                    # MCP server port
+OPENAI_API_KEY=your-key-here     # OpenAI API key
+REDIS_URL=redis://localhost:6379 # Redis for caching
+NODE_ENV=production              # Environment
 ```
 
-### Framework Tests
-- Unit tests for core modules
-- Integration tests for API endpoints
-- MCP protocol tests
-- OpenAPI generation tests
-
-## Deployment
-
-### Production Setup
-1. Set `NODE_ENV=production`
-2. Configure environment variables
-3. Use process manager (PM2, etc.)
-4. Set up reverse proxy (nginx, etc.)
-
-### Docker Support
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 3000 3001
-CMD ["easy-mcp-server"]
+### MCP Server Options
+```javascript
+const mcpServer = new DynamicAPIMCPServer({
+  port: 3001,
+  host: '0.0.0.0',
+  enableWebSocket: true,
+  enableSSE: true
+});
 ```
 
-This framework is designed to make API development as simple as possible while providing powerful features like automatic OpenAPI generation and MCP integration. The annotation system allows for precise control when needed, while the automatic discovery handles the common cases seamlessly.
+## Integration Examples
+
+### OpenAI Integration
+```javascript
+class OpenAIAPI extends BaseAPIEnhanced {
+  async process(req, res) {
+    const { prompt } = req.body;
+    
+    const response = await this.llm.generateResponse({
+      prompt,
+      model: 'gpt-4',
+      maxTokens: 1000
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { response });
+  }
+}
+```
+
+### Anthropic Integration
+```javascript
+class AnthropicAPI extends BaseAPIEnhanced {
+  async process(req, res) {
+    const { message } = req.body;
+    
+    const response = await this.llm.generateResponse({
+      prompt: message,
+      model: 'claude-3-sonnet',
+      maxTokens: 1000
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { response });
+  }
+}
+```
+
+## Troubleshooting for AI Models
+
+### Common Issues
+1. **Tool Not Found**: Check if API file exists in correct path
+2. **Validation Errors**: Verify request body matches schema
+3. **Connection Issues**: Ensure MCP server is running on correct port
+4. **Authentication**: Check API keys and permissions
+
+### Debug Mode
+```bash
+DEBUG=* easy-mcp-server
+```
+
+### Health Check
+```bash
+curl http://localhost:3001/health
+```
+
+## Performance Considerations
+
+### Caching
+- Redis integration for response caching
+- Automatic cache invalidation
+- Configurable TTL settings
+
+### Rate Limiting
+- Built-in rate limiting per IP
+- Configurable limits
+- Redis-backed rate limiting
+
+### Monitoring
+- Request/response logging
+- Performance metrics
+- Error tracking
+- Health monitoring
+
+For complete framework documentation, see: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)

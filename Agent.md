@@ -1,422 +1,479 @@
-# Easy MCP Server - Agent Context
+# easy-mcp-server - Agent Context
 
-## Overview
-Easy MCP Server is a dynamic API framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI agents with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard.
+## Agent Integration Overview
+easy-mcp-server provides AI agents with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard. Agents can discover, call, and interact with APIs as if they were native tools.
 
-## Core Principles
+## Core Agent Capabilities
 
-### File Structure = API Structure
-- **File Path = API Path**: `api/users/profile/get.js` → `GET /users/profile`
-- **File Name = HTTP Method**: `get.js` → `GET`, `post.js` → `POST`, etc.
-- **One Function = Everything**: A single `process()` method generates REST API, MCP tools, OpenAPI docs, and more
+### Automatic Tool Discovery
+Agents can automatically discover all available API endpoints as MCP tools:
+- **Dynamic Discovery**: Tools are automatically generated from file structure
+- **Schema Generation**: Complete input/output schemas for each tool
+- **Parameter Validation**: Automatic validation of tool parameters
+- **Error Handling**: Standardized error responses for agent understanding
 
-### Supported HTTP Methods
-- `get.js` → GET
-- `post.js` → POST  
-- `put.js` → PUT
-- `patch.js` → PATCH
-- `delete.js` → DELETE
-- `head.js` → HEAD
-- `options.js` → OPTIONS
+### Agent-Optimized Features
+- **Context Awareness**: Built-in logging and context tracking
+- **Hot Reloading**: Real-time tool updates without restart
+- **Multiple Transports**: HTTP, WebSocket, and Server-Sent Events
+- **Structured Responses**: Consistent JSON schemas for reliable parsing
 
-## API Development Pattern
+## Agent Development Workflow
 
-### Basic API Class
-```javascript
-const BaseAPI = require('easy-mcp-server/base-api');
-
-class MyAPI extends BaseAPI {
-  process(req, res) {
-    res.json({ message: 'Hello World' });
-  }
-}
-
-module.exports = MyAPI;
-```
-
-### Advanced API with Annotations
-```javascript
-const BaseAPI = require('easy-mcp-server/base-api');
-
-/**
- * @description Create a new user with validation
- * @summary Create user endpoint
- * @tags users,authentication
- * @requestBody {
- *   "type": "object",
- *   "required": ["name", "email"],
- *   "properties": {
- *     "name": { "type": "string", "minLength": 2 },
- *     "email": { "type": "string", "format": "email" }
- *   }
- * }
- * @responseSchema {
- *   "type": "object",
- *   "properties": {
- *     "success": { "type": "boolean" },
- *     "data": { "type": "object" }
- *   }
- * }
- */
-class CreateUser extends BaseAPI {
-  process(req, res) {
-    const { name, email } = req.body;
-    res.json({ success: true, data: { name, email, id: Date.now() } });
-  }
-}
-
-module.exports = CreateUser;
-```
-
-## MCP Integration
-
-### MCP Tools
-All API endpoints automatically become MCP tools:
-- **Auto-discovery**: Scans `api/` directory and creates tools
-- **Rich schemas**: Input/output validation with OpenAPI integration
-- **Real-time execution**: Execute API endpoints directly from AI models
-
-### MCP Prompts
-Template-based prompts with parameter substitution:
-```javascript
-class PromptAPI extends BaseAPI {
-  constructor() {
-    super();
-    this.prompts = [{
-      name: 'code_review',
-      description: 'Review code for best practices',
-      template: 'Please review this {{language}} code:\n\n```{{language}}\n{{code}}\n```',
-      arguments: [
-        { name: 'language', description: 'Programming language', required: true },
-        { name: 'code', description: 'Code to review', required: true }
-      ]
-    }];
-  }
-}
-```
-
-### MCP Resources
-Access to documentation, configuration, and data:
-```javascript
-class ResourceAPI extends BaseAPI {
-  constructor() {
-    super();
-    this.resources = [{
-      uri: 'config://server-settings',
-      name: 'Server Configuration',
-      description: 'Current server settings',
-      mimeType: 'application/json',
-      content: JSON.stringify({ port: 3000, features: ['tools', 'prompts', 'resources'] })
-    }];
-  }
-}
-```
-
-## Available MCP Commands
-
-### Tools
-- `tools/list` - List all available API endpoints as tools
-- `tools/call` - Execute a specific API endpoint
-
-### Prompts
-- `prompts/list` - List all available prompt templates
-- `prompts/get` - Get a prompt with parameter substitution
-
-### Resources
-- `resources/list` - List all available resources
-- `resources/read` - Read resource content by URI
-
-### Utility
-- `ping` - Health check
-
-## Server Endpoints
-
-### Framework Endpoints
-- `GET /health` - Health check
-- `GET /api-info` - Framework information
-- `GET /openapi.json` - OpenAPI specification
-- `GET /docs` - Swagger UI documentation
-- `GET /LLM.txt` - AI context file
-- `GET /Agent.md` - This agent context file
-
-### MCP Server
-- **URL**: `http://localhost:3001`
-- **Type**: Streamable HTTP
-- **WebSocket**: `ws://localhost:3001`
-
-## Annotation System
-
-### Supported Annotations
-- `@description` - Detailed description
-- `@summary` - Short summary
-- `@tags` - Comma-separated tags
-- `@requestBody` - JSON schema for request body
-- `@responseSchema` - JSON schema for success response
-- `@errorResponses` - Error response schemas
-
-### Annotation Format
-```javascript
-/**
- * @requestBody {
- *   "type": "object",
- *   "properties": {
- *     "field": { "type": "string" }
- *   }
- * }
- */
-```
-
-## Development Workflow
-
-### 1. Create API Endpoint
+### 1. Create API Endpoints
 ```bash
 mkdir -p api/users
-touch api/users/post.js
+touch api/users/get.js
 ```
 
-### 2. Implement API Class
+### 2. Implement Agent-Friendly APIs
 ```javascript
-// api/users/post.js
+// api/users/get.js
 const BaseAPI = require('easy-mcp-server/base-api');
 
-class CreateUser extends BaseAPI {
-  constructor() {
-    super();
-    
-    // Define prompts for this API
-    this.prompts = [{
-      name: 'user_creation_prompt',
-      description: 'Generate user creation documentation',
-      template: 'Create a user with name: {{name}} and email: {{email}}',
-      arguments: [
-        { name: 'name', description: 'User name', required: true },
-        { name: 'email', description: 'User email', required: true }
-      ]
-    }];
-    
-    // Define resources for this API
-    this.resources = [{
-      uri: 'users://schema',
-      name: 'User Schema',
-      description: 'User data structure',
-      mimeType: 'application/json',
-      content: JSON.stringify({
-        type: 'object',
-        properties: {
-          name: { type: 'string' },
-          email: { type: 'string', format: 'email' }
-        }
-      })
-    }];
-  }
-
+/**
+ * @description Get all users with optional filtering
+ * @summary Retrieve user list
+ * @tags users,data-access
+ * @requestBody {
+ *   "type": "object",
+ *   "properties": {
+ *     "limit": { "type": "number", "default": 10 },
+ *     "offset": { "type": "number", "default": 0 },
+ *     "filter": { "type": "string" }
+ *   }
+ * }
+ */
+class GetUsers extends BaseAPI {
   process(req, res) {
-    res.json({ message: 'User created' });
+    const { limit = 10, offset = 0, filter } = req.body;
+    
+    // Agent-friendly response format
+    res.json({
+      success: true,
+      data: {
+        users: [],
+        pagination: { limit, offset, total: 0 }
+      },
+      message: 'Users retrieved successfully',
+      timestamp: new Date().toISOString()
+    });
   }
 }
 
-module.exports = CreateUser;
+module.exports = GetUsers;
 ```
 
-### 3. Start Server
-```bash
-easy-mcp-server
-```
-
-### 4. Access Interfaces
-- **REST API**: `http://localhost:3000/users`
-- **OpenAPI**: `http://localhost:3000/openapi.json`
-- **Swagger UI**: `http://localhost:3000/docs`
-- **MCP Tools**: Available to AI models
-
-## AI Agent Usage
-
-### Using MCP Inspector
-```bash
-npx @modelcontextprotocol/inspector
-# Connect to: http://localhost:3001
-# Type: Streamable HTTP
-```
-
-### Direct API Usage
-```javascript
-// List all tools
-POST http://localhost:3001/
+### 3. Agent Tool Discovery
+```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "method": "tools/list"
 }
+```
 
-// Call a tool
-POST http://localhost:3001/
+### 4. Agent Tool Execution
+```json
 {
   "jsonrpc": "2.0",
-  "id": 2,
+  "id": 1,
   "method": "tools/call",
   "params": {
-    "name": "post_users",
+    "name": "get_users",
     "arguments": {
-      "body": { "name": "John", "email": "john@example.com" }
+      "limit": 5,
+      "filter": "active"
     }
-  }
-}
-
-// Get a prompt
-POST http://localhost:3001/
-{
-  "jsonrpc": "2.0",
-  "id": 3,
-  "method": "prompts/get",
-  "params": {
-    "name": "user_creation_prompt",
-    "arguments": {
-      "name": "John Doe",
-      "email": "john@example.com"
-    }
-  }
-}
-
-// List all resources
-POST http://localhost:3001/
-{
-  "jsonrpc": "2.0",
-  "id": 4,
-  "method": "resources/list"
-}
-
-// Read a resource
-POST http://localhost:3001/
-{
-  "jsonrpc": "2.0",
-  "id": 5,
-  "method": "resources/read",
-  "params": {
-    "uri": "users://schema"
   }
 }
 ```
 
-## Configuration
+## Agent-Specific API Patterns
+
+### Data Retrieval APIs
+```javascript
+class GetUserData extends BaseAPI {
+  process(req, res) {
+    const { userId } = req.params;
+    
+    // Agent-friendly structured response
+    res.json({
+      success: true,
+      data: {
+        user: { id: userId, name: 'John Doe' },
+        metadata: { retrievedAt: new Date().toISOString() }
+      },
+      message: 'User data retrieved',
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
+
+### Data Modification APIs
+```javascript
+class UpdateUserData extends BaseAPI {
+  process(req, res) {
+    const { userId } = req.params;
+    const updateData = req.body;
+    
+    // Agent-friendly response with confirmation
+    res.json({
+      success: true,
+      data: {
+        user: { id: userId, ...updateData },
+        changes: updateData
+      },
+      message: 'User updated successfully',
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
+
+### Analysis APIs
+```javascript
+class AnalyzeData extends BaseAPI {
+  process(req, res) {
+    const { data, analysisType } = req.body;
+    
+    // Agent-friendly analysis response
+    res.json({
+      success: true,
+      data: {
+        analysis: { type: analysisType, result: 'positive' },
+        confidence: 0.95,
+        insights: ['Key insight 1', 'Key insight 2']
+      },
+      message: 'Analysis completed',
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
+
+## Enhanced Agent Features
+
+### BaseAPIEnhanced for Agent Context
+```javascript
+const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+
+class AgentAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('agent-service', {
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY },
+      redis: { host: 'localhost', port: 6379 }
+    });
+  }
+
+  async process(req, res) {
+    // Agent context tracking
+    const agentId = req.headers['x-agent-id'];
+    const sessionId = req.headers['x-session-id'];
+    
+    // Log agent interaction
+    this.logger.info('Agent API call', {
+      agentId,
+      sessionId,
+      endpoint: req.path,
+      method: req.method
+    });
+    
+    // Process with agent context
+    const result = await this.processWithContext(req, agentId);
+    
+    // Cache result for agent
+    await this.redis.set(`agent:${agentId}:${req.path}`, JSON.stringify(result), 300);
+    
+    this.responseUtils.sendSuccessResponse(res, result);
+  }
+}
+```
+
+### Agent Session Management
+```javascript
+class AgentSessionAPI extends BaseAPI {
+  process(req, res) {
+    const { agentId, action, data } = req.body;
+    
+    // Agent session handling
+    const session = this.getAgentSession(agentId);
+    
+    switch (action) {
+      case 'start':
+        session.start();
+        break;
+      case 'update':
+        session.update(data);
+        break;
+      case 'end':
+        session.end();
+        break;
+    }
+    
+    res.json({
+      success: true,
+      data: { session: session.getState() },
+      message: `Session ${action} completed`,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
+
+## Agent Tool Categories
+
+### Data Access Tools
+- `get_users` - Retrieve user information
+- `get_products` - Access product catalog
+- `get_orders` - View order history
+- `get_analytics` - Access analytics data
+
+### Data Modification Tools
+- `create_user` - Add new users
+- `update_product` - Modify product information
+- `process_order` - Handle order processing
+- `update_settings` - Modify configuration
+
+### Analysis Tools
+- `analyze_sentiment` - Sentiment analysis
+- `generate_report` - Create reports
+- `predict_trends` - Trend prediction
+- `classify_data` - Data classification
+
+### Communication Tools
+- `send_notification` - Send notifications
+- `create_message` - Generate messages
+- `schedule_task` - Schedule operations
+- `monitor_status` - Status monitoring
+
+## Agent Error Handling
+
+### Standardized Error Responses
+```javascript
+class AgentErrorHandler extends BaseAPI {
+  process(req, res) {
+    try {
+      // Process request
+      const result = this.processRequest(req);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      // Agent-friendly error response
+      res.status(400).json({
+        success: false,
+        error: error.message,
+        errorCode: error.code || 'AGENT_ERROR',
+        details: {
+          suggestion: 'Try adjusting your parameters',
+          retryable: true
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+}
+```
+
+### Common Agent Error Codes
+- `AGENT_ERROR` - General agent error
+- `INVALID_PARAMETERS` - Parameter validation failed
+- `RESOURCE_NOT_FOUND` - Requested resource not found
+- `PERMISSION_DENIED` - Agent lacks required permissions
+- `RATE_LIMITED` - Agent exceeded rate limits
+- `SESSION_EXPIRED` - Agent session expired
+
+## Agent Configuration
 
 ### Environment Variables
-- `SERVER_PORT` - API server port (default: 3000)
-- `SERVER_HOST` - API server host (default: localhost)
-- `MCP_PORT` - MCP server port (default: 3001)
-- `NODE_ENV` - Environment (development/production)
+```bash
+AGENT_PORT=3001                    # Agent MCP server port
+AGENT_SESSION_TIMEOUT=3600         # Session timeout in seconds
+AGENT_RATE_LIMIT=100               # Requests per minute
+AGENT_CACHE_TTL=300                # Cache TTL in seconds
+```
 
-## Best Practices
-
-### API Design
-1. Use resource-based URLs (`/users`, `/users/:id`)
-2. Follow REST conventions
-3. Use appropriate HTTP methods
-4. Return consistent response formats
-
-### Annotations
-1. Use `@description` for detailed explanations
-2. Use `@tags` to group related endpoints
-3. Define `@requestBody` for POST/PUT endpoints
-4. Document `@errorResponses` for error cases
-5. Keep `@summary` concise
-
-### File Organization
-1. Group related endpoints in directories
-2. Use descriptive file names
-3. Follow the HTTP method naming convention
-4. Keep API classes focused and single-purpose
-
-## Error Handling
-
-### Framework Errors
-- 400: Bad request (validation errors)
-- 404: Endpoint not found
-- 500: Internal server error
-
-### Custom Error Responses
+### Agent-Specific Settings
 ```javascript
-res.status(400).json({ 
-  success: false, 
-  error: 'Validation failed' 
+const agentConfig = {
+  sessionTimeout: 3600,
+  rateLimit: 100,
+  cacheTTL: 300,
+  enableLogging: true,
+  enableMetrics: true
+};
+```
+
+## Agent Monitoring
+
+### Health Check for Agents
+```javascript
+class AgentHealthCheck extends BaseAPI {
+  process(req, res) {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: '1.0.0',
+      agentConnections: this.getAgentConnections(),
+      activeSessions: this.getActiveSessions()
+    };
+    
+    res.json(health);
+  }
+}
+```
+
+### Agent Metrics
+```javascript
+class AgentMetrics extends BaseAPI {
+  process(req, res) {
+    const metrics = {
+      totalRequests: this.getTotalRequests(),
+      activeAgents: this.getActiveAgents(),
+      averageResponseTime: this.getAverageResponseTime(),
+      errorRate: this.getErrorRate(),
+      topEndpoints: this.getTopEndpoints()
+    };
+    
+    res.json({ success: true, data: metrics });
+  }
+}
+```
+
+## Agent Best Practices
+
+### 1. Use Descriptive Tool Names
+```javascript
+// Good: Clear, descriptive names
+class GetUserProfile extends BaseAPI { }
+class UpdateUserSettings extends BaseAPI { }
+class AnalyzeUserBehavior extends BaseAPI { }
+
+// Avoid: Generic or unclear names
+class ProcessData extends BaseAPI { }
+class HandleRequest extends BaseAPI { }
+```
+
+### 2. Provide Clear Error Messages
+```javascript
+if (!req.body.userId) {
+  return res.status(400).json({
+    success: false,
+    error: "User ID is required for this operation",
+    errorCode: "MISSING_USER_ID",
+    suggestion: "Please provide a valid user ID in the request body"
+  });
+}
+```
+
+### 3. Use Consistent Response Formats
+```javascript
+// Success response
+res.json({
+  success: true,
+  data: { /* response data */ },
+  message: 'Operation completed successfully',
+  timestamp: new Date().toISOString()
+});
+
+// Error response
+res.status(400).json({
+  success: false,
+  error: 'Error message',
+  errorCode: 'ERROR_CODE',
+  details: { /* additional error details */ },
+  timestamp: new Date().toISOString()
 });
 ```
 
-## Common Issues & Solutions
+### 4. Implement Proper Validation
+```javascript
+const { body } = req;
+const validation = this.validateRequest(body, {
+  userId: { type: 'string', required: true },
+  action: { type: 'string', enum: ['create', 'update', 'delete'] },
+  data: { type: 'object', required: true }
+});
 
-### Port Conflicts
-- Check if ports 3000/3001 are available
-- Use different ports via environment variables
+if (!validation.isValid) {
+  return res.status(400).json({
+    success: false,
+    error: 'Validation failed',
+    errorCode: 'VALIDATION_ERROR',
+    details: validation.errors
+  });
+}
+```
 
-### File Not Loaded
-- Verify file naming and path structure
-- Check for syntax errors in JavaScript files
+## Agent Integration Examples
 
-### Annotation Errors
-- Verify JSON syntax in annotations
-- Check for proper JSDoc format
+### OpenAI Agent Integration
+```javascript
+class OpenAIAgentAPI extends BaseAPIEnhanced {
+  async process(req, res) {
+    const { prompt, context } = req.body;
+    
+    const response = await this.llm.generateResponse({
+      prompt: `${context}\n\n${prompt}`,
+      model: 'gpt-4',
+      maxTokens: 1000,
+      temperature: 0.7
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, {
+      response: response,
+      context: context,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
 
-### MCP Connection Issues
-- Verify MCP server is running on port 3001
-- Use Streamable HTTP connection type
-- Check WebSocket endpoint accessibility
+### Multi-Agent Coordination
+```javascript
+class MultiAgentAPI extends BaseAPI {
+  async process(req, res) {
+    const { agents, task, data } = req.body;
+    
+    // Coordinate multiple agents
+    const results = await Promise.all(
+      agents.map(agent => this.executeAgentTask(agent, task, data))
+    );
+    
+    res.json({
+      success: true,
+      data: {
+        results: results,
+        coordination: {
+          agents: agents.length,
+          completed: results.filter(r => r.success).length
+        }
+      },
+      message: 'Multi-agent task completed',
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+```
 
-## Testing
+## Troubleshooting for Agents
 
-### Running Tests
+### Common Agent Issues
+1. **Tool Not Found**: Verify API file exists and is properly named
+2. **Parameter Errors**: Check request body matches expected schema
+3. **Session Issues**: Ensure agent session is valid and not expired
+4. **Rate Limiting**: Check if agent has exceeded rate limits
+5. **Permission Errors**: Verify agent has required permissions
+
+### Debug Mode for Agents
 ```bash
-npm test
+DEBUG=agent:* easy-mcp-server
 ```
 
-### Framework Tests
-- Unit tests for core modules
-- Integration tests for API endpoints
-- MCP protocol tests
-- OpenAPI generation tests
-
-## Deployment
-
-### Production Setup
-1. Set `NODE_ENV=production`
-2. Configure environment variables
-3. Use process manager (PM2, etc.)
-4. Set up reverse proxy (nginx, etc.)
-
-### Docker Support
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 3000 3001
-CMD ["easy-mcp-server"]
+### Agent Health Check
+```bash
+curl -H "X-Agent-ID: test-agent" http://localhost:3001/health
 ```
 
-## Key Features
-
-- **Auto Discovery**: Scans `api/` directory and maps file structure to endpoints
-- **MCP Integration**: Full support for tools, prompts, and resources
-- **Hot Reload**: Real-time updates during development
-- **OpenAPI Generation**: Automatic API documentation
-- **Multiple Transports**: WebSocket, HTTP, and Server-Sent Events
-- **Annotation Support**: JSDoc annotations for custom schemas
-- **AI-Native**: LLM.txt and Agent.md support for AI model context
-
-## MCP Capabilities
-
-### Tools
-- Automatic discovery of API endpoints as MCP tools
-- Rich input/output schemas
-- Real-time execution
-
-### Prompts
-- Template-based prompt system
-- Parameter substitution
-- Organized by API endpoints
-
-### Resources
-- Access to documentation and configuration
-- Multiple MIME types supported
-- Real-time content updates
-
-This framework is designed to make API development as simple as possible while providing powerful features like automatic OpenAPI generation and MCP integration. The annotation system allows for precise control when needed, while the automatic discovery handles the common cases seamlessly.
+For complete framework documentation, see: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)

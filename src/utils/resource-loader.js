@@ -61,23 +61,32 @@ class MCPResourceLoader {
       const fullPath = path.resolve(basePath, filePath);
       const content = await fs.readFile(fullPath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
+      const fileName = path.basename(filePath, ext);
       
       let resource;
       
       if (ext === '.json') {
         resource = JSON.parse(content);
+        // Use filename as resource name if not specified
+        if (!resource.name) {
+          resource.name = fileName;
+        }
+        // Use filename-based URI if not specified
+        if (!resource.uri) {
+          resource.uri = resourceUri || `resource://${fileName}`;
+        }
       } else if (ext === '.md') {
         resource = this.createMarkdownResource(
-          resourceUri || `resource://${path.basename(filePath, ext)}`,
-          path.basename(filePath, ext),
+          resourceUri || `resource://${fileName}`,
+          fileName,
           `Resource loaded from ${filePath}`,
           content
         );
       } else {
         // Treat as plain text
         resource = this.createTextResource(
-          resourceUri || `resource://${path.basename(filePath, ext)}`,
-          path.basename(filePath, ext),
+          resourceUri || `resource://${fileName}`,
+          fileName,
           `Resource loaded from ${filePath}`,
           content
         );
@@ -106,9 +115,15 @@ class MCPResourceLoader {
       const content = await fs.readFile(fullPath, 'utf8');
       const prompt = JSON.parse(content);
       
+      // Use filename (without extension) as the prompt name if not specified
+      const fileName = path.basename(filePath, path.extname(filePath));
+      if (!prompt.name) {
+        prompt.name = fileName;
+      }
+      
       // Validate prompt structure
-      if (!prompt.name || !prompt.description) {
-        throw new Error('Prompt must have name and description');
+      if (!prompt.description) {
+        throw new Error('Prompt must have description');
       }
       
       this.prompts.set(prompt.name, prompt);
@@ -146,7 +161,7 @@ class MCPResourceLoader {
             
             try {
               if (resourceType === 'prompts' || (resourceType === 'all' && ext === '.json' && dirPath.includes('prompts'))) {
-                const prompt = await this.loadPrompt(filePath, null, customBasePath);
+                const prompt = await this.loadPrompt(filePath, customBasePath);
                 loadedResources.push(prompt);
               } else {
                 const resource = await this.loadResource(filePath, null, customBasePath);
@@ -345,7 +360,7 @@ class MCPResourceLoader {
    * Load user resources and prompts
    * @returns {Promise<Object>} Object containing loaded resources and prompts
    */
-  async loadDefaults() {
+  async loadUserResources() {
     const allResources = [];
     const allPrompts = [];
     

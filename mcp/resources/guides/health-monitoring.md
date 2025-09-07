@@ -1,9 +1,9 @@
-# Easy MCP Server Health Monitoring Guide
+# easy-mcp-server Health Monitoring Guide
 
 ## Overview
-This guide provides comprehensive information about monitoring Easy MCP Server applications using the framework's built-in health monitoring capabilities, including automatic health endpoints, service status monitoring, and enhanced component health checks.
+This guide provides comprehensive information about monitoring easy-mcp-server applications using the framework's built-in health monitoring capabilities, including automatic health endpoints, service status monitoring, and enhanced component health checks.
 
-## Easy MCP Server Built-in Health Monitoring
+## easy-mcp-server Built-in Health Monitoring
 
 ### Automatic Health Endpoint
 The framework provides an automatic `/health` endpoint that returns:
