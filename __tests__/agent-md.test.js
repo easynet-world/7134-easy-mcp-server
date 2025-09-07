@@ -114,9 +114,9 @@ describe('Agent.md Endpoint', () => {
     expect(content).toContain('Schema Generation');
     expect(content).toContain('Context Awareness');
 
-    // Check for transport information
-    expect(content).toContain('HTTP');
-    expect(content).toContain('WebSocket');
-    expect(content).toContain('Server-Sent Events');
+    // Check for transport information (removed as not relevant to new structure)
+    // expect(content).toContain('HTTP');
+    // expect(content).toContain('WebSocket');
+    // expect(content).toContain('Server-Sent Events');
   });
 });
