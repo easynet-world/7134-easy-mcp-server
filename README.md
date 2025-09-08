@@ -73,11 +73,19 @@ npx easy-mcp-server
 
 ### 4. Optional: Add MCP Features
 ```bash
-# Add prompts
+# Add a Markdown prompt (use {{placeholders}})
 mkdir -p mcp/prompts/my-category
-echo '{"description": "My AI prompt", "instructions": "..."}' > mcp/prompts/my-category/my-prompt.json
+cat > mcp/prompts/my-category/my-prompt.md << 'EOF'
+<!-- description: Example prompt using placeholders -->
 
-# Add resources  
+Please process {{subject}} with priority {{priority}}.
+
+Details:
+- Region: {{region}}
+- Owner: {{owner}}
+EOF
+
+# Add resources
 mkdir -p mcp/resources/docs
 echo '# My Guide' > mcp/resources/docs/my-guide.md
 ```
@@ -142,15 +150,19 @@ class GetUser extends BaseAPI {
 
 ### Environment Variables
 ```bash
-PORT=3000                    # REST API port
-MCP_PORT=3001               # MCP server port  
-OPENAI_API_KEY=your-key-here      # OpenAI API key
+PORT=3000                         # REST API port
+MCP_PORT=3001                     # MCP server port
+OPENAI_API_KEY=your-key-here      # OpenAI API key (optional)
 ```
 
 ### CLI Options
 ```bash
 easy-mcp-server --port 3000 --mcp-port 3001 --api-dir ./api
 ```
+
+### MCP Runtime Parsing & Cache
+- Parser: `src/utils/parameter-template-parser.js` extracts `{{name}}` placeholders across Markdown/YAML/JSON/TXT.
+- Cache: `src/utils/mcp-cache-manager.js` caches parsed prompts/resources and hot-swaps on file changes.
 
 ---
 
@@ -176,30 +188,33 @@ api/users/profile/put.js  →  PUT /users/profile
 
 **Auto-Discovery**: Automatically loads prompts and resources from `mcp/prompts/` and `mcp/resources/` directories.
 
-**Supported Formats**: JSON, YAML, Markdown, Text files
+**Supported Formats**: Markdown, YAML, JSON, Text files (parameters as `{{name}}`)
 
-**Hot Reloading**: File changes are detected automatically - no server restart needed!
+**Hot Reloading & Caching**: Backed by in-memory cache with chokidar-based invalidation. File changes are detected automatically — no server restart needed.
 
 **Example Structure:**
 ```
 mcp/
 ├── prompts/
-│   ├── youtube-analysis.yaml
-│   └── content-creation.json
+│   ├── my-category/
+│   │   └── my-prompt.md
+│   └── content-creation.md
 └── resources/
     ├── api-guide.md
-    └── languages.yaml
+    └── guides/
+        └── markdown-prompt-guide.md
 ```
 
 **Example Prompt:**
-```yaml
-name: youtube_analysis
-description: Analyze YouTube videos
-template: "Analyze {{url}} and extract {{language}} subtitles"
-arguments:
-  properties:
-    url: { type: "string", description: "Video URL" }
-    language: { type: "string", description: "Subtitle language" }
+```markdown
+<!-- description: Analyze something using placeholders -->
+
+Analyze {{target}} and produce a {{format}} report for {{audience}}.
+
+Inputs:
+- target: {{target}}
+- format: {{format}}
+- audience: {{audience}}
 ```
 
 ---
