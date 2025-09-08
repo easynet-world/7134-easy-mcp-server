@@ -238,3 +238,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **Issues**: [GitHub Issues](https://github.com/your-org/easy-mcp-server/issues)
 - **Documentation**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 - **Examples**: Check the `api/example/` directory
+Maintenance: trigger patch release for parameter parsing + MCP cache.
