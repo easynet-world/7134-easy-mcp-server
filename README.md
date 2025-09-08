@@ -254,3 +254,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **Documentation**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 - **Examples**: Check the `api/example/` directory
 Maintenance: trigger patch release for parameter parsing + MCP cache.
+
+Small README clarifications for MCP cache + parser.
