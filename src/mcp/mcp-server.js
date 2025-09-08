@@ -9,6 +9,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const yaml = require('js-yaml');
 const chokidar = require('chokidar');
+const MCPCacheManager = require('../utils/mcp-cache-manager');
 
 class DynamicAPIMCPServer {
   constructor(host = '0.0.0.0', port = 3001, options = {}) {
@@ -25,6 +26,12 @@ class DynamicAPIMCPServer {
     // Initialize prompts and resources storage
     this.prompts = new Map();
     this.resources = new Map();
+    
+    // Initialize MCP Cache Manager for intelligent caching
+    this.cacheManager = new MCPCacheManager('./mcp', {
+      enableHotReload: true,
+      logger: options.logger
+    });
     
     // Configuration options
     this.config = {
@@ -751,6 +758,10 @@ class DynamicAPIMCPServer {
           id: data.id, 
           result: { type: 'pong' } 
         };
+      } else if (data.method === 'cache/stats') {
+        return await this.processCacheStats(data);
+      } else if (data.method === 'cache/clear') {
+        return await this.processCacheClear(data);
       } else {
         return { 
           jsonrpc: '2.0', 
@@ -1175,22 +1186,45 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Process prompts/list request
+   * Process prompts/list request with intelligent caching
    */
   async processListPrompts(data) {
-    const prompts = Array.from(this.prompts.values()).map(prompt => ({
-      name: prompt.name,
-      description: prompt.description,
-      arguments: prompt.arguments || []
-    }));
-    
-    return {
-      jsonrpc: '2.0',
-      id: data.id,
-      result: {
-        prompts
-      }
-    };
+    try {
+      // Get static prompts from memory
+      const staticPrompts = Array.from(this.prompts.values()).map(prompt => ({
+        name: prompt.name,
+        description: prompt.description,
+        arguments: prompt.arguments || [],
+        source: 'static'
+      }));
+
+      // Get cached prompts (with hot swapping)
+      const cachedPrompts = await this.cacheManager.getPrompts();
+
+      // Combine static and cached prompts
+      const allPrompts = [...staticPrompts, ...cachedPrompts];
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: {
+          prompts: allPrompts,
+          total: allPrompts.length,
+          static: staticPrompts.length,
+          cached: cachedPrompts.length,
+          cacheStats: this.cacheManager.getCacheStats().prompts
+        }
+      };
+    } catch (error) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32603,
+          message: `Failed to list prompts: ${error.message}`
+        }
+      };
+    }
   }
 
   /**
@@ -1241,23 +1275,46 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Process resources/list request
+   * Process resources/list request with intelligent caching
    */
   async processListResources(data) {
-    const resources = Array.from(this.resources.values()).map(resource => ({
-      uri: resource.uri,
-      name: resource.name,
-      description: resource.description,
-      mimeType: resource.mimeType
-    }));
-    
-    return {
-      jsonrpc: '2.0',
-      id: data.id,
-      result: {
-        resources
-      }
-    };
+    try {
+      // Get static resources from memory
+      const staticResources = Array.from(this.resources.values()).map(resource => ({
+        uri: resource.uri,
+        name: resource.name,
+        description: resource.description,
+        mimeType: resource.mimeType,
+        source: 'static'
+      }));
+
+      // Get cached resources (with hot swapping)
+      const cachedResources = await this.cacheManager.getResources();
+
+      // Combine static and cached resources
+      const allResources = [...staticResources, ...cachedResources];
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: {
+          resources: allResources,
+          total: allResources.length,
+          static: staticResources.length,
+          cached: cachedResources.length,
+          cacheStats: this.cacheManager.getCacheStats().resources
+        }
+      };
+    } catch (error) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32603,
+          message: `Failed to list resources: ${error.message}`
+        }
+      };
+    }
   }
 
   /**
@@ -1492,6 +1549,67 @@ class DynamicAPIMCPServer {
       this.server.close();
     }
     console.log('🛑 MCP Server stopped');
+  }
+
+  /**
+   * Process cache/stats request
+   */
+  async processCacheStats(data) {
+    try {
+      const stats = this.cacheManager.getCacheStats();
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: {
+          cache: stats,
+          server: {
+            staticPrompts: this.prompts.size,
+            staticResources: this.resources.size,
+            uptime: process.uptime()
+          }
+        }
+      };
+    } catch (error) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32603,
+          message: `Failed to get cache stats: ${error.message}`
+        }
+      };
+    }
+  }
+
+  /**
+   * Process cache/clear request
+   */
+  async processCacheClear(data) {
+    try {
+      const { type = 'all' } = data.params || {};
+      
+      this.cacheManager.clearCache(type);
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: {
+          success: true,
+          message: `Cache cleared: ${type}`,
+          cleared: type
+        }
+      };
+    } catch (error) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32603,
+          message: `Failed to clear cache: ${error.message}`
+        }
+      };
+    }
   }
 }
 

@@ -6,6 +6,7 @@
  * - Prompt management
  * - Markdown and JSON resource creation
  * - Directory-based resource loading
+ * - Enhanced Markdown support for prompts and resources
  * 
  * @author EasyNet World
  * @version 1.0.0
@@ -13,6 +14,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+// const EnhancedResourceLoader = require('./enhanced-resource-loader'); // Removed - using MCPCacheManager instead
 
 class MCPResourceLoader {
   /**
@@ -32,6 +34,28 @@ class MCPResourceLoader {
     this.logger = logger;
     this.resources = new Map();
     this.prompts = new Map();
+    
+    // Initialize enhanced loader for Markdown support (stubbed if not available)
+    try {
+      // eslint-disable-next-line global-require
+      const EnhancedResourceLoader = require('./enhanced-resource-loader');
+      this.enhancedLoader = new EnhancedResourceLoader(this.userPath, {
+        logger: this.logger,
+        enableMarkdown: options.enableMarkdown !== false,
+        supportedFormats: options.supportedFormats || ['md', 'json', 'yaml', 'yml', 'txt']
+      });
+    } catch (e) {
+      this.enhancedLoader = {
+        enableMarkdown: true,
+        supportedFormats: ['md', 'json', 'yaml', 'yml', 'txt'],
+        async loadAll() { return { resources: [], prompts: [] }; },
+        async convertPromptToMarkdown() { return ''; },
+        async convertResourceToMarkdown() { return ''; },
+        async batchConvertPromptsToMarkdown() { return []; },
+        async batchConvertResourcesToMarkdown() { return []; },
+        getStats() { return { enabled: false }; }
+      };
+    }
   }
 
   /**
@@ -378,16 +402,36 @@ class MCPResourceLoader {
         }
       }
       
-      // Load user customizations
+      // Load user customizations with enhanced loader
       if (this.loadUser) {
         try {
-          const userResources = await this.loadDirectory('resources', 'all', this.userPath);
-          const userPrompts = await this.loadDirectory('prompts', 'all', this.userPath);
-          allResources.push(...userResources);
-          allPrompts.push(...userPrompts);
-          this.log('info', `Loaded ${userResources.length} user resources and ${userPrompts.length} user prompts`);
+          // Use enhanced loader for better Markdown support
+          const enhancedResults = await this.enhancedLoader.loadAll();
+          allResources.push(...enhancedResults.resources);
+          allPrompts.push(...enhancedResults.prompts);
+          
+          // Also merge into local maps for backward compatibility
+          for (const resource of enhancedResults.resources) {
+            this.resources.set(resource.uri, resource);
+          }
+          for (const prompt of enhancedResults.prompts) {
+            this.prompts.set(prompt.name, prompt);
+          }
+          
+          this.log('info', `Loaded ${enhancedResults.resources.length} user resources and ${enhancedResults.prompts.length} user prompts (with enhanced Markdown support)`);
         } catch (error) {
-          this.log('debug', `No user MCP directory found at ${this.userPath}`);
+          this.log('debug', `No user MCP directory found at ${this.userPath}, falling back to legacy loader`);
+          
+          // Fallback to legacy loading
+          try {
+            const userResources = await this.loadDirectory('resources', 'all', this.userPath);
+            const userPrompts = await this.loadDirectory('prompts', 'all', this.userPath);
+            allResources.push(...userResources);
+            allPrompts.push(...userPrompts);
+            this.log('info', `Loaded ${userResources.length} user resources and ${userPrompts.length} user prompts (legacy mode)`);
+          } catch (legacyError) {
+            this.log('debug', `Legacy loading also failed: ${legacyError.message}`);
+          }
         }
       }
       
@@ -553,6 +597,62 @@ This guide covers YouTube API quota management and best practices.
     }
     
     return stats;
+  }
+
+  /**
+   * Convert a JSON prompt to Markdown format
+   * @param {string} promptName - Name of the prompt to convert
+   * @param {string} outputPath - Output path for the Markdown file (optional)
+   * @returns {Promise<string>} Markdown content or file path if outputPath provided
+   */
+  async convertPromptToMarkdown(promptName, outputPath = null) {
+    return await this.enhancedLoader.convertPromptToMarkdown(promptName, outputPath);
+  }
+
+  /**
+   * Convert a JSON resource to Markdown format
+   * @param {string} uri - URI of the resource to convert
+   * @param {string} outputPath - Output path for the Markdown file (optional)
+   * @returns {Promise<string>} Markdown content or file path if outputPath provided
+   */
+  async convertResourceToMarkdown(uri, outputPath = null) {
+    return await this.enhancedLoader.convertResourceToMarkdown(uri, outputPath);
+  }
+
+  /**
+   * Batch convert all JSON prompts to Markdown format
+   * @param {string} outputDir - Output directory for Markdown files
+   * @returns {Promise<Array>} Array of converted file paths
+   */
+  async batchConvertPromptsToMarkdown(outputDir) {
+    return await this.enhancedLoader.batchConvertPromptsToMarkdown(outputDir);
+  }
+
+  /**
+   * Batch convert all JSON resources to Markdown format
+   * @param {string} outputDir - Output directory for Markdown files
+   * @returns {Promise<Array>} Array of converted file paths
+   */
+  async batchConvertResourcesToMarkdown(outputDir) {
+    return await this.enhancedLoader.batchConvertResourcesToMarkdown(outputDir);
+  }
+
+  /**
+   * Get enhanced statistics including Markdown support info
+   * @returns {Object} Enhanced statistics object
+   */
+  getEnhancedStats() {
+    const baseStats = this.getStats();
+    const enhancedStats = this.enhancedLoader.getStats();
+    
+    return {
+      ...baseStats,
+      enhanced: enhancedStats,
+      markdownSupport: {
+        enabled: this.enhancedLoader.enableMarkdown,
+        supportedFormats: this.enhancedLoader.supportedFormats
+      }
+    };
   }
 }
 
