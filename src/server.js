@@ -67,6 +67,8 @@ app.get('/openapi.json', (req, res) => {
   }
 });
 
+// Markdown API routes removed (moved to MCP via MCPCacheManager)
+
 // Swagger UI endpoint
 app.get('/docs', (req, res) => {
   const swaggerHtml = `
