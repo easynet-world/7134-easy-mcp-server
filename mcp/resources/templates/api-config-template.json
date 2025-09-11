@@ -1,0 +1,6 @@
+{
+  "service": "{{service_name}}",
+  "port": {{port}},
+  "database": "{{db_name}}",
+  "api_key": "{{api_key}}"
+}
