@@ -206,16 +206,16 @@ You are a helpful assistant that specializes in {{domain}}.
 
     test('should load JSON files as prompts with metadata', async () => {
       const jsonContent = JSON.stringify({
-        name: "code_review_prompt",
-        description: "Prompt for code review assistance",
-        instructions: "Review the following {{language}} code for {{review_type}} issues:\n\n{{code}}",
+        name: 'code_review_prompt',
+        description: 'Prompt for code review assistance',
+        instructions: 'Review the following {{language}} code for {{review_type}} issues:\n\n{{code}}',
         arguments: {
           properties: {
-            language: { description: "Programming language" },
-            review_type: { description: "Type of review to perform" },
-            code: { description: "Code to review" }
+            language: { description: 'Programming language' },
+            review_type: { description: 'Type of review to perform' },
+            code: { description: 'Code to review' }
           },
-          required: ["language", "code"]
+          required: ['language', 'code']
         }
       }, null, 2);
       await fs.writeFile(path.join(promptsDir, 'code_review.json'), jsonContent);

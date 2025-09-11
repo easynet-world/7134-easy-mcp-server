@@ -1484,8 +1484,7 @@ class DynamicAPIMCPServer {
       '.vtt': 'text/vtt',
       '.srt': 'text/x-subrip',
       '.sub': 'text/x-subviewer',
-      '.smi': 'text/x-sami',
-      '.srt': 'text/x-subrip'
+      '.smi': 'text/x-sami'
     };
     
     return mimeTypes[ext.toLowerCase()] || 'text/plain';
