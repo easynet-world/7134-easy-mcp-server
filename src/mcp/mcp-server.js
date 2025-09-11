@@ -40,13 +40,19 @@ class DynamicAPIMCPServer {
           enabled: options.prompts?.enabled !== false,
           directory: options.prompts?.directory || './mcp/prompts',
           watch: options.prompts?.watch !== false,
-          formats: options.prompts?.formats || ['json', 'yaml', 'yml']
+          // Support any file format by default - let the system auto-detect
+          formats: options.prompts?.formats || ['*'],
+          // Enable template parameter substitution
+          enableTemplates: options.prompts?.enableTemplates !== false
         },
         resources: {
           enabled: options.resources?.enabled !== false,
           directory: options.resources?.directory || './mcp/resources',
           watch: options.resources?.watch !== false,
-          formats: options.resources?.formats || ['json', 'yaml', 'yml', 'md', 'txt']
+          // Support any file format by default - let the system auto-detect
+          formats: options.resources?.formats || ['*'],
+          // Enable template parameter substitution
+          enableTemplates: options.resources?.enableTemplates !== false
         }
       }
     };
@@ -170,8 +176,11 @@ class DynamicAPIMCPServer {
           await this.loadPromptsFromDirectory(fullPath);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase();
-          // Load supported prompt file formats
-          if (this.config.mcp.prompts.formats.includes(ext.substring(1))) {
+          // Load any file format if '*' is specified, or check specific formats
+          const shouldLoad = this.config.mcp.prompts.formats.includes('*') || 
+                           this.config.mcp.prompts.formats.includes(ext.substring(1));
+          
+          if (shouldLoad) {
             await this.loadPromptFromFile(fullPath);
           }
         }
@@ -183,36 +192,82 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Load a single prompt from a file (JSON or YAML)
+   * Load a single prompt from a file (supports any format)
    */
   async loadPromptFromFile(filePath) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
+      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
       
-      let promptData;
+      // Extract template parameters using the parameter parser
+      const SimpleParameterParser = require('../utils/parameter-template-parser');
+      const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
+      
+      let promptData = {};
+      let template = content;
+      let description = `Prompt from ${relativePath}`;
+      let arguments_ = [];
+      
+      // Try to parse structured formats for metadata extraction
       if (ext === '.json') {
-        promptData = JSON.parse(content);
+        try {
+          promptData = JSON.parse(content);
+          template = promptData.instructions || promptData.template || content;
+          description = promptData.description || description;
+          arguments_ = promptData.arguments?.properties ? 
+            Object.keys(promptData.arguments.properties).map(key => ({
+              name: key,
+              description: promptData.arguments.properties[key].description || '',
+              required: promptData.arguments.required?.includes(key) || false
+            })) : [];
+        } catch (parseError) {
+          console.warn(`⚠️  MCP Server: Invalid JSON in ${filePath}, treating as plain text`);
+        }
       } else if (ext === '.yaml' || ext === '.yml') {
-        promptData = yaml.load(content);
+        try {
+          promptData = yaml.load(content);
+          template = promptData.instructions || promptData.template || content;
+          description = promptData.description || description;
+          arguments_ = promptData.arguments?.properties ? 
+            Object.keys(promptData.arguments.properties).map(key => ({
+              name: key,
+              description: promptData.arguments.properties[key].description || '',
+              required: promptData.arguments.required?.includes(key) || false
+            })) : [];
+        } catch (parseError) {
+          console.warn(`⚠️  MCP Server: Invalid YAML in ${filePath}, treating as plain text`);
+        }
       } else {
-        throw new Error(`Unsupported file format: ${ext}`);
+        // For any other format, treat as plain text template
+        template = content;
+        description = `Prompt from ${relativePath}`;
       }
       
       // Generate a name from the file path if not provided
-      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
-      const name = promptData.name || relativePath.replace(/\.(json|yaml|yml)$/, '').replace(/\//g, '_');
+      const name = promptData.name || relativePath.replace(/\.[^/.]+$/, '').replace(/\//g, '_');
+      
+      // If no arguments were defined in structured format, use extracted parameters
+      if (arguments_.length === 0 && parsed.hasParameters) {
+        arguments_ = parsed.parameters.map(param => ({
+          name: param,
+          description: `Parameter: ${param}`,
+          required: false
+        }));
+      }
       
       const prompt = {
         name: name,
-        description: promptData.description || `Prompt from ${relativePath}`,
-        template: promptData.instructions || promptData.template || '',
-        arguments: promptData.arguments?.properties ? 
-          Object.keys(promptData.arguments.properties).map(key => ({
-            name: key,
-            description: promptData.arguments.properties[key].description || '',
-            required: promptData.arguments.required?.includes(key) || false
-          })) : []
+        description: description,
+        template: template,
+        arguments: arguments_,
+        // Add template support
+        hasParameters: parsed.hasParameters,
+        parameters: parsed.parameters,
+        parameterCount: parsed.parameterCount,
+        isTemplate: parsed.hasParameters,
+        filePath: relativePath,
+        format: parsed.format
       };
       
       this.addPrompt(prompt);
@@ -236,8 +291,11 @@ class DynamicAPIMCPServer {
           await this.loadResourcesFromDirectory(fullPath);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase();
-          // Load supported resource file formats
-          if (this.config.mcp.resources.formats.includes(ext.substring(1))) {
+          // Load any file format if '*' is specified, or check specific formats
+          const shouldLoad = this.config.mcp.resources.formats.includes('*') || 
+                           this.config.mcp.resources.formats.includes(ext.substring(1));
+          
+          if (shouldLoad) {
             await this.loadResourceFromFile(fullPath);
           }
         }
@@ -260,17 +318,18 @@ class DynamicAPIMCPServer {
       // Generate URI from file path
       const uri = `resource://${relativePath.replace(/\//g, '/')}`;
       
+      // Extract template parameters using the parameter parser
+      const SimpleParameterParser = require('../utils/parameter-template-parser');
+      const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
+      
       // Determine MIME type and process content based on file extension
-      let mimeType = 'text/plain';
+      let mimeType = this.getMimeTypeForExtension(ext);
       let processedContent = content;
       let resourceName = null;
       let resourceDescription = null;
       
-      if (ext === '.md') {
-        mimeType = 'text/markdown';
-      } else if (ext === '.json') {
-        mimeType = 'application/json';
-        // Try to parse and re-stringify JSON for validation
+      // Try to parse structured formats for metadata extraction
+      if (ext === '.json') {
         try {
           const jsonData = JSON.parse(content);
           processedContent = JSON.stringify(jsonData, null, 2);
@@ -282,8 +341,6 @@ class DynamicAPIMCPServer {
           console.warn(`⚠️  MCP Server: Invalid JSON in ${filePath}, treating as plain text`);
         }
       } else if (ext === '.yaml' || ext === '.yml') {
-        mimeType = 'application/x-yaml';
-        // Try to parse YAML for validation
         try {
           const yamlData = yaml.load(content);
           processedContent = yaml.dump(yamlData, { indent: 2 });
@@ -294,12 +351,10 @@ class DynamicAPIMCPServer {
         } catch (parseError) {
           console.warn(`⚠️  MCP Server: Invalid YAML in ${filePath}, treating as plain text`);
         }
-      } else if (ext === '.txt') {
-        mimeType = 'text/plain';
       }
       
       // Generate name from file path if not provided in content
-      const name = resourceName || relativePath.replace(/\//g, ' - ').replace(/\.(md|json|yaml|yml|txt)$/, '');
+      const name = resourceName || relativePath.replace(/\//g, ' - ').replace(/\.[^/.]+$/, '');
       const description = resourceDescription || `Resource from ${relativePath}`;
       
       const resource = {
@@ -307,7 +362,14 @@ class DynamicAPIMCPServer {
         name: name,
         description: description,
         mimeType: mimeType,
-        content: processedContent
+        content: processedContent,
+        // Add template support
+        hasParameters: parsed.hasParameters,
+        parameters: parsed.parameters,
+        parameterCount: parsed.parameterCount,
+        isTemplate: parsed.hasParameters,
+        filePath: relativePath,
+        format: parsed.format
       };
       
       this.addResource(resource);
@@ -752,6 +814,8 @@ class DynamicAPIMCPServer {
         return await this.processListResources(data);
       } else if (data.method === 'resources/read') {
         return await this.processReadResource(data);
+      } else if (data.method === 'resources/templates/list') {
+        return await this.processListResourceTemplates(data);
       } else if (data.method === 'ping') {
         return { 
           jsonrpc: '2.0', 
@@ -1152,15 +1216,26 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Handle WebSocket resources/read request
+   * Handle WebSocket resources/read request with template support
    */
   async handleReadResource(ws, data) {
     try {
-      const { uri } = data;
+      const { uri, arguments: args } = data;
       const resource = this.resources.get(uri);
       
       if (!resource) {
         throw new Error(`Resource not found: ${uri}`);
+      }
+      
+      // Process template with arguments if provided and resource has parameters
+      let processedContent = resource.content;
+      if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates) {
+        resource.parameters.forEach(param => {
+          if (args[param] !== undefined) {
+            const placeholder = new RegExp(`{{${param}}}`, 'g');
+            processedContent = processedContent.replace(placeholder, args[param]);
+          }
+        });
       }
       
       ws.send(JSON.stringify({
@@ -1171,9 +1246,17 @@ class DynamicAPIMCPServer {
             {
               uri: resource.uri,
               mimeType: resource.mimeType,
-              text: resource.content
+              text: processedContent
             }
-          ]
+          ],
+          // Add template metadata if available
+          ...(resource.hasParameters && {
+            template: {
+              hasParameters: resource.hasParameters,
+              parameters: resource.parameters,
+              parameterCount: resource.parameterCount
+            }
+          })
         }
       }));
     } catch (error) {
@@ -1318,10 +1401,139 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * Process resources/read request
+   * Get MIME type for file extension
+   */
+  getMimeTypeForExtension(ext) {
+    const mimeTypes = {
+      '.md': 'text/markdown',
+      '.txt': 'text/plain',
+      '.json': 'application/json',
+      '.yaml': 'application/x-yaml',
+      '.yml': 'application/x-yaml',
+      '.js': 'application/javascript',
+      '.ts': 'application/typescript',
+      '.py': 'text/x-python',
+      '.java': 'text/x-java-source',
+      '.cpp': 'text/x-c++src',
+      '.c': 'text/x-csrc',
+      '.h': 'text/x-chdr',
+      '.hpp': 'text/x-c++hdr',
+      '.cs': 'text/x-csharp',
+      '.php': 'text/x-php',
+      '.rb': 'text/x-ruby',
+      '.go': 'text/x-go',
+      '.rs': 'text/x-rust',
+      '.swift': 'text/x-swift',
+      '.kt': 'text/x-kotlin',
+      '.scala': 'text/x-scala',
+      '.sh': 'text/x-shellscript',
+      '.bash': 'text/x-shellscript',
+      '.zsh': 'text/x-shellscript',
+      '.fish': 'text/x-fish',
+      '.ps1': 'text/x-powershell',
+      '.bat': 'text/x-msdos-batch',
+      '.cmd': 'text/x-msdos-batch',
+      '.html': 'text/html',
+      '.htm': 'text/html',
+      '.xml': 'text/xml',
+      '.css': 'text/css',
+      '.scss': 'text/x-scss',
+      '.sass': 'text/x-sass',
+      '.less': 'text/x-less',
+      '.sql': 'text/x-sql',
+      '.r': 'text/x-r',
+      '.m': 'text/x-objective-c',
+      '.mm': 'text/x-objective-c++',
+      '.pl': 'text/x-perl',
+      '.pm': 'text/x-perl',
+      '.lua': 'text/x-lua',
+      '.dart': 'text/x-dart',
+      '.elm': 'text/x-elm',
+      '.clj': 'text/x-clojure',
+      '.cljs': 'text/x-clojure',
+      '.hs': 'text/x-haskell',
+      '.ml': 'text/x-ocaml',
+      '.fs': 'text/x-fsharp',
+      '.vb': 'text/x-vb',
+      '.asm': 'text/x-asm',
+      '.s': 'text/x-asm',
+      '.tex': 'text/x-tex',
+      '.rst': 'text/x-rst',
+      '.adoc': 'text/x-asciidoc',
+      '.asciidoc': 'text/x-asciidoc',
+      '.org': 'text/x-org',
+      '.wiki': 'text/x-wiki',
+      '.toml': 'text/x-toml',
+      '.ini': 'text/x-ini',
+      '.cfg': 'text/x-config',
+      '.conf': 'text/x-config',
+      '.properties': 'text/x-properties',
+      '.env': 'text/x-env',
+      '.dockerfile': 'text/x-dockerfile',
+      '.makefile': 'text/x-makefile',
+      '.cmake': 'text/x-cmake',
+      '.gradle': 'text/x-gradle',
+      '.maven': 'text/x-maven',
+      '.pom': 'text/x-maven',
+      '.log': 'text/x-log',
+      '.diff': 'text/x-diff',
+      '.patch': 'text/x-patch',
+      '.csv': 'text/csv',
+      '.tsv': 'text/tab-separated-values',
+      '.rtf': 'text/rtf',
+      '.vtt': 'text/vtt',
+      '.srt': 'text/x-subrip',
+      '.sub': 'text/x-subviewer',
+      '.smi': 'text/x-sami',
+      '.srt': 'text/x-subrip'
+    };
+    
+    return mimeTypes[ext.toLowerCase()] || 'text/plain';
+  }
+
+  /**
+   * Process resources/templates/list request
+   */
+  async processListResourceTemplates(data) {
+    try {
+      // Get all resources that have template parameters
+      const allResources = Array.from(this.resources.values());
+      const templateResources = allResources.filter(resource => resource.hasParameters);
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: {
+          resourceTemplates: templateResources.map(resource => ({
+            uri: resource.uri,
+            uriTemplate: resource.uri,
+            name: resource.name,
+            description: resource.description,
+            mimeType: resource.mimeType,
+            parameters: resource.parameters,
+            parameterCount: resource.parameterCount,
+            isTemplate: resource.isTemplate
+          })),
+          total: templateResources.length
+        }
+      };
+    } catch (error) {
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        error: {
+          code: -32603,
+          message: `Failed to list resource templates: ${error.message}`
+        }
+      };
+    }
+  }
+
+  /**
+   * Process resources/read request with template support
    */
   async processReadResource(data) {
-    const { uri } = data.params || data;
+    const { uri, arguments: args } = data.params || data;
     const resource = this.resources.get(uri);
     
     if (!resource) {
@@ -1335,6 +1547,17 @@ class DynamicAPIMCPServer {
       };
     }
     
+    // Process template with arguments if provided and resource has parameters
+    let processedContent = resource.content;
+    if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates) {
+      resource.parameters.forEach(param => {
+        if (args[param] !== undefined) {
+          const placeholder = new RegExp(`{{${param}}}`, 'g');
+          processedContent = processedContent.replace(placeholder, args[param]);
+        }
+      });
+    }
+    
     return {
       jsonrpc: '2.0',
       id: data.id,
@@ -1343,9 +1566,17 @@ class DynamicAPIMCPServer {
           {
             uri: resource.uri,
             mimeType: resource.mimeType,
-            text: resource.content
+            text: processedContent
           }
-        ]
+        ],
+        // Add template metadata if available
+        ...(resource.hasParameters && {
+          template: {
+            hasParameters: resource.hasParameters,
+            parameters: resource.parameters,
+            parameterCount: resource.parameterCount
+          }
+        })
       }
     };
   }

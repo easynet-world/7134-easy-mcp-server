@@ -16,13 +16,15 @@ const customServer = new DynamicAPIMCPServer('0.0.0.0', 3001, {
     enabled: true,                    // Enable prompt auto-discovery
     directory: './mcp/prompts',       // Custom prompts directory
     watch: true,                      // Enable hot reloading
-    formats: ['json', 'yaml', 'yml']  // Supported file formats
+    formats: ['*'],                   // Support any file format
+    enableTemplates: true             // Enable {{params}} template support
   },
   resources: {
     enabled: true,                    // Enable resource auto-discovery
     directory: './mcp/resources',     // Custom resources directory
     watch: true,                      // Enable hot reloading
-    formats: ['json', 'yaml', 'yml', 'md', 'txt']  // Supported file formats
+    formats: ['*'],                   // Support any file format
+    enableTemplates: true             // Enable {{params}} template support
   }
 });
 
@@ -31,7 +33,8 @@ const minimalServer = new DynamicAPIMCPServer('0.0.0.0', 3001, {
   prompts: {
     enabled: true,
     watch: false,                     // Disable hot reloading
-    formats: ['json']                 // Only JSON files
+    formats: ['json'],                // Only JSON files
+    enableTemplates: false            // Disable template support
   },
   resources: {
     enabled: false                    // Disable resource auto-discovery
@@ -44,13 +47,15 @@ const devServer = new DynamicAPIMCPServer('0.0.0.0', 3001, {
     enabled: true,
     directory: './dev/prompts',       // Custom development directory
     watch: true,
-    formats: ['json', 'yaml', 'yml']
+    formats: ['*'],                   // Support any file format
+    enableTemplates: true             // Enable template support
   },
   resources: {
     enabled: true,
     directory: './dev/resources',     // Custom development directory
     watch: true,
-    formats: ['json', 'yaml', 'yml', 'md', 'txt']
+    formats: ['*'],                   // Support any file format
+    enableTemplates: true             // Enable template support
   }
 });
 

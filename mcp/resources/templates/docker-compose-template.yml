@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  {{app_name}}:
+    image: {{image_name}}:{{tag}}
+    ports:
+      - "{{port}}:3000"
+    environment:
+      - NODE_ENV={{environment}}
+      - DATABASE_URL={{database_url}}

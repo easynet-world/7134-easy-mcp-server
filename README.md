@@ -217,6 +217,16 @@ Inputs:
 - audience: {{audience}}
 ```
 
+### Resources vs Resource Templates (one‑glance)
+
+- **Where to put files**: anywhere under `mcp/resources/**`.
+- **How templates are detected**: if a file contains `{{param}}` placeholders, it is a **resource template**.
+- **Listings**:
+  - `resources/list` → shows all resources (templates included).
+  - `resources/templates/list` → shows only templates as `resourceTemplates[]` with `uriTemplate`, `name`, `mimeType`, `parameters`.
+- **Location impact**: folder path only affects the URI, e.g. `mcp/resources/templates/email.html` → `resource://templates/email.html`.
+- **Read with parameters**: call `resources/read` and pass `arguments` to substitute `{{param}}`.
+
 ---
 
 ## 🚀 **Production Ready**
