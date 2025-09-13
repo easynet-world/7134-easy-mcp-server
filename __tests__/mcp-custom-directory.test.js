@@ -74,8 +74,17 @@ This is a test resource from custom MCP directory.`;
     const prompts = mcpServer.prompts;
     const resources = mcpServer.resources;
     
-    // Should have loaded the custom files
-    expect(prompts.size).toBeGreaterThan(0);
+    // Prompts are now loaded through cache manager when available, so check both static and cached
+    let totalPrompts = prompts.size;
+    if (mcpServer.cacheManager) {
+      try {
+        const cachedPrompts = await mcpServer.cacheManager.getPrompts();
+        totalPrompts += cachedPrompts.length;
+      } catch (error) {
+        // Cache manager might not be available in test environment
+      }
+    }
+    expect(totalPrompts).toBeGreaterThan(0);
     
     // Resources are now loaded through cache manager when available, so check both static and cached
     let totalResources = resources.size;
@@ -96,6 +105,21 @@ This is a test resource from custom MCP directory.`;
     for (const [, prompt] of prompts) {
       if (prompt.template && prompt.template.includes('custom MCP directory')) {
         foundCustomPrompt = true;
+      }
+    }
+    
+    // Also check cached prompts if cache manager is available
+    if (mcpServer.cacheManager && !foundCustomPrompt) {
+      try {
+        const cachedPrompts = await mcpServer.cacheManager.getPrompts();
+        for (const prompt of cachedPrompts) {
+          if (prompt.template && prompt.template.includes('custom MCP directory')) {
+            foundCustomPrompt = true;
+            break;
+          }
+        }
+      } catch (error) {
+        // Cache manager might not be available in test environment
       }
     }
     
