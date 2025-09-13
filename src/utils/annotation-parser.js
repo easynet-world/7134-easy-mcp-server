@@ -54,78 +54,137 @@ class AnnotationParser {
           annotations.summary = fullSummary;
           break;
         }
-        case 'tags':
-          annotations.tags = tag.name ? tag.name.split(',').map(t => t.trim()) : [];
+        case 'tags': {
+          // Split tags into array
+          const tagsValue = tag.name && tag.description ? 
+            `${tag.name} ${tag.description}` : 
+            (tag.name || tag.description);
+          annotations.tags = tagsValue ? tagsValue.split(',').map(t => t.trim()) : [];
           break;
-        case 'requestBody':
-        case 'responseSchema':
-        case 'errorResponses':
-          annotations[tagName] = this.parseJsonAnnotation(tag);
+        }
+        case 'requestBody': {
+          const parsedRequestBody = this.parseJsonAnnotation(tag);
+          if (parsedRequestBody) {
+            annotations.requestBody = parsedRequestBody;
+          }
           break;
-        default:
-          // Store any other annotations
-          annotations[tagName] = tag.name || tag.description || tag.type;
+        }
+        case 'responseSchema': {
+          const parsedResponseSchema = this.parseJsonAnnotation(tag);
+          if (parsedResponseSchema) {
+            annotations.responseSchema = parsedResponseSchema;
+          }
+          break;
+        }
+        case 'errorResponses': {
+          const parsedErrorResponses = this.parseJsonAnnotation(tag);
+          if (parsedErrorResponses) {
+            annotations.errorResponses = parsedErrorResponses;
+          }
+          break;
+        }
+        default: {
+          // For any other tag, store the name/description
+          const value = tag.name && tag.description ? 
+            `${tag.name} ${tag.description}` : 
+            (tag.name || tag.description);
+          annotations[tagName] = value;
+          break;
+        }
         }
       });
 
+      // Add basic description and summary from the comment if not already set
+      if (!annotations.description && parsed[0].description) {
+        annotations.description = parsed[0].description;
+      }
+      
+      if (!annotations.summary && parsed[0].description) {
+        annotations.summary = parsed[0].description;
+      }
+
+      // Store all tags for reference
+      annotations.tags = annotations.tags || [];
+
       return annotations;
     } catch (error) {
-      console.warn(`Error parsing annotations for ${className}: ${error.message}`);
       return null;
     }
   }
 
   /**
-   * Parse JSON content from annotation tags
-   * @param {Object} tag - The parsed tag object
+   * Parse a JSON annotation from a JSDoc tag
+   * @param {Object} tag - The JSDoc tag
    * @returns {Object|null} Parsed JSON or null if invalid
    */
   static parseJsonAnnotation(tag) {
     try {
-      // For single-line JSON, it's in the type field
-      if (tag.type && tag.type.startsWith('{')) {
+      // First try to parse from the type field (single-line JSON)
+      if (tag.type && tag.type.trim()) {
         return JSON.parse(tag.type);
       }
-
-      // For multi-line JSON, we need to reconstruct from source
-      if (tag.source && tag.source.length > 1) {
-        const jsonLines = tag.source.map(line => line.source.trim());
-        const jsonContent = jsonLines.join('\n');
-        
-        // Extract JSON content between braces
-        const braceStart = jsonContent.indexOf('{');
-        const braceEnd = jsonContent.lastIndexOf('}');
-        
-        if (braceStart !== -1 && braceEnd !== -1 && braceEnd > braceStart) {
-          const jsonString = jsonContent.substring(braceStart, braceEnd + 1);
-          // Clean up JSDoc markers and extra whitespace
-          const cleaned = jsonString
-            .replace(/^\s*\*\s*/gm, '') // Remove leading asterisks
-            .replace(/\n/g, '') // Remove newlines
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .trim();
-          
-          return JSON.parse(cleaned);
+      
+      // Then try to parse from the description or name field (multi-line JSON)
+      let jsonText = '';
+      
+      if (tag.description) {
+        jsonText = tag.description;
+      } else if (tag.name) {
+        jsonText = tag.name;
+      }
+      
+      if (jsonText) {
+        // Clean up the JSON text and extract content between braces
+        const match = jsonText.match(/\{[\s\S]*\}/);
+        if (match) {
+          return JSON.parse(match[0]);
         }
       }
-
+      
+      // Finally try to parse from the source (multi-line JSON)
+      if (tag.source && Array.isArray(tag.source)) {
+        // Join all source lines and extract JSON content
+        let sourceText = tag.source.map(line => {
+          if (typeof line === 'string') {
+            return line;
+          } else if (line.source) {
+            return line.source;
+          } else if (line.tokens?.description) {
+            return line.tokens.description;
+          }
+          return '';
+        }).join('\n');
+        
+        // Clean up the source text to extract just the JSON
+        sourceText = sourceText.replace(/\s*\*\s*/g, ' ').trim();
+        
+        // Extract content between braces
+        const match = sourceText.match(/\{[\s\S]*\}/);
+        if (match) {
+          return JSON.parse(match[0]);
+        }
+      }
+      
       return null;
     } catch (error) {
-      console.warn(`Error parsing JSON annotation ${tag.tag}: ${error.message}`);
       return null;
     }
   }
 
   /**
-   * Get a specific annotation value
+   * Get annotation value for a specific annotation type
    * @param {string} className - The name of the class
-   * @param {string} annotationName - The annotation name (without @)
+   * @param {string} annotationType - The annotation type to retrieve
    * @param {string} filePath - Path to the source file
-   * @returns {any} The annotation value
+   * @returns {*} The annotation value or null
    */
-  static getAnnotationValue(className, annotationName, filePath) {
-    const annotations = this.parseClassAnnotations(className, filePath);
-    return annotations ? annotations[annotationName] : null;
+  static getAnnotationValue(className, annotationType, filePath) {
+    try {
+      const annotations = this.parseClassAnnotations(className, filePath);
+      return annotations ? annotations[annotationType] : null;
+    } catch (error) {
+      return null;
+    }
   }
 }
 

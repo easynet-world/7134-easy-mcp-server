@@ -1,14 +1,16 @@
+// Mock fs module before importing AnnotationParser
+const mockFs = {
+  existsSync: jest.fn(),
+  readFileSync: jest.fn()
+};
+
+jest.mock('fs', () => mockFs);
+
 const AnnotationParser = require('../src/utils/annotation-parser');
 
-// Mock fs module
-jest.mock('fs');
-
 describe('AnnotationParser', () => {
-  let mockFs;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFs = require('fs');
   });
 
   describe('parseClassAnnotations', () => {
