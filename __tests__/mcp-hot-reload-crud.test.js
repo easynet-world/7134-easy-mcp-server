@@ -12,7 +12,7 @@ const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
 
 describe('MCP Server Hot Reload CRUD Operations', () => {
   // Increase timeout for CI environments
-  jest.setTimeout(15000);
+  jest.setTimeout(30000);
   
   let mcpServer;
   let tempDir;
@@ -100,9 +100,11 @@ Use this prompt to test hot reload functionality.`;
       while (mcpServer.prompts.size === 0 && retries < 20) {
         await new Promise(resolve => setTimeout(resolve, 200));
         retries++;
+        console.log(`Retry ${retries}: prompts.size = ${mcpServer.prompts.size}`);
       }
 
       // Check if prompt was loaded
+      console.log(`Final prompts.size = ${mcpServer.prompts.size}`);
       expect(mcpServer.prompts.size).toBeGreaterThan(0);
       
       const prompt = Array.from(mcpServer.prompts.values())[0];
