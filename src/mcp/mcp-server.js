@@ -1246,8 +1246,8 @@ class DynamicAPIMCPServer {
       }
       
       // Process template with arguments if provided
-      let processedTemplate = prompt.template;
-      if (args && prompt.arguments) {
+      let processedTemplate = prompt.template || '';
+      if (args && prompt.arguments && processedTemplate) {
         prompt.arguments.forEach(arg => {
           if (args[arg.name] !== undefined) {
             const placeholder = new RegExp(`{{${arg.name}}}`, 'g');
@@ -1336,8 +1336,8 @@ class DynamicAPIMCPServer {
       }
       
       // Process template with arguments if provided and resource has parameters
-      let processedContent = resource.content;
-      if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates) {
+      let processedContent = resource.content || '';
+      if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates && processedContent) {
         resource.parameters.forEach(param => {
           if (args[param] !== undefined) {
             const placeholder = new RegExp(`{{${param}}}`, 'g');
@@ -1452,8 +1452,8 @@ class DynamicAPIMCPServer {
     }
     
     // Process template with arguments if provided
-    let processedTemplate = prompt.template;
-    if (args && prompt.arguments) {
+    let processedTemplate = prompt.template || '';
+    if (args && prompt.arguments && processedTemplate) {
       prompt.arguments.forEach(arg => {
         if (args[arg.name] !== undefined) {
           const placeholder = new RegExp(`{{${arg.name}}}`, 'g');
@@ -1685,8 +1685,8 @@ class DynamicAPIMCPServer {
     }
     
     // Process template with arguments if provided and resource has parameters
-    let processedContent = resource.content;
-    if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates) {
+    let processedContent = resource.content || '';
+    if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates && processedContent) {
       resource.parameters.forEach(param => {
         if (args[param] !== undefined) {
           const placeholder = new RegExp(`{{${param}}}`, 'g');
