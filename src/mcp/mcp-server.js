@@ -320,7 +320,6 @@ class DynamicAPIMCPServer {
       
       // Extract template parameters using the parameter parser
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
-      const parameters = parsed.parameters || [];
       
       // Determine MIME type and process content based on file extension
       let mimeType = this.getMimeTypeForExtension(ext);
