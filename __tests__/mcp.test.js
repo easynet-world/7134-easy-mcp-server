@@ -184,4 +184,83 @@ describe('MCP (Model Context Protocol) Support', () => {
     const mcpServerCustom = new DynamicAPIMCPServer('192.168.1.100', 3001);
     expect(mcpServerCustom.host).toBe('192.168.1.100');
   });
+
+  test('MCP server uses default MCP directory when no custom path is provided', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const mcpServer = new DynamicAPIMCPServer();
+    
+    // Should use default './mcp' path
+    expect(mcpServer.config.mcp.basePath).toBe('./mcp');
+    expect(mcpServer.config.mcp.prompts.directory).toBe('mcp/prompts');
+    expect(mcpServer.config.mcp.resources.directory).toBe('mcp/resources');
+  });
+
+  test('MCP server respects custom MCP base path configuration', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const customOptions = {
+      mcp: {
+        basePath: './custom-mcp'
+      }
+    };
+    
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    
+    // Should use custom base path
+    expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');
+    expect(mcpServer.config.mcp.prompts.directory).toBe('custom-mcp/prompts');
+    expect(mcpServer.config.mcp.resources.directory).toBe('custom-mcp/resources');
+  });
+
+  test('MCP server respects custom prompts and resources directory configuration', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const customOptions = {
+      mcp: {
+        basePath: './custom-mcp'
+      },
+      prompts: {
+        directory: './custom-prompts'
+      },
+      resources: {
+        directory: './custom-resources'
+      }
+    };
+    
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    
+    // Should use custom base path and custom subdirectories
+    expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');
+    expect(mcpServer.config.mcp.prompts.directory).toBe('./custom-prompts');
+    expect(mcpServer.config.mcp.resources.directory).toBe('./custom-resources');
+  });
+
+  test('MCP server cache manager uses configured base path', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const customOptions = {
+      mcp: {
+        basePath: './custom-mcp'
+      }
+    };
+    
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    
+    // Cache manager should use the configured base path
+    expect(mcpServer.cacheManager.basePath).toContain('custom-mcp');
+  });
+
+  test('MCP server falls back to default paths when custom paths are not provided', () => {
+    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const customOptions = {
+      mcp: {
+        basePath: './custom-mcp'
+      }
+      // No custom prompts or resources directories
+    };
+    
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    
+    // Should use custom base path with default subdirectories
+    expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');
+    expect(mcpServer.config.mcp.prompts.directory).toBe('custom-mcp/prompts');
+    expect(mcpServer.config.mcp.resources.directory).toBe('custom-mcp/resources');
+  });
 });
