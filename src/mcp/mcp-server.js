@@ -465,12 +465,12 @@ class DynamicAPIMCPServer {
     this.promptsWatcher
       .on('add', (filePath) => {
         console.log(`🔌 MCP Server: New prompt file added: ${filePath}`);
-        this.loadPromptFromFile(filePath);
+        this.loadPromptFromFile(filePath, promptsPath);
         this.notifyPromptsChanged();
       })
       .on('change', (filePath) => {
         console.log(`🔌 MCP Server: Prompt file changed: ${filePath}`);
-        this.loadPromptFromFile(filePath);
+        this.loadPromptFromFile(filePath, promptsPath);
         this.notifyPromptsChanged();
       })
       .on('unlink', (filePath) => {
@@ -504,12 +504,12 @@ class DynamicAPIMCPServer {
     this.resourcesWatcher
       .on('add', (filePath) => {
         console.log(`🔌 MCP Server: New resource file added: ${filePath}`);
-        this.loadResourceFromFile(filePath);
+        this.loadResourceFromFile(filePath, resourcesPath);
         this.notifyResourcesChanged();
       })
       .on('change', (filePath) => {
         console.log(`🔌 MCP Server: Resource file changed: ${filePath}`);
-        this.loadResourceFromFile(filePath);
+        this.loadResourceFromFile(filePath, resourcesPath);
         this.notifyResourcesChanged();
       })
       .on('unlink', (filePath) => {
