@@ -221,8 +221,19 @@ class DynamicAPIMCPServer {
    */
   async loadPromptFromFile(filePath, baseDir = null) {
     try {
-      const content = await fs.readFile(filePath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
+      
+      // Check if file extension is supported based on MCP server configuration
+      const supportedFormats = this.config.mcp.prompts.formats;
+      if (!supportedFormats.includes('*')) {
+        const supportedExtensions = supportedFormats.map(fmt => `.${fmt}`);
+        if (!supportedExtensions.includes(ext)) {
+          console.log(`🔌 MCP Server: Skipping unsupported file format: ${filePath} (${ext})`);
+          return;
+        }
+      }
+      
+      const content = await fs.readFile(filePath, 'utf8');
       const promptsBasePath = baseDir || path.resolve(this.resolvedBasePath, 'prompts');
       const relativePath = path.relative(promptsBasePath, filePath);
       
@@ -347,10 +358,21 @@ class DynamicAPIMCPServer {
    */
   async loadResourceFromFile(filePath, baseDir = null) {
     try {
+      const ext = path.extname(filePath).toLowerCase();
+      
+      // Check if file extension is supported based on MCP server configuration
+      const supportedFormats = this.config.mcp.resources.formats;
+      if (!supportedFormats.includes('*')) {
+        const supportedExtensions = supportedFormats.map(fmt => `.${fmt}`);
+        if (!supportedExtensions.includes(ext)) {
+          console.log(`🔌 MCP Server: Skipping unsupported file format: ${filePath} (${ext})`);
+          return;
+        }
+      }
+      
       const content = await fs.readFile(filePath, 'utf8');
       const resourcesBasePath = baseDir || path.resolve(this.resolvedBasePath, 'resources');
       const relativePath = path.relative(resourcesBasePath, filePath);
-      const ext = path.extname(filePath).toLowerCase();
       
       // Generate URI from file path - use relative path, but clean up if it goes outside the resources directory
       let cleanRelativePath = relativePath;
@@ -507,7 +529,9 @@ class DynamicAPIMCPServer {
    */
   removePromptByFilePath(filePath) {
     const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'prompts'), filePath);
-    const name = relativePath.replace(/\.(json|yaml|yml)$/, '').replace(/\//g, '_');
+    // Remove any file extension and replace slashes with underscores
+    const name = relativePath.replace(/\.[^/.]+$/, '').replace(/\//g, '_');
+    console.log(`🔌 MCP Server: Removing prompt: ${name} (from ${filePath})`);
     this.prompts.delete(name);
   }
 
@@ -516,7 +540,15 @@ class DynamicAPIMCPServer {
    */
   removeResourceByFilePath(filePath) {
     const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'resources'), filePath);
-    const uri = `resource://${relativePath.replace(/\//g, '/')}`;
+    // Clean up the relative path similar to how it's done in loadResourceFromFile
+    let cleanRelativePath = relativePath;
+    if (relativePath.startsWith('..')) {
+      cleanRelativePath = path.basename(filePath);
+    } else {
+      cleanRelativePath = relativePath.replace(/\\/g, '/');
+    }
+    const uri = `resource://${cleanRelativePath}`;
+    console.log(`🔌 MCP Server: Removing resource: ${uri} (from ${filePath})`);
     this.resources.delete(uri);
   }
 
