@@ -281,9 +281,6 @@ This resource will be deleted.`;
       const nestedDir = path.join(resourcesDir, 'templates', 'v1');
       await fs.mkdir(nestedDir, { recursive: true });
 
-      const resourceContent = `# Nested Resource
-This is a nested resource.`;
-
       const resourceFile = path.join(nestedDir, 'nested-resource.json');
       await fs.writeFile(resourceFile, JSON.stringify({
         name: 'nested-resource',
