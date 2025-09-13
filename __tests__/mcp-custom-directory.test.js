@@ -188,27 +188,29 @@ module.exports = GetExample;
     });
     
     let output = '';
+    let stderr = '';
     
     serverProcess.stdout.on('data', (data) => {
       output += data.toString();
     });
     
     serverProcess.stderr.on('data', (data) => {
-      // Capture stderr but don't store it in a variable since it's not used
+      stderr += data.toString();
       console.log('Server stderr:', data.toString());
     });
     
     // Wait for server to start and check for custom MCP directory message
     setTimeout(() => {
-      expect(output).toContain('Using custom MCP directory');
+      const combinedOutput = output + stderr;
+      expect(combinedOutput).toContain('🔌 MCP Server: Using custom MCP directory');
       serverProcess.kill();
       done();
-    }, 25000);
+    }, 10000);
     
-    // Timeout after 40 seconds
+    // Timeout after 20 seconds
     setTimeout(() => {
       serverProcess.kill();
       done(new Error('Test timeout'));
-    }, 40000);
+    }, 20000);
   });
 });
