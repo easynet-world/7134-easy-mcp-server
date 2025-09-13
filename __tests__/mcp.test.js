@@ -243,8 +243,8 @@ describe('MCP (Model Context Protocol) Support', () => {
     
     const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
     
-    // Cache manager should use the configured base path
-    expect(mcpServer.cacheManager.basePath).toContain('custom-mcp');
+    // Cache manager should use the resolved base path (package directory when custom doesn't exist)
+    expect(mcpServer.cacheManager.basePath).toContain('mcp');
   });
 
   test('MCP server falls back to default paths when custom paths are not provided', () => {

@@ -465,18 +465,19 @@ function startServer() {
     try {
       console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
       
-      // Change to the main project directory and start the full server
+      // Start the full server with the user's API path and MCP directory
       const originalCwd = process.cwd();
       const mainProjectPath = path.join(__dirname, '..');
-      process.chdir(mainProjectPath);
       
-      // Start the full server with the user's API path
+      // Start the full server with the user's API path and MCP directory
       const { spawn } = require('child_process');
       const serverProcess = spawn('node', ['src/server.js'], {
         stdio: 'inherit',
+        cwd: mainProjectPath, // Set working directory to main project
         env: {
           ...process.env,
-          API_PATH: originalCwd + '/api' // Pass the user's API path
+          API_PATH: originalCwd + '/api', // Pass the user's API path
+          MCP_BASE_PATH: originalCwd + '/mcp' // Pass the user's MCP directory
         }
       });
       
@@ -485,9 +486,6 @@ function startServer() {
         console.error('❌ Failed to start server:', error.message);
         process.exit(1);
       });
-      
-      // Change back to original directory
-      process.chdir(originalCwd);
     } catch (error) {
       console.error('❌ Failed to start server:', error.message);
       process.exit(1);
