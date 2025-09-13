@@ -188,16 +188,17 @@ class DynamicAPIMCPServer {
   /**
    * Load prompts from a directory recursively
    */
-  async loadPromptsFromDirectory(dirPath) {
+  async loadPromptsFromDirectory(dirPath, baseDir = null) {
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      const promptsBase = baseDir || dirPath;
       
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
         
         if (entry.isDirectory()) {
           // Recursively load subdirectories
-          await this.loadPromptsFromDirectory(fullPath);
+          await this.loadPromptsFromDirectory(fullPath, promptsBase);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase();
           // Load any file format if '*' is specified, or check specific formats
@@ -205,7 +206,7 @@ class DynamicAPIMCPServer {
                            this.config.mcp.prompts.formats.includes(ext.substring(1));
           
           if (shouldLoad) {
-            await this.loadPromptFromFile(fullPath);
+            await this.loadPromptFromFile(fullPath, promptsBase);
           }
         }
       }
@@ -218,18 +219,19 @@ class DynamicAPIMCPServer {
   /**
    * Load a single prompt from a file (supports any format)
    */
-  async loadPromptFromFile(filePath) {
+  async loadPromptFromFile(filePath, baseDir = null) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
-      const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'prompts'), filePath);
+      const promptsBasePath = baseDir || path.resolve(this.resolvedBasePath, 'prompts');
+      const relativePath = path.relative(promptsBasePath, filePath);
       
       // Extract template parameters using the parameter parser
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
       
       let promptData = {};
       let template = content;
-      let description = `Prompt from ${relativePath}`;
+      let description = `Prompt from ${path.basename(filePath)}`;
       let arguments_ = [];
       
       // Try to parse structured formats for metadata extraction
@@ -264,11 +266,21 @@ class DynamicAPIMCPServer {
       } else {
         // For any other format, treat as plain text template
         template = content;
-        description = `Prompt from ${relativePath}`;
+        description = `Prompt from ${path.basename(filePath)}`;
       }
       
       // Generate a name from the file path if not provided
-      const name = promptData.name || relativePath.replace(/\.[^/.]+$/, '').replace(/\//g, '_');
+      // Use relative path with underscores for nested directories, or just filename for root level
+      let name = promptData.name;
+      if (!name) {
+        if (relativePath.startsWith('..')) {
+          // If the path goes outside the prompts directory, just use the filename
+          name = path.basename(filePath, path.extname(filePath));
+        } else {
+          // Use relative path with underscores for nested directories
+          name = relativePath.replace(/\//g, '_').replace(/\.[^/.]+$/, '');
+        }
+      }
       
       // If no arguments were defined in structured format, use extracted parameters
       if (arguments_.length === 0 && parsed.hasParameters) {
@@ -302,16 +314,17 @@ class DynamicAPIMCPServer {
   /**
    * Load resources from a directory recursively
    */
-  async loadResourcesFromDirectory(dirPath) {
+  async loadResourcesFromDirectory(dirPath, baseDir = null) {
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      const resourcesBase = baseDir || dirPath;
       
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
         
         if (entry.isDirectory()) {
           // Recursively load subdirectories
-          await this.loadResourcesFromDirectory(fullPath);
+          await this.loadResourcesFromDirectory(fullPath, resourcesBase);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase();
           // Load any file format if '*' is specified, or check specific formats
@@ -319,7 +332,7 @@ class DynamicAPIMCPServer {
                            this.config.mcp.resources.formats.includes(ext.substring(1));
           
           if (shouldLoad) {
-            await this.loadResourceFromFile(fullPath);
+            await this.loadResourceFromFile(fullPath, resourcesBase);
           }
         }
       }
@@ -332,14 +345,23 @@ class DynamicAPIMCPServer {
   /**
    * Load a single resource from a file
    */
-  async loadResourceFromFile(filePath) {
+  async loadResourceFromFile(filePath, baseDir = null) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'resources'), filePath);
+      const resourcesBasePath = baseDir || path.resolve(this.resolvedBasePath, 'resources');
+      const relativePath = path.relative(resourcesBasePath, filePath);
       const ext = path.extname(filePath).toLowerCase();
       
-      // Generate URI from file path
-      const uri = `resource://${relativePath.replace(/\//g, '/')}`;
+      // Generate URI from file path - use relative path, but clean up if it goes outside the resources directory
+      let cleanRelativePath = relativePath;
+      if (relativePath.startsWith('..')) {
+        // If the path goes outside the resources directory, just use the filename
+        cleanRelativePath = path.basename(filePath);
+      } else {
+        // Normalize the path to use forward slashes consistently
+        cleanRelativePath = relativePath.replace(/\\/g, '/');
+      }
+      const uri = `resource://${cleanRelativePath}`;
       
       // Extract template parameters using the parameter parser
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
@@ -376,8 +398,10 @@ class DynamicAPIMCPServer {
       }
       
       // Generate name from file path if not provided in content
-      const name = resourceName || relativePath.replace(/\//g, ' - ').replace(/\.[^/.]+$/, '');
-      const description = resourceDescription || `Resource from ${relativePath}`;
+      // Use just the filename without extension for simple names
+      const fileName = path.basename(filePath, path.extname(filePath));
+      const name = resourceName || fileName;
+      const description = resourceDescription || `Resource from ${path.basename(filePath)}`;
       
       const resource = {
         uri: uri,
