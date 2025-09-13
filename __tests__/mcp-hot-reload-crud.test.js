@@ -90,12 +90,12 @@ Use this prompt to test hot reload functionality.`;
       await fs.writeFile(promptFile, promptContent);
 
       // Wait for file watcher to detect the change - increased timeout for CI
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Wait for prompt to be loaded with retry logic for CI
       let retries = 0;
-      while (mcpServer.prompts.size === 0 && retries < 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      while (mcpServer.prompts.size === 0 && retries < 20) {
+        await new Promise(resolve => setTimeout(resolve, 200));
         retries++;
       }
 
@@ -210,12 +210,12 @@ This is a test resource with some content.
       await fs.writeFile(resourceFile, resourceContent);
 
       // Wait for file watcher to detect the change - increased timeout for CI
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Wait for resource to be loaded with retry logic for CI
       let retries = 0;
-      while (mcpServer.resources.size === 0 && retries < 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      while (mcpServer.resources.size === 0 && retries < 20) {
+        await new Promise(resolve => setTimeout(resolve, 200));
         retries++;
       }
 
