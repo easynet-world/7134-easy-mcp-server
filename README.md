@@ -98,13 +98,13 @@ echo '# My Guide' > mcp/resources/docs/my-guide.md
 |----------|---------|----------|
 | **[Framework Guide](mcp/resources/guides/easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
 | **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
-| **[Health Monitoring](mcp/resources/guides/health-monitoring.md)** | Monitoring and observability | Production monitoring |
+| **[Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
 | **[LLM Context](LLM.txt)** | LLM-specific information | AI model integration |
 
 ### 📋 **Quick Reference**
 - **Getting Started**: [Quick Start](#-quick-start) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 - **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
-- **Production**: [Production Ready](#-production-ready) → [Health Monitoring](mcp/resources/guides/health-monitoring.md)
+- **Production**: [Production Ready](#-production-ready) → [Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)
 - **Advanced**: [Advanced Features](#-advanced-features) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 
 ---
@@ -188,7 +188,16 @@ api/users/profile/put.js  →  PUT /users/profile
 
 **Auto-Discovery**: Automatically loads prompts and resources from `mcp/prompts/` and `mcp/resources/` directories.
 
-**Supported Formats**: Markdown, YAML, JSON, Text files (parameters as `{{name}}`)
+**Universal Format Support**: Supports **ALL file formats** including:
+- **Programming Languages**: `.js`, `.py`, `.java`, `.cpp`, `.c`, `.php`, `.rb`, `.go`, `.rs`, `.swift`, `.kt`, `.scala`
+- **Web Technologies**: `.html`, `.css`, `.xml`, `.scss`, `.sass`, `.less`
+- **Data Formats**: `.json`, `.yaml`, `.yml`, `.csv`, `.tsv`, `.toml`, `.ini`, `.properties`
+- **Documentation**: `.md`, `.txt`, `.rst`, `.adoc`, `.asciidoc`, `.org`, `.wiki`
+- **Scripts**: `.sh`, `.bash`, `.zsh`, `.fish`, `.ps1`, `.bat`, `.cmd`
+- **Build Tools**: `.dockerfile`, `.makefile`, `.cmake`, `.gradle`, `.maven`
+- **And many more!** (80+ supported formats)
+
+**Template Parameters**: Any file can use `{{parameter}}` substitution for dynamic content.
 
 **Hot Reloading & Caching**: Backed by in-memory cache with chokidar-based invalidation. File changes are detected automatically — no server restart needed.
 
@@ -202,7 +211,6 @@ mcp/
 └── resources/
     ├── api-guide.md
     └── guides/
-        └── markdown-prompt-guide.md
 ```
 
 **Example Prompt:**
@@ -245,6 +253,34 @@ Inputs:
 ## 📄 **License**
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🔧 **Troubleshooting**
+
+### Custom Prompts & Resources Not Showing Up?
+
+The framework supports **ALL file formats** for prompts and resources. If your custom content isn't appearing:
+
+1. **Check Directory Structure**: Ensure files are in `mcp/prompts/` and `mcp/resources/`
+2. **Verify Configuration**: Make sure `formats: ['*']` is set in your MCP server config
+3. **Check File Permissions**: Ensure the server can read your files
+4. **Use MCP Inspector**: Run `npx @modelcontextprotocol/inspector` to see loaded content
+5. **Check Server Logs**: Look for `🔌 MCP Server: Added prompt/resource` messages
+
+**Quick Test:**
+```bash
+# Create test files
+echo '{"name": "Test Prompt", "instructions": "Test with {{param}}"}' > mcp/prompts/test.json
+echo '# Test Resource\n\nWith {{variable}}' > mcp/resources/test.md
+
+# Start server and check logs
+node src/server.js
+```
+
+**Supported Formats**: `.js`, `.py`, `.md`, `.json`, `.yaml`, `.txt`, `.html`, `.css`, `.sql`, `.ini`, `.properties`, `.dockerfile`, `.makefile`, and 70+ more!
+
+📖 **Full Guide**: See [CUSTOM_CONTENT_TROUBLESHOOTING.md](./CUSTOM_CONTENT_TROUBLESHOOTING.md) for detailed troubleshooting steps.
 
 ---
 

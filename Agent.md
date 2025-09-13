@@ -325,10 +325,10 @@ curl -H "X-Agent-ID: test-agent" http://localhost:3001/health
 | Document | Purpose | Best For |
 |----------|---------|----------|
 | **[Framework Guide](mcp/resources/guides/easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
-| **[Health Monitoring](mcp/resources/guides/health-monitoring.md)** | Monitoring and observability | Production monitoring |
+| **[Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
 | **[README](README.md)** | Quick start and overview | Getting started |
 
 ### 📋 **Quick Reference**
 - **Getting Started**: [README Quick Start](README.md#-quick-start) → [Agent Quick Start](#-quick-start-for-agents)
 - **Framework Details**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md) → [Agent Integration](#-agent-capabilities)
-- **Production**: [Health Monitoring](mcp/resources/guides/health-monitoring.md) → [Agent Monitoring](#-agent-monitoring)
+- **Production**: [Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging) → [Agent Monitoring](#-agent-monitoring)

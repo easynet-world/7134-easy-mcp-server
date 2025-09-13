@@ -59,6 +59,98 @@ class MCPResourceLoader {
   }
 
   /**
+   * Get MIME type for file extension
+   * @param {string} ext - File extension (with dot)
+   * @returns {string} MIME type
+   */
+  getMimeTypeForExtension(ext) {
+    const mimeTypes = {
+      '.md': 'text/markdown',
+      '.txt': 'text/plain',
+      '.json': 'application/json',
+      '.yaml': 'application/x-yaml',
+      '.yml': 'application/x-yaml',
+      '.js': 'application/javascript',
+      '.ts': 'application/typescript',
+      '.py': 'text/x-python',
+      '.java': 'text/x-java-source',
+      '.cpp': 'text/x-c++src',
+      '.c': 'text/x-csrc',
+      '.h': 'text/x-chdr',
+      '.hpp': 'text/x-c++hdr',
+      '.cs': 'text/x-csharp',
+      '.php': 'text/x-php',
+      '.rb': 'text/x-ruby',
+      '.go': 'text/x-go',
+      '.rs': 'text/x-rust',
+      '.swift': 'text/x-swift',
+      '.kt': 'text/x-kotlin',
+      '.scala': 'text/x-scala',
+      '.sh': 'text/x-shellscript',
+      '.bash': 'text/x-shellscript',
+      '.zsh': 'text/x-shellscript',
+      '.fish': 'text/x-fish',
+      '.ps1': 'text/x-powershell',
+      '.bat': 'text/x-msdos-batch',
+      '.cmd': 'text/x-msdos-batch',
+      '.html': 'text/html',
+      '.htm': 'text/html',
+      '.xml': 'text/xml',
+      '.css': 'text/css',
+      '.scss': 'text/x-scss',
+      '.sass': 'text/x-sass',
+      '.less': 'text/x-less',
+      '.sql': 'text/x-sql',
+      '.r': 'text/x-r',
+      '.m': 'text/x-objective-c',
+      '.mm': 'text/x-objective-c++',
+      '.pl': 'text/x-perl',
+      '.pm': 'text/x-perl',
+      '.lua': 'text/x-lua',
+      '.dart': 'text/x-dart',
+      '.elm': 'text/x-elm',
+      '.clj': 'text/x-clojure',
+      '.cljs': 'text/x-clojure',
+      '.hs': 'text/x-haskell',
+      '.ml': 'text/x-ocaml',
+      '.fs': 'text/x-fsharp',
+      '.vb': 'text/x-vb',
+      '.asm': 'text/x-asm',
+      '.s': 'text/x-asm',
+      '.tex': 'text/x-tex',
+      '.rst': 'text/x-rst',
+      '.adoc': 'text/x-asciidoc',
+      '.asciidoc': 'text/x-asciidoc',
+      '.org': 'text/x-org',
+      '.wiki': 'text/x-wiki',
+      '.toml': 'text/x-toml',
+      '.ini': 'text/x-ini',
+      '.cfg': 'text/x-config',
+      '.conf': 'text/x-config',
+      '.properties': 'text/x-properties',
+      '.env': 'text/x-env',
+      '.dockerfile': 'text/x-dockerfile',
+      '.makefile': 'text/x-makefile',
+      '.cmake': 'text/x-cmake',
+      '.gradle': 'text/x-gradle',
+      '.maven': 'text/x-maven',
+      '.pom': 'text/x-maven',
+      '.log': 'text/x-log',
+      '.diff': 'text/x-diff',
+      '.patch': 'text/x-patch',
+      '.csv': 'text/csv',
+      '.tsv': 'text/tab-separated-values',
+      '.rtf': 'text/rtf',
+      '.vtt': 'text/vtt',
+      '.srt': 'text/x-subrip',
+      '.sub': 'text/x-subviewer',
+      '.smi': 'text/x-sami'
+    };
+    
+    return mimeTypes[ext.toLowerCase()] || 'text/plain';
+  }
+
+  /**
    * Log a message with context
    * @param {string} level - Log level
    * @param {string} message - Log message
@@ -86,35 +178,59 @@ class MCPResourceLoader {
       const content = await fs.readFile(fullPath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
       const fileName = path.basename(filePath, ext);
+      const relativePath = path.relative(basePath, fullPath);
       
-      let resource;
+      // Generate URI from file path if not provided
+      const uri = resourceUri || `resource://${relativePath.replace(/\//g, '/')}`;
       
+      // Determine MIME type and process content based on file extension
+      let mimeType = this.getMimeTypeForExtension(ext);
+      let processedContent = content;
+      let resourceName = null;
+      let resourceDescription = null;
+      
+      // Try to parse structured formats for metadata extraction
       if (ext === '.json') {
-        resource = JSON.parse(content);
-        // Use filename as resource name if not specified
-        if (!resource.name) {
-          resource.name = fileName;
+        try {
+          const jsonData = JSON.parse(content);
+          processedContent = JSON.stringify(jsonData, null, 2);
+          // Extract name and description from JSON if available
+          if (jsonData.name) resourceName = jsonData.name;
+          if (jsonData.description) resourceDescription = jsonData.description;
+          if (jsonData.mimeType) mimeType = jsonData.mimeType;
+        } catch (parseError) {
+          this.log('warn', `Invalid JSON in ${filePath}, treating as plain text`);
+          mimeType = 'text/plain';
         }
-        // Use filename-based URI if not specified
-        if (!resource.uri) {
-          resource.uri = resourceUri || `resource://${fileName}`;
+      } else if (ext === '.yaml' || ext === '.yml') {
+        try {
+          const yaml = require('js-yaml');
+          const yamlData = yaml.load(content);
+          processedContent = yaml.dump(yamlData, { indent: 2 });
+          // Extract name and description from YAML if available
+          if (yamlData.name) resourceName = yamlData.name;
+          if (yamlData.description) resourceDescription = yamlData.description;
+          if (yamlData.mimeType) mimeType = yamlData.mimeType;
+        } catch (parseError) {
+          this.log('warn', `Invalid YAML in ${filePath}, treating as plain text`);
+          mimeType = 'text/plain';
         }
-      } else if (ext === '.md') {
-        resource = this.createMarkdownResource(
-          resourceUri || `resource://${fileName}`,
-          fileName,
-          `Resource loaded from ${filePath}`,
-          content
-        );
-      } else {
-        // Treat as plain text
-        resource = this.createTextResource(
-          resourceUri || `resource://${fileName}`,
-          fileName,
-          `Resource loaded from ${filePath}`,
-          content
-        );
       }
+      
+      // Generate name from file path if not provided in content
+      const name = resourceName || relativePath.replace(/\//g, ' - ').replace(/\.[^/.]+$/, '');
+      const description = resourceDescription || `Resource from ${relativePath}`;
+      
+      const resource = {
+        uri: uri,
+        name: name,
+        description: description,
+        mimeType: mimeType,
+        content: processedContent,
+        // Add file metadata
+        filePath: relativePath,
+        format: ext.substring(1)
+      };
       
       this.resources.set(resource.uri, resource);
       this.log('debug', `Loaded resource: ${resource.uri}`);
@@ -137,23 +253,79 @@ class MCPResourceLoader {
       const basePath = customBasePath || this.basePath;
       const fullPath = path.resolve(basePath, filePath);
       const content = await fs.readFile(fullPath, 'utf8');
-      const prompt = JSON.parse(content);
+      const ext = path.extname(filePath).toLowerCase();
+      const fileName = path.basename(filePath, ext);
       
-      // Use filename (without extension) as the prompt name if not specified
-      const fileName = path.basename(filePath, path.extname(filePath));
-      if (!prompt.name) {
-        prompt.name = fileName;
+      let prompt = {};
+      let template = content;
+      let description = `Prompt from ${fileName}`;
+      let arguments_ = [];
+      
+      // Try to parse structured formats for metadata extraction
+      if (ext === '.json') {
+        try {
+          prompt = JSON.parse(content);
+          template = prompt.instructions || prompt.template || content;
+          description = prompt.description || description;
+          arguments_ = prompt.arguments?.properties ? 
+            Object.keys(prompt.arguments.properties).map(key => ({
+              name: key,
+              description: prompt.arguments.properties[key].description || '',
+              required: prompt.arguments.required?.includes(key) || false
+            })) : [];
+        } catch (parseError) {
+          this.log('warn', `Invalid JSON in ${filePath}, treating as plain text`);
+          template = content;
+        }
+      } else if (ext === '.yaml' || ext === '.yml') {
+        try {
+          const yaml = require('js-yaml');
+          prompt = yaml.load(content);
+          template = prompt.instructions || prompt.template || content;
+          description = prompt.description || description;
+          arguments_ = prompt.arguments?.properties ? 
+            Object.keys(prompt.arguments.properties).map(key => ({
+              name: key,
+              description: prompt.arguments.properties[key].description || '',
+              required: prompt.arguments.required?.includes(key) || false
+            })) : [];
+        } catch (parseError) {
+          this.log('warn', `Invalid YAML in ${filePath}, treating as plain text`);
+          template = content;
+        }
+      } else {
+        // For any other format, treat as plain text template
+        template = content;
+        description = `Prompt from ${fileName}`;
       }
       
-      // Validate prompt structure
-      if (!prompt.description) {
-        throw new Error('Prompt must have description');
-      }
+      // Create prompt object
+      const promptObj = {
+        name: prompt.name || fileName,
+        description: description,
+        instructions: template,
+        template: template,
+        arguments: arguments_.length > 0 ? {
+          type: 'object',
+          properties: arguments_.reduce((acc, arg) => {
+            acc[arg.name] = {
+              type: 'string',
+              description: arg.description
+            };
+            return acc;
+          }, {}),
+          required: arguments_.filter(arg => arg.required).map(arg => arg.name)
+        } : undefined,
+        // Add file metadata
+        filePath: filePath,
+        format: ext.substring(1),
+        mimeType: this.getMimeTypeForExtension(ext)
+      };
       
-      this.prompts.set(prompt.name, prompt);
-      this.log('debug', `Loaded prompt: ${prompt.name}`);
+      this.prompts.set(promptObj.name, promptObj);
+      this.log('debug', `Loaded prompt: ${promptObj.name}`);
       
-      return prompt;
+      return promptObj;
     } catch (error) {
       this.log('error', `Failed to load prompt from ${filePath}: ${error.message}`);
       throw error;
@@ -179,22 +351,24 @@ class MCPResourceLoader {
           const filePath = path.join(dirPath, entry.name);
           const ext = path.extname(entry.name).toLowerCase();
           
-          if (resourceType === 'all' || 
-              (resourceType === 'resources' && (ext === '.md' || ext === '.json')) ||
-              (resourceType === 'prompts' && ext === '.json')) {
+          // Support any file format - let the system auto-detect based on extension
+          const shouldLoad = resourceType === 'all' || 
+              (resourceType === 'resources') ||
+              (resourceType === 'prompts');
             
-            try {
-              if (resourceType === 'prompts' || (resourceType === 'all' && ext === '.json' && dirPath.includes('prompts'))) {
-                const prompt = await this.loadPrompt(filePath, customBasePath);
-                loadedResources.push(prompt);
-              } else {
-                const resource = await this.loadResource(filePath, null, customBasePath);
-                loadedResources.push(resource);
+            if (shouldLoad) {
+              try {
+                if (resourceType === 'prompts' || (resourceType === 'all' && dirPath.includes('prompts'))) {
+                  const prompt = await this.loadPrompt(filePath, customBasePath);
+                  loadedResources.push(prompt);
+                } else {
+                  const resource = await this.loadResource(filePath, null, customBasePath);
+                  loadedResources.push(resource);
+                }
+              } catch (error) {
+                this.log('warn', `Skipped file ${filePath}: ${error.message}`);
               }
-            } catch (error) {
-              this.log('warn', `Skipped file ${filePath}: ${error.message}`);
             }
-          }
         } else if (entry.isDirectory()) {
           // Recursively load subdirectories
           const subResources = await this.loadDirectory(path.join(dirPath, entry.name), resourceType, customBasePath);
@@ -479,7 +653,6 @@ This guide provides comprehensive information about monitoring health services a
 Implement health checks for all critical services and endpoints.`;
 
     return this.createMarkdownResource(
-      'resource://health-monitoring-guide',
       'Health Monitoring Guide',
       'Comprehensive guide for health service monitoring',
       content
