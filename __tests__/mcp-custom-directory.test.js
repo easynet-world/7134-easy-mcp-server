@@ -83,13 +83,13 @@ This is a test resource from custom MCP directory.`;
     let foundCustomPrompt = false;
     let foundCustomResource = false;
     
-    for (const [key, prompt] of prompts) {
+    for (const [, prompt] of prompts) {
       if (prompt.template && prompt.template.includes('custom MCP directory')) {
         foundCustomPrompt = true;
       }
     }
     
-    for (const [key, resource] of resources) {
+    for (const [, resource] of resources) {
       if (resource.content && resource.content.includes('custom MCP directory')) {
         foundCustomResource = true;
       }
@@ -188,14 +188,14 @@ module.exports = GetExample;
     });
     
     let output = '';
-    let errorOutput = '';
     
     serverProcess.stdout.on('data', (data) => {
       output += data.toString();
     });
     
     serverProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
+      // Capture stderr but don't store it in a variable since it's not used
+      console.log('Server stderr:', data.toString());
     });
     
     // Wait for server to start and check for custom MCP directory message
