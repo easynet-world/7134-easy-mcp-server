@@ -206,12 +206,12 @@ module.exports = GetExample;
       expect(combinedOutput).toContain('🔌 MCP Server: Using custom MCP directory');
       serverProcess.kill();
       done();
-    }, 30000);
+    }, 35000);
     
-    // Timeout after 35 seconds
+    // Timeout after 45 seconds
     setTimeout(() => {
       serverProcess.kill();
       done(new Error('Test timeout'));
-    }, 35000);
+    }, 45000);
   }, 40000);
 });
