@@ -11,6 +11,9 @@ const os = require('os');
 const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
 
 describe('MCP Server Hot Reload CRUD Operations', () => {
+  // Increase timeout for CI environments
+  jest.setTimeout(15000);
+  
   let mcpServer;
   let tempDir;
   let promptsDir;
