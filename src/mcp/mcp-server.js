@@ -10,6 +10,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 const chokidar = require('chokidar');
 const MCPCacheManager = require('../utils/mcp-cache-manager');
+const SimpleParameterParser = require('../utils/parameter-template-parser');
 
 class DynamicAPIMCPServer {
   constructor(host = '0.0.0.0', port = 3001, options = {}) {
@@ -201,7 +202,6 @@ class DynamicAPIMCPServer {
       const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
       
       // Extract template parameters using the parameter parser
-      const SimpleParameterParser = require('../utils/parameter-template-parser');
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
       
       let promptData = {};
@@ -319,8 +319,8 @@ class DynamicAPIMCPServer {
       const uri = `resource://${relativePath.replace(/\//g, '/')}`;
       
       // Extract template parameters using the parameter parser
-      const SimpleParameterParser = require('../utils/parameter-template-parser');
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
+      const parameters = parsed.parameters || [];
       
       // Determine MIME type and process content based on file extension
       let mimeType = this.getMimeTypeForExtension(ext);

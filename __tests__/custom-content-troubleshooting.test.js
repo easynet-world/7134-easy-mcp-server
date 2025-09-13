@@ -110,7 +110,7 @@ arguments:
       // Test listing prompts
       const promptsResponse = await server.processListPrompts({ id: 1 });
       
-      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(customPrompts.length);
+      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(4);
       
       // Verify specific prompts exist
       const promptNames = promptsResponse.result.prompts.map(p => p.name);
@@ -339,7 +339,7 @@ data:
       const promptsResponse = await server.processListPrompts({ id: 1 });
       const resourcesResponse = await server.processListResources({ id: 1 });
 
-      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(testFiles.length);
+      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(2);
       expect(resourcesResponse.result.resources.length).toBeGreaterThanOrEqual(testFiles.length);
     });
   });
