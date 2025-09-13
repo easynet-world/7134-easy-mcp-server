@@ -202,32 +202,31 @@ class MCPCacheManager {
       
       const parsed = SimpleParameterParser.parse(content, fileName);
       
-      // Only cache if it has parameters (useful for prompts)
-      if (parsed.hasParameters) {
-        const prompt = {
-          name: parsed.name,
-          description: `${parsed.format} prompt with ${parsed.parameterCount} parameters`,
-          arguments: parsed.parameters.map(param => ({
-            name: param,
-            type: 'string',
-            description: `The ${param} parameter`
-          })),
-          source: parsed.format,
-          parameterCount: parsed.parameterCount,
-          parameters: parsed.parameters, // Add parameters array
-          content: parsed.content,
-          filePath: filePath,
-          format: parsed.format
-        };
-        
-        // Cache the result
-        this.promptsCache.set(filePath, prompt);
-        this.fileTimestamps.set(filePath, Date.now());
-        
-        return prompt;
-      }
+      // Cache all prompts, with or without parameters
+      const prompt = {
+        name: parsed.name,
+        description: parsed.hasParameters 
+          ? `${parsed.format} prompt with ${parsed.parameterCount} parameters`
+          : `${parsed.format} prompt`,
+        arguments: parsed.parameters.map(param => ({
+          name: param,
+          type: 'string',
+          description: `The ${param} parameter`
+        })),
+        source: parsed.format,
+        parameterCount: parsed.parameterCount,
+        parameters: parsed.parameters, // Add parameters array
+        content: parsed.content,
+        filePath: filePath,
+        format: parsed.format,
+        hasParameters: parsed.hasParameters
+      };
       
-      return null;
+      // Cache the result
+      this.promptsCache.set(filePath, prompt);
+      this.fileTimestamps.set(filePath, Date.now());
+      
+      return prompt;
     } catch (error) {
       this.log('warn', `Failed to load prompt ${filePath}: ${error.message}`);
       return { error: error.message, filePath };
