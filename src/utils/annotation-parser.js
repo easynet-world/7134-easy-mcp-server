@@ -64,23 +64,17 @@ class AnnotationParser {
         }
         case 'requestBody': {
           const parsedRequestBody = this.parseJsonAnnotation(tag);
-          if (parsedRequestBody) {
-            annotations.requestBody = parsedRequestBody;
-          }
+          annotations.requestBody = parsedRequestBody; // Will be null if parsing failed
           break;
         }
         case 'responseSchema': {
           const parsedResponseSchema = this.parseJsonAnnotation(tag);
-          if (parsedResponseSchema) {
-            annotations.responseSchema = parsedResponseSchema;
-          }
+          annotations.responseSchema = parsedResponseSchema; // Will be null if parsing failed
           break;
         }
         case 'errorResponses': {
           const parsedErrorResponses = this.parseJsonAnnotation(tag);
-          if (parsedErrorResponses) {
-            annotations.errorResponses = parsedErrorResponses;
-          }
+          annotations.errorResponses = parsedErrorResponses; // Will be null if parsing failed
           break;
         }
         default: {
@@ -121,7 +115,12 @@ class AnnotationParser {
     try {
       // First try to parse from the type field (single-line JSON)
       if (tag.type && tag.type.trim()) {
-        return JSON.parse(tag.type);
+        let jsonText = tag.type.trim();
+        // If the JSON doesn't start with {, wrap it
+        if (!jsonText.startsWith('{')) {
+          jsonText = '{' + jsonText + '}';
+        }
+        return JSON.parse(jsonText);
       }
       
       // Then try to parse from the description or name field (multi-line JSON)

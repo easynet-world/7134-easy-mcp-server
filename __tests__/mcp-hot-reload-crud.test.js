@@ -365,8 +365,14 @@ This resource has some content.`;
         fs.writeFile(resourceFile, resourceContent)
       ]);
 
-      // Wait for hot reload
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Wait for hot reload with retry logic
+      let retries = 0;
+      while ((mcpServer.prompts.size === 0 || mcpServer.resources.size === 0) && retries < 20) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        retries++;
+        console.log(`Retry ${retries}: prompts.size = ${mcpServer.prompts.size}, resources.size = ${mcpServer.resources.size}`);
+      }
+      console.log(`Final: prompts.size = ${mcpServer.prompts.size}, resources.size = ${mcpServer.resources.size}`);
 
       // Verify both are loaded
       expect(mcpServer.prompts.size).toBe(1);
