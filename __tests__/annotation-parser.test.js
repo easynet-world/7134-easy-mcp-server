@@ -353,9 +353,9 @@ describe('AnnotationParser', () => {
         throw new Error('Parsing error');
       });
 
-      // Current implementation doesn't catch parsing errors
-      // This test documents the current behavior
-      expect(() => AnnotationParser.getAnnotationValue('TestAPI', 'description', '/test/path.js')).toThrow('Parsing error');
+      // Updated implementation catches parsing errors and returns null
+      const result = AnnotationParser.getAnnotationValue('TestAPI', 'description', '/test/path.js');
+      expect(result).toBeNull();
 
       AnnotationParser.parseClassAnnotations = originalParse;
     });
