@@ -89,8 +89,15 @@ Use this prompt to test hot reload functionality.`;
       const promptFile = path.join(promptsDir, 'test-prompt.md');
       await fs.writeFile(promptFile, promptContent);
 
-      // Wait for file watcher to detect the change
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Wait for file watcher to detect the change - increased timeout for CI
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Wait for prompt to be loaded with retry logic for CI
+      let retries = 0;
+      while (mcpServer.prompts.size === 0 && retries < 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
 
       // Check if prompt was loaded
       expect(mcpServer.prompts.size).toBeGreaterThan(0);
@@ -202,8 +209,15 @@ This is a test resource with some content.
       const resourceFile = path.join(resourcesDir, 'test-resource.md');
       await fs.writeFile(resourceFile, resourceContent);
 
-      // Wait for file watcher to detect the change
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Wait for file watcher to detect the change - increased timeout for CI
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Wait for resource to be loaded with retry logic for CI
+      let retries = 0;
+      while (mcpServer.resources.size === 0 && retries < 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
 
       // Check if resource was loaded
       expect(mcpServer.resources.size).toBeGreaterThan(0);
