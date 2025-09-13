@@ -202,15 +202,16 @@ module.exports = GetExample;
     // Wait for server to start and check for custom MCP directory message
     setTimeout(() => {
       const combinedOutput = output + stderr;
+      console.log('Combined output:', combinedOutput);
       expect(combinedOutput).toContain('🔌 MCP Server: Using custom MCP directory');
       serverProcess.kill();
       done();
-    }, 25000);
+    }, 5000);
     
-    // Timeout after 35 seconds
+    // Timeout after 10 seconds
     setTimeout(() => {
       serverProcess.kill();
       done(new Error('Test timeout'));
-    }, 35000);
+    }, 10000);
   });
 });
