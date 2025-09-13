@@ -39,6 +39,9 @@ describe('MCP Server Hot Reload CRUD Operations', () => {
     // Initialize and start the server
     await mcpServer.loadPromptsAndResourcesFromFilesystem();
     await mcpServer.run();
+    
+    // Wait for file watchers to be fully initialized
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   afterAll(async () => {
