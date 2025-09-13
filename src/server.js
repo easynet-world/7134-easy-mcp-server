@@ -329,9 +329,16 @@ function startServer() {
 
   if (process.env.MCP_ENABLED !== 'false') {
     try {
+      // Use custom MCP base path if provided, otherwise use default
+      const mcpBasePath = process.env.MCP_BASE_PATH || './mcp';
       mcpServer = new DynamicAPIMCPServer(
         process.env.MCP_HOST || '0.0.0.0',
-        process.env.MCP_PORT || 3001
+        process.env.MCP_PORT || 3001,
+        {
+          mcp: {
+            basePath: mcpBasePath
+          }
+        }
       );
       
       // Start MCP server first

@@ -30,19 +30,37 @@ class DynamicAPIMCPServer {
     
     // Initialize MCP Cache Manager for intelligent caching
     // Use configured base path instead of hardcoded './mcp'
-    const basePath = options.mcp?.basePath || './mcp';
-    this.cacheManager = new MCPCacheManager(basePath, {
+    const originalBasePath = options.mcp?.basePath || './mcp';
+    
+    // Check if custom MCP directory exists, otherwise fall back to package directory
+    const fs = require('fs');
+    const customMcpPath = path.resolve(originalBasePath);
+    const packageMcpPath = path.resolve(__dirname, '..', '..', 'mcp');
+    
+    let resolvedBasePath;
+    if (!fs.existsSync(customMcpPath)) {
+      console.log(`🔌 MCP Server: Custom MCP directory not found at ${customMcpPath}, falling back to package directory`);
+      resolvedBasePath = packageMcpPath;
+    } else {
+      console.log(`🔌 MCP Server: Using custom MCP directory at ${customMcpPath}`);
+      resolvedBasePath = customMcpPath;
+    }
+    
+    this.cacheManager = new MCPCacheManager(resolvedBasePath, {
       enableHotReload: true,
       logger: options.logger
     });
     
+    // Store the resolved base path for internal use
+    this.resolvedBasePath = resolvedBasePath;
+    
     // Configuration options
     this.config = {
       mcp: {
-        basePath: basePath, // Store the base path for reference
+        basePath: originalBasePath, // Store the original base path for reference
         prompts: {
           enabled: options.prompts?.enabled !== false,
-          directory: options.prompts?.directory || path.join(basePath, 'prompts'),
+          directory: options.prompts?.directory || path.join(originalBasePath, 'prompts'),
           watch: options.prompts?.watch !== false,
           // Support any file format by default - let the system auto-detect
           formats: options.prompts?.formats || ['*'],
@@ -51,7 +69,7 @@ class DynamicAPIMCPServer {
         },
         resources: {
           enabled: options.resources?.enabled !== false,
-          directory: options.resources?.directory || path.join(basePath, 'resources'),
+          directory: options.resources?.directory || path.join(originalBasePath, 'resources'),
           watch: options.resources?.watch !== false,
           // Support any file format by default - let the system auto-detect
           formats: options.resources?.formats || ['*'],
@@ -78,7 +96,9 @@ class DynamicAPIMCPServer {
     this.discoverPromptsAndResources(routes);
     
     // Load prompts and resources from filesystem
-    this.loadPromptsAndResourcesFromFilesystem();
+    this.loadPromptsAndResourcesFromFilesystem().catch(error => {
+      console.warn('⚠️  MCP Server: Failed to load prompts and resources:', error.message);
+    });
     
     // Notify all connected clients about route changes
     this.notifyRouteChanges(routes);
@@ -141,13 +161,13 @@ class DynamicAPIMCPServer {
     try {
       // Load prompts if enabled
       if (this.config.mcp.prompts.enabled) {
-        const promptsPath = path.resolve(process.cwd(), this.config.mcp.prompts.directory);
+        const promptsPath = path.resolve(this.resolvedBasePath, 'prompts');
         await this.loadPromptsFromDirectory(promptsPath);
       }
       
       // Load resources if enabled
       if (this.config.mcp.resources.enabled) {
-        const resourcesPath = path.resolve(process.cwd(), this.config.mcp.resources.directory);
+        const resourcesPath = path.resolve(this.resolvedBasePath, 'resources');
         await this.loadResourcesFromDirectory(resourcesPath);
       }
       
@@ -202,7 +222,7 @@ class DynamicAPIMCPServer {
     try {
       const content = await fs.readFile(filePath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
-      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
+      const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'prompts'), filePath);
       
       // Extract template parameters using the parameter parser
       const parsed = SimpleParameterParser.parse(content, path.basename(filePath));
@@ -315,7 +335,7 @@ class DynamicAPIMCPServer {
   async loadResourceFromFile(filePath) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.resources.directory), filePath);
+      const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'resources'), filePath);
       const ext = path.extname(filePath).toLowerCase();
       
       // Generate URI from file path
@@ -388,7 +408,7 @@ class DynamicAPIMCPServer {
       this.promptsWatcher.close();
     }
     
-    const promptsPath = path.resolve(process.cwd(), this.config.mcp.prompts.directory);
+    const promptsPath = path.resolve(this.resolvedBasePath, 'prompts');
     
     this.promptsWatcher = chokidar.watch(promptsPath, {
       ignored: /(^|[/\\])\../, // ignore dotfiles
@@ -427,7 +447,7 @@ class DynamicAPIMCPServer {
       this.resourcesWatcher.close();
     }
     
-    const resourcesPath = path.resolve(process.cwd(), this.config.mcp.resources.directory);
+    const resourcesPath = path.resolve(this.resolvedBasePath, 'resources');
     
     this.resourcesWatcher = chokidar.watch(resourcesPath, {
       ignored: /(^|[/\\])\../, // ignore dotfiles
@@ -462,7 +482,7 @@ class DynamicAPIMCPServer {
    * Remove a prompt by file path
    */
   removePromptByFilePath(filePath) {
-    const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.prompts.directory), filePath);
+    const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'prompts'), filePath);
     const name = relativePath.replace(/\.(json|yaml|yml)$/, '').replace(/\//g, '_');
     this.prompts.delete(name);
   }
@@ -471,7 +491,7 @@ class DynamicAPIMCPServer {
    * Remove a resource by file path
    */
   removeResourceByFilePath(filePath) {
-    const relativePath = path.relative(path.resolve(process.cwd(), this.config.mcp.resources.directory), filePath);
+    const relativePath = path.relative(path.resolve(this.resolvedBasePath, 'resources'), filePath);
     const uri = `resource://${relativePath.replace(/\//g, '/')}`;
     this.resources.delete(uri);
   }
