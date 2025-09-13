@@ -29,7 +29,9 @@ class DynamicAPIMCPServer {
     this.resources = new Map();
     
     // Initialize MCP Cache Manager for intelligent caching
-    this.cacheManager = new MCPCacheManager('./mcp', {
+    // Use configured base path instead of hardcoded './mcp'
+    const basePath = options.mcp?.basePath || './mcp';
+    this.cacheManager = new MCPCacheManager(basePath, {
       enableHotReload: true,
       logger: options.logger
     });
@@ -37,9 +39,10 @@ class DynamicAPIMCPServer {
     // Configuration options
     this.config = {
       mcp: {
+        basePath: basePath, // Store the base path for reference
         prompts: {
           enabled: options.prompts?.enabled !== false,
-          directory: options.prompts?.directory || './mcp/prompts',
+          directory: options.prompts?.directory || path.join(basePath, 'prompts'),
           watch: options.prompts?.watch !== false,
           // Support any file format by default - let the system auto-detect
           formats: options.prompts?.formats || ['*'],
@@ -48,7 +51,7 @@ class DynamicAPIMCPServer {
         },
         resources: {
           enabled: options.resources?.enabled !== false,
-          directory: options.resources?.directory || './mcp/resources',
+          directory: options.resources?.directory || path.join(basePath, 'resources'),
           watch: options.resources?.watch !== false,
           // Support any file format by default - let the system auto-detect
           formats: options.resources?.formats || ['*'],
