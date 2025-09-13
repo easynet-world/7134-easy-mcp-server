@@ -165,8 +165,8 @@ class DynamicAPIMCPServer {
         await this.loadPromptsFromDirectory(promptsPath);
       }
       
-      // Load resources if enabled
-      if (this.config.mcp.resources.enabled) {
+      // Load resources if enabled and cache manager is not available
+      if (this.config.mcp.resources.enabled && !this.cacheManager) {
         const resourcesPath = path.resolve(this.resolvedBasePath, 'resources');
         await this.loadResourcesFromDirectory(resourcesPath);
       }
@@ -1299,7 +1299,22 @@ class DynamicAPIMCPServer {
   async handleReadResource(ws, data) {
     try {
       const { uri, arguments: args } = data;
-      const resource = this.resources.get(uri);
+      let resource = null;
+      
+      // Try to get from cache first (if available)
+      if (this.cacheManager) {
+        try {
+          const cachedResources = await this.cacheManager.getResources();
+          resource = cachedResources.find(r => r.uri === uri);
+        } catch (error) {
+          console.warn('⚠️  MCP Server: Failed to get cached resources:', error.message);
+        }
+      }
+      
+      // If not found in cache, try static resources
+      if (!resource) {
+        resource = this.resources.get(uri);
+      }
       
       if (!resource) {
         throw new Error(`Resource not found: ${uri}`);
@@ -1611,7 +1626,22 @@ class DynamicAPIMCPServer {
    */
   async processReadResource(data) {
     const { uri, arguments: args } = data.params || data;
-    const resource = this.resources.get(uri);
+    let resource = null;
+    
+    // Try to get from cache first (if available)
+    if (this.cacheManager) {
+      try {
+        const cachedResources = await this.cacheManager.getResources();
+        resource = cachedResources.find(r => r.uri === uri);
+      } catch (error) {
+        console.warn('⚠️  MCP Server: Failed to get cached resources:', error.message);
+      }
+    }
+    
+    // If not found in cache, try static resources
+    if (!resource) {
+      resource = this.resources.get(uri);
+    }
     
     if (!resource) {
       return {

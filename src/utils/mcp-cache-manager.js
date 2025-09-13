@@ -256,8 +256,11 @@ class MCPCacheManager {
       
       const parsed = SimpleParameterParser.parse(content, fileName);
       
+      // Generate URI with file extension to match static loader format
+      const uri = `resource://${fileName}`;
+      
       const resource = {
-        uri: `resource://${parsed.name}`,
+        uri: uri,
         name: parsed.name,
         description: `${parsed.format} resource: ${parsed.name}`,
         mimeType: parsed.format === 'markdown' ? 'text/markdown' : `text/${parsed.format}`,
