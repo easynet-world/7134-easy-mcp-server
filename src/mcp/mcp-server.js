@@ -159,8 +159,8 @@ class DynamicAPIMCPServer {
    */
   async loadPromptsAndResourcesFromFilesystem() {
     try {
-      // Load prompts if enabled
-      if (this.config.mcp.prompts.enabled) {
+      // Load prompts if enabled and cache manager is not available
+      if (this.config.mcp.prompts.enabled && !this.cacheManager) {
         const promptsPath = path.resolve(this.resolvedBasePath, 'prompts');
         await this.loadPromptsFromDirectory(promptsPath);
       }
@@ -1224,7 +1224,22 @@ class DynamicAPIMCPServer {
   async handleGetPrompt(ws, data) {
     try {
       const { name, arguments: args } = data;
-      const prompt = this.prompts.get(name);
+      let prompt = null;
+      
+      // Try to get from cache first (if available)
+      if (this.cacheManager) {
+        try {
+          const cachedPrompts = await this.cacheManager.getPrompts();
+          prompt = cachedPrompts.find(p => p.name === name);
+        } catch (error) {
+          console.warn('⚠️  MCP Server: Failed to get cached prompts:', error.message);
+        }
+      }
+      
+      // If not found in cache, try static prompts
+      if (!prompt) {
+        prompt = this.prompts.get(name);
+      }
       
       if (!prompt) {
         throw new Error(`Prompt not found: ${name}`);
@@ -1408,7 +1423,22 @@ class DynamicAPIMCPServer {
    */
   async processGetPrompt(data) {
     const { name, arguments: args } = data.params || data;
-    const prompt = this.prompts.get(name);
+    let prompt = null;
+    
+    // Try to get from cache first (if available)
+    if (this.cacheManager) {
+      try {
+        const cachedPrompts = await this.cacheManager.getPrompts();
+        prompt = cachedPrompts.find(p => p.name === name);
+      } catch (error) {
+        console.warn('⚠️  MCP Server: Failed to get cached prompts:', error.message);
+      }
+    }
+    
+    // If not found in cache, try static prompts
+    if (!prompt) {
+      prompt = this.prompts.get(name);
+    }
     
     if (!prompt) {
       return {
