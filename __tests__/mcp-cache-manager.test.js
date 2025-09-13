@@ -63,15 +63,24 @@ describe('MCPCacheManager', () => {
       expect(prompts1).toEqual(prompts2);
     });
 
-    it('should only cache files with parameters', async () => {
+    it('should cache all files with or without parameters', async () => {
       // Create file without parameters
       await fs.writeFile(path.join(tempDir, 'prompts', 'no-params.md'), '# No parameters here');
       
       const prompts = await cacheManager.getPrompts();
       
-      // Should only cache the file with parameters
-      expect(prompts).toHaveLength(1);
-      expect(cacheManager.promptsCache.size).toBe(1);
+      // Should cache both files (with and without parameters)
+      expect(prompts).toHaveLength(2);
+      expect(cacheManager.promptsCache.size).toBe(2);
+      
+      // Check that both files are cached
+      const hasParamsFile = prompts.find(p => p.hasParameters);
+      const noParamsFile = prompts.find(p => !p.hasParameters);
+      
+      expect(hasParamsFile).toBeDefined();
+      expect(noParamsFile).toBeDefined();
+      expect(hasParamsFile.parameterCount).toBe(1);
+      expect(noParamsFile.parameterCount).toBe(0);
     });
   });
 

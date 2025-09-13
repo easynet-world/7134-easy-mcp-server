@@ -113,7 +113,7 @@ This is a test resource from custom MCP directory.`;
       try {
         const cachedPrompts = await mcpServer.cacheManager.getPrompts();
         for (const prompt of cachedPrompts) {
-          if (prompt.template && prompt.template.includes('custom MCP directory')) {
+          if (prompt.content && prompt.content.includes('custom MCP directory')) {
             foundCustomPrompt = true;
             break;
           }
