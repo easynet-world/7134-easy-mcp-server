@@ -1246,7 +1246,8 @@ class DynamicAPIMCPServer {
       }
       
       // Process template with arguments if provided
-      let processedTemplate = prompt.template || '';
+      // Handle both 'template' and 'content' fields for compatibility
+      let processedTemplate = prompt.template || prompt.content || '';
       if (args && prompt.arguments && processedTemplate) {
         prompt.arguments.forEach(arg => {
           if (args[arg.name] !== undefined) {
@@ -1336,7 +1337,8 @@ class DynamicAPIMCPServer {
       }
       
       // Process template with arguments if provided and resource has parameters
-      let processedContent = resource.content || '';
+      // Handle both 'content' and 'template' fields for compatibility
+      let processedContent = resource.content || resource.template || '';
       if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates && processedContent) {
         resource.parameters.forEach(param => {
           if (args[param] !== undefined) {
@@ -1452,7 +1454,8 @@ class DynamicAPIMCPServer {
     }
     
     // Process template with arguments if provided
-    let processedTemplate = prompt.template || '';
+    // Handle both 'template' and 'content' fields for compatibility
+    let processedTemplate = prompt.template || prompt.content || '';
     if (args && prompt.arguments && processedTemplate) {
       prompt.arguments.forEach(arg => {
         if (args[arg.name] !== undefined) {
@@ -1685,7 +1688,8 @@ class DynamicAPIMCPServer {
     }
     
     // Process template with arguments if provided and resource has parameters
-    let processedContent = resource.content || '';
+    // Handle both 'content' and 'template' fields for compatibility
+    let processedContent = resource.content || resource.template || '';
     if (args && resource.hasParameters && this.config.mcp.resources.enableTemplates && processedContent) {
       resource.parameters.forEach(param => {
         if (args[param] !== undefined) {

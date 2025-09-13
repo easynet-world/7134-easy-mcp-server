@@ -115,16 +115,10 @@ class MCPCacheManager {
   async getPrompts() {
     try {
       const promptsDir = path.join(this.basePath, 'prompts');
-      const files = await fs.readdir(promptsDir, { withFileTypes: true });
       const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
       
-      const promptFiles = files
-        .filter(file => {
-          if (!file.isFile()) return false;
-          const ext = path.extname(file.name).toLowerCase();
-          return supportedExtensions.includes(ext);
-        })
-        .map(file => path.join('prompts', file.name));
+      // Recursively find all prompt files
+      const promptFiles = await this.findPromptFiles(promptsDir, 'prompts', supportedExtensions);
       
       const results = [];
       for (const filePath of promptFiles) {
@@ -145,22 +139,42 @@ class MCPCacheManager {
   }
 
   /**
+   * Recursively find all prompt files in a directory
+   */
+  async findPromptFiles(dirPath, relativePath, supportedExtensions) {
+    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    const promptFiles = [];
+    
+    for (const file of files) {
+      const fullPath = path.join(dirPath, file.name);
+      const fileRelativePath = path.join(relativePath, file.name);
+      
+      if (file.isDirectory()) {
+        // Recursively search subdirectories
+        const subFiles = await this.findPromptFiles(fullPath, fileRelativePath, supportedExtensions);
+        promptFiles.push(...subFiles);
+      } else if (file.isFile()) {
+        const ext = path.extname(file.name).toLowerCase();
+        if (supportedExtensions.includes(ext)) {
+          promptFiles.push(fileRelativePath);
+        }
+      }
+    }
+    
+    return promptFiles;
+  }
+
+  /**
    * Get all resources with caching
    * @returns {Promise<Array<Object>>} Array of parsed resources
    */
   async getResources() {
     try {
       const resourcesDir = path.join(this.basePath, 'resources');
-      const files = await fs.readdir(resourcesDir, { withFileTypes: true });
       const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
       
-      const resourceFiles = files
-        .filter(file => {
-          if (!file.isFile()) return false;
-          const ext = path.extname(file.name).toLowerCase();
-          return supportedExtensions.includes(ext);
-        })
-        .map(file => path.join('resources', file.name));
+      // Recursively find all resource files
+      const resourceFiles = await this.findResourceFiles(resourcesDir, 'resources', supportedExtensions);
       
       const results = [];
       for (const filePath of resourceFiles) {
@@ -178,6 +192,32 @@ class MCPCacheManager {
       this.log('error', `Failed to get resources: ${error.message}`);
       return [];
     }
+  }
+
+  /**
+   * Recursively find all resource files in a directory
+   */
+  async findResourceFiles(dirPath, relativePath, supportedExtensions) {
+    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    const resourceFiles = [];
+    
+    for (const file of files) {
+      const fullPath = path.join(dirPath, file.name);
+      const fileRelativePath = path.join(relativePath, file.name);
+      
+      if (file.isDirectory()) {
+        // Recursively search subdirectories
+        const subFiles = await this.findResourceFiles(fullPath, fileRelativePath, supportedExtensions);
+        resourceFiles.push(...subFiles);
+      } else if (file.isFile()) {
+        const ext = path.extname(file.name).toLowerCase();
+        if (supportedExtensions.includes(ext)) {
+          resourceFiles.push(fileRelativePath);
+        }
+      }
+    }
+    
+    return resourceFiles;
   }
 
   /**
