@@ -330,7 +330,8 @@ function startServer() {
   if (process.env.MCP_ENABLED !== 'false') {
     try {
       // Use custom MCP base path if provided, otherwise use default
-      const mcpBasePath = process.env.MCP_BASE_PATH || './mcp';
+      // Since server runs from src directory, we need to go up one level to find mcp
+      const mcpBasePath = process.env.MCP_BASE_PATH || '../mcp';
       mcpServer = new DynamicAPIMCPServer(
         process.env.MCP_HOST || '0.0.0.0',
         process.env.MCP_PORT || 3001,
