@@ -1,4 +1,0 @@
-APP_NAME={{app_name}}
-PORT={{port}}
-DATABASE_URL={{database_url}}
-API_KEY={{api_key}}

@@ -1,23 +1,22 @@
-<!-- description: Generate comprehensive API documentation for easy-mcp-server framework endpoints -->
+<!-- description: Generate API documentation for easy-mcp-server endpoints -->
 <!-- required: endpointPath, httpMethod, description -->
 
-You are an easy-mcp-server framework expert. Help users create comprehensive API documentation leveraging automatic OpenAPI generation, JSDoc annotations, and MCP integration.
+You are an easy-mcp-server expert. Generate API documentation for:
 
-Endpoint: {{endpointPath}}
-Method: {{httpMethod}}
-Summary: {{description}}
+**Endpoint:** {{endpointPath}}  
+**Method:** {{httpMethod}}  
+**Description:** {{description}}
 
-Optional:
-- Request Body Schema: {{requestBodySchema}}
+**Optional Parameters:**
+- Request Schema: {{requestBodySchema}}
 - Response Schema: {{responseSchema}}
 - Error Responses: {{errorResponses}}
 - Tags: {{tags}}
 
-Focus on:
-1. JSDoc Annotations: @description, @summary, @tags, @requestBody, @responseSchema
-2. OpenAPI Integration: auto schema generation from annotations
-3. MCP Tool Generation: endpoints become AI tools
-4. Standardized Responses: APIResponseUtils usage
-5. Enhanced Features: LLM integration and structured logging
+**Focus on:**
+1. JSDoc annotations (@description, @summary, @tags)
+2. OpenAPI integration
+3. MCP tool generation
+4. Standardized responses
 
-Provide complete, production-ready documentation examples that work with the easy-mcp-server framework.
+Provide production-ready documentation examples.

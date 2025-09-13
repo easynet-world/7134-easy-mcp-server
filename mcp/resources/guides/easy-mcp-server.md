@@ -298,22 +298,20 @@ logger.logRequest(req);
 logger.logMCPCall('tool', params, result, duration);
 ```
 
-### Performance Monitoring
-| Metric | Description |
-|--------|-------------|
-| **Response Time** | API endpoint response times |
-| **Error Rate** | Error rate monitoring |
-| **MCP Calls** | MCP call analytics |
-| **Resource Usage** | Memory and CPU utilization |
-
-### Metrics Collection
+### Enhanced Health Monitoring
 ```javascript
 const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 
-class MetricsAPI extends BaseAPIEnhanced {
+class HealthAPI extends BaseAPIEnhanced {
   async process(req, res) {
+    const status = await this.getServiceStatus();
     const metrics = await this.getMetrics();
-    this.responseUtils.sendSuccessResponse(res, { metrics });
+    
+    this.responseUtils.sendSuccessResponse(res, {
+      status: status.isInitialized ? 'healthy' : 'degraded',
+      components: status.components,
+      metrics: metrics
+    });
   }
 }
 ```
@@ -478,12 +476,12 @@ Options:
 |----------|---------|----------|
 | **[README](README.md)** | Quick start and overview | Getting started |
 | **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
-| **[Health Monitoring](health-monitoring.md)** | Monitoring and observability | Production monitoring |
+| **[Health Monitoring](#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
 
 ### 📋 **Quick Reference**
 - **Getting Started**: [README Quick Start](README.md#-quick-start) → [Framework Quick Start](#-quick-start)
 - **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
-- **Production**: [Health Monitoring](health-monitoring.md) → [Production Deployment](#-production-deployment)
+- **Production**: [Production Deployment](#-production-deployment) → [Health Monitoring](#-monitoring-and-logging)
 - **Advanced**: [Advanced Features](#-advanced-features) → [Best Practices](#-best-practices-summary)
 
 ---
