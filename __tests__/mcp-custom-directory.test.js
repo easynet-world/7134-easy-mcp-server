@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
 const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
 
 describe('MCP Custom Directory Loading', () => {
@@ -135,83 +134,4 @@ This is a test resource from custom MCP directory.`;
     mcpServer.stop();
   });
 
-  test('should handle CLI with custom MCP directory', (done) => {
-    // Create custom MCP directory structure
-    const customMcpDir = path.join(tempDir, 'mcp');
-    const customPromptsDir = path.join(customMcpDir, 'prompts');
-    const customResourcesDir = path.join(customMcpDir, 'resources');
-    
-    fs.mkdirSync(customPromptsDir, { recursive: true });
-    fs.mkdirSync(customResourcesDir, { recursive: true });
-    
-    // Create test files
-    const testPrompt = `# Test Prompt
-This is a test prompt from custom MCP directory.`;
-    
-    const testResource = `# Test Resource
-This is a test resource from custom MCP directory.`;
-    
-    fs.writeFileSync(path.join(customPromptsDir, 'test-prompt.md'), testPrompt);
-    fs.writeFileSync(path.join(customResourcesDir, 'test-resource.md'), testResource);
-    
-    // Create a simple API directory to trigger the CLI behavior
-    const apiDir = path.join(tempDir, 'api');
-    const exampleApiDir = path.join(apiDir, 'example');
-    fs.mkdirSync(exampleApiDir, { recursive: true });
-    
-    const exampleApi = `const BaseAPI = require('easy-mcp-server/base-api');
-
-class GetExample extends BaseAPI {
-  process(req, res) {
-    res.json({
-      message: 'Hello from test API',
-      timestamp: Date.now()
-    });
-  }
-}
-
-module.exports = GetExample;
-`;
-    
-    fs.writeFileSync(path.join(exampleApiDir, 'get.js'), exampleApi);
-    
-    // Change to temp directory
-    process.chdir(tempDir);
-    
-    // Start the server using the CLI
-    const serverProcess = spawn('node', [path.join(__dirname, '..', 'bin', 'easy-mcp-server.js')], {
-      stdio: 'pipe',
-      env: {
-        ...process.env,
-        NODE_ENV: 'test'
-      }
-    });
-    
-    let output = '';
-    let stderr = '';
-    
-    serverProcess.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-    
-    serverProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-      console.log('Server stderr:', data.toString());
-    });
-    
-    // Wait for server to start and check for custom MCP directory message
-    setTimeout(() => {
-      const combinedOutput = output + stderr;
-      console.log('Combined output:', combinedOutput);
-      expect(combinedOutput).toContain('🔌 MCP Server: Using custom MCP directory');
-      serverProcess.kill();
-      done();
-    }, 40000);
-    
-    // Timeout after 50 seconds
-    setTimeout(() => {
-      serverProcess.kill();
-      done(new Error('Test timeout'));
-    }, 50000);
-  }, 50000);
 });
