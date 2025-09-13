@@ -177,7 +177,6 @@ class MCPResourceLoader {
       const fullPath = path.resolve(basePath, filePath);
       const content = await fs.readFile(fullPath, 'utf8');
       const ext = path.extname(filePath).toLowerCase();
-      const fileName = path.basename(filePath, ext);
       const relativePath = path.relative(basePath, fullPath);
       
       // Generate URI from file path if not provided
@@ -349,26 +348,25 @@ class MCPResourceLoader {
       for (const entry of entries) {
         if (entry.isFile()) {
           const filePath = path.join(dirPath, entry.name);
-          const ext = path.extname(entry.name).toLowerCase();
           
           // Support any file format - let the system auto-detect based on extension
           const shouldLoad = resourceType === 'all' || 
               (resourceType === 'resources') ||
               (resourceType === 'prompts');
-            
-            if (shouldLoad) {
-              try {
-                if (resourceType === 'prompts' || (resourceType === 'all' && dirPath.includes('prompts'))) {
-                  const prompt = await this.loadPrompt(filePath, customBasePath);
-                  loadedResources.push(prompt);
-                } else {
-                  const resource = await this.loadResource(filePath, null, customBasePath);
-                  loadedResources.push(resource);
-                }
-              } catch (error) {
-                this.log('warn', `Skipped file ${filePath}: ${error.message}`);
+          
+          if (shouldLoad) {
+            try {
+              if (resourceType === 'prompts' || (resourceType === 'all' && dirPath.includes('prompts'))) {
+                const prompt = await this.loadPrompt(filePath, customBasePath);
+                loadedResources.push(prompt);
+              } else {
+                const resource = await this.loadResource(filePath, null, customBasePath);
+                loadedResources.push(resource);
               }
+            } catch (error) {
+              this.log('warn', `Skipped file ${filePath}: ${error.message}`);
             }
+          }
         } else if (entry.isDirectory()) {
           // Recursively load subdirectories
           const subResources = await this.loadDirectory(path.join(dirPath, entry.name), resourceType, customBasePath);
