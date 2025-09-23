@@ -277,7 +277,8 @@ describe('BaseAPIEnhanced', () => {
     });
 
     it('should return unhealthy status', async () => {
-      // Simulate unhealthy state by setting isInitialized to false
+      // Simulate unhealthy state by setting initialization status to failed
+      api.initializationStatus = 'failed';
       api.isInitialized = false;
 
       await api.healthCheck(mockReq, mockRes);
@@ -285,11 +286,12 @@ describe('BaseAPIEnhanced', () => {
       expect(mockRes.status).toHaveBeenCalledWith(503);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Service has issues',
+        message: 'Service initialization failed',
         timestamp: expect.any(String),
         data: expect.objectContaining({
           serviceName: 'test-service',
-          isInitialized: false
+          isInitialized: false,
+          initializationStatus: 'failed'
         })
       });
     });
@@ -306,6 +308,10 @@ describe('BaseAPIEnhanced', () => {
       expect(status).toEqual({
         serviceName: 'test-service',
         isInitialized: true,
+        initializationStatus: 'success',
+        initializationError: null,
+        retryCount: 0,
+        maxRetries: 3,
         components: {
           logger: true,
           llm: expect.any(Object),
