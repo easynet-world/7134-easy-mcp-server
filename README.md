@@ -247,6 +247,62 @@ Inputs:
 | **LLM Integration** | AI service integration |
 | **Health Monitoring** | Built-in health checks |
 | **Structured Logging** | Comprehensive logging |
+| **Graceful Initialization** | Server continues running even if some APIs fail to initialize |
+
+### 🛡️ **Graceful API Initialization**
+
+The framework includes **graceful initialization** to prevent server crashes when individual APIs fail to initialize. This is crucial for production environments where partial service availability is better than complete downtime.
+
+**Key Features:**
+- ✅ **Server stays running** even if some APIs fail to initialize
+- ✅ **Failed APIs return 503** with helpful error messages
+- ✅ **Automatic retry mechanism** for failed initializations
+- ✅ **Enhanced health checks** showing API status
+- ✅ **Management endpoints** for retrying failed APIs
+
+**Example Health Check Response:**
+```json
+{
+  "status": "partial",
+  "server": "running",
+  "apis": {
+    "total": 15,
+    "healthy": 14,
+    "failed": 1,
+    "details": [
+      {
+        "serviceName": "opensearch-api",
+        "initializationStatus": "failed",
+        "error": "Connection timeout",
+        "retryCount": 2,
+        "maxRetries": 3
+      }
+    ]
+  }
+}
+```
+
+**Retry Failed APIs:**
+```bash
+# Retry a specific API
+curl -X POST http://localhost:3000/admin/retry-initialization \
+  -H "Content-Type: application/json" \
+  -d '{"api": "opensearch-api"}'
+```
+
+**Configuration Options:**
+```javascript
+// In your API class
+class MyAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('my-service', {
+      maxRetries: 5,        // Max retry attempts
+      retryDelay: 10000,    // Delay between retries (ms)
+      autoRetry: true       // Enable automatic retry
+    });
+  }
+}
+```
 
 ---
 
