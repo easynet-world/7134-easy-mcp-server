@@ -452,8 +452,8 @@ class BaseAPIEnhanced extends BaseAPI {
                      status.components.logger;
     
     const message = isHealthy ? 'Service is healthy' : 
-                   status.initializationStatus === 'failed' ? 'Service initialization failed' :
-                   'Service is initializing';
+      status.initializationStatus === 'failed' ? 'Service initialization failed' :
+        'Service is initializing';
 
     return this.sendSuccessResponse(res, status, message, 
       isHealthy ? 200 : 503);
