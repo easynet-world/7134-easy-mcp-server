@@ -67,7 +67,7 @@ class APILoader {
   }
 
   /**
-   * Load a single API file and register the route
+   * Load a single API file and register the route with graceful initialization
    */
   loadAPIFile(filePath, basePath, fileName) {
     const httpMethod = path.basename(fileName, '.js').toUpperCase();
@@ -93,16 +93,29 @@ class APILoader {
       const processor = new ProcessorClass();
       
       if (typeof processor.process === 'function') {
-        // Register the route dynamically
-        this.app[httpMethod.toLowerCase()](normalizedPath, (req, res) => {
-          processor.process(req, res);
+        // Register the route dynamically with graceful error handling
+        this.app[httpMethod.toLowerCase()](normalizedPath, async (req, res) => {
+          try {
+            await processor.process(req, res);
+          } catch (error) {
+            console.error(`Error processing request to ${httpMethod} ${normalizedPath}:`, error.message);
+            if (!res.headersSent) {
+              res.status(500).json({
+                success: false,
+                error: 'Internal server error',
+                details: error.message,
+                timestamp: new Date().toISOString()
+              });
+            }
+          }
         });
         
         this.routes.push({
           method: httpMethod,
           path: normalizedPath,
           processor: processor.constructor.name,
-          filePath: filePath
+          filePath: filePath,
+          processorInstance: processor
         });
         
         // Store processor instance for OpenAPI generation
@@ -115,6 +128,7 @@ class APILoader {
       }
     } catch (error) {
       this.errors.push(`Error loading API from ${filePath}: ${error.message}`);
+      console.error(`❌ Failed to load API from ${filePath}:`, error.message);
     }
   }
 

@@ -42,17 +42,22 @@ class BaseAPIEnhanced extends BaseAPI {
     this.prompts = [];
     this.resources = [];
     
-    // Service state
+    // Service state with graceful initialization support
     this.isInitialized = false;
     this.initializationPromise = null;
+    this.initializationStatus = 'pending'; // 'pending', 'success', 'failed'
+    this.initializationError = null;
+    this.retryCount = 0;
+    this.maxRetries = options.maxRetries || 3;
+    this.retryDelay = options.retryDelay || 5000; // ms
   }
 
   /**
-   * Initialize the enhanced API service
+   * Initialize the enhanced API service with graceful error handling
    * @returns {Promise<void>}
    */
   async initialize() {
-    if (this.isInitialized) {
+    if (this.initializationStatus === 'success') {
       return;
     }
 
@@ -65,7 +70,7 @@ class BaseAPIEnhanced extends BaseAPI {
   }
 
   /**
-   * Perform the actual initialization
+   * Perform the actual initialization with graceful error handling
    * @returns {Promise<void>}
    * @private
    */
@@ -84,10 +89,19 @@ class BaseAPIEnhanced extends BaseAPI {
       await this.setupMCPResources();
       
       this.isInitialized = true;
+      this.initializationStatus = 'success';
+      this.initializationError = null;
       this.logger.info(`Enhanced API service initialized: ${this.serviceName}`);
     } catch (error) {
-      this.logger?.error(`Failed to initialize enhanced API service: ${error.message}`);
-      throw error;
+      this.initializationStatus = 'failed';
+      this.initializationError = error;
+      this.logger?.error(`Failed to initialize enhanced API service: ${error.message}`, {
+        error: error.stack,
+        retryCount: this.retryCount
+      });
+      
+      // Don't throw - let server continue
+      // The API will return error when called
     }
   }
 
@@ -154,15 +168,20 @@ class BaseAPIEnhanced extends BaseAPI {
 
   /**
    * Process the request and generate response
-   * Enhanced version with automatic initialization and error handling
+   * Enhanced version with automatic initialization and graceful error handling
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
   async process(req, res) {
     try {
       // Ensure service is initialized
-      if (!this.isInitialized) {
+      if (this.initializationStatus === 'pending') {
         await this.initialize();
+      }
+
+      // Check if API is properly initialized
+      if (this.initializationStatus === 'failed') {
+        return this.handleInitializationFailure(req, res);
       }
 
       // Log request
@@ -183,6 +202,55 @@ class BaseAPIEnhanced extends BaseAPI {
       });
 
       return this.responseUtils.sendInternalErrorResponse(res, error.message);
+    }
+  }
+
+  /**
+   * Handle initialization failure by returning appropriate error response
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} Error response
+   */
+  handleInitializationFailure(req, res) {
+    const errorMessage = this.initializationError?.message || 'Unknown initialization error';
+    const retryAfter = this.retryCount < this.maxRetries ? 30 : 300; // seconds
+    
+    return res.status(503).json({
+      success: false,
+      error: 'Service temporarily unavailable',
+      details: `API ${this.serviceName} failed to initialize: ${errorMessage}`,
+      retryAfter: retryAfter,
+      retryCount: this.retryCount,
+      maxRetries: this.maxRetries,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * Allow manual retry of initialization
+   * @returns {Promise<boolean>} True if retry was successful
+   */
+  async retryInitialization() {
+    if (this.retryCount >= this.maxRetries) {
+      this.logger?.warn(`Maximum retry attempts reached for ${this.serviceName}`);
+      return false;
+    }
+
+    this.retryCount++;
+    this.initializationStatus = 'pending';
+    this.initializationPromise = null;
+    
+    // Wait before retrying
+    if (this.retryDelay > 0) {
+      await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+    }
+    
+    try {
+      await this.initialize();
+      return this.initializationStatus === 'success';
+    } catch (error) {
+      this.logger?.error(`Retry ${this.retryCount} failed for ${this.serviceName}: ${error.message}`);
+      return false;
     }
   }
 
@@ -349,13 +417,17 @@ class BaseAPIEnhanced extends BaseAPI {
   }
 
   /**
-   * Get service status
+   * Get service status with initialization details
    * @returns {Object} Service status information
    */
   getServiceStatus() {
     return {
       serviceName: this.serviceName,
       isInitialized: this.isInitialized,
+      initializationStatus: this.initializationStatus,
+      initializationError: this.initializationError?.message || null,
+      retryCount: this.retryCount,
+      maxRetries: this.maxRetries,
       components: {
         logger: !!this.logger,
         llm: this.llm?.getStatus() || null,
@@ -369,18 +441,21 @@ class BaseAPIEnhanced extends BaseAPI {
   }
 
   /**
-   * Health check endpoint
+   * Health check endpoint with initialization status
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    * @returns {Object} Health check response
    */
   async healthCheck(req, res) {
     const status = this.getServiceStatus();
-    const isHealthy = status.isInitialized && 
+    const isHealthy = status.initializationStatus === 'success' && 
                      status.components.logger;
+    
+    const message = isHealthy ? 'Service is healthy' : 
+                   status.initializationStatus === 'failed' ? 'Service initialization failed' :
+                   'Service is initializing';
 
-    return this.sendSuccessResponse(res, status, 
-      isHealthy ? 'Service is healthy' : 'Service has issues', 
+    return this.sendSuccessResponse(res, status, message, 
       isHealthy ? 200 : 503);
   }
 

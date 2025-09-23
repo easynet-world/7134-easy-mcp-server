@@ -25,15 +25,112 @@ app.use(express.urlencoded({ extended: true }));
 const apiLoader = new APILoader(app, process.env.API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
 
-// Health check endpoint
+// Enhanced health check endpoint with API status
 app.get('/health', (req, res) => {
+  const routes = apiLoader.getRoutes();
+  const errors = apiLoader.getErrors();
+  
+  // Get API status information
+  const apiStatus = routes.map(route => {
+    const processor = route.processorInstance;
+    if (processor && typeof processor.getServiceStatus === 'function') {
+      return processor.getServiceStatus();
+    }
+    return {
+      serviceName: route.processor,
+      path: route.path,
+      method: route.method,
+      status: 'unknown'
+    };
+  });
+  
+  // Determine overall health
+  const healthyAPIs = apiStatus.filter(api => 
+    api.initializationStatus === 'success' || api.status === 'unknown'
+  ).length;
+  const totalAPIs = apiStatus.length;
+  const failedAPIs = apiStatus.filter(api => 
+    api.initializationStatus === 'failed'
+  ).length;
+  
+  const overallStatus = failedAPIs === 0 ? 'healthy' : 
+                       healthyAPIs > 0 ? 'partial' : 'unhealthy';
+  
   res.json({
-    status: 'OK',
+    status: overallStatus,
+    server: 'running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0'
+    version: '1.0.0',
+    apis: {
+      total: totalAPIs,
+      healthy: healthyAPIs,
+      failed: failedAPIs,
+      details: apiStatus
+    },
+    errors: errors.length > 0 ? errors : null
   });
+});
+
+// API retry endpoint for failed initializations
+app.post('/admin/retry-initialization', async (req, res) => {
+  try {
+    const { api } = req.body;
+    const routes = apiLoader.getRoutes();
+    
+    if (!api) {
+      return res.status(400).json({
+        success: false,
+        error: 'API parameter is required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Find the API by service name or path
+    const route = routes.find(r => 
+      r.processorInstance?.serviceName === api || 
+      r.path === api ||
+      r.processor === api
+    );
+    
+    if (!route || !route.processorInstance) {
+      return res.status(404).json({
+        success: false,
+        error: `API not found: ${api}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const processor = route.processorInstance;
+    
+    // Check if the processor has retry capability
+    if (typeof processor.retryInitialization !== 'function') {
+      return res.status(400).json({
+        success: false,
+        error: 'API does not support retry initialization',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Attempt retry
+    const retryResult = await processor.retryInitialization();
+    
+    res.json({
+      success: retryResult,
+      api: api,
+      result: retryResult ? 'success' : 'failed',
+      status: processor.getServiceStatus(),
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: `Retry initialization failed: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API info endpoint
