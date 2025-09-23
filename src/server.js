@@ -54,7 +54,7 @@ app.get('/health', (req, res) => {
   ).length;
   
   const overallStatus = failedAPIs === 0 ? 'healthy' : 
-                       healthyAPIs > 0 ? 'partial' : 'unhealthy';
+    healthyAPIs > 0 ? 'partial' : 'unhealthy';
   
   res.json({
     status: overallStatus,

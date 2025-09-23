@@ -208,7 +208,6 @@ describe('Graceful API Initialization', () => {
       // Create a test API that fails initialization
       const fs = require('fs');
       const path = require('path');
-      const testApiPath = path.join(__dirname, 'temp-failing-api.js');
       
       const failingApiCode = `
 const BaseAPIEnhanced = require('../../src/lib/base-api-enhanced');
@@ -272,7 +271,7 @@ module.exports = FailingTestAPI;
         ).length;
         
         const overallStatus = failedAPIs === 0 ? 'healthy' : 
-                             healthyAPIs > 0 ? 'partial' : 'unhealthy';
+          healthyAPIs > 0 ? 'partial' : 'unhealthy';
         
         res.json({
           status: overallStatus,
@@ -531,7 +530,7 @@ module.exports = FailingTestAPI;
         ).length;
         
         const overallStatus = failedAPIs === 0 ? 'healthy' : 
-                             healthyAPIs > 0 ? 'partial' : 'unhealthy';
+          healthyAPIs > 0 ? 'partial' : 'unhealthy';
         
         res.json({
           status: overallStatus,
