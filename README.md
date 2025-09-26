@@ -129,20 +129,73 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
 }
 ```
 
-### Auto-Generated OpenAPI with JSDoc
+### Auto-Generated OpenAPI with JSDoc Annotations
+
+The framework automatically parses JSDoc annotations to generate comprehensive OpenAPI documentation. All annotations are optional but highly recommended for better API documentation.
+
+#### Supported Annotations
+
+| Annotation | Purpose | Example |
+|------------|---------|---------|
+| `@description` | Detailed API description | `@description Get user information with optional filtering` |
+| `@summary` | Short summary for OpenAPI | `@summary Retrieve user details` |
+| `@tags` | API categorization | `@tags users,data-access` |
+| `@requestBody` | Request body schema (JSON) | `@requestBody { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } }` |
+| `@responseSchema` | Response schema (JSON) | `@responseSchema { "type": "object", "properties": { "data": { "type": "array" } } }` |
+| `@errorResponses` | Error response schemas (JSON) | `@errorResponses { "400": { "description": "Validation error" } }` |
+
+#### Complete Example with All Annotations
 ```javascript
 /**
- * @description Get user information
- * @summary Retrieve user details
- * @tags users
- * @requestBody { "type": "object", "required": ["userId"], "properties": { "userId": { "type": "string" } } }
+ * @description Create a new user with validation and comprehensive error handling
+ * @summary Create user endpoint with full validation
+ * @tags users,authentication
+ * @requestBody {
+ *   "type": "object",
+ *   "required": ["name", "email"],
+ *   "properties": {
+ *     "name": { "type": "string", "minLength": 2, "maxLength": 50 },
+ *     "email": { "type": "string", "format": "email" },
+ *     "age": { "type": "integer", "minimum": 0, "maximum": 120 },
+ *     "isActive": { "type": "boolean", "default": true }
+ *   }
+ * }
+ * @responseSchema {
+ *   "type": "object",
+ *   "properties": {
+ *     "success": { "type": "boolean" },
+ *     "data": {
+ *       "type": "object",
+ *       "properties": {
+ *         "id": { "type": "string", "format": "uuid" },
+ *         "name": { "type": "string" },
+ *         "email": { "type": "string", "format": "email" },
+ *         "age": { "type": "integer" },
+ *         "isActive": { "type": "boolean" },
+ *         "createdAt": { "type": "string", "format": "date-time" }
+ *       }
+ *     },
+ *     "message": { "type": "string" }
+ *   }
+ * }
+ * @errorResponses {
+ *   "400": { "description": "Validation error", "schema": { "type": "object", "properties": { "error": { "type": "string" } } } },
+ *   "409": { "description": "User already exists", "schema": { "type": "object", "properties": { "error": { "type": "string" } } } }
+ * }
  */
-class GetUser extends BaseAPI {
+class CreateUser extends BaseAPI {
   process(req, res) {
-    // Your code here
+    // Your implementation here
   }
 }
 ```
+
+#### Annotation Benefits
+- ✅ **Auto-Generated OpenAPI**: Annotations automatically create complete OpenAPI specifications
+- ✅ **Swagger UI Integration**: Rich interactive documentation with request/response examples
+- ✅ **MCP Tool Enhancement**: Better AI model integration with detailed schemas
+- ✅ **Type Safety**: JSON schema validation for requests and responses
+- ✅ **Developer Experience**: IntelliSense and auto-completion in IDEs
 
 ---
 
@@ -178,11 +231,71 @@ easy-mcp-server --port 3000 --mcp-port 3001 --api-dir ./api
 | **MCP Resources** | Documentation & data access | ✅ |
 
 ### File Structure → API Endpoints
+
+The framework uses a **convention-over-configuration** approach where file structure directly maps to API endpoints.
+
+#### HTTP Method Mapping Rules
+
+| File Name | HTTP Method | Purpose | Example |
+|-----------|-------------|---------|---------|
+| `get.js` | `GET` | Retrieve data | `api/users/get.js` → `GET /users` |
+| `post.js` | `POST` | Create resources | `api/users/post.js` → `POST /users` |
+| `put.js` | `PUT` | Update/replace resources | `api/users/put.js` → `PUT /users` |
+| `patch.js` | `PATCH` | Partial updates | `api/users/patch.js` → `PATCH /users` |
+| `delete.js` | `DELETE` | Remove resources | `api/users/delete.js` → `DELETE /users` |
+| `head.js` | `HEAD` | Get headers only | `api/users/head.js` → `HEAD /users` |
+| `options.js` | `OPTIONS` | Get allowed methods | `api/users/options.js` → `OPTIONS /users` |
+
+#### Path Mapping Rules
+
+| File Structure | API Endpoint | Description |
+|----------------|--------------|-------------|
+| `api/users/get.js` | `GET /users` | Root level endpoint |
+| `api/users/profile/get.js` | `GET /users/profile` | Nested path |
+| `api/users/profile/settings/get.js` | `GET /users/profile/settings` | Deep nesting |
+| `api/v1/users/get.js` | `GET /v1/users` | Versioned API |
+| `api/admin/users/get.js` | `GET /admin/users` | Namespaced API |
+
+#### Complete File Structure Example
 ```
-api/users/get.js          →  GET /users
-api/users/post.js         →  POST /users  
-api/users/profile/put.js  →  PUT /users/profile
+api/
+├── users/
+│   ├── get.js              → GET /users
+│   ├── post.js             → POST /users
+│   ├── profile/
+│   │   ├── get.js          → GET /users/profile
+│   │   ├── put.js          → PUT /users/profile
+│   │   └── settings/
+│   │       ├── get.js      → GET /users/profile/settings
+│   │       └── patch.js    → PATCH /users/profile/settings
+│   └── delete.js           → DELETE /users
+├── products/
+│   ├── get.js              → GET /products
+│   ├── post.js             → POST /products
+│   └── {id}/
+│       ├── get.js          → GET /products/{id}
+│       ├── put.js          → PUT /products/{id}
+│       └── delete.js       → DELETE /products/{id}
+└── v1/
+    └── legacy/
+        └── get.js          → GET /v1/legacy
 ```
+
+#### HTTP Method Validation
+
+The framework automatically validates HTTP methods:
+- ✅ **Valid Methods**: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`
+- ❌ **Invalid Methods**: Any other filename will be rejected with an error
+- 🔄 **Case Insensitive**: `Get.js`, `POST.js`, `put.js` all work correctly
+- 📝 **Error Handling**: Invalid methods are logged and skipped during API loading
+
+#### Dynamic Route Generation
+
+Each API file automatically becomes:
+- 🌐 **REST Endpoint**: Available at the mapped HTTP path
+- 🤖 **MCP Tool**: AI models can call the endpoint via MCP protocol
+- 📚 **OpenAPI Schema**: Auto-generated documentation
+- 🔍 **Swagger UI**: Interactive API explorer
 
 ### MCP Prompts & Resources
 
