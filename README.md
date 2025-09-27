@@ -15,6 +15,8 @@ Write **ONE function** → Get **EVERYTHING**:
 - ✅ **OpenAPI** - Complete API documentation
 - ✅ **Swagger UI** - Interactive API explorer
 
+---
+
 ## ⚡ **3 Simple Rules**
 
 | Rule | Example | Result |
@@ -71,41 +73,131 @@ npx easy-mcp-server
 - 📚 **OpenAPI**: http://localhost:3000/openapi.json
 - 🔍 **Swagger UI**: http://localhost:3000/docs
 
-### 4. Optional: Add MCP Features
+### 4. Add MCP Features (AI Integration)
 ```bash
-# Add a Markdown prompt (use {{placeholders}})
-mkdir -p mcp/prompts/my-category
-cat > mcp/prompts/my-category/my-prompt.md << 'EOF'
-<!-- description: Example prompt using placeholders -->
+# Add AI prompts (templates with parameters)
+mkdir -p mcp/prompts/analysis
+cat > mcp/prompts/analysis/data-analysis.md << 'EOF'
+<!-- description: Analyze data with custom parameters -->
 
-Please process {{subject}} with priority {{priority}}.
-
-Details:
-- Region: {{region}}
-- Owner: {{owner}}
+Analyze {{dataset}} and create a {{report_type}} report.
+Focus on: {{focus_area}}
 EOF
 
-# Add resources
-mkdir -p mcp/resources/docs
-echo '# My Guide' > mcp/resources/docs/my-guide.md
+# Add AI resources (documentation)
+mkdir -p mcp/resources/guides
+echo '# API Guide
+
+This API helps you manage users and products.' > mcp/resources/guides/api-guide.md
 ```
+
+**Result**: AI models can now use your prompts and access your documentation!
 
 ---
 
-## 📚 **Documentation**
+## 🤖 **MCP Integration (AI Features)**
 
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| **[Framework Guide](mcp/resources/guides/easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
-| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
-| **[Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
-| **[LLM Context](LLM.txt)** | LLM-specific information | AI model integration |
+MCP (Model Context Protocol) lets AI models interact with your APIs and use your prompts/resources.
 
-### 📋 **Quick Reference**
-- **Getting Started**: [Quick Start](#-quick-start) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
-- **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
-- **Production**: [Production Ready](#-production-ready) → [Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)
-- **Advanced**: [Advanced Features](#-advanced-features) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
+### 📁 **Simple MCP Structure**
+```
+mcp/
+├── prompts/          # AI prompts (templates)
+│   └── my-prompt.md
+└── resources/       # Documentation & data
+    └── guide.md
+```
+
+### 🤖 **MCP Prompts** (AI Templates)
+- **Purpose**: Create reusable AI prompts with dynamic parameters
+- **Location**: Put files in `mcp/prompts/` folder
+- **Parameters**: Use `{{name}}` for dynamic content
+- **Example**:
+  ```markdown
+  <!-- description: Analyze data with custom parameters -->
+  
+  Analyze {{dataset}} and create a {{report_type}} report.
+  Focus on: {{focus_area}}
+  ```
+
+### 📚 **MCP Resources** (Documentation & Data)
+- **Purpose**: Provide documentation, guides, and data to AI models
+- **Location**: Put files in `mcp/resources/` folder
+- **Formats**: Supports common formats like `.md`, `.txt`, `.json`, `.yaml`
+- **Example**: Create `mcp/resources/api-guide.md` with your API documentation
+
+### ⚡ **Auto-Discovery & Hot Reload**
+- **Auto-Load**: Files are automatically detected when server starts
+- **Hot Reload**: Changes are picked up instantly (no restart needed)
+- **Template Support**: Any file can use `{{parameter}}` placeholders
+
+### 🔄 **Resource Templates**
+- **Static Files**: Regular files (like `guide.md`) are loaded as-is
+- **Template Files**: Files with `{{parameter}}` become dynamic templates
+- **Usage**: AI models can call templates with specific parameters
+- **Example**: `mcp/resources/email-template.html` with `{{name}}` becomes a reusable email template
+
+---
+
+## 📦 **API Structure Made Easy**
+
+### File Structure → API Endpoints
+
+The framework uses **convention-over-configuration** - your file structure becomes your API structure.
+
+#### HTTP Method Mapping Rules
+
+| File Name | HTTP Method | Purpose | Example |
+|-----------|-------------|---------|---------|
+| `get.js` | `GET` | Retrieve data | `api/users/get.js` → `GET /users` |
+| `post.js` | `POST` | Create resources | `api/users/post.js` → `POST /users` |
+| `put.js` | `PUT` | Update/replace resources | `api/users/put.js` → `PUT /users` |
+| `patch.js` | `PATCH` | Partial updates | `api/users/patch.js` → `PATCH /users` |
+| `delete.js` | `DELETE` | Remove resources | `api/users/delete.js` → `DELETE /users` |
+| `head.js` | `HEAD` | Get headers only | `api/users/head.js` → `HEAD /users` |
+| `options.js` | `OPTIONS` | Get allowed methods | `api/users/options.js` → `OPTIONS /users` |
+
+#### Path Mapping Rules
+
+| File Structure | API Endpoint | Description |
+|----------------|--------------|-------------|
+| `api/users/get.js` | `GET /users` | Root level endpoint |
+| `api/users/profile/get.js` | `GET /users/profile` | Nested path |
+| `api/users/profile/settings/get.js` | `GET /users/profile/settings` | Deep nesting |
+| `api/v1/users/get.js` | `GET /v1/users` | Versioned API |
+| `api/admin/users/get.js` | `GET /admin/users` | Namespaced API |
+
+#### Complete File Structure Example
+```
+api/
+├── users/
+│   ├── get.js              → GET /users
+│   ├── post.js             → POST /users
+│   ├── profile/
+│   │   ├── get.js          → GET /users/profile
+│   │   ├── put.js          → PUT /users/profile
+│   │   └── settings/
+│   │       ├── get.js      → GET /users/profile/settings
+│   │       └── patch.js    → PATCH /users/profile/settings
+│   └── delete.js           → DELETE /users
+├── products/
+│   ├── get.js              → GET /products
+│   ├── post.js             → POST /products
+│   └── {id}/
+│       ├── get.js          → GET /products/{id}
+│       ├── put.js          → PUT /products/{id}
+│       └── delete.js       → DELETE /products/{id}
+└── v1/
+    └── legacy/
+        └── get.js          → GET /v1/legacy
+```
+
+#### What Each API File Becomes
+Each API file automatically becomes:
+- 🌐 **REST Endpoint**: Available at the mapped HTTP path
+- 🤖 **MCP Tool**: AI models can call the endpoint via MCP protocol
+- 📚 **OpenAPI Schema**: Auto-generated documentation
+- 🔍 **Swagger UI**: Interactive API explorer
 
 ---
 
@@ -131,7 +223,7 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
 
 ### Auto-Generated OpenAPI with JSDoc Annotations
 
-The framework automatically parses JSDoc annotations to generate comprehensive OpenAPI documentation. All annotations are optional but highly recommended for better API documentation.
+Add comments to your functions for automatic API documentation:
 
 #### Supported Annotations
 
@@ -214,139 +306,8 @@ easy-mcp-server --port 3000 --mcp-port 3001 --api-dir ./api
 ```
 
 ### MCP Runtime Parsing & Cache
-- Parser: `src/utils/parameter-template-parser.js` extracts `{{name}}` placeholders across Markdown/YAML/JSON/TXT.
-- Cache: `src/utils/mcp-cache-manager.js` caches parsed prompts/resources and hot-swaps on file changes.
-
----
-
-## 📦 **What You Get**
-
-| Feature | Description | Auto-Generated |
-|---------|-------------|----------------|
-| **REST API** | HTTP endpoints from file structure | ✅ |
-| **MCP Tools** | AI-callable functions | ✅ |
-| **OpenAPI Docs** | Complete API documentation | ✅ |
-| **Swagger UI** | Interactive API explorer | ✅ |
-| **MCP Prompts** | Template-based AI prompts | ✅ |
-| **MCP Resources** | Documentation & data access | ✅ |
-
-### File Structure → API Endpoints
-
-The framework uses a **convention-over-configuration** approach where file structure directly maps to API endpoints.
-
-#### HTTP Method Mapping Rules
-
-| File Name | HTTP Method | Purpose | Example |
-|-----------|-------------|---------|---------|
-| `get.js` | `GET` | Retrieve data | `api/users/get.js` → `GET /users` |
-| `post.js` | `POST` | Create resources | `api/users/post.js` → `POST /users` |
-| `put.js` | `PUT` | Update/replace resources | `api/users/put.js` → `PUT /users` |
-| `patch.js` | `PATCH` | Partial updates | `api/users/patch.js` → `PATCH /users` |
-| `delete.js` | `DELETE` | Remove resources | `api/users/delete.js` → `DELETE /users` |
-| `head.js` | `HEAD` | Get headers only | `api/users/head.js` → `HEAD /users` |
-| `options.js` | `OPTIONS` | Get allowed methods | `api/users/options.js` → `OPTIONS /users` |
-
-#### Path Mapping Rules
-
-| File Structure | API Endpoint | Description |
-|----------------|--------------|-------------|
-| `api/users/get.js` | `GET /users` | Root level endpoint |
-| `api/users/profile/get.js` | `GET /users/profile` | Nested path |
-| `api/users/profile/settings/get.js` | `GET /users/profile/settings` | Deep nesting |
-| `api/v1/users/get.js` | `GET /v1/users` | Versioned API |
-| `api/admin/users/get.js` | `GET /admin/users` | Namespaced API |
-
-#### Complete File Structure Example
-```
-api/
-├── users/
-│   ├── get.js              → GET /users
-│   ├── post.js             → POST /users
-│   ├── profile/
-│   │   ├── get.js          → GET /users/profile
-│   │   ├── put.js          → PUT /users/profile
-│   │   └── settings/
-│   │       ├── get.js      → GET /users/profile/settings
-│   │       └── patch.js    → PATCH /users/profile/settings
-│   └── delete.js           → DELETE /users
-├── products/
-│   ├── get.js              → GET /products
-│   ├── post.js             → POST /products
-│   └── {id}/
-│       ├── get.js          → GET /products/{id}
-│       ├── put.js          → PUT /products/{id}
-│       └── delete.js       → DELETE /products/{id}
-└── v1/
-    └── legacy/
-        └── get.js          → GET /v1/legacy
-```
-
-#### HTTP Method Validation
-
-The framework automatically validates HTTP methods:
-- ✅ **Valid Methods**: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`
-- ❌ **Invalid Methods**: Any other filename will be rejected with an error
-- 🔄 **Case Insensitive**: `Get.js`, `POST.js`, `put.js` all work correctly
-- 📝 **Error Handling**: Invalid methods are logged and skipped during API loading
-
-#### Dynamic Route Generation
-
-Each API file automatically becomes:
-- 🌐 **REST Endpoint**: Available at the mapped HTTP path
-- 🤖 **MCP Tool**: AI models can call the endpoint via MCP protocol
-- 📚 **OpenAPI Schema**: Auto-generated documentation
-- 🔍 **Swagger UI**: Interactive API explorer
-
-### MCP Prompts & Resources
-
-**Auto-Discovery**: Automatically loads prompts and resources from `mcp/prompts/` and `mcp/resources/` directories.
-
-**Universal Format Support**: Supports **ALL file formats** including:
-- **Programming Languages**: `.js`, `.py`, `.java`, `.cpp`, `.c`, `.php`, `.rb`, `.go`, `.rs`, `.swift`, `.kt`, `.scala`
-- **Web Technologies**: `.html`, `.css`, `.xml`, `.scss`, `.sass`, `.less`
-- **Data Formats**: `.json`, `.yaml`, `.yml`, `.csv`, `.tsv`, `.toml`, `.ini`, `.properties`
-- **Documentation**: `.md`, `.txt`, `.rst`, `.adoc`, `.asciidoc`, `.org`, `.wiki`
-- **Scripts**: `.sh`, `.bash`, `.zsh`, `.fish`, `.ps1`, `.bat`, `.cmd`
-- **Build Tools**: `.dockerfile`, `.makefile`, `.cmake`, `.gradle`, `.maven`
-- **And many more!** (80+ supported formats)
-
-**Template Parameters**: Any file can use `{{parameter}}` substitution for dynamic content.
-
-**Hot Reloading & Caching**: Backed by in-memory cache with chokidar-based invalidation. File changes are detected automatically — no server restart needed.
-
-**Example Structure:**
-```
-mcp/
-├── prompts/
-│   ├── my-category/
-│   │   └── my-prompt.md
-│   └── content-creation.md
-└── resources/
-    ├── api-guide.md
-    └── guides/
-```
-
-**Example Prompt:**
-```markdown
-<!-- description: Analyze something using placeholders -->
-
-Analyze {{target}} and produce a {{format}} report for {{audience}}.
-
-Inputs:
-- target: {{target}}
-- format: {{format}}
-- audience: {{audience}}
-```
-
-### Resources vs Resource Templates (one‑glance)
-
-- **Where to put files**: anywhere under `mcp/resources/**`.
-- **How templates are detected**: if a file contains `{{param}}` placeholders, it is a **resource template**.
-- **Listings**:
-  - `resources/list` → shows all resources (templates included).
-  - `resources/templates/list` → shows only templates as `resourceTemplates[]` with `uriTemplate`, `name`, `mimeType`, `parameters`.
-- **Location impact**: folder path only affects the URI, e.g. `mcp/resources/templates/email.html` → `resource://templates/email.html`.
-- **Read with parameters**: call `resources/read` and pass `arguments` to substitute `{{param}}`.
+- **Parser**: `src/utils/parameter-template-parser.js` extracts `{{name}}` placeholders across Markdown/YAML/JSON/TXT
+- **Cache**: `src/utils/mcp-cache-manager.js` caches parsed prompts/resources and hot-swaps on file changes
 
 ---
 
@@ -419,9 +380,20 @@ class MyAPI extends BaseAPIEnhanced {
 
 ---
 
-## 📄 **License**
+## 📚 **Documentation**
 
-MIT License - see the [package.json](package.json) for license details.
+| Document | Purpose | Best For |
+|----------|---------|----------|
+| **[Framework Guide](mcp/resources/guides/easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
+| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
+| **[Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
+| **[LLM Context](LLM.txt)** | LLM-specific information | AI model integration |
+
+### 📋 **Quick Reference**
+- **Getting Started**: [Quick Start](#-quick-start) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
+- **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
+- **Production**: [Production Ready](#-production-ready) → [Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)
+- **Advanced**: [Advanced Features](#-advanced-features) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 
 ---
 
@@ -468,3 +440,9 @@ node src/server.js
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
 - **Documentation**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 - **Examples**: Check the `api/example/` directory
+
+---
+
+## 📄 **License**
+
+MIT License - see the [package.json](package.json) for license details.
