@@ -44,7 +44,7 @@ describe('Error Handling Improvements', () => {
       const { spawn } = require('child_process');
       const serverProcess = spawn('node', ['src/server.js'], {
         cwd: path.join(__dirname, '..'),
-        env: { ...process.env, SERVER_PORT: '3000' }
+        env: { ...process.env, EASY_MCP_SERVER_PORT: '3000' }
       });
 
       // Wait a bit for the server to start
@@ -56,7 +56,10 @@ describe('Error Handling Improvements', () => {
 
       // Clean up
       testServer.close();
-      serverProcess.kill();
+      serverProcess.kill('SIGTERM');
+      setTimeout(() => {
+        serverProcess.kill('SIGKILL');
+      }, 1000);
     });
   });
 
