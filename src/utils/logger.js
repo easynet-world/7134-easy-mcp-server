@@ -29,9 +29,9 @@ class Logger extends EventEmitter {
     super();
     
     this.options = {
-      level: options.level || process.env.LOG_LEVEL || 'info',
-      format: options.format || process.env.LOG_FORMAT || 'text',
-      service: options.service || process.env.SERVICE_NAME || 'easy-mcp-server',
+      level: options.level || process.env.EASY_MCP_SERVER_LOG_LEVEL || 'info',
+      format: options.format || process.env.EASY_MCP_SERVER_LOG_FORMAT || 'text',
+      service: options.service || process.env.EASY_MCP_SERVER_SERVICE_NAME || 'easy-mcp-server',
       enableColors: options.enableColors !== false,
       enableTimestamp: options.enableTimestamp !== false,
       transports: options.transports || {}

@@ -127,8 +127,42 @@ class APILoader {
         this.errors.push(`Processor class in ${filePath} must have a 'process' method`);
       }
     } catch (error) {
-      this.errors.push(`Error loading API from ${filePath}: ${error.message}`);
-      console.error(`❌ Failed to load API from ${filePath}:`, error.message);
+      // Enhanced error handling for different types of errors
+      let errorMessage = error.message;
+      let errorType = 'unknown';
+      
+      if (error.code === 'MODULE_NOT_FOUND') {
+        errorType = 'missing_dependency';
+        errorMessage = `Missing dependency: ${error.message}`;
+      } else if (error.message.includes('Cannot find module')) {
+        errorType = 'missing_module';
+        errorMessage = `Missing module: ${error.message}`;
+      } else if (error.message.includes('is not a constructor')) {
+        errorType = 'invalid_constructor';
+        errorMessage = `Invalid constructor: ${error.message}`;
+      } else if (error.message.includes('Cannot read properties')) {
+        errorType = 'property_error';
+        errorMessage = `Property access error: ${error.message}`;
+      }
+      
+      this.errors.push({
+        file: filePath,
+        error: errorMessage,
+        type: errorType,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Log the error with more context
+      console.error(`❌ Failed to load API from ${filePath}:`);
+      console.error(`   Error Type: ${errorType}`);
+      console.error(`   Error Message: ${errorMessage}`);
+      
+      // Provide helpful suggestions based on error type
+      if (errorType === 'missing_dependency' || errorType === 'missing_module') {
+        console.error(`   💡 Suggestion: Install missing dependencies with 'npm install <package-name>'`);
+      } else if (errorType === 'invalid_constructor') {
+        console.error(`   💡 Suggestion: Check that the module exports a class constructor`);
+      }
     }
   }
 

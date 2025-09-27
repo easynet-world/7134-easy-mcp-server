@@ -128,8 +128,8 @@ describe('MCP Info Page Customization', () => {
     fs.writeFileSync(customHtmlPath, customHtml);
 
     // Set environment variable
-    const originalEnv = process.env.MCP_INFO_HTML_PATH;
-    process.env.MCP_INFO_HTML_PATH = customHtmlPath;
+    const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
+    process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = customHtmlPath;
 
     try {
       const response = await makeRequest('/');
@@ -141,9 +141,9 @@ describe('MCP Info Page Customization', () => {
     } finally {
       // Restore original environment variable
       if (originalEnv) {
-        process.env.MCP_INFO_HTML_PATH = originalEnv;
+        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
       } else {
-        delete process.env.MCP_INFO_HTML_PATH;
+        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
     }
   });
@@ -181,8 +181,8 @@ describe('MCP Info Page Customization', () => {
     fs.writeFileSync(customHtmlPath, envHtml);
 
     // Set environment variable
-    const originalEnv = process.env.MCP_INFO_HTML_PATH;
-    process.env.MCP_INFO_HTML_PATH = customHtmlPath;
+    const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
+    process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = customHtmlPath;
 
     try {
       const response = await makeRequest('/');
@@ -199,9 +199,9 @@ describe('MCP Info Page Customization', () => {
         fs.unlinkSync(projectRootHtmlPath);
       }
       if (originalEnv) {
-        process.env.MCP_INFO_HTML_PATH = originalEnv;
+        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
       } else {
-        delete process.env.MCP_INFO_HTML_PATH;
+        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
     }
   });
@@ -221,9 +221,9 @@ describe('MCP Info Page Customization', () => {
     } finally {
       // Restore original environment variable
       if (originalEnv) {
-        process.env.MCP_INFO_HTML_PATH = originalEnv;
+        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
       } else {
-        delete process.env.MCP_INFO_HTML_PATH;
+        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
     }
   });
@@ -234,8 +234,8 @@ describe('MCP Info Page Customization', () => {
     fs.writeFileSync(customHtmlPath, invalidHtml);
 
     // Set environment variable
-    const originalEnv = process.env.MCP_INFO_HTML_PATH;
-    process.env.MCP_INFO_HTML_PATH = customHtmlPath;
+    const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
+    process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = customHtmlPath;
 
     try {
       const response = await makeRequest('/');
@@ -247,9 +247,9 @@ describe('MCP Info Page Customization', () => {
     } finally {
       // Restore original environment variable
       if (originalEnv) {
-        process.env.MCP_INFO_HTML_PATH = originalEnv;
+        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
       } else {
-        delete process.env.MCP_INFO_HTML_PATH;
+        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
     }
   });

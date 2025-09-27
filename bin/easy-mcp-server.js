@@ -23,15 +23,34 @@ function showHelp() {
 Easy MCP Server - Dynamic API Framework with MCP Integration
 
 Usage:
-  easy-mcp-server          # Start the server (uses server.js if exists, otherwise auto-starts)
-  easy-mcp-server init     # Initialize a new project
-  easy-mcp-server start    # Start the server (alias)
-  easy-mcp-server --help   # Show this help
+  easy-mcp-server                    # Start the server (uses server.js if exists, otherwise auto-starts)
+  easy-mcp-server init               # Initialize a new project
+  easy-mcp-server start              # Start the server (alias)
+  easy-mcp-server --help             # Show this help
 
 Commands:
   init    Create a new Easy MCP Server project with example files
   start   Start the server (same as running without arguments)
   --help  Show this help message
+
+Options:
+  --port <number>        Set the REST API server port (default: 3000)
+  --api-port <number>    Set the REST API server port (alternative to --port)
+  --mcp-port <number>    Set the MCP server port (default: 3001)
+
+Environment Variables:
+  EASY_MCP_SERVER_PORT   REST API server port (recommended)
+  EASY_MCP_SERVER_MCP_PORT MCP server port (recommended)
+  PORT                   REST API server port (fallback)
+  MCP_PORT               MCP server port (fallback)
+  SERVER_PORT            Alternative name for REST API port (fallback)
+
+Features:
+  • Auto .env loading     Automatically loads .env, .env.development, .env.local files
+  • Auto npm install      Automatically runs npm install before starting server
+  • Port auto-detection   Automatically finds available ports if configured port is busy
+  • Graceful error handling  Continues running even with some broken APIs
+  • Clear error reporting  Detailed error messages with helpful suggestions
 
 Server Starting Behavior:
   • If server.js exists: Uses your custom server configuration
@@ -39,10 +58,12 @@ Server Starting Behavior:
   • If neither exists: Shows error and helpful tips
 
 Examples:
-  easy-mcp-server          # Start server (custom or auto)
-  easy-mcp-server init     # Create new project
-  npx easy-mcp-server      # Run without installation
-  npx easy-mcp-server init # Initialize without installation
+  easy-mcp-server                    # Start server (custom or auto)
+  easy-mcp-server --port 8080       # Start server on port 8080
+  easy-mcp-server --mcp-port 8081   # Start MCP server on port 8081
+  easy-mcp-server init               # Create new project
+  npx easy-mcp-server                # Run without installation
+  npx easy-mcp-server --port 3001   # Run with custom port
 
 For more information, visit: https://github.com/easynet-world/7134-easy-mcp-server
 `);
@@ -440,9 +461,144 @@ describe('Easy MCP Server', () => {
 `);
 }
 
+// Load .env files from user directory
+function loadUserEnvFiles() {
+  const userCwd = process.cwd();
+  const envFiles = ['.env.local', '.env.development', '.env'];
+  
+  for (const envFile of envFiles) {
+    const envPath = path.join(userCwd, envFile);
+    if (fs.existsSync(envPath)) {
+      try {
+        require('dotenv').config({ path: envPath });
+        console.log(`📄 Loaded environment from ${envFile}`);
+      } catch (error) {
+        console.warn(`⚠️  Warning: Could not load ${envFile}: ${error.message}`);
+      }
+    }
+  }
+}
+
+// Global env hot reloader instance
+let envHotReloader = null;
+
+// Initialize env hot reloader
+function initializeEnvHotReloader() {
+  try {
+    const EnvHotReloader = require('../src/utils/env-hot-reloader');
+    envHotReloader = new EnvHotReloader({
+      debounceDelay: 1000,
+      onReload: () => {
+        console.log('🔄 Environment variables reloaded - some changes may require server restart');
+      },
+      logger: console
+    });
+    envHotReloader.startWatching();
+  } catch (error) {
+    console.warn(`⚠️  Could not initialize .env hot reload: ${error.message}`);
+  }
+}
+
+// Set MCP server reference for env hot reloader
+function setMCPServerForHotReloader(mcpServer) {
+  if (envHotReloader) {
+    envHotReloader.setMCPServer(mcpServer);
+  }
+}
+
+// Set API loader reference for env hot reloader
+function setAPILoaderForHotReloader(apiLoader) {
+  if (envHotReloader) {
+    envHotReloader.setAPILoader(apiLoader);
+  }
+}
+
+// Auto-install missing dependencies
+async function autoInstallDependencies() {
+  const userCwd = process.cwd();
+  const packageJsonPath = path.join(userCwd, 'package.json');
+  
+  if (!fs.existsSync(packageJsonPath)) {
+    console.log('📦 No package.json found - skipping auto-install');
+    return;
+  }
+  
+  console.log('📦 Checking for missing dependencies...');
+  
+  try {
+    const { spawn } = require('child_process');
+    
+    // Run npm install
+    const installProcess = spawn('npm', ['install'], {
+      cwd: userCwd,
+      stdio: 'inherit'
+    });
+    
+    return new Promise((resolve, reject) => {
+      installProcess.on('close', (code) => {
+        if (code === 0) {
+          console.log('✅ Dependencies installed successfully');
+          resolve();
+        } else {
+          console.warn(`⚠️  npm install completed with code ${code}`);
+          resolve(); // Don't fail the server startup
+        }
+      });
+      
+      installProcess.on('error', (error) => {
+        console.warn(`⚠️  Could not run npm install: ${error.message}`);
+        resolve(); // Don't fail the server startup
+      });
+    });
+  } catch (error) {
+    console.warn(`⚠️  Error during auto-install: ${error.message}`);
+  }
+}
+
+// Parse command line arguments for port configuration
+function parsePortArguments() {
+  const args = process.argv.slice(2);
+  const config = {
+    port: process.env.EASY_MCP_SERVER_PORT || 3000,
+    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 3001
+  };
+  
+  // Parse --port argument
+  const portIndex = args.indexOf('--port');
+  if (portIndex !== -1 && args[portIndex + 1]) {
+    config.port = parseInt(args[portIndex + 1]);
+  }
+  
+  // Parse --mcp-port argument
+  const mcpPortIndex = args.indexOf('--mcp-port');
+  if (mcpPortIndex !== -1 && args[mcpPortIndex + 1]) {
+    config.mcpPort = parseInt(args[mcpPortIndex + 1]);
+  }
+  
+  // Parse --api-port argument (alternative to --port)
+  const apiPortIndex = args.indexOf('--api-port');
+  if (apiPortIndex !== -1 && args[apiPortIndex + 1]) {
+    config.port = parseInt(args[apiPortIndex + 1]);
+  }
+  
+  return config;
+}
+
 // Start the server
-function startServer() {
+async function startServer() {
   console.log('🚀 Starting Easy MCP Server...');
+  
+  // Load .env files from user directory
+  loadUserEnvFiles();
+  
+  // Initialize .env hot reloader
+  initializeEnvHotReloader();
+  
+  // Parse port configuration
+  const portConfig = parsePortArguments();
+  
+  // Auto-install dependencies
+  await autoInstallDependencies();
   
   // Check if server.js exists in current directory
   const serverPath = path.join(process.cwd(), 'server.js');
@@ -476,8 +632,10 @@ function startServer() {
         cwd: mainProjectPath, // Set working directory to main project
         env: {
           ...process.env,
-          API_PATH: originalCwd + '/api', // Pass the user's API path
-          MCP_BASE_PATH: originalCwd + '/mcp' // Pass the user's MCP directory
+          EASY_MCP_SERVER_API_PATH: originalCwd + '/api', // Pass the user's API path
+          EASY_MCP_SERVER_MCP_BASE_PATH: originalCwd + '/mcp', // Pass the user's MCP directory
+          EASY_MCP_SERVER_PORT: portConfig.port.toString(), // Pass configured port
+          EASY_MCP_SERVER_MCP_PORT: portConfig.mcpPort.toString() // Pass configured MCP port
         }
       });
       
@@ -499,24 +657,31 @@ function startServer() {
 }
 
 // Main CLI logic
-function main() {
+async function main() {
   if (args.includes('--help') || args.includes('-h')) {
     showHelp();
     return;
   }
   
-  switch (command) {
-  case 'init':
-    initProject();
-    break;
-  case 'start':
-  case undefined:
-    startServer();
-    break;
-  default:
-    console.error(`❌ Unknown command: ${command}`);
-    console.log('💡 Run "easy-mcp-server --help" for usage information');
-    process.exit(1);
+  // Check if first argument is a command or a flag
+  const isCommand = command && !command.startsWith('--');
+  
+  if (isCommand) {
+    switch (command) {
+    case 'init':
+      initProject();
+      break;
+    case 'start':
+      await startServer();
+      break;
+    default:
+      console.error(`❌ Unknown command: ${command}`);
+      console.log('💡 Run "easy-mcp-server --help" for usage information');
+      process.exit(1);
+    }
+  } else {
+    // No command provided, start server with any flags
+    await startServer();
   }
 }
 
