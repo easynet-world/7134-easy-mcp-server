@@ -159,9 +159,9 @@ class APILoader {
       
       // Provide helpful suggestions based on error type
       if (errorType === 'missing_dependency' || errorType === 'missing_module') {
-        console.error(`   💡 Suggestion: Install missing dependencies with 'npm install <package-name>'`);
+        console.error('   💡 Suggestion: Install missing dependencies with \'npm install <package-name>\'');
       } else if (errorType === 'invalid_constructor') {
-        console.error(`   💡 Suggestion: Check that the module exports a class constructor`);
+        console.error('   💡 Suggestion: Check that the module exports a class constructor');
       }
     }
   }
