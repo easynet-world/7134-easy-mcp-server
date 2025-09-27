@@ -34,24 +34,45 @@ describe('Error Handling Improvements', () => {
     test('should handle port conflicts gracefully', async () => {
       const net = require('net');
       
-      // Create a server to occupy port 3000
-      const testServer = net.createServer();
-      await new Promise((resolve) => {
-        testServer.listen(3000, resolve);
-      });
+      // Find an available port first
+      let testPort = 3000;
+      let testServer;
+      let serverStarted = false;
+      
+      // Try to find an available port
+      for (let i = 0; i < 10; i++) {
+        try {
+          testServer = net.createServer();
+          await new Promise((resolve, reject) => {
+            testServer.listen(testPort, resolve);
+            testServer.on('error', reject);
+          });
+          serverStarted = true;
+          break;
+        } catch (error) {
+          testPort++;
+          if (testServer) {
+            testServer.close();
+          }
+        }
+      }
+      
+      if (!serverStarted) {
+        throw new Error('Could not find an available port for testing');
+      }
 
       // Test that the server can start on an alternative port
       const { spawn } = require('child_process');
       const serverProcess = spawn('node', ['bin/easy-mcp-server.js'], {
         cwd: path.join(__dirname, '..'),
-        env: { ...process.env, EASY_MCP_SERVER_PORT: '3000' }
+        env: { ...process.env, EASY_MCP_SERVER_PORT: testPort.toString() }
       });
 
       // Wait a bit for the server to start
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Check if server is running on alternative port
-      const isRunning = await checkPort(3001);
+      const isRunning = await checkPort(testPort + 1);
       expect(isRunning).toBe(true);
 
       // Clean up

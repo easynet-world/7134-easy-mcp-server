@@ -33,6 +33,8 @@ describe('Environment Hot Reload - Simple', () => {
     const envFile = path.join(tempDir, '.env');
     fs.writeFileSync(envFile, 'TEST_VAR=initial_value\n');
 
+    let reloadCalled = false;
+
     // Create hot reloader
     const hotReloader = new EnvHotReloader({
       userCwd: tempDir,
@@ -40,6 +42,7 @@ describe('Environment Hot Reload - Simple', () => {
       onReload: () => {
         console.log('✅ .env hot reload test passed!');
         console.log('TEST_VAR:', process.env.TEST_VAR);
+        reloadCalled = true;
         hotReloader.stopWatching();
         done();
       },
@@ -55,13 +58,16 @@ describe('Environment Hot Reload - Simple', () => {
 
     // Modify .env file after a short delay
     setTimeout(() => {
+      console.log('Modifying .env file...');
       fs.writeFileSync(envFile, 'TEST_VAR=updated_value\n');
     }, 500);
 
     // Timeout after 5 seconds
     setTimeout(() => {
       hotReloader.stopWatching();
-      done(new Error('Test timeout - environment hot reload did not work'));
+      if (!reloadCalled) {
+        done(new Error('Test timeout - environment hot reload did not work'));
+      }
     }, 5000);
   });
 
