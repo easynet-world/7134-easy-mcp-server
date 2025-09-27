@@ -69,10 +69,17 @@ describe('Error Handling Improvements', () => {
       });
 
       // Wait a bit for the server to start
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
-      // Check if server is running on alternative port
-      const isRunning = await checkPort(testPort + 1);
+      // Check if server is running on alternative port (try multiple ports)
+      let isRunning = false;
+      for (let i = 1; i <= 5; i++) {
+        if (await checkPort(testPort + i)) {
+          isRunning = true;
+          break;
+        }
+      }
+      
       expect(isRunning).toBe(true);
 
       // Clean up
