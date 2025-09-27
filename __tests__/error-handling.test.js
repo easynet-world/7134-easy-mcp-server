@@ -42,7 +42,7 @@ describe('Error Handling Improvements', () => {
 
       // Test that the server can start on an alternative port
       const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['src/server.js'], {
+      const serverProcess = spawn('node', ['bin/easy-mcp-server.js'], {
         cwd: path.join(__dirname, '..'),
         env: { ...process.env, EASY_MCP_SERVER_PORT: '3000' }
       });
