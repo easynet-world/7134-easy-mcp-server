@@ -287,7 +287,7 @@ const errors = apiLoader.getErrors();
 
 // Display error summary if there are any
 if (errors.length > 0) {
-  console.log(`\n⚠️  API Loading Summary:`);
+  console.log('\n⚠️  API Loading Summary:');
   console.log(`   Total APIs attempted: ${loadedRoutes.length + errors.length}`);
   console.log(`   Successfully loaded: ${loadedRoutes.length}`);
   console.log(`   Failed to load: ${errors.length}`);
@@ -302,14 +302,14 @@ if (errors.length > 0) {
     errorTypes[errorType]++;
   });
   
-  console.log(`\n📊 Error Breakdown:`);
+  console.log('\n📊 Error Breakdown:');
   Object.entries(errorTypes).forEach(([type, count]) => {
     console.log(`   ${type}: ${count} errors`);
   });
   
-  console.log(`\n💡 Server will continue running with available APIs.`);
-  console.log(`   Check /health endpoint for detailed API status.`);
-  console.log(`   Fix missing dependencies to enable failed APIs.\n`);
+  console.log('\n💡 Server will continue running with available APIs.');
+  console.log('   Check /health endpoint for detailed API status.');
+  console.log('   Fix missing dependencies to enable failed APIs.\n');
 }
 
 // MCP (Model Context Protocol) endpoints

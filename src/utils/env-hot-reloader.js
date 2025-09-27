@@ -89,7 +89,7 @@ class EnvHotReloader {
   /**
    * Handle .env file changes with debouncing
    */
-  handleEnvChange(filePath) {
+  handleEnvChange(_filePath) {
     // Clear existing timeout
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout);
@@ -137,8 +137,8 @@ class EnvHotReloader {
         
         this.onReload();
       } else {
-          this.logger.log('📄 No .env files to reload');
-        }
+        this.logger.log('📄 No .env files to reload');
+      }
     } catch (error) {
       this.logger.error(`❌ Error reloading .env files: ${error.message}`);
     }
@@ -150,7 +150,7 @@ class EnvHotReloader {
    */
   clearEnvVariables() {
     // Common environment variables that might be set by .env files
-    const commonEnvVars = [
+    const _commonEnvVars = [
       'PORT', 'SERVER_PORT', 'EASY_MCP_SERVER_PORT',
       'MCP_PORT', 'EASY_MCP_SERVER_MCP_PORT',
       'NODE_ENV', 'API_CORS_ORIGIN', 'API_CORS_METHODS', 'API_CORS_CREDENTIALS',
