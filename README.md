@@ -421,7 +421,7 @@ class MyAPI extends BaseAPIEnhanced {
 
 ## 📄 **License**
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see the [package.json](package.json) for license details.
 
 ---
 
@@ -449,7 +449,7 @@ node src/server.js
 
 **Supported Formats**: `.js`, `.py`, `.md`, `.json`, `.yaml`, `.txt`, `.html`, `.css`, `.sql`, `.ini`, `.properties`, `.dockerfile`, `.makefile`, and 70+ more!
 
-📖 **Full Guide**: See [CUSTOM_CONTENT_TROUBLESHOOTING.md](./CUSTOM_CONTENT_TROUBLESHOOTING.md) for detailed troubleshooting steps.
+📖 **Full Guide**: See the [Framework Guide](mcp/resources/guides/easy-mcp-server.md) for detailed troubleshooting steps.
 
 ---
 
@@ -468,6 +468,3 @@ node src/server.js
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
 - **Documentation**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 - **Examples**: Check the `api/example/` directory
-Maintenance: Trigger patch release for parameter parsing + MCP cache.
-
-Small README clarifications for MCP cache + parser.
