@@ -707,7 +707,7 @@ class DynamicAPIMCPServer {
       // 1. Environment variable MCP_INFO_HTML_PATH
       // 2. Custom file in project root (mcp-info.html)
       // 3. Default file in src/mcp directory
-      const envHtmlPath = process.env.MCP_INFO_HTML_PATH;
+      const envHtmlPath = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       const customHtmlPath = path.join(process.cwd(), 'mcp-info.html');
       const defaultHtmlPath = path.join(__dirname, 'mcp-info.html');
       

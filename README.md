@@ -42,13 +42,19 @@ module.exports = MyAPI;
 
 ## 🚀 **Quick Start**
 
-### 1. Install & Setup
+### Option 1: Run Directly (Recommended)
+```bash
+# No installation needed - just run!
+npx easy-mcp-server
+```
+
+### Option 2: Install & Setup
 ```bash
 npm install easy-mcp-server
 mkdir -p api/users && touch api/users/get.js
 ```
 
-### 2. Write Your API
+### Write Your API
 ```javascript
 // api/users/get.js
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -62,10 +68,28 @@ class GetUsers extends BaseAPI {
 module.exports = GetUsers;
 ```
 
-### 3. Start & Access
+### Start & Access
 ```bash
+# Basic usage
 npx easy-mcp-server
+
+# With custom ports
+npx easy-mcp-server --port 8080 --mcp-port 8081
+npx easy-mcp-server --api-port 8080 --mcp-port 8081
+
+# Using environment variables (recommended)
+EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+
 ```
+
+**✨ Features:**
+- 🔄 **Auto .env Loading**: Automatically loads `.env`, `.env.development`, `.env.local` files
+- 🔥 **.env Hot Reload**: Automatically detects and reloads .env file changes without restart
+- 📦 **Auto npm Install**: Automatically runs `npm install` before starting server
+- 🚀 **Port Auto-Detection**: Automatically finds available ports if configured port is busy
+- ⚙️ **Configurable Ports**: Set ports via CLI arguments or environment variables
+- 🛡️ **Graceful Error Handling**: Continues running even with some broken APIs
+- 📊 **Error Reporting**: Clear error messages with helpful suggestions
 
 **Access Points:**
 - 🌐 **REST API**: http://localhost:3000
@@ -294,16 +318,116 @@ class CreateUser extends BaseAPI {
 ## 🔧 **Configuration**
 
 ### Environment Variables
+The server automatically loads `.env` files from your project directory in this order:
+1. `.env.local` (highest priority)
+2. `.env.development` 
+3. `.env` (lowest priority)
+
+**🔧 Environment Variable Naming Convention:**
+All project-specific environment variables use the `EASY_MCP_SERVER_` prefix for consistency and to avoid conflicts with other applications.
+
 ```bash
-PORT=3000                         # REST API port
-MCP_PORT=3001                     # MCP server port
-OPENAI_API_KEY=your-key-here      # OpenAI API key (optional)
+# .env
+EASY_MCP_SERVER_PORT=3000                    # REST API port
+EASY_MCP_SERVER_MCP_PORT=3001               # MCP server port
+EASY_MCP_SERVER_HOST=0.0.0.0                # REST API host
+EASY_MCP_SERVER_MCP_HOST=0.0.0.0            # MCP server host
+EASY_MCP_SERVER_MCP_BASE_PATH=./mcp         # MCP base directory
+EASY_MCP_SERVER_API_PATH=./api              # API directory
+EASY_MCP_SERVER_CORS_ORIGIN=*               # CORS origin
+EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE  # CORS methods
+EASY_MCP_SERVER_CORS_CREDENTIALS=false      # CORS credentials
+EASY_MCP_SERVER_LOG_LEVEL=info              # Log level
+EASY_MCP_SERVER_LOG_FORMAT=text             # Log format
+EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server # Service name
+OPENAI_API_KEY=your-key-here                # OpenAI API key (optional)
+NODE_ENV=development                         # Environment
 ```
+
+**Benefits of Standardized Naming:**
+- 🔍 **Clear Identification**: Easy to identify which variables belong to easy-mcp-server
+- 🛡️ **No Conflicts**: Prevents conflicts with other applications' environment variables
+- 📚 **Better Documentation**: Makes configuration more organized and understandable
+- 🚀 **Future-Proof**: Consistent pattern for any new environment variables
 
 ### CLI Options
 ```bash
-easy-mcp-server --port 3000 --mcp-port 3001 --api-dir ./api
+# Port configuration
+easy-mcp-server --port 8080 --mcp-port 8081
+easy-mcp-server --api-port 8080 --mcp-port 8081
+
+# Environment variables
+EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 easy-mcp-server
+
+# Help
+easy-mcp-server --help
 ```
+
+### Port Configuration
+The server supports multiple ways to configure ports:
+
+**1. Command Line Arguments:**
+```bash
+npx easy-mcp-server --port 8080 --mcp-port 8081
+npx easy-mcp-server --api-port 8080 --mcp-port 8081
+```
+
+**2. Environment Variables:**
+```bash
+# In .env file (recommended)
+EASY_MCP_SERVER_PORT=8080
+EASY_MCP_SERVER_MCP_PORT=8081
+
+# Or inline (recommended)
+EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+```
+
+**3. Priority Order:**
+1. CLI arguments (`--port`/`--api-port`, `--mcp-port`)
+2. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
+3. Default values (3000 for REST API, 3001 for MCP)
+
+### Auto npm Install
+The server automatically runs `npm install` before starting if a `package.json` file is found in your project directory:
+
+```bash
+# Server will automatically run npm install if package.json exists
+npx easy-mcp-server
+```
+
+**What it does:**
+- ✅ Checks for `package.json` in your project directory
+- ✅ Runs `npm install` automatically before starting server
+- ✅ Continues server startup even if npm install fails
+- ✅ Shows clear status messages during the process
+
+**Benefits:**
+- 🚀 **Zero Setup**: No need to manually install dependencies
+- 🔄 **Always Fresh**: Ensures all dependencies are up to date
+- 🛡️ **Fault Tolerant**: Server starts even if some dependencies fail to install
+
+### .env Hot Reload
+The server automatically detects changes to `.env` files and reloads environment variables without requiring a restart:
+
+```bash
+# Start the server
+npx easy-mcp-server
+
+# In another terminal, modify your .env file
+echo "NEW_VAR=value" >> .env
+# The server will automatically detect and reload the changes
+```
+
+**Supported Files (in priority order):**
+- `.env.local` (highest priority)
+- `.env.development`
+- `.env` (lowest priority)
+
+**Benefits:**
+- 🔥 **No Restart**: Environment changes take effect immediately
+- 🤖 **MCP Integration**: MCP server automatically uses latest configuration
+- ⚡ **Seamless Development**: Modify environment variables without interrupting workflow
+- 🔍 **Automatic Detection**: New environment variables are picked up automatically
 
 ### MCP Runtime Parsing & Cache
 - **Parser**: `src/utils/parameter-template-parser.js` extracts `{{name}}` placeholders across Markdown/YAML/JSON/TXT

@@ -14,7 +14,7 @@ const HotReloader = require('../utils/hot-reloader');
 
 class DynamicAPIServer {
   constructor(options = {}) {
-    this.port = options.port || process.env.PORT || 3000;
+    this.port = options.port || process.env.EASY_MCP_SERVER_PORT || 3000;
     this.cors = options.cors || {};
     this.apiPath = options.apiPath || './api';
     this.hotReload = options.hotReload !== false;
@@ -46,9 +46,9 @@ class DynamicAPIServer {
   _setupMiddleware() {
     // CORS middleware
     this.app.use(cors({
-      origin: this.cors.origin || process.env.API_CORS_ORIGIN || '*',
-      methods: this.cors.methods || (process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
-      credentials: this.cors.credentials || process.env.API_CORS_CREDENTIALS === 'true'
+      origin: this.cors.origin || process.env.EASY_MCP_SERVER_CORS_ORIGIN || '*',
+      methods: this.cors.methods || (process.env.EASY_MCP_SERVER_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
+      credentials: this.cors.credentials || process.env.EASY_MCP_SERVER_CORS_CREDENTIALS === 'true'
     }));
     
     // Body parsing middleware

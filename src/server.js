@@ -8,21 +8,22 @@ const APILoader = require(path.join(__dirname, 'core', 'api-loader'));
 const OpenAPIGenerator = require(path.join(__dirname, 'core', 'openapi-generator'));
 const DynamicAPIMCPServer = require(path.join(__dirname, 'mcp', 'mcp-server'));
 const HotReloader = require(path.join(__dirname, 'utils', 'hot-reloader'));
+const EnvHotReloader = require(path.join(__dirname, 'utils', 'env-hot-reloader'));
 
 // Create Express app
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.API_CORS_ORIGIN || '*',
-  methods: (process.env.API_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
-  credentials: process.env.API_CORS_CREDENTIALS === 'true'
+  origin: process.env.EASY_MCP_SERVER_CORS_ORIGIN || '*',
+  methods: (process.env.EASY_MCP_SERVER_CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE').split(','),
+  credentials: process.env.EASY_MCP_SERVER_CORS_CREDENTIALS === 'true'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Initialize core services
-const apiLoader = new APILoader(app, process.env.API_PATH || null);
+const apiLoader = new APILoader(app, process.env.EASY_MCP_SERVER_API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
 
 // Enhanced health check endpoint with API status
@@ -280,8 +281,36 @@ app.get('/Agent.md', (req, res) => {
   }
 });
 
-// Load all APIs
+// Load all APIs with error summary
 const loadedRoutes = apiLoader.loadAPIs();
+const errors = apiLoader.getErrors();
+
+// Display error summary if there are any
+if (errors.length > 0) {
+  console.log(`\n⚠️  API Loading Summary:`);
+  console.log(`   Total APIs attempted: ${loadedRoutes.length + errors.length}`);
+  console.log(`   Successfully loaded: ${loadedRoutes.length}`);
+  console.log(`   Failed to load: ${errors.length}`);
+  
+  // Group errors by type for better reporting
+  const errorTypes = {};
+  errors.forEach(error => {
+    const errorType = typeof error === 'object' ? error.type : 'unknown';
+    if (!errorTypes[errorType]) {
+      errorTypes[errorType] = 0;
+    }
+    errorTypes[errorType]++;
+  });
+  
+  console.log(`\n📊 Error Breakdown:`);
+  Object.entries(errorTypes).forEach(([type, count]) => {
+    console.log(`   ${type}: ${count} errors`);
+  });
+  
+  console.log(`\n💡 Server will continue running with available APIs.`);
+  console.log(`   Check /health endpoint for detailed API status.`);
+  console.log(`   Fix missing dependencies to enable failed APIs.\n`);
+}
 
 // MCP (Model Context Protocol) endpoints
 app.get('/mcp/tools', (req, res) => {
@@ -406,10 +435,10 @@ async function executeAPIEndpoint(route, args, res) {
   }
 }
 
-// Server startup function
+// Server startup function with port conflict handling
 function startServer() {
-  const host = process.env.SERVER_HOST || '0.0.0.0';
-  const port = process.env.SERVER_PORT || 3000;
+  const host = process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
+  const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 3000;
 
   // Display startup banner
   console.log('\n');
@@ -423,15 +452,16 @@ function startServer() {
   // Start MCP server if enabled
   let mcpServer = null;
   let hotReloader = null;
+  let envHotReloader = null;
 
-  if (process.env.MCP_ENABLED !== 'false') {
+  if (process.env.EASY_MCP_SERVER_MCP_ENABLED !== 'false') {
     try {
       // Use custom MCP base path if provided, otherwise use default
       // Since server runs from src directory, we need to go up one level to find mcp
-      const mcpBasePath = process.env.MCP_BASE_PATH || '../mcp';
+      const mcpBasePath = process.env.EASY_MCP_SERVER_MCP_BASE_PATH || '../mcp';
       mcpServer = new DynamicAPIMCPServer(
-        process.env.MCP_HOST || '0.0.0.0',
-        process.env.MCP_PORT || 3001,
+        process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0',
+        process.env.EASY_MCP_SERVER_MCP_PORT || 3001,
         {
           mcp: {
             basePath: mcpBasePath
@@ -450,6 +480,18 @@ function startServer() {
         hotReloader = new HotReloader(apiLoader, mcpServer);
         hotReloader.startWatching();
         
+        // Initialize .env hot reloader
+        envHotReloader = new EnvHotReloader({
+          debounceDelay: 1000,
+          onReload: () => {
+            console.log('🔄 Environment variables reloaded - MCP server will use latest configuration');
+          },
+          logger: console,
+          mcpServer: mcpServer,
+          apiLoader: apiLoader
+        });
+        envHotReloader.startWatching();
+        
       }).catch(error => {
         console.warn('⚠️  MCP Server failed to start:', error.message);
       });
@@ -458,53 +500,74 @@ function startServer() {
     }
   }
 
-  // Start the main server
-  app.listen(port, host, { family: 4 }, () => {
-    console.log('\n');
-    console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
-    console.log('  ║                                                                                                      ║');
-    console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
-    console.log('  ║                                                                                                      ║');
-    console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
-    console.log('');
-    console.log('  🚀  SERVER STARTED SUCCESSFULLY');
-    console.log('  ' + '═'.repeat(78));
-    console.log(`  📍 Server Address: ${host}:${port}`);
-    console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log('');
-    console.log('  📡  API ENDPOINTS:');
-    console.log(`     • Health Check:     http://localhost:${port}/health`);
-    console.log(`     • API Information:  http://localhost:${port}/api-info`);
-    console.log(`     • MCP Tools:        http://localhost:${port}/mcp/tools`);
-    console.log('');
-    console.log('  📚  DOCUMENTATION:');
-    console.log(`     • OpenAPI JSON:     http://localhost:${port}/openapi.json`);
-    console.log(`     • Swagger UI:       http://localhost:${port}/docs ✨`);
-    console.log(`     • LLM Context:      http://localhost:${port}/LLM.txt`);
-    console.log(`     • Agent Context:    http://localhost:${port}/Agent.md`);
-    console.log('');
-    if (mcpServer) {
-      console.log('  🤖  MCP SERVER:');
-      console.log(`     • WebSocket:       ws://${process.env.MCP_HOST || '0.0.0.0'}:${process.env.MCP_PORT || 3001}`);
-      console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
+  // Function to try starting server on a port
+  function tryStartServer(port) {
+    const server = app.listen(port, host, { family: 4 }, () => {
+      console.log('\n');
+      console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
+      console.log('  ║                                                                                                      ║');
+      console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
+      console.log('  ║                                                                                                      ║');
+      console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
       console.log('');
-    }
-    console.log('  ⚡  FEATURES:');
-    console.log('     • Auto-discovery of API endpoints');
-    console.log('     • Real-time MCP tool generation');
-    console.log('     • Automatic OpenAPI documentation');
-    console.log('     • Hot reloading enabled');
-    console.log('');
-    console.log('  🎯  Ready to serve your APIs!');
-    console.log('  ' + '═'.repeat(78));
-    console.log('');
-  });
+      console.log('  🚀  SERVER STARTED SUCCESSFULLY');
+      console.log('  ' + '═'.repeat(78));
+      console.log(`  📍 Server Address: ${host}:${port}`);
+      console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log('');
+      console.log('  📡  API ENDPOINTS:');
+      console.log(`     • Health Check:     http://localhost:${port}/health`);
+      console.log(`     • API Information:  http://localhost:${port}/api-info`);
+      console.log(`     • MCP Tools:        http://localhost:${port}/mcp/tools`);
+      console.log('');
+      console.log('  📚  DOCUMENTATION:');
+      console.log(`     • OpenAPI JSON:     http://localhost:${port}/openapi.json`);
+      console.log(`     • Swagger UI:       http://localhost:${port}/docs ✨`);
+      console.log(`     • LLM Context:      http://localhost:${port}/LLM.txt`);
+      console.log(`     • Agent Context:    http://localhost:${port}/Agent.md`);
+      console.log('');
+      if (mcpServer) {
+        console.log('  🤖  MCP SERVER:');
+        console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${process.env.EASY_MCP_SERVER_MCP_PORT || 3001}`);
+        console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
+        console.log('');
+      }
+      console.log('  ⚡  FEATURES:');
+      console.log('     • Auto-discovery of API endpoints');
+      console.log('     • Real-time MCP tool generation');
+      console.log('     • Automatic OpenAPI documentation');
+      console.log('     • Hot reloading enabled');
+      console.log('');
+      console.log('  🎯  Ready to serve your APIs!');
+      console.log('  ' + '═'.repeat(78));
+      console.log('');
+    });
+
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.log(`⚠️  Port ${port} is already in use, trying port ${port + 1}...`);
+        server.close();
+        tryStartServer(port + 1);
+      } else {
+        console.error(`❌ Server error: ${error.message}`);
+        process.exit(1);
+      }
+    });
+
+    return server;
+  }
+
+  // Start the main server with port conflict handling
+  tryStartServer(basePort);
 
   // Graceful shutdown
   process.on('SIGINT', () => {
     console.log('\n🛑 Shutting down servers...');
     if (hotReloader) {
       hotReloader.stopWatching();
+    }
+    if (envHotReloader) {
+      envHotReloader.stopWatching();
     }
     if (mcpServer) {
       mcpServer.stop();
@@ -516,6 +579,9 @@ function startServer() {
     console.log('\n🛑 Shutting down servers...');
     if (hotReloader) {
       hotReloader.stopWatching();
+    }
+    if (envHotReloader) {
+      envHotReloader.stopWatching();
     }
     if (mcpServer) {
       mcpServer.stop();

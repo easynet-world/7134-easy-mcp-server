@@ -150,8 +150,8 @@ class OpenAPIGenerator {
    * Generate servers configuration
    */
   generateServers() {
-    const port = process.env.SERVER_PORT || 3000;
-    const host = process.env.SERVER_HOST || 'localhost';
+    const port = process.env.EASY_MCP_SERVER_PORT || 3000;
+    const host = process.env.EASY_MCP_SERVER_HOST || 'localhost';
     
     return [
       {
