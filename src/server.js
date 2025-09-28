@@ -435,7 +435,7 @@ async function executeAPIEndpoint(route, args, res) {
   }
 }
 
-// Server startup function with port conflict handling
+// Server startup function
 function startServer() {
   const host = process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
   const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 3000;
@@ -500,65 +500,58 @@ function startServer() {
     }
   }
 
-  // Function to try starting server on a port
-  function tryStartServer(port) {
-    const server = app.listen(port, host, { family: 4 }, () => {
-      console.log('\n');
-      console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
-      console.log('  ║                                                                                                      ║');
-      console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
-      console.log('  ║                                                                                                      ║');
-      console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
+  // Start the main server on the specified port
+  const server = app.listen(basePort, host, { family: 4 }, () => {
+    console.log('\n');
+    console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log('  🚀  SERVER STARTED SUCCESSFULLY');
+    console.log('  ' + '═'.repeat(78));
+    console.log(`  📍 Server Address: ${host}:${basePort}`);
+    console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('');
+    console.log('  📡  API ENDPOINTS:');
+    console.log(`     • Health Check:     http://localhost:${basePort}/health`);
+    console.log(`     • API Information:  http://localhost:${basePort}/api-info`);
+    console.log(`     • MCP Tools:        http://localhost:${basePort}/mcp/tools`);
+    console.log('');
+    console.log('  📚  DOCUMENTATION:');
+    console.log(`     • OpenAPI JSON:     http://localhost:${basePort}/openapi.json`);
+    console.log(`     • Swagger UI:       http://localhost:${basePort}/docs ✨`);
+    console.log(`     • LLM Context:      http://localhost:${basePort}/LLM.txt`);
+    console.log(`     • Agent Context:    http://localhost:${basePort}/Agent.md`);
+    console.log('');
+    if (mcpServer) {
+      console.log('  🤖  MCP SERVER:');
+      console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${process.env.EASY_MCP_SERVER_MCP_PORT || 3001}`);
+      console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
-      console.log('  🚀  SERVER STARTED SUCCESSFULLY');
-      console.log('  ' + '═'.repeat(78));
-      console.log(`  📍 Server Address: ${host}:${port}`);
-      console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log('');
-      console.log('  📡  API ENDPOINTS:');
-      console.log(`     • Health Check:     http://localhost:${port}/health`);
-      console.log(`     • API Information:  http://localhost:${port}/api-info`);
-      console.log(`     • MCP Tools:        http://localhost:${port}/mcp/tools`);
-      console.log('');
-      console.log('  📚  DOCUMENTATION:');
-      console.log(`     • OpenAPI JSON:     http://localhost:${port}/openapi.json`);
-      console.log(`     • Swagger UI:       http://localhost:${port}/docs ✨`);
-      console.log(`     • LLM Context:      http://localhost:${port}/LLM.txt`);
-      console.log(`     • Agent Context:    http://localhost:${port}/Agent.md`);
-      console.log('');
-      if (mcpServer) {
-        console.log('  🤖  MCP SERVER:');
-        console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${process.env.EASY_MCP_SERVER_MCP_PORT || 3001}`);
-        console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
-        console.log('');
-      }
-      console.log('  ⚡  FEATURES:');
-      console.log('     • Auto-discovery of API endpoints');
-      console.log('     • Real-time MCP tool generation');
-      console.log('     • Automatic OpenAPI documentation');
-      console.log('     • Hot reloading enabled');
-      console.log('');
-      console.log('  🎯  Ready to serve your APIs!');
-      console.log('  ' + '═'.repeat(78));
-      console.log('');
-    });
+    }
+    console.log('  ⚡  FEATURES:');
+    console.log('     • Auto-discovery of API endpoints');
+    console.log('     • Real-time MCP tool generation');
+    console.log('     • Automatic OpenAPI documentation');
+    console.log('     • Hot reloading enabled');
+    console.log('');
+    console.log('  🎯  Ready to serve your APIs!');
+    console.log('  ' + '═'.repeat(78));
+    console.log('');
+  });
 
-    server.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.log(`⚠️  Port ${port} is already in use, trying port ${port + 1}...`);
-        server.close();
-        tryStartServer(port + 1);
-      } else {
-        console.error(`❌ Server error: ${error.message}`);
-        process.exit(1);
-      }
-    });
-
-    return server;
-  }
-
-  // Start the main server with port conflict handling
-  tryStartServer(basePort);
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${basePort} is already in use. Please choose a different port or stop the process using that port.`);
+      console.error(`   You can set a different port using: EASY_MCP_SERVER_PORT=<port>`);
+      process.exit(1);
+    } else {
+      console.error(`❌ Server error: ${error.message}`);
+      process.exit(1);
+    }
+  });
 
   // Graceful shutdown
   process.on('SIGINT', () => {

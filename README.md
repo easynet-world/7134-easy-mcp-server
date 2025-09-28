@@ -86,7 +86,6 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 - 🔄 **Auto .env Loading**: Automatically loads `.env`, `.env.development`, `.env.local` files
 - 🔥 **.env Hot Reload**: Automatically detects and reloads .env file changes without restart
 - 📦 **Auto npm Install**: Automatically runs `npm install` before starting server
-- 🚀 **Port Auto-Detection**: Automatically finds available ports if configured port is busy
 - ⚙️ **Configurable Ports**: Set ports via CLI arguments or environment variables
 - 🛡️ **Graceful Error Handling**: Continues running even with some broken APIs
 - 📊 **Error Reporting**: Clear error messages with helpful suggestions

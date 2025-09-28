@@ -31,7 +31,7 @@ describe('Error Handling Improvements', () => {
   });
 
   describe('Port Conflict Handling', () => {
-    test('should handle port conflicts gracefully', async () => {
+    test('should fail gracefully when port is already in use', async () => {
       const net = require('net');
       
       // Find an available port first
@@ -61,26 +61,23 @@ describe('Error Handling Improvements', () => {
         throw new Error('Could not find an available port for testing');
       }
 
-      // Test that the server can start on an alternative port
+      // Test that the server fails when trying to use an occupied port
       const { spawn } = require('child_process');
       const serverProcess = spawn('node', ['bin/easy-mcp-server.js'], {
         cwd: path.join(__dirname, '..'),
         env: { ...process.env, EASY_MCP_SERVER_PORT: testPort.toString() }
       });
 
-      // Wait a bit for the server to start
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      let output = '';
+      serverProcess.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+      serverProcess.stderr.on('data', (data) => {
+        output += data.toString();
+      });
 
-      // Check if server is running on alternative port (try multiple ports)
-      let isRunning = false;
-      for (let i = 1; i <= 5; i++) {
-        if (await checkPort(testPort + i)) {
-          isRunning = true;
-          break;
-        }
-      }
-      
-      expect(isRunning).toBe(true);
+      // Wait for the server to attempt startup and fail
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Clean up
       testServer.close();
@@ -88,6 +85,9 @@ describe('Error Handling Improvements', () => {
       setTimeout(() => {
         serverProcess.kill('SIGKILL');
       }, 1000);
+
+      // Server should have failed with port conflict error
+      expect(output).toContain('Port') && expect(output).toContain('already in use');
     });
   });
 
