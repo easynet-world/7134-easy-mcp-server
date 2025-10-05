@@ -27,7 +27,7 @@ describe('CLI Static File Serving', () => {
     fs.mkdirSync(apiDir, { recursive: true });
     fs.writeFileSync(
       path.join(apiDir, 'get.js'),
-      "const BaseAPI = require('easy-mcp-server/base-api');\nclass TestAPI extends BaseAPI { process(req, res){ res.json({ ok: true }); } }\nmodule.exports = TestAPI;\n"
+      'const BaseAPI = require(\'easy-mcp-server/base-api\');\nclass TestAPI extends BaseAPI { process(req, res){ res.json({ ok: true }); } }\nmodule.exports = TestAPI;\n'
     );
 
     const publicDir = path.join(tempDir, 'public');
