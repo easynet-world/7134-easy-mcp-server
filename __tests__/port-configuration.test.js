@@ -61,13 +61,16 @@ module.exports = TestAPI;
       expect(output).toContain('🚀 Starting Easy MCP Server...');
       
       // Clean up
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      serverProcess.once('close', finish);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish();
+      }, 300);
     }, 3000);
   });
 
@@ -111,13 +114,16 @@ module.exports = TestAPI;
       expect(output).toContain('🚀 Starting Easy MCP Server...');
       
       // Clean up
+      let finished2 = false;
+      const finish2 = () => { if (!finished2) { finished2 = true; done(); } };
+      serverProcess.once('close', finish2);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish2();
+      }, 300);
     }, 3000);
   });
 
@@ -174,13 +180,16 @@ EASY_MCP_SERVER_MCP_PORT=8888
       expect(output).toContain('🚀 Starting Easy MCP Server...');
       
       // Clean up
+      let finished3 = false;
+      const finish3 = () => { if (!finished3) { finished3 = true; done(); } };
+      serverProcess.once('close', finish3);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish3();
+      }, 300);
     }, 3000);
   });
 
@@ -237,13 +246,16 @@ MCP_PORT=8888
       expect(output).toContain('🚀 Starting Easy MCP Server...');
       
       // Clean up
+      let finished4 = false;
+      const finish4 = () => { if (!finished4) { finished4 = true; done(); } };
+      serverProcess.once('close', finish4);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish4();
+      }, 300);
     }, 3000);
   });
 
@@ -292,13 +304,16 @@ module.exports = TestAPI;
       expect(output).toContain('🚀 Starting Easy MCP Server...');
       
       // Clean up
+      let finished5 = false;
+      const finish5 = () => { if (!finished5) { finished5 = true; done(); } };
+      serverProcess.once('close', finish5);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish5();
+      }, 300);
     }, 3000);
   });
 });
