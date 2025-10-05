@@ -1,0 +1,49 @@
+### Project rules for Cursor
+
+- **primary-language**: JavaScript (Node.js >=16)
+- **package-manager**: npm
+- **test-command**: `npm test`
+- **lint-command**: `npm run lint`
+- **fix-lint-command**: `npm run lint:fix`
+- **prefer-absolute-paths**: true
+
+### Assistant behavior
+
+- **finish-criteria**: Always run full tests and lint; fix failures before concluding.
+- **file-edits**: Use minimal diffs; do not reformat unrelated code.
+- **indentation**: Preserve existing indentation style and width.
+- **naming**: Prefer descriptive names over abbreviations.
+- **comments**: Only add non-obvious, high-signal comments.
+- **error-handling**: Avoid broad try/catch; handle meaningfully or allow failure.
+- **control-flow**: Use early returns; avoid deep nesting.
+
+### Communication style
+
+- **concise-default**: Keep replies short and skimmable.
+- **formatting**:
+  - Use code fences only for relevant snippets or proposed code.
+  - When citing existing repo code, include start:end:filepath code references.
+  - Use backticks for file/dir/function/class names.
+- **assumptions**: State assumptions briefly and proceed without blocking.
+
+### Tooling expectations
+
+- **todos**: Track multi-step work with a TODO list; update statuses as you proceed.
+- **testing**: After edits, run `npm test`. If failures occur, fix and re-run until green.
+- **linting**: Run `npm run lint`. Fix issues or run `npm run lint:fix` when safe.
+- **parallel-reads**: Prefer parallel searches/reads for faster context gathering.
+
+### Repository specifics
+
+- **scripts**: `test` uses Jest; `lint` uses ESLint for .js files.
+- **important-paths**:
+  - Tests: `__tests__/`
+  - Source: `src/`, `api/`, `bin/`, `index.js`
+  - MCP assets: `mcp/`
+- **do-not-touch**: Do not modify generated artifacts unless explicitly requested.
+
+### Done definition
+
+- All tests pass (green `npm test`).
+- Lint passes with no errors (`npm run lint`).
+- Changes are minimal, focused, and readable.
