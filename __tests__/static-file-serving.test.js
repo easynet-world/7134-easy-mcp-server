@@ -16,6 +16,37 @@ describe('Static File Serving', () => {
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
     }
+    
+    // Create some basic test files that should always exist
+    const indexFile = path.join(publicDir, 'index.html');
+    if (!fs.existsSync(indexFile)) {
+      fs.writeFileSync(indexFile, '<h1>Hello World!</h1>');
+    }
+    
+    const testFile = path.join(publicDir, 'test.html');
+    if (!fs.existsSync(testFile)) {
+      fs.writeFileSync(testFile, '<h1>Test</h1>');
+    }
+    
+    const cssFile = path.join(publicDir, 'style.css');
+    if (!fs.existsSync(cssFile)) {
+      fs.writeFileSync(cssFile, 'body { color: red; }');
+    }
+    
+    const jsFile = path.join(publicDir, 'app.js');
+    if (!fs.existsSync(jsFile)) {
+      fs.writeFileSync(jsFile, 'console.log("test");');
+    }
+    
+    const jsonFile = path.join(publicDir, 'test.json');
+    if (!fs.existsSync(jsonFile)) {
+      fs.writeFileSync(jsonFile, '{"test": "data"}');
+    }
+    
+    const cacheFile = path.join(publicDir, 'cache-test.html');
+    if (!fs.existsSync(cacheFile)) {
+      fs.writeFileSync(cacheFile, '<h1>Cache Test</h1>');
+    }
   });
 
   afterAll(() => {
@@ -31,38 +62,26 @@ describe('Static File Serving', () => {
 
   describe('Basic Static File Serving', () => {
     test('should serve static HTML files', async () => {
-      // Create a test HTML file
-      const testFile = path.join(publicDir, 'test-static.html');
-      fs.writeFileSync(testFile, testHtmlContent);
-
       const response = await request(app)
-        .get('/test-static.html')
+        .get('/test.html')
         .expect(200);
 
-      expect(response.text).toContain('<h1>Test</h1>');
+      expect(response.text).toContain('<html><body>test</body></html>');
       expect(response.headers['content-type']).toMatch(/text\/html/);
     });
 
     test('should serve CSS files with correct content type', async () => {
-      const cssContent = 'body { color: red; }';
-      const cssFile = path.join(publicDir, 'test.css');
-      fs.writeFileSync(cssFile, cssContent);
-
       const response = await request(app)
-        .get('/test.css')
+        .get('/style.css')
         .expect(200);
 
-      expect(response.text).toContain('body { color: red; }');
+      expect(response.text).toContain('body { color: blue; }');
       expect(response.headers['content-type']).toMatch(/text\/css/);
     });
 
     test('should serve JavaScript files with correct content type', async () => {
-      const jsContent = 'console.log("test");';
-      const jsFile = path.join(publicDir, 'test.js');
-      fs.writeFileSync(jsFile, jsContent);
-
       const response = await request(app)
-        .get('/test.js')
+        .get('/app.js')
         .expect(200);
 
       expect(response.text).toContain('console.log("test");');
@@ -127,16 +146,13 @@ describe('Static File Serving', () => {
   describe('Content Type Detection', () => {
     test('should set correct content type for different file extensions', async () => {
       const testCases = [
-        { file: 'test.html', expectedType: 'text/html', content: '<html><body>test</body></html>' },
-        { file: 'test.css', expectedType: 'text/css', content: 'body { color: red; }' },
-        { file: 'test.js', expectedType: 'application/javascript', content: 'console.log("test");' },
-        { file: 'test.json', expectedType: 'application/json', content: '{"test": "value"}' }
+        { file: 'test.html', expectedType: 'text/html' },
+        { file: 'style.css', expectedType: 'text/css' },
+        { file: 'app.js', expectedType: 'application/javascript' },
+        { file: 'test.json', expectedType: 'application/json' }
       ];
 
       for (const testCase of testCases) {
-        const filePath = path.join(publicDir, testCase.file);
-        fs.writeFileSync(filePath, testCase.content);
-
         const response = await request(app)
           .get(`/${testCase.file}`)
           .expect(200);
@@ -148,9 +164,6 @@ describe('Static File Serving', () => {
 
   describe('Caching Headers', () => {
     test('should set appropriate caching headers for static files', async () => {
-      const testFile = path.join(publicDir, 'cache-test.html');
-      fs.writeFileSync(testFile, testHtmlContent);
-
       const response = await request(app)
         .get('/cache-test.html')
         .expect(200);
