@@ -12,6 +12,11 @@ describe('Static File Serving', () => {
   const testHtmlContent = '<html><body><h1>Test</h1></body></html>';
   
   beforeAll(() => {
+    // Ensure static file serving is enabled for tests
+    process.env.EASY_MCP_SERVER_STATIC_ENABLED = 'true';
+    process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = './public';
+    process.env.EASY_MCP_SERVER_SERVE_INDEX = 'true';
+    process.env.EASY_MCP_SERVER_DEFAULT_FILE = 'index.html';
     // Ensure public directory exists
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
@@ -25,12 +30,12 @@ describe('Static File Serving', () => {
     
     const testFile = path.join(publicDir, 'test.html');
     if (!fs.existsSync(testFile)) {
-      fs.writeFileSync(testFile, '<h1>Test</h1>');
+      fs.writeFileSync(testFile, '<html><body>test</body></html>');
     }
     
     const cssFile = path.join(publicDir, 'style.css');
     if (!fs.existsSync(cssFile)) {
-      fs.writeFileSync(cssFile, 'body { color: red; }');
+      fs.writeFileSync(cssFile, 'body { color: blue; }');
     }
     
     const jsFile = path.join(publicDir, 'app.js');
