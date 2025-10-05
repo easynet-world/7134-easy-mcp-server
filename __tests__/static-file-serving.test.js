@@ -41,6 +41,12 @@ const { app } = require('../src/server');
 // Debug: Check if static file serving middleware is applied
 console.log('🔍 Debug: Checking static file serving middleware...');
 const middleware = app._router.stack;
+console.log('🔍 Total middleware layers:', middleware.length);
+console.log('🔍 Middleware layers:', middleware.map(layer => ({
+  name: layer.name,
+  regexp: layer.regexp ? layer.regexp.toString() : 'no regexp'
+})));
+
 const staticMiddleware = middleware.find(layer => 
   layer.name === 'serveStatic' || 
   (layer.regexp && layer.regexp.toString().includes('static'))
@@ -48,6 +54,8 @@ const staticMiddleware = middleware.find(layer =>
 console.log('🔍 Static middleware found:', !!staticMiddleware);
 if (staticMiddleware) {
   console.log('🔍 Static middleware details:', staticMiddleware.name, staticMiddleware.regexp);
+} else {
+  console.log('🔍 No static middleware found! This is the problem.');
 }
 
 describe('Static File Serving - CI', () => {
