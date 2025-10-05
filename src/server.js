@@ -13,6 +13,23 @@ const EnvHotReloader = require(path.join(__dirname, 'utils', 'env-hot-reloader')
 // Create Express app
 const app = express();
 
+// Global safety nets: never crash the process on unexpected errors
+process.on('uncaughtException', (error) => {
+  try {
+    console.error('❌ Uncaught Exception (server will continue running):', error);
+  } catch (_) {
+    // no-op
+  }
+});
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    console.error('❌ Unhandled Promise Rejection (server will continue running):', reason);
+  } catch (_) {
+    // no-op
+  }
+});
+
 // Middleware
 app.use(cors({
   origin: process.env.EASY_MCP_SERVER_CORS_ORIGIN || '*',
@@ -62,6 +79,17 @@ if (staticConfig.serveIndex) {
     console.log(`🏠 Root route configured: serving ${staticConfig.defaultFile}`);
   }
 }
+
+// Centralized Express error handler to prevent crashes on route errors
+app.use((err, req, res, next) => {
+  try {
+    console.error('❌ Express error handler caught error:', err);
+  } catch (_) {
+    // no-op
+  }
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Internal Server Error', message: err?.message || 'Unknown error' });
+});
 
 // Initialize core services
 const apiLoader = new APILoader(app, process.env.EASY_MCP_SERVER_API_PATH || null);

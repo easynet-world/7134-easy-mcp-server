@@ -17,6 +17,7 @@ class MCPCacheManager {
     this.basePath = path.resolve(basePath);
     this.logger = options.logger || null;
     this.enableHotReload = options.enableHotReload !== false;
+    this.onChange = typeof options.onChange === 'function' ? options.onChange : null;
     
     // Cache storage
     this.promptsCache = new Map(); // filePath -> parsed prompt
@@ -106,6 +107,15 @@ class MCPCacheManager {
     }
     
     this.stats.lastUpdate = new Date();
+
+    // Notify consumer about the change so it can broadcast to clients
+    try {
+      if (this.onChange) {
+        this.onChange({ type, event, filePath, relativePath });
+      }
+    } catch (notifyError) {
+      this.log('warn', `onChange callback failed: ${notifyError.message}`);
+    }
   }
 
   /**

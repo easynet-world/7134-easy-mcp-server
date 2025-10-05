@@ -218,7 +218,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Easy MCP Server</h1>
+            <h1 style="display:flex;align-items:center;gap:10px;">🚀 Easy MCP Server <span id="mcp-change-badge" style="display:none;background:#f59e0b;color:#111827;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600;cursor:pointer;">Changes</span></h1>
             <p>Professional Model Context Protocol server with automatic API discovery, static file serving, and seamless AI integration.</p>
         </div>
 
@@ -241,6 +241,10 @@
                     <h3>🔄 Hot Reload</h3>
                     <p>Environment variables auto-reload enabled</p>
                 </div>
+                <div class="status-item">
+                    <h3>🛰️ MCP Change Feed</h3>
+                    <p id="mcp-feed-status">Connecting…</p>
+                </div>
             </div>
         </div>
 
@@ -254,6 +258,12 @@
                 <li><span class="method post">POST</span> /mcp - MCP protocol requests</li>
                 <li><span class="method get">GET</span> /sse - Server-Sent Events for Inspector</li>
             </ul>
+        </div>
+
+        <div class="card" id="mcp-changes-card" style="display:none;">
+            <h2>🔔 MCP Changes Detected</h2>
+            <p id="mcp-change-summary">Changes pending.</p>
+            <button id="refresh-mcp" class="btn">Refresh MCP Components</button>
         </div>
 
         <div class="card">
@@ -386,4 +396,83 @@
         });
     </script>
 </body>
+<script>
+(function(){
+  const statusEl = document.getElementById('mcp-feed-status');
+  const cardEl = document.getElementById('mcp-changes-card');
+  const summaryEl = document.getElementById('mcp-change-summary');
+  const refreshBtn = document.getElementById('refresh-mcp');
+  const badgeEl = document.getElementById('mcp-change-badge');
+
+  function setStatus(text, ok){
+    statusEl.textContent = text;
+    statusEl.style.color = ok ? '#16a34a' : '#b91c1c';
+  }
+
+  let promptsChanged = false;
+  let resourcesChanged = false;
+  let toolsChanged = false;
+  let configChanged = false;
+
+  function updateCard(){
+    const parts = [];
+    if (toolsChanged) parts.push('Tools');
+    if (promptsChanged) parts.push('Prompts');
+    if (resourcesChanged) parts.push('Resources');
+    if (configChanged) parts.push('Config');
+    if (parts.length) {
+      summaryEl.textContent = parts.join(', ') + ' updated. Click to refresh.';
+      cardEl.style.display = '';
+      if (badgeEl) {
+        badgeEl.style.display = '';
+        badgeEl.textContent = 'Changes';
+      }
+    } else {
+      cardEl.style.display = 'none';
+      if (badgeEl) {
+        badgeEl.style.display = 'none';
+      }
+    }
+  }
+
+  refreshBtn?.addEventListener('click', () => {
+    // Simple approach: reload the page so the client fetches new lists from server
+    location.reload();
+  });
+
+  badgeEl?.addEventListener('click', () => {
+    location.reload();
+  });
+
+  try {
+    const sseUrl = (location.protocol === 'https:' ? 'https://' : 'http://') + location.hostname + ':8888/sse';
+    const es = new EventSource(sseUrl);
+    es.onopen = () => setStatus('Connected', true);
+    es.onerror = () => setStatus('Disconnected', false);
+    es.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg && msg.method === 'notifications/promptsChanged') {
+          promptsChanged = true;
+          updateCard();
+        } else if (msg && msg.method === 'notifications/resourcesChanged') {
+          resourcesChanged = true;
+          updateCard();
+        } else if (msg && msg.method === 'notifications/routesChanged') {
+          toolsChanged = true;
+          updateCard();
+        } else if (msg && msg.method === 'notifications/toolsChanged') {
+          toolsChanged = true;
+          updateCard();
+        } else if (msg && msg.method === 'notifications/configChanged') {
+          configChanged = true;
+          updateCard();
+        }
+      } catch (_) {}
+    };
+  } catch (_) {
+    setStatus('Unavailable', false);
+  }
+})();
+</script>
 </html>
