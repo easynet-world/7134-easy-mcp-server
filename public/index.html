@@ -470,7 +470,7 @@
         }
       } catch (_) {}
     };
-  } catch (_) {
+  } catch (sseInitError) {
     setStatus('Unavailable', false);
   }
 })();
