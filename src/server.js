@@ -22,6 +22,42 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Static file serving configuration
+const staticConfig = {
+  enabled: process.env.EASY_MCP_SERVER_STATIC_ENABLED !== 'false',
+  directory: process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public',
+  serveIndex: process.env.EASY_MCP_SERVER_SERVE_INDEX !== 'false',
+  defaultFile: process.env.EASY_MCP_SERVER_DEFAULT_FILE || 'index.html'
+};
+
+// Setup static file serving if enabled
+if (staticConfig.enabled) {
+  const fs = require('fs');
+  const staticPath = path.resolve(staticConfig.directory);
+  
+  // Check if static directory exists
+  if (fs.existsSync(staticPath)) {
+    console.log(`📁 Static files enabled: serving from ${staticPath}`);
+    
+    // Serve static files
+    app.use(express.static(staticPath));
+    
+    // Handle root route with index.html if it exists
+    if (staticConfig.serveIndex) {
+      const indexPath = path.join(staticPath, staticConfig.defaultFile);
+      if (fs.existsSync(indexPath)) {
+        app.get('/', (req, res) => {
+          res.sendFile(indexPath);
+        });
+        console.log(`🏠 Root route configured: serving ${staticConfig.defaultFile}`);
+      }
+    }
+  } else {
+    console.log(`⚠️  Static directory not found: ${staticPath}`);
+    console.log(`   Static file serving disabled. Create the directory to enable.`);
+  }
+}
+
 // Initialize core services
 const apiLoader = new APILoader(app, process.env.EASY_MCP_SERVER_API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
@@ -531,15 +567,18 @@ function startServer() {
       console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
     }
-    console.log('  ⚡  FEATURES:');
-    console.log('     • Auto-discovery of API endpoints');
-    console.log('     • Real-time MCP tool generation');
-    console.log('     • Automatic OpenAPI documentation');
-    console.log('     • Hot reloading enabled');
-    console.log('');
-    console.log('  🎯  Ready to serve your APIs!');
-    console.log('  ' + '═'.repeat(78));
-    console.log('');
+  console.log('  ⚡  FEATURES:');
+  console.log('     • Auto-discovery of API endpoints');
+  console.log('     • Real-time MCP tool generation');
+  console.log('     • Automatic OpenAPI documentation');
+  console.log('     • Hot reloading enabled');
+  if (staticConfig.enabled && fs.existsSync(path.resolve(staticConfig.directory))) {
+    console.log('     • Static file serving enabled');
+  }
+  console.log('');
+  console.log('  🎯  Ready to serve your APIs!');
+  console.log('  ' + '═'.repeat(78));
+  console.log('');
   });
 
   server.on('error', (error) => {
