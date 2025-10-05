@@ -414,7 +414,7 @@ NODE_ENV=development                         # Environment
 ### CLI Options
 ```bash
 # Port configuration
-easy-mcp-server --port 8887
+EASY_MCP_SERVER_PORT=8887 easy-mcp-server
 
 # Environment variables
 EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
@@ -428,7 +428,7 @@ The server supports multiple ways to configure ports:
 
 **1. Command Line Arguments:**
 ```bash
-npx easy-mcp-server --port 8887
+npx EASY_MCP_SERVER_PORT=8887 easy-mcp-server
 ```
 
 **2. Environment Variables:**
