@@ -95,6 +95,7 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 - 🤖 **MCP Server**: http://localhost:3001  
 - 📚 **OpenAPI**: http://localhost:3000/openapi.json
 - 🔍 **Swagger UI**: http://localhost:3000/docs
+- 📁 **Static Files**: http://localhost:3000/ (serves from `public/` directory)
 
 ### 4. Add MCP Features (AI Integration)
 ```bash
@@ -115,6 +116,64 @@ This API helps you manage users and products.' > mcp/resources/guides/api-guide.
 ```
 
 **Result**: AI models can now use your prompts and access your documentation!
+
+---
+
+## 📁 **Static File Serving**
+
+The framework now supports serving static files (HTML, CSS, JS, images) alongside your APIs, making it perfect for building web applications with admin panels, documentation sites, or any static content.
+
+### Quick Setup
+```bash
+# Create public directory for static files
+mkdir public
+
+# Add your static files
+echo '<h1>Hello World!</h1>' > public/index.html
+echo 'body { color: blue; }' > public/style.css
+echo 'console.log("Hello!");' > public/app.js
+```
+
+### Configuration Options
+```bash
+# Environment variables for static file serving
+EASY_MCP_SERVER_STATIC_ENABLED=true          # Enable static serving (default: true)
+EASY_MCP_SERVER_STATIC_DIRECTORY=./public    # Static directory (default: ./public)
+EASY_MCP_SERVER_SERVE_INDEX=true            # Serve index.html at root (default: true)
+EASY_MCP_SERVER_DEFAULT_FILE=index.html     # Default file name (default: index.html)
+```
+
+### Features
+- ✅ **Automatic Detection**: Serves static files if `public/` directory exists
+- ✅ **Root Route Support**: Serves `index.html` at `/` when available
+- ✅ **Security**: Prevents access to files outside the public directory
+- ✅ **Content Types**: Automatic MIME type detection for all file types
+- ✅ **Caching**: Proper HTTP caching headers for static assets
+- ✅ **Hot Reload**: Static files are served directly (no restart needed)
+
+### Example Structure
+```
+your-project/
+├── api/                    # API endpoints
+│   └── users/
+│       └── get.js
+├── public/                 # Static files (served at root)
+│   ├── index.html         # Served at /
+│   ├── style.css          # Served at /style.css
+│   ├── app.js            # Served at /app.js
+│   └── images/
+│       └── logo.png       # Served at /images/logo.png
+└── mcp/                   # MCP prompts and resources
+    ├── prompts/
+    └── resources/
+```
+
+### Use Cases
+- 🎨 **Admin Panels**: Build web interfaces for your MCP servers
+- 📚 **Documentation Sites**: Serve documentation alongside APIs
+- 🔧 **Settings Pages**: Create web-based configuration interfaces
+- 🎯 **Single Page Applications**: Serve React, Vue, or Angular apps
+- 📊 **Dashboards**: Build monitoring and analytics dashboards
 
 ---
 
@@ -336,6 +395,10 @@ EASY_MCP_SERVER_API_PATH=./api              # API directory
 EASY_MCP_SERVER_CORS_ORIGIN=*               # CORS origin
 EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE  # CORS methods
 EASY_MCP_SERVER_CORS_CREDENTIALS=false      # CORS credentials
+EASY_MCP_SERVER_STATIC_ENABLED=true         # Enable static file serving
+EASY_MCP_SERVER_STATIC_DIRECTORY=./public   # Static files directory
+EASY_MCP_SERVER_SERVE_INDEX=true           # Serve index.html at root
+EASY_MCP_SERVER_DEFAULT_FILE=index.html     # Default file name
 EASY_MCP_SERVER_LOG_LEVEL=info              # Log level
 EASY_MCP_SERVER_LOG_FORMAT=text             # Log format
 EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server # Service name
