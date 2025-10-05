@@ -34,7 +34,7 @@ Commands:
   --help  Show this help message
 
 Options:
-  --port <number>        Set the REST API server port (default: 8887)
+  (No CLI options - use environment variables)
 
 Environment Variables:
   EASY_MCP_SERVER_PORT   REST API server port
@@ -58,10 +58,11 @@ Server Starting Behavior:
 
 Examples:
   easy-mcp-server                    # Start server (custom or auto)
-  easy-mcp-server --port 8887       # Start server on port 8887
   easy-mcp-server init               # Create new project
   npx easy-mcp-server                # Run without installation
-  npx easy-mcp-server --port 8887   # Run with custom port
+  
+  # Using environment variables (recommended)
+  EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
 
 For more information, visit: https://github.com/easynet-world/7134-easy-mcp-server
 `);
@@ -570,11 +571,6 @@ function parsePortArguments() {
     mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 8888
   };
   
-  // Parse --port argument
-  const portIndex = args.indexOf('--port');
-  if (portIndex !== -1 && args[portIndex + 1]) {
-    config.port = parseInt(args[portIndex + 1]);
-  }
   
   
   return config;

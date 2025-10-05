@@ -90,8 +90,8 @@ module.exports = TestAPI;
 `;
     fs.writeFileSync(apiFile, apiContent);
 
-    // Start the server with custom ports
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js', '--port', '8887'], {
+    // Start the server with default ports
+    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -266,14 +266,14 @@ module.exports = TestAPI;
 `;
     fs.writeFileSync(apiFile, apiContent);
 
-    // Start the server with CLI args (should override env vars)
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js', '--port', '9997'], {
+    // Start the server with environment variables
+    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,
       env: {
         ...process.env,
-        PORT: '8887',  // This should be overridden by CLI
-        MCP_PORT: '8888'  // This should be overridden by CLI
+        EASY_MCP_SERVER_PORT: '9997',
+        EASY_MCP_SERVER_MCP_PORT: '9998'
       }
     });
 

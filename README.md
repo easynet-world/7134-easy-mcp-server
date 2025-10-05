@@ -73,8 +73,8 @@ module.exports = GetUsers;
 # Basic usage
 npx easy-mcp-server
 
-# With custom ports
-npx easy-mcp-server --port 8887
+# With custom ports (using environment variables)
+EASY_MCP_SERVER_PORT=8887 npx easy-mcp-server
 
 # Using environment variables (recommended)
 EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
@@ -442,9 +442,8 @@ EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 ```
 
 **3. Priority Order:**
-1. CLI arguments (`--port`)
-2. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
-3. Default values (8887 for REST API, 8888 for MCP)
+1. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
+2. Default values (8887 for REST API, 8888 for MCP)
 
 ### Auto npm Install
 The server automatically runs `npm install` before starting if a `package.json` file is found in your project directory:

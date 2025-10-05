@@ -458,12 +458,7 @@ SESSION_SECRET=your-secret
 easy-mcp-server [options]
 
 Options:
-  --port <number>        REST API port (default: 8887)
-  --host <string>        Server host (default: 0.0.0.0)
-  --api-dir <string>     API directory (default: ./api)
-  --mcp-dir <string>     MCP directory (default: ./mcp)
-  --config <string>      Configuration file
-  --debug                Enable debug mode
+  (No CLI options - use environment variables)
   --help                 Show help
 ```
 
