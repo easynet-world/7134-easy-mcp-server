@@ -91,11 +91,11 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 - 📊 **Error Reporting**: Clear error messages with helpful suggestions
 
 **Access Points:**
-- 🌐 **REST API**: http://localhost:3000
-- 🤖 **MCP Server**: http://localhost:3001  
-- 📚 **OpenAPI**: http://localhost:3000/openapi.json
-- 🔍 **Swagger UI**: http://localhost:3000/docs
-- 📁 **Static Files**: http://localhost:3000/ (serves from `public/` directory)
+- 🌐 **REST API**: http://localhost:8887
+- 🤖 **MCP Server**: http://localhost:8888  
+- 📚 **OpenAPI**: http://localhost:8887/openapi.json
+- 🔍 **Swagger UI**: http://localhost:8887/docs
+- 📁 **Static Files**: http://localhost:8887/ (serves from `public/` directory)
 
 ### 4. Add MCP Features (AI Integration)
 ```bash
@@ -386,8 +386,8 @@ All project-specific environment variables use the `EASY_MCP_SERVER_` prefix for
 
 ```bash
 # .env
-EASY_MCP_SERVER_PORT=3000                    # REST API port
-EASY_MCP_SERVER_MCP_PORT=3001               # MCP server port
+EASY_MCP_SERVER_PORT=8887                    # REST API port
+EASY_MCP_SERVER_MCP_PORT=8888               # MCP server port
 EASY_MCP_SERVER_HOST=0.0.0.0                # REST API host
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0            # MCP server host
 EASY_MCP_SERVER_MCP_BASE_PATH=./mcp         # MCP base directory

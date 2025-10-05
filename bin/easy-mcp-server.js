@@ -34,9 +34,9 @@ Commands:
   --help  Show this help message
 
 Options:
-  --port <number>        Set the REST API server port (default: 3000)
+  --port <number>        Set the REST API server port (default: 8887)
   --api-port <number>    Set the REST API server port (alternative to --port)
-  --mcp-port <number>    Set the MCP server port (default: 3001)
+  --mcp-port <number>    Set the MCP server port (default: 8888)
 
 Environment Variables:
   EASY_MCP_SERVER_PORT   REST API server port
@@ -151,8 +151,8 @@ module.exports = {
   
   // Create .env file
   const envFile = `# Easy MCP Server Configuration
-EASY_MCP_SERVER_PORT=3000
-EASY_MCP_SERVER_MCP_PORT=3001
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 EASY_MCP_SERVER_HOST=0.0.0.0
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0
 NODE_ENV=development
@@ -447,16 +447,16 @@ describe('Easy MCP Server', () => {
    3. easy-mcp-server
 
 📚 Your server will be available at:
-   - Server: http://localhost:3000
-   - API Docs: http://localhost:3000/docs
-   - Health Check: http://localhost:3000/health
-   - OpenAPI Spec: http://localhost:3000/openapi.json
-   - API Info: http://localhost:3000/api-info
+   - Server: http://localhost:8887
+   - API Docs: http://localhost:8887/docs
+   - Health Check: http://localhost:8887/health
+   - OpenAPI Spec: http://localhost:8887/openapi.json
+   - API Info: http://localhost:8887/api-info
 
 🔌 MCP (Model Context Protocol) Integration:
-   - MCP Server: http://localhost:3001
-   - MCP Tools: http://localhost:3000/mcp/tools
-   - MCP Schema: http://localhost:3000/mcp/schema
+   - MCP Server: http://localhost:8888
+   - MCP Tools: http://localhost:8887/mcp/tools
+   - MCP Schema: http://localhost:8887/mcp/schema
    - Transport Types: Streamable HTTP, Server-Sent Events (SSE)
    - MCP Endpoints: GET /sse, POST /mcp, POST / (StreamableHttp)
 
@@ -569,8 +569,8 @@ async function autoInstallDependencies() {
 function parsePortArguments() {
   const args = process.argv.slice(2);
   const config = {
-    port: process.env.EASY_MCP_SERVER_PORT || 3000,
-    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 3001
+    port: process.env.EASY_MCP_SERVER_PORT || 8887,
+    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 8888
   };
   
   // Parse --port argument

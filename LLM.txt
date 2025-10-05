@@ -291,7 +291,7 @@ if (!body.text || typeof body.text !== 'string') {
 - `GET /health` - Health check endpoint
 
 ### WebSocket Support
-- `ws://localhost:3001` - WebSocket MCP server
+- `ws://localhost:8888` - WebSocket MCP server
 - Real-time tool updates
 - Bidirectional communication
 
@@ -299,7 +299,7 @@ if (!body.text || typeof body.text !== 'string') {
 
 ### Environment Variables
 ```bash
-MCP_PORT=3001                    # MCP server port
+MCP_PORT=8888                    # MCP server port
 OPENAI_API_KEY=your-key-here     # OpenAI API key
 REDIS_URL=redis://localhost:6379 # Redis for caching
 NODE_ENV=production              # Environment
@@ -308,7 +308,7 @@ NODE_ENV=production              # Environment
 ### MCP Server Options
 ```javascript
 const mcpServer = new DynamicAPIMCPServer({
-  port: 3001,
+  port: 8888,
   host: '0.0.0.0',
   enableWebSocket: true,
   enableSSE: true
@@ -366,7 +366,7 @@ DEBUG=* easy-mcp-server
 
 ### Health Check
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:8888/health
 ```
 
 ## Performance Considerations

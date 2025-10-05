@@ -474,7 +474,7 @@ async function executeAPIEndpoint(route, args, res) {
 // Server startup function
 function startServer() {
   const host = process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
-  const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 3000;
+  const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 8887;
 
   // Display startup banner
   console.log('\n');
@@ -497,7 +497,7 @@ function startServer() {
       const mcpBasePath = process.env.EASY_MCP_SERVER_MCP_BASE_PATH || '../mcp';
       mcpServer = new DynamicAPIMCPServer(
         process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0',
-        process.env.EASY_MCP_SERVER_MCP_PORT || 3001,
+        parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888,
         {
           mcp: {
             basePath: mcpBasePath
@@ -563,7 +563,7 @@ function startServer() {
     console.log('');
     if (mcpServer) {
       console.log('  🤖  MCP SERVER:');
-      console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${process.env.EASY_MCP_SERVER_MCP_PORT || 3001}`);
+      console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888}`);
       console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
     }
