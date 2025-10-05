@@ -2,6 +2,12 @@
  * Test cases for static file serving functionality
  */
 
+// Set environment variables before importing the server
+process.env.EASY_MCP_SERVER_STATIC_ENABLED = 'true';
+process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = './public';
+process.env.EASY_MCP_SERVER_SERVE_INDEX = 'true';
+process.env.EASY_MCP_SERVER_DEFAULT_FILE = 'index.html';
+
 const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
@@ -12,11 +18,6 @@ describe('Static File Serving', () => {
   const testHtmlContent = '<html><body><h1>Test</h1></body></html>';
   
   beforeAll(() => {
-    // Ensure static file serving is enabled for tests
-    process.env.EASY_MCP_SERVER_STATIC_ENABLED = 'true';
-    process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = './public';
-    process.env.EASY_MCP_SERVER_SERVE_INDEX = 'true';
-    process.env.EASY_MCP_SERVER_DEFAULT_FILE = 'index.html';
     // Ensure public directory exists
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
