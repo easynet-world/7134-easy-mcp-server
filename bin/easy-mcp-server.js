@@ -626,6 +626,10 @@ async function startServer() {
           ...process.env,
           EASY_MCP_SERVER_API_PATH: originalCwd + '/api', // Pass the user's API path
           EASY_MCP_SERVER_MCP_BASE_PATH: originalCwd + '/mcp', // Pass the user's MCP directory
+          // If the user has a public directory, ensure the server serves static files from there
+          EASY_MCP_SERVER_STATIC_DIRECTORY: fs.existsSync(path.join(originalCwd, 'public'))
+            ? path.join(originalCwd, 'public')
+            : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(mainProjectPath, 'public')),
           EASY_MCP_SERVER_PORT: portConfig.port.toString(), // Pass configured port
           EASY_MCP_SERVER_MCP_PORT: portConfig.mcpPort.toString() // Pass configured MCP port
         }
