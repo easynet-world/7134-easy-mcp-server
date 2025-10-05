@@ -42,8 +42,13 @@ if (!fs.existsSync(staticPath)) {
 
 console.log(`📁 Static files enabled: serving from ${staticPath}`);
 
-// Serve static files
-app.use(express.static(staticPath));
+// Serve static files - ensure this is applied early
+app.use(express.static(staticPath, {
+  index: false, // Disable automatic index serving
+  dotfiles: 'ignore', // Ignore dotfiles for security
+  etag: true, // Enable ETags for caching
+  lastModified: true // Enable Last-Modified headers
+}));
 
 // Handle root route with index.html if it exists
 if (staticConfig.serveIndex) {
