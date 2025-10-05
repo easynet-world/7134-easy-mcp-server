@@ -13,35 +13,34 @@ const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 
-// Import server after environment variables are set
+// Create public directory and test files before importing the server
+const publicDir = path.join(__dirname, '..', 'public');
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+
+// Create test files before server initialization
+const testFiles = [
+  { name: 'index.html', content: '<html><body><h1>Hello World!</h1></body></html>' },
+  { name: 'test.html', content: '<html><body>test</body></html>' },
+  { name: 'style.css', content: 'body { color: blue; }' },
+  { name: 'app.js', content: 'console.log("test");' },
+  { name: 'test.json', content: '{"test": "data"}' },
+  { name: 'cache-test.html', content: '<html><body>Cache Test</body></html>' }
+];
+
+testFiles.forEach(file => {
+  const filePath = path.join(publicDir, file.name);
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, file.content);
+  }
+});
+
+// Import server after environment variables and files are set
 const { app } = require('../src/server');
 
 describe('Static File Serving - CI', () => {
   const publicDir = path.join(__dirname, '..', 'public');
-  
-  beforeAll(() => {
-    // Ensure public directory exists
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-    }
-    
-    // Create some basic test files
-    const testFiles = [
-      { name: 'index.html', content: '<html><body><h1>Hello World!</h1></body></html>' },
-      { name: 'test.html', content: '<html><body>test</body></html>' },
-      { name: 'style.css', content: 'body { color: blue; }' },
-      { name: 'app.js', content: 'console.log("test");' },
-      { name: 'test.json', content: '{"test": "data"}' },
-      { name: 'cache-test.html', content: '<html><body>Cache Test</body></html>' }
-    ];
-    
-    testFiles.forEach(file => {
-      const filePath = path.join(publicDir, file.name);
-      if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, file.content);
-      }
-    });
-  });
 
   afterAll(() => {
     // Clean up test files
