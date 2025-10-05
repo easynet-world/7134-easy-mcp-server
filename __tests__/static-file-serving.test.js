@@ -38,6 +38,18 @@ if (!fs.existsSync(indexPath)) {
 // Import server after files are set
 const { app } = require('../src/server');
 
+// Debug: Check if static file serving middleware is applied
+console.log('🔍 Debug: Checking static file serving middleware...');
+const middleware = app._router.stack;
+const staticMiddleware = middleware.find(layer => 
+  layer.name === 'serveStatic' || 
+  (layer.regexp && layer.regexp.toString().includes('static'))
+);
+console.log('🔍 Static middleware found:', !!staticMiddleware);
+if (staticMiddleware) {
+  console.log('🔍 Static middleware details:', staticMiddleware.name, staticMiddleware.regexp);
+}
+
 describe('Static File Serving - CI', () => {
   const publicDir = path.join(__dirname, '..', 'public');
 
