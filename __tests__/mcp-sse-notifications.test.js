@@ -47,7 +47,7 @@ describe('MCP SSE Notifications', () => {
     }
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
-    } catch (_) {}
+    } catch (cleanupError) { /* ignore cleanup error */ }
   });
 
   function connectSSE() {

@@ -73,13 +73,16 @@ module.exports = TestAPI;
       expect(output).toContain('📄 Loaded environment from .env');
       
       // Clean up
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      serverProcess.once('close', finish);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish();
+      }, 300);
     }, 3000);
   });
 
@@ -130,13 +133,16 @@ module.exports = TestAPI;
       expect(output).toContain('📄 Loaded environment from .env');
       
       // Clean up
+      let finished2 = false;
+      const finish2 = () => { if (!finished2) { finished2 = true; done(); } };
+      serverProcess.once('close', finish2);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish2();
+      }, 300);
     }, 3000);
   });
 
@@ -180,13 +186,16 @@ module.exports = TestAPI;
       expect(output).not.toContain('📄 Loaded environment from');
       
       // Clean up
+      let finished3 = false;
+      const finish3 = () => { if (!finished3) { finished3 = true; done(); } };
+      serverProcess.once('close', finish3);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish3();
+      }, 300);
     }, 3000);
   });
 });

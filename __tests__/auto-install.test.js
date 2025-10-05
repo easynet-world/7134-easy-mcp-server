@@ -79,14 +79,18 @@ module.exports = TestAPI;
       
       expect(hasInstallMessage || hasServerMessage).toBe(true);
       
-      // Clean up
+      // Clean up and ensure child process fully exits
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      serverProcess.once('close', finish);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        // Fallback in case 'close' wasn't emitted
+        finish();
+      }, 300);
     }, 5000); // Longer timeout for npm install
   });
 
@@ -134,14 +138,17 @@ module.exports = TestAPI;
       
       expect(hasSkipMessage || hasServerMessage).toBe(true);
       
-      // Clean up
+      // Clean up and ensure child process fully exits
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      serverProcess.once('close', finish);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish();
+      }, 300);
     }, 3000);
   });
 
@@ -199,14 +206,17 @@ module.exports = TestAPI;
       
       expect(hasInstallMessage || hasServerMessage).toBe(true);
       
-      // Clean up
+      // Clean up and ensure child process fully exits
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      serverProcess.once('close', finish);
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
         if (!serverProcess.killed) {
           serverProcess.kill('SIGKILL');
         }
-        done();
-      }, 100);
+        finish();
+      }, 300);
     }, 8000); // Longer timeout for failed npm install
   });
 });
