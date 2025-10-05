@@ -13,7 +13,7 @@ const MCPCacheManager = require('../utils/mcp-cache-manager');
 const SimpleParameterParser = require('../utils/parameter-template-parser');
 
 class DynamicAPIMCPServer {
-  constructor(host = '0.0.0.0', port = 3001, options = {}) {
+  constructor(host = '0.0.0.0', port = parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888, options = {}) {
     this.host = host;
     this.port = port;
     this.wss = null;

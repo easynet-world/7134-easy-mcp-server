@@ -23,7 +23,7 @@ describe('Custom Content Troubleshooting', () => {
     await fs.mkdir(customResourcesDir, { recursive: true });
 
     // Initialize server with custom directories
-    server = new DynamicAPIMCPServer('0.0.0.0', 3001, {
+    server = new DynamicAPIMCPServer('0.0.0.0', 8888, {
       prompts: {
         enabled: true,
         directory: customPromptsDir,

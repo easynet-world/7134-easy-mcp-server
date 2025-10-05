@@ -34,9 +34,7 @@ Commands:
   --help  Show this help message
 
 Options:
-  --port <number>        Set the REST API server port (default: 3000)
-  --api-port <number>    Set the REST API server port (alternative to --port)
-  --mcp-port <number>    Set the MCP server port (default: 3001)
+  (No CLI options - use environment variables)
 
 Environment Variables:
   EASY_MCP_SERVER_PORT   REST API server port
@@ -60,11 +58,11 @@ Server Starting Behavior:
 
 Examples:
   easy-mcp-server                    # Start server (custom or auto)
-  easy-mcp-server --port 8080       # Start server on port 8080
-  easy-mcp-server --mcp-port 8081   # Start MCP server on port 8081
   easy-mcp-server init               # Create new project
   npx easy-mcp-server                # Run without installation
-  npx easy-mcp-server --port 3001   # Run with custom port
+  
+  # Using environment variables (recommended)
+  EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
 
 For more information, visit: https://github.com/easynet-world/7134-easy-mcp-server
 `);
@@ -151,8 +149,8 @@ module.exports = {
   
   // Create .env file
   const envFile = `# Easy MCP Server Configuration
-EASY_MCP_SERVER_PORT=3000
-EASY_MCP_SERVER_MCP_PORT=3001
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 EASY_MCP_SERVER_HOST=0.0.0.0
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0
 NODE_ENV=development
@@ -298,7 +296,7 @@ module.exports = GetExample;
 ## Environment Variables
 
 Copy \`.env.example\` to \`.env\` and configure:
-- \`PORT\`: Server port (default: 3000)
+- \`EASY_MCP_SERVER_PORT\`: Server port (default: 8887)
 - \`NODE_ENV\`: Environment (development/production)
 - \`EASY_MCP_SERVER_CORS_ORIGIN\`: CORS origin
 - \`EASY_MCP_SERVER_CORS_METHODS\`: Allowed HTTP methods
@@ -447,16 +445,16 @@ describe('Easy MCP Server', () => {
    3. easy-mcp-server
 
 📚 Your server will be available at:
-   - Server: http://localhost:3000
-   - API Docs: http://localhost:3000/docs
-   - Health Check: http://localhost:3000/health
-   - OpenAPI Spec: http://localhost:3000/openapi.json
-   - API Info: http://localhost:3000/api-info
+   - Server: http://localhost:${config.port}
+   - API Docs: http://localhost:${config.port}/docs
+   - Health Check: http://localhost:${config.port}/health
+   - OpenAPI Spec: http://localhost:${config.port}/openapi.json
+   - API Info: http://localhost:${config.port}/api-info
 
 🔌 MCP (Model Context Protocol) Integration:
-   - MCP Server: http://localhost:3001
-   - MCP Tools: http://localhost:3000/mcp/tools
-   - MCP Schema: http://localhost:3000/mcp/schema
+   - MCP Server: http://localhost:${config.mcpPort}
+   - MCP Tools: http://localhost:${config.port}/mcp/tools
+   - MCP Schema: http://localhost:${config.port}/mcp/schema
    - Transport Types: Streamable HTTP, Server-Sent Events (SSE)
    - MCP Endpoints: GET /sse, POST /mcp, POST / (StreamableHttp)
 
@@ -569,27 +567,11 @@ async function autoInstallDependencies() {
 function parsePortArguments() {
   const args = process.argv.slice(2);
   const config = {
-    port: process.env.EASY_MCP_SERVER_PORT || 3000,
-    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 3001
+    port: process.env.EASY_MCP_SERVER_PORT || 8887,
+    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 8888
   };
   
-  // Parse --port argument
-  const portIndex = args.indexOf('--port');
-  if (portIndex !== -1 && args[portIndex + 1]) {
-    config.port = parseInt(args[portIndex + 1]);
-  }
   
-  // Parse --mcp-port argument
-  const mcpPortIndex = args.indexOf('--mcp-port');
-  if (mcpPortIndex !== -1 && args[mcpPortIndex + 1]) {
-    config.mcpPort = parseInt(args[mcpPortIndex + 1]);
-  }
-  
-  // Parse --api-port argument (alternative to --port)
-  const apiPortIndex = args.indexOf('--api-port');
-  if (apiPortIndex !== -1 && args[apiPortIndex + 1]) {
-    config.port = parseInt(args[apiPortIndex + 1]);
-  }
   
   return config;
 }

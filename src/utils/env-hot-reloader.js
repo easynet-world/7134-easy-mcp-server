@@ -178,7 +178,7 @@ class EnvHotReloader {
     try {
       // Update MCP server host and port if they changed
       const newHost = process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0';
-      const newPort = parseInt(process.env.EASY_MCP_SERVER_MCP_PORT || '3001');
+      const newPort = parseInt(process.env.EASY_MCP_SERVER_MCP_PORT || '8888');
       
       // Check if configuration changed
       if (this.mcpServer.host !== newHost || this.mcpServer.port !== newPort) {

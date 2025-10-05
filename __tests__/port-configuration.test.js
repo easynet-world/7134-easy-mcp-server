@@ -90,8 +90,8 @@ module.exports = TestAPI;
 `;
     fs.writeFileSync(apiFile, apiContent);
 
-    // Start the server with custom ports
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js', '--api-port', '8080', '--mcp-port', '8081'], {
+    // Start the server with default ports
+    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -142,8 +142,8 @@ module.exports = TestAPI;
 
     // Create .env file with port configuration
     const envContent = `
-EASY_MCP_SERVER_PORT=8080
-EASY_MCP_SERVER_MCP_PORT=8081
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 `;
     fs.writeFileSync(path.join(tempDir, '.env'), envContent);
 
@@ -153,8 +153,8 @@ EASY_MCP_SERVER_MCP_PORT=8081
       cwd: tempDir,
       env: {
         ...process.env,
-        EASY_MCP_SERVER_PORT: '8080',
-        EASY_MCP_SERVER_MCP_PORT: '8081'
+        EASY_MCP_SERVER_PORT: '8887',
+        EASY_MCP_SERVER_MCP_PORT: '8888'
       }
     });
 
@@ -205,8 +205,8 @@ module.exports = TestAPI;
 
     // Create .env file with fallback port configuration
     const envContent = `
-PORT=8080
-MCP_PORT=8081
+PORT=8887
+MCP_PORT=8888
 `;
     fs.writeFileSync(path.join(tempDir, '.env'), envContent);
 
@@ -216,8 +216,8 @@ MCP_PORT=8081
       cwd: tempDir,
       env: {
         ...process.env,
-        PORT: '8080',
-        MCP_PORT: '8081'
+        PORT: '8887',
+        MCP_PORT: '8888'
       }
     });
 
@@ -266,14 +266,14 @@ module.exports = TestAPI;
 `;
     fs.writeFileSync(apiFile, apiContent);
 
-    // Start the server with CLI args (should override env vars)
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js', '--api-port', '9090', '--mcp-port', '9091'], {
+    // Start the server with environment variables
+    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,
       env: {
         ...process.env,
-        PORT: '8080',  // This should be overridden by CLI
-        MCP_PORT: '8081'  // This should be overridden by CLI
+        EASY_MCP_SERVER_PORT: '9997',
+        EASY_MCP_SERVER_MCP_PORT: '9998'
       }
     });
 

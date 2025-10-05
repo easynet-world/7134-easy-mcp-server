@@ -173,15 +173,15 @@ describe('MCP (Model Context Protocol) Support', () => {
     expect(mcpServerDefault.host).toBe('0.0.0.0');
     
     // Test explicit binding to all interfaces
-    const mcpServerAllInterfaces = new DynamicAPIMCPServer('0.0.0.0', 3001);
+    const mcpServerAllInterfaces = new DynamicAPIMCPServer('0.0.0.0', 8888);
     expect(mcpServerAllInterfaces.host).toBe('0.0.0.0');
     
     // Test that localhost still works when explicitly specified
-    const mcpServerLocalhost = new DynamicAPIMCPServer('localhost', 3001);
+    const mcpServerLocalhost = new DynamicAPIMCPServer('localhost', 8888);
     expect(mcpServerLocalhost.host).toBe('localhost');
     
     // Test that custom host still works
-    const mcpServerCustom = new DynamicAPIMCPServer('192.168.1.100', 3001);
+    const mcpServerCustom = new DynamicAPIMCPServer('192.168.1.100', 8888);
     expect(mcpServerCustom.host).toBe('192.168.1.100');
   });
 
@@ -203,7 +203,7 @@ describe('MCP (Model Context Protocol) Support', () => {
       }
     };
     
-    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, customOptions);
     
     // Should use custom base path
     expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');
@@ -225,7 +225,7 @@ describe('MCP (Model Context Protocol) Support', () => {
       }
     };
     
-    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, customOptions);
     
     // Should use custom base path and custom subdirectories
     expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');
@@ -241,7 +241,7 @@ describe('MCP (Model Context Protocol) Support', () => {
       }
     };
     
-    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, customOptions);
     
     // Cache manager should use the resolved base path (package directory when custom doesn't exist)
     expect(mcpServer.cacheManager.basePath).toContain('mcp');
@@ -256,7 +256,7 @@ describe('MCP (Model Context Protocol) Support', () => {
       // No custom prompts or resources directories
     };
     
-    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 3001, customOptions);
+    const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, customOptions);
     
     // Should use custom base path with default subdirectories
     expect(mcpServer.config.mcp.basePath).toBe('./custom-mcp');

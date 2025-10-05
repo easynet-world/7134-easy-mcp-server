@@ -42,10 +42,10 @@ module.exports = GetUsers;
 ```bash
 npx easy-mcp-server
 ```
-- 🌐 **REST API**: http://localhost:3000
-- 🤖 **MCP Server**: http://localhost:3001
-- 📚 **OpenAPI**: http://localhost:3000/openapi.json
-- 🔍 **Swagger UI**: http://localhost:3000/docs
+- 🌐 **REST API**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}
+- 🤖 **MCP Server**: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}
+- 📚 **OpenAPI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/openapi.json
+- 🔍 **Swagger UI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/docs
 
 ---
 
@@ -200,26 +200,26 @@ module.exports = MyAPI;
 easy-mcp-server
 
 # Test REST API
-curl http://localhost:3000/users
+curl http://localhost:${EASY_MCP_SERVER_PORT:-8887}/users
 
 # Test MCP Tools
-curl -X POST http://localhost:3001/mcp \
+curl -X POST http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
 ### 4. Access Points
-- 🌐 **REST API**: http://localhost:3000
-- 🤖 **MCP Server**: http://localhost:3001
-- 📚 **OpenAPI**: http://localhost:3000/openapi.json
-- 🔍 **Swagger UI**: http://localhost:3000/docs
+- 🌐 **REST API**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}
+- 🤖 **MCP Server**: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}
+- 📚 **OpenAPI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/openapi.json
+- 🔍 **Swagger UI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/docs
 
 ## 🚀 **Production Deployment**
 
 ### Environment Configuration
 ```bash
-PORT=3000
-MCP_PORT=3001
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 NODE_ENV=production
 OPENAI_API_KEY=your-key-here
 ```
@@ -249,7 +249,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
-EXPOSE 3000 3001
+EXPOSE 8887 8888
 CMD ["npx", "easy-mcp-server"]
 ```
 
@@ -273,8 +273,8 @@ spec:
       - name: easy-mcp-server
         image: your-registry/easy-mcp-server:latest
         ports:
-        - containerPort: 3000
-        - containerPort: 3001
+        - containerPort: 8887
+        - containerPort: 8888
         env:
         - name: NODE_ENV
           value: "production"
@@ -365,7 +365,7 @@ app.use(cors({
 ### Common Issues
 | Issue | Solution |
 |-------|----------|
-| **Port conflicts** | Check if ports 3000/3001 are available |
+| **Port conflicts** | Check if ports 8887/8888 are available |
 | **File not found** | Ensure API files are in the `api/` directory |
 | **MCP connection** | Verify MCP server is running on correct port |
 | **Validation errors** | Verify request body matches schema |
@@ -377,8 +377,8 @@ DEBUG=* easy-mcp-server
 
 ### Health Check
 ```bash
-curl http://localhost:3000/health
-curl http://localhost:3001/health
+curl http://localhost:${EASY_MCP_SERVER_PORT:-8887}/health
+curl http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/health
 ```
 
 ## 🚀 **Advanced Features**
@@ -433,8 +433,8 @@ class WebSocketAPI extends BaseAPI {
 ### Environment Variables
 ```bash
 # Server Configuration
-PORT=3000                    # REST API port
-MCP_PORT=3001               # MCP server port
+EASY_MCP_SERVER_PORT=8887                    # REST API port
+EASY_MCP_SERVER_MCP_PORT=8888               # MCP server port
 HOST=0.0.0.0                # Server host
 NODE_ENV=production         # Environment
 
@@ -458,13 +458,7 @@ SESSION_SECRET=your-secret
 easy-mcp-server [options]
 
 Options:
-  --port <number>        REST API port (default: 3000)
-  --mcp-port <number>    MCP server port (default: 3001)
-  --host <string>        Server host (default: 0.0.0.0)
-  --api-dir <string>     API directory (default: ./api)
-  --mcp-dir <string>     MCP directory (default: ./mcp)
-  --config <string>      Configuration file
-  --debug                Enable debug mode
+  (No CLI options - use environment variables)
   --help                 Show help
 ```
 

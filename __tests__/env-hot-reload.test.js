@@ -40,7 +40,7 @@ describe('Environment Hot Reload', () => {
   test('should detect .env file changes and reload environment variables', (done) => {
     // Create initial .env file
     const envFile = path.join(tempDir, '.env');
-    fs.writeFileSync(envFile, 'TEST_VAR=initial_value\nEASY_MCP_SERVER_PORT=3000\n');
+    fs.writeFileSync(envFile, 'TEST_VAR=initial_value\nEASY_MCP_SERVER_PORT=8887\n');
 
     // Create a simple API file
     const apiDir = path.join(tempDir, 'api');
@@ -86,7 +86,7 @@ module.exports = router;
         // Wait a bit for server to fully start
         setTimeout(() => {
           // Modify .env file
-          fs.writeFileSync(envFile, 'TEST_VAR=updated_value\nEASY_MCP_SERVER_PORT=3001\n');
+          fs.writeFileSync(envFile, 'TEST_VAR=updated_value\nEASY_MCP_SERVER_PORT=8888\n');
         }, 2000);
       }
       

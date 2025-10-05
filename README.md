@@ -73,12 +73,11 @@ module.exports = GetUsers;
 # Basic usage
 npx easy-mcp-server
 
-# With custom ports
-npx easy-mcp-server --port 8080 --mcp-port 8081
-npx easy-mcp-server --api-port 8080 --mcp-port 8081
+# With custom ports (using environment variables)
+EASY_MCP_SERVER_PORT=8887 npx easy-mcp-server
 
 # Using environment variables (recommended)
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 
 ```
 
@@ -91,11 +90,11 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 - 📊 **Error Reporting**: Clear error messages with helpful suggestions
 
 **Access Points:**
-- 🌐 **REST API**: http://localhost:3000
-- 🤖 **MCP Server**: http://localhost:3001  
-- 📚 **OpenAPI**: http://localhost:3000/openapi.json
-- 🔍 **Swagger UI**: http://localhost:3000/docs
-- 📁 **Static Files**: http://localhost:3000/ (serves from `public/` directory)
+- 🌐 **REST API**: http://localhost:8887 (default)
+- 🤖 **MCP Server**: http://localhost:8888 (default)
+- 📚 **OpenAPI**: http://localhost:8887/openapi.json
+- 🔍 **Swagger UI**: http://localhost:8887/docs
+- 📁 **Static Files**: http://localhost:8887/ (serves from `public/` directory)
 
 ### 4. Add MCP Features (AI Integration)
 ```bash
@@ -386,8 +385,8 @@ All project-specific environment variables use the `EASY_MCP_SERVER_` prefix for
 
 ```bash
 # .env
-EASY_MCP_SERVER_PORT=3000                    # REST API port
-EASY_MCP_SERVER_MCP_PORT=3001               # MCP server port
+EASY_MCP_SERVER_PORT=8887                    # REST API port
+EASY_MCP_SERVER_MCP_PORT=8888               # MCP server port
 EASY_MCP_SERVER_HOST=0.0.0.0                # REST API host
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0            # MCP server host
 EASY_MCP_SERVER_MCP_BASE_PATH=./mcp         # MCP base directory
@@ -415,11 +414,10 @@ NODE_ENV=development                         # Environment
 ### CLI Options
 ```bash
 # Port configuration
-easy-mcp-server --port 8080 --mcp-port 8081
-easy-mcp-server --api-port 8080 --mcp-port 8081
+EASY_MCP_SERVER_PORT=8887 easy-mcp-server
 
 # Environment variables
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
 
 # Help
 easy-mcp-server --help
@@ -430,24 +428,22 @@ The server supports multiple ways to configure ports:
 
 **1. Command Line Arguments:**
 ```bash
-npx easy-mcp-server --port 8080 --mcp-port 8081
-npx easy-mcp-server --api-port 8080 --mcp-port 8081
+npx EASY_MCP_SERVER_PORT=8887 easy-mcp-server
 ```
 
 **2. Environment Variables:**
 ```bash
 # In .env file (recommended)
-EASY_MCP_SERVER_PORT=8080
-EASY_MCP_SERVER_MCP_PORT=8081
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 
 # Or inline (recommended)
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 ```
 
 **3. Priority Order:**
-1. CLI arguments (`--port`/`--api-port`, `--mcp-port`)
-2. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
-3. Default values (3000 for REST API, 3001 for MCP)
+1. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
+2. Default values (8887 for REST API, 8888 for MCP)
 
 ### Auto npm Install
 The server automatically runs `npm install` before starting if a `package.json` file is found in your project directory:
@@ -545,7 +541,7 @@ The framework includes **graceful initialization** to prevent server crashes whe
 **Retry Failed APIs:**
 ```bash
 # Retry a specific API
-curl -X POST http://localhost:3000/admin/retry-initialization \
+curl -X POST http://localhost:${EASY_MCP_SERVER_PORT:-8887}/admin/retry-initialization \
   -H "Content-Type: application/json" \
   -d '{"api": "opensearch-api"}'
 ```

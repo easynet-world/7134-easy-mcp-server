@@ -14,7 +14,7 @@ const HotReloader = require('../utils/hot-reloader');
 
 class DynamicAPIServer {
   constructor(options = {}) {
-    this.port = options.port || process.env.EASY_MCP_SERVER_PORT || 3000;
+    this.port = options.port || process.env.EASY_MCP_SERVER_PORT || 8887;
     this.cors = options.cors || {};
     this.apiPath = options.apiPath || './api';
     this.hotReload = options.hotReload !== false;

@@ -189,7 +189,7 @@ class AgentErrorHandler extends BaseAPI {
 
 ### Environment Variables
 ```bash
-AGENT_PORT=3001                    # Agent MCP server port
+EASY_MCP_SERVER_MCP_PORT=8888     # Agent MCP server port
 AGENT_SESSION_TIMEOUT=3600         # Session timeout in seconds
 AGENT_RATE_LIMIT=100               # Requests per minute
 ```
@@ -315,7 +315,7 @@ DEBUG=agent:* easy-mcp-server
 
 ### Health Check
 ```bash
-curl -H "X-Agent-ID: test-agent" http://localhost:3001/health
+curl -H "X-Agent-ID: test-agent" http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/health
 ```
 
 ---
