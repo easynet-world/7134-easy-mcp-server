@@ -136,6 +136,23 @@ class EnvHotReloader {
         this.updateAPILoaderConfiguration();
         
         this.onReload();
+
+        // Notify connected MCP clients about configuration changes
+        try {
+          if (this.mcpServer && typeof this.mcpServer.broadcastNotification === 'function') {
+            const notification = {
+              jsonrpc: '2.0',
+              method: 'notifications/configChanged',
+              params: {
+                timestamp: new Date().toISOString(),
+                filesReloaded: reloadedCount
+              }
+            };
+            this.mcpServer.broadcastNotification(notification);
+          }
+        } catch (notifyError) {
+          this.logger.warn(`⚠️  Failed to notify MCP clients about config change: ${notifyError.message}`);
+        }
       } else {
         this.logger.log('📄 No .env files to reload');
       }

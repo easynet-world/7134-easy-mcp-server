@@ -48,7 +48,15 @@ class DynamicAPIMCPServer {
     
     this.cacheManager = new MCPCacheManager(resolvedBasePath, {
       enableHotReload: true,
-      logger: options.logger
+      logger: options.logger,
+      onChange: ({ type }) => {
+        // Broadcast notifications when cache detects changes
+        if (type === 'prompts') {
+          this.notifyPromptsChanged();
+        } else if (type === 'resources') {
+          this.notifyResourcesChanged();
+        }
+      }
     });
     
     // Store the resolved base path for internal use
@@ -560,15 +568,37 @@ class DynamicAPIMCPServer {
       jsonrpc: '2.0',
       method: 'notifications/promptsChanged',
       params: {
-        prompts: Array.from(this.prompts.values()).map(prompt => ({
-          name: prompt.name,
-          description: prompt.description,
-          arguments: prompt.arguments || []
-        }))
+        // Include both static and cached prompts
+        prompts: []
       }
     };
 
-    this.broadcastNotification(notification);
+    // Build payload including cached prompts (if available)
+    (async () => {
+      try {
+        const staticPrompts = Array.from(this.prompts.values()).map(prompt => ({
+          name: prompt.name,
+          description: prompt.description,
+          arguments: prompt.arguments || [],
+          source: 'static'
+        }));
+        let cachedPrompts = [];
+        if (this.cacheManager) {
+          cachedPrompts = await this.cacheManager.getPrompts();
+        }
+        notification.params.prompts = [...staticPrompts, ...cachedPrompts];
+      } catch (e) {
+        // Fallback to static only
+        notification.params.prompts = Array.from(this.prompts.values()).map(prompt => ({
+          name: prompt.name,
+          description: prompt.description,
+          arguments: prompt.arguments || [],
+          source: 'static'
+        }));
+      } finally {
+        this.broadcastNotification(notification);
+      }
+    })();
   }
 
   /**
@@ -579,16 +609,39 @@ class DynamicAPIMCPServer {
       jsonrpc: '2.0',
       method: 'notifications/resourcesChanged',
       params: {
-        resources: Array.from(this.resources.values()).map(resource => ({
-          uri: resource.uri,
-          name: resource.name,
-          description: resource.description,
-          mimeType: resource.mimeType
-        }))
+        // Include both static and cached resources
+        resources: []
       }
     };
 
-    this.broadcastNotification(notification);
+    // Build payload including cached resources (if available)
+    (async () => {
+      try {
+        const staticResources = Array.from(this.resources.values()).map(resource => ({
+          uri: resource.uri,
+          name: resource.name,
+          description: resource.description,
+          mimeType: resource.mimeType,
+          source: 'static'
+        }));
+        let cachedResources = [];
+        if (this.cacheManager) {
+          cachedResources = await this.cacheManager.getResources();
+        }
+        notification.params.resources = [...staticResources, ...cachedResources];
+      } catch (e) {
+        // Fallback to static only
+        notification.params.resources = Array.from(this.resources.values()).map(resource => ({
+          uri: resource.uri,
+          name: resource.name,
+          description: resource.description,
+          mimeType: resource.mimeType,
+          source: 'static'
+        }));
+      } finally {
+        this.broadcastNotification(notification);
+      }
+    })();
   }
 
   /**
@@ -619,10 +672,26 @@ class DynamicAPIMCPServer {
   createServer() {
     // Create HTTP server with explicit IPv4 binding
     this.server = http.createServer();
+    // Harden against server errors to avoid process crashes
+    this.server.on('error', (err) => {
+      try {
+        console.error('❌ MCP HTTP server error (continuing):', err);
+      } catch (_) {}
+    });
     
     // Add HTTP endpoints for MCP Inspector compatibility
     this.server.on('request', (req, res) => {
-      this.handleHTTPRequest(req, res);
+      try {
+        this.handleHTTPRequest(req, res);
+      } catch (err) {
+        try {
+          console.error('❌ MCP HTTP request handling error:', err);
+        } catch (_) {}
+        try {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Internal Server Error' }));
+        } catch (_) {}
+      }
     });
     
     // Log the host configuration for debugging
