@@ -29,6 +29,12 @@ testFiles.forEach(file => {
   }
 });
 
+// Ensure the professional index.html exists
+const indexPath = path.join(publicDir, 'index.html');
+if (!fs.existsSync(indexPath)) {
+  fs.writeFileSync(indexPath, '<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Test Index</h1></body></html>');
+}
+
 // Import server after files are set
 const { app } = require('../src/server');
 
