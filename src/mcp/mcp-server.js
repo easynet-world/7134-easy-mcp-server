@@ -676,7 +676,7 @@ class DynamicAPIMCPServer {
     this.server.on('error', (err) => {
       try {
         console.error('❌ MCP HTTP server error (continuing):', err);
-      } catch (_) {}
+      } catch (logErr) { /* ignore logging error */ }
     });
     
     // Add HTTP endpoints for MCP Inspector compatibility
@@ -686,11 +686,11 @@ class DynamicAPIMCPServer {
       } catch (err) {
         try {
           console.error('❌ MCP HTTP request handling error:', err);
-        } catch (_) {}
+        } catch (logErr) { /* ignore logging error */ }
         try {
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Internal Server Error' }));
-        } catch (_) {}
+        } catch (writeErr) { /* ignore write error */ }
       }
     });
     
@@ -848,7 +848,12 @@ class DynamicAPIMCPServer {
     });
 
     req.on('error', (error) => {
-      console.error('❌ SSE connection error:', error);
+      // ECONNRESET/aborted is normal when clients disconnect
+      if (error && (error.code === 'ECONNRESET' || error.message === 'aborted')) {
+        console.log('🔌 MCP SSE client connection closed');
+      } else {
+        console.warn('⚠️  SSE connection issue:', error?.message || error);
+      }
       this.httpClients.delete(clientId);
     });
   }

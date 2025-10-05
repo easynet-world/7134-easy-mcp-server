@@ -88,10 +88,10 @@ describe('MCP SSE Notifications', () => {
                     }
                   });
                 }, close: () => {
-                  try { res.destroy(); } catch(_) {}
-                  try { req.destroy(); } catch(_) {}
+                  try { res.destroy(); } catch(errCloseRes) { /* ignore close error */ }
+                  try { req.destroy(); } catch(errCloseReq) { /* ignore close error */ }
                 }});
-              } catch (_) {}
+              } catch (parseInitError) { /* ignore non-JSON init chunk */ }
             }
           }
         });

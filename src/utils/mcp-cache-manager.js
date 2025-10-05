@@ -127,6 +127,16 @@ class MCPCacheManager {
       const promptsDir = path.join(this.basePath, 'prompts');
       const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
       
+      // If the prompts directory doesn't exist, return empty without error
+      try {
+        await fs.access(promptsDir);
+      } catch (e) {
+        if (e && e.code === 'ENOENT') {
+          return [];
+        }
+        throw e;
+      }
+
       // Recursively find all prompt files
       const promptFiles = await this.findPromptFiles(promptsDir, 'prompts', supportedExtensions);
       
@@ -143,6 +153,11 @@ class MCPCacheManager {
       
       return results;
     } catch (error) {
+      if (error && error.code === 'ENOENT') {
+        // Directory missing is non-fatal; treat as no prompts
+        this.log('info', 'Prompts directory not found; returning empty list');
+        return [];
+      }
       this.log('error', `Failed to get prompts: ${error.message}`);
       return [];
     }
@@ -152,7 +167,14 @@ class MCPCacheManager {
    * Recursively find all prompt files in a directory
    */
   async findPromptFiles(dirPath, relativePath, supportedExtensions) {
-    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    let files;
+    try {
+      files = await fs.readdir(dirPath, { withFileTypes: true });
+    } catch (e) {
+      // Directory may have been removed (e.g., temp dirs in tests); treat as empty
+      if (e && e.code === 'ENOENT') return [];
+      throw e;
+    }
     const promptFiles = [];
     
     for (const file of files) {
@@ -183,6 +205,16 @@ class MCPCacheManager {
       const resourcesDir = path.join(this.basePath, 'resources');
       const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
       
+      // If the resources directory doesn't exist, return empty without error
+      try {
+        await fs.access(resourcesDir);
+      } catch (e) {
+        if (e && e.code === 'ENOENT') {
+          return [];
+        }
+        throw e;
+      }
+
       // Recursively find all resource files
       const resourceFiles = await this.findResourceFiles(resourcesDir, 'resources', supportedExtensions);
       
@@ -199,6 +231,10 @@ class MCPCacheManager {
       
       return results;
     } catch (error) {
+      if (error && error.code === 'ENOENT') {
+        this.log('info', 'Resources directory not found; returning empty list');
+        return [];
+      }
       this.log('error', `Failed to get resources: ${error.message}`);
       return [];
     }
@@ -208,7 +244,13 @@ class MCPCacheManager {
    * Recursively find all resource files in a directory
    */
   async findResourceFiles(dirPath, relativePath, supportedExtensions) {
-    const files = await fs.readdir(dirPath, { withFileTypes: true });
+    let files;
+    try {
+      files = await fs.readdir(dirPath, { withFileTypes: true });
+    } catch (e) {
+      if (e && e.code === 'ENOENT') return [];
+      throw e;
+    }
     const resourceFiles = [];
     
     for (const file of files) {
