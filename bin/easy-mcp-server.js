@@ -64,7 +64,7 @@ Examples:
   easy-mcp-server --mcp-port 8081   # Start MCP server on port 8081
   easy-mcp-server init               # Create new project
   npx easy-mcp-server                # Run without installation
-  npx easy-mcp-server --port 3001   # Run with custom port
+  npx easy-mcp-server --port 8888   # Run with custom port
 
 For more information, visit: https://github.com/easynet-world/7134-easy-mcp-server
 `);
@@ -298,7 +298,7 @@ module.exports = GetExample;
 ## Environment Variables
 
 Copy \`.env.example\` to \`.env\` and configure:
-- \`PORT\`: Server port (default: 3000)
+- \`EASY_MCP_SERVER_PORT\`: Server port (default: 8887)
 - \`NODE_ENV\`: Environment (development/production)
 - \`EASY_MCP_SERVER_CORS_ORIGIN\`: CORS origin
 - \`EASY_MCP_SERVER_CORS_METHODS\`: Allowed HTTP methods

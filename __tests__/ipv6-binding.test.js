@@ -89,10 +89,10 @@ describe('IPv6 Binding Fix for Kubernetes Compatibility', () => {
   });
 
   test('MCP server can still bind to specific interfaces when needed', () => {
-    const localhostServer = new DynamicAPIMCPServer('localhost', 3001);
+    const localhostServer = new DynamicAPIMCPServer('localhost', 8888);
     expect(localhostServer.host).toBe('localhost');
     
-    const customServer = new DynamicAPIMCPServer('192.168.1.100', 3001);
+    const customServer = new DynamicAPIMCPServer('192.168.1.100', 8888);
     expect(customServer.host).toBe('192.168.1.100');
   });
 

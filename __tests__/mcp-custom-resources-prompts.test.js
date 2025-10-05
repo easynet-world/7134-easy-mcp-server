@@ -166,7 +166,7 @@ paths:
           uri: 'resource://template-config.json',
           arguments: {
             service_name: 'MyAPI',
-            port: '3000',
+            port: '8887',
             environment: 'production',
             feature1: 'authentication',
             feature2: 'caching'
@@ -185,7 +185,7 @@ paths:
       const processedData = JSON.parse(content.text);
       expect(processedData.name).toBe('MyAPI Configuration');
       expect(processedData.description).toBe('Configuration for MyAPI service');
-      expect(processedData.port).toBe('3000');
+      expect(processedData.port).toBe('8887');
       expect(processedData.environment).toBe('production');
       expect(processedData.features).toEqual(['authentication', 'caching']);
     });

@@ -85,9 +85,9 @@ module.exports = TestAPI;
 
   test('should load multiple .env files in correct order', (done) => {
     // Create multiple .env files
-    fs.writeFileSync(path.join(tempDir, '.env'), 'BASE_VAR=base\nPORT=3000');
-    fs.writeFileSync(path.join(tempDir, '.env.development'), 'DEV_VAR=development\nPORT=3001');
-    fs.writeFileSync(path.join(tempDir, '.env.local'), 'LOCAL_VAR=local\nPORT=3002');
+    fs.writeFileSync(path.join(tempDir, '.env'), 'BASE_VAR=base\nEASY_MCP_SERVER_PORT=8887');
+    fs.writeFileSync(path.join(tempDir, '.env.development'), 'DEV_VAR=development\nEASY_MCP_SERVER_PORT=8888');
+    fs.writeFileSync(path.join(tempDir, '.env.local'), 'LOCAL_VAR=local\nEASY_MCP_SERVER_PORT=8889');
 
     // Create a simple API file
     const apiDir = path.join(tempDir, 'api');

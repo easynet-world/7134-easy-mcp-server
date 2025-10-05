@@ -447,7 +447,7 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 **3. Priority Order:**
 1. CLI arguments (`--port`/`--api-port`, `--mcp-port`)
 2. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
-3. Default values (3000 for REST API, 3001 for MCP)
+3. Default values (8887 for REST API, 8888 for MCP)
 
 ### Auto npm Install
 The server automatically runs `npm install` before starting if a `package.json` file is found in your project directory:
@@ -545,7 +545,7 @@ The framework includes **graceful initialization** to prevent server crashes whe
 **Retry Failed APIs:**
 ```bash
 # Retry a specific API
-curl -X POST http://localhost:3000/admin/retry-initialization \
+curl -X POST http://localhost:${EASY_MCP_SERVER_PORT:-8887}/admin/retry-initialization \
   -H "Content-Type: application/json" \
   -d '{"api": "opensearch-api"}'
 ```

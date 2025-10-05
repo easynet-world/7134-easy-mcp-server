@@ -249,7 +249,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
-EXPOSE 3000 3001
+EXPOSE 8887 8888
 CMD ["npx", "easy-mcp-server"]
 ```
 
@@ -273,8 +273,8 @@ spec:
       - name: easy-mcp-server
         image: your-registry/easy-mcp-server:latest
         ports:
-        - containerPort: 3000
-        - containerPort: 3001
+        - containerPort: 8887
+        - containerPort: 8888
         env:
         - name: NODE_ENV
           value: "production"
@@ -365,7 +365,7 @@ app.use(cors({
 ### Common Issues
 | Issue | Solution |
 |-------|----------|
-| **Port conflicts** | Check if ports 3000/3001 are available |
+| **Port conflicts** | Check if ports 8887/8888 are available |
 | **File not found** | Ensure API files are in the `api/` directory |
 | **MCP connection** | Verify MCP server is running on correct port |
 | **Validation errors** | Verify request body matches schema |

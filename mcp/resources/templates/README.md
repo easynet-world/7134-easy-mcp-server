@@ -20,7 +20,7 @@ Simple templates demonstrating `{{parameter}}` substitution in the MCP server.
 ## Usage
 
 ```bash
-curl -X POST http://localhost:3001/ \
+curl -X POST http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/ \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc":"2.0",
@@ -30,7 +30,7 @@ curl -X POST http://localhost:3001/ \
       "uri":"resource://templates/api-config-template.json",
       "arguments":{
         "service_name":"my-api",
-        "port":3000,
+        "port":8887,
         "db_name":"myapp_db",
         "api_key":"abc123"
       }
