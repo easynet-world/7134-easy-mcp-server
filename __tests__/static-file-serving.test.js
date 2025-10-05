@@ -15,7 +15,6 @@ if (!fs.existsSync(publicDir)) {
 
 // Create test files before server initialization
 const testFiles = [
-  { name: 'index.html', content: '<html><body><h1>Hello World!</h1></body></html>' },
   { name: 'test.html', content: '<html><body>test</body></html>' },
   { name: 'style.css', content: 'body { color: blue; }' },
   { name: 'app.js', content: 'console.log("test");' },
@@ -37,8 +36,8 @@ describe('Static File Serving - CI', () => {
   const publicDir = path.join(__dirname, '..', 'public');
 
   afterAll(() => {
-    // Clean up test files
-    const testFiles = ['index.html', 'test.html', 'style.css', 'app.js', 'test.json', 'cache-test.html'];
+    // Clean up test files (but keep the professional index.html)
+    const testFiles = ['test.html', 'style.css', 'app.js', 'test.json', 'cache-test.html'];
     testFiles.forEach(file => {
       const filePath = path.join(publicDir, file);
       if (fs.existsSync(filePath)) {
@@ -82,7 +81,7 @@ describe('Static File Serving - CI', () => {
         .get('/')
         .expect(200);
 
-      expect(response.text).toContain('<h1>Hello World!</h1>');
+      expect(response.text).toContain('🚀 Easy MCP Server');
       expect(response.headers['content-type']).toMatch(/text\/html/);
     });
   });
