@@ -75,7 +75,7 @@ describe('MCP SSE Notifications', () => {
             const line = event.split('\n').find(l => l.startsWith('data: '));
             if (line) {
               try {
-                const payload = JSON.parse(line.slice(6));
+                JSON.parse(line.slice(6));
                 resolve({ res, req, onEvent: (handler) => {
                   res.removeAllListeners('data');
                   res.on('data', (ch) => {
@@ -83,7 +83,7 @@ describe('MCP SSE Notifications', () => {
                     for (const part of parts) {
                       const l = part.split('\n').find(s => s.startsWith('data: '));
                       if (l) {
-                        try { handler(JSON.parse(l.slice(6))); } catch(_) {}
+                        try { handler(JSON.parse(l.slice(6))); } catch(parseEventError) { void 0; }
                       }
                     }
                   });
@@ -91,7 +91,7 @@ describe('MCP SSE Notifications', () => {
                   try { res.destroy(); } catch(errCloseRes) { /* ignore close error */ }
                   try { req.destroy(); } catch(errCloseReq) { /* ignore close error */ }
                 }});
-              } catch (parseInitError) { /* ignore non-JSON init chunk */ }
+              } catch (parseInitError) { void 0; }
             }
           }
         });
