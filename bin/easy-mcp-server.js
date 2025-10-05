@@ -60,8 +60,8 @@ Server Starting Behavior:
 
 Examples:
   easy-mcp-server                    # Start server (custom or auto)
-  easy-mcp-server --port 8080       # Start server on port 8080
-  easy-mcp-server --mcp-port 8081   # Start MCP server on port 8081
+  easy-mcp-server --port 8887       # Start server on port 8887
+  easy-mcp-server --mcp-port 8888   # Start MCP server on port 8888
   easy-mcp-server init               # Create new project
   npx easy-mcp-server                # Run without installation
   npx easy-mcp-server --port 8888   # Run with custom port

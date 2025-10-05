@@ -74,11 +74,11 @@ module.exports = GetUsers;
 npx easy-mcp-server
 
 # With custom ports
-npx easy-mcp-server --port 8080 --mcp-port 8081
-npx easy-mcp-server --api-port 8080 --mcp-port 8081
+npx easy-mcp-server --port 8887 --mcp-port 8888
+npx easy-mcp-server --api-port 8887 --mcp-port 8888
 
 # Using environment variables (recommended)
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 
 ```
 
@@ -415,11 +415,11 @@ NODE_ENV=development                         # Environment
 ### CLI Options
 ```bash
 # Port configuration
-easy-mcp-server --port 8080 --mcp-port 8081
-easy-mcp-server --api-port 8080 --mcp-port 8081
+easy-mcp-server --port 8887 --mcp-port 8888
+easy-mcp-server --api-port 8887 --mcp-port 8888
 
 # Environment variables
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
 
 # Help
 easy-mcp-server --help
@@ -430,18 +430,18 @@ The server supports multiple ways to configure ports:
 
 **1. Command Line Arguments:**
 ```bash
-npx easy-mcp-server --port 8080 --mcp-port 8081
-npx easy-mcp-server --api-port 8080 --mcp-port 8081
+npx easy-mcp-server --port 8887 --mcp-port 8888
+npx easy-mcp-server --api-port 8887 --mcp-port 8888
 ```
 
 **2. Environment Variables:**
 ```bash
 # In .env file (recommended)
-EASY_MCP_SERVER_PORT=8080
-EASY_MCP_SERVER_MCP_PORT=8081
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_MCP_PORT=8888
 
 # Or inline (recommended)
-EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 ```
 
 **3. Priority Order:**
