@@ -22,7 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static file serving configuration
+// Static file serving configuration - always enabled by default
 const staticConfig = {
   enabled: process.env.EASY_MCP_SERVER_STATIC_ENABLED !== 'false',
   directory: process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public',
@@ -30,31 +30,29 @@ const staticConfig = {
   defaultFile: process.env.EASY_MCP_SERVER_DEFAULT_FILE || 'index.html'
 };
 
-// Setup static file serving if enabled
-if (staticConfig.enabled) {
-  const fs = require('fs');
-  const staticPath = path.resolve(staticConfig.directory);
-  
-  // Check if static directory exists
-  if (fs.existsSync(staticPath)) {
-    console.log(`📁 Static files enabled: serving from ${staticPath}`);
-    
-    // Serve static files
-    app.use(express.static(staticPath));
-    
-    // Handle root route with index.html if it exists
-    if (staticConfig.serveIndex) {
-      const indexPath = path.join(staticPath, staticConfig.defaultFile);
-      if (fs.existsSync(indexPath)) {
-        app.get('/', (req, res) => {
-          res.sendFile(indexPath);
-        });
-        console.log(`🏠 Root route configured: serving ${staticConfig.defaultFile}`);
-      }
-    }
-  } else {
-    console.log(`⚠️  Static directory not found: ${staticPath}`);
-    console.log(`   Static file serving disabled. Create the directory to enable.`);
+// Setup static file serving - always enabled
+const fs = require('fs');
+const staticPath = path.resolve(staticConfig.directory);
+
+// Create static directory if it doesn't exist
+if (!fs.existsSync(staticPath)) {
+  fs.mkdirSync(staticPath, { recursive: true });
+  console.log(`📁 Created static directory: ${staticPath}`);
+}
+
+console.log(`📁 Static files enabled: serving from ${staticPath}`);
+
+// Serve static files
+app.use(express.static(staticPath));
+
+// Handle root route with index.html if it exists
+if (staticConfig.serveIndex) {
+  const indexPath = path.join(staticPath, staticConfig.defaultFile);
+  if (fs.existsSync(indexPath)) {
+    app.get('/', (req, res) => {
+      res.sendFile(indexPath);
+    });
+    console.log(`🏠 Root route configured: serving ${staticConfig.defaultFile}`);
   }
 }
 

@@ -1,13 +1,7 @@
 /**
- * Test cases for static file serving functionality - CI specific
- * This test file sets environment variables before importing the server
+ * Test cases for static file serving functionality
+ * Static file serving is always enabled by default
  */
-
-// Set environment variables before importing the server
-process.env.EASY_MCP_SERVER_STATIC_ENABLED = 'true';
-process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = './public';
-process.env.EASY_MCP_SERVER_SERVE_INDEX = 'true';
-process.env.EASY_MCP_SERVER_DEFAULT_FILE = 'index.html';
 
 const request = require('supertest');
 const fs = require('fs');
@@ -36,7 +30,7 @@ testFiles.forEach(file => {
   }
 });
 
-// Import server after environment variables and files are set
+// Import server after files are set
 const { app } = require('../src/server');
 
 describe('Static File Serving - CI', () => {
