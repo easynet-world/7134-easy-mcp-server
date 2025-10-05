@@ -211,8 +211,8 @@ describe('Error Handling Improvements', () => {
         cwd: path.join(__dirname, '..'),
         env: { 
           ...process.env, 
-          API_PATH: tempApiDir,
-          SERVER_PORT: '0' // Use random port
+          EASY_MCP_SERVER_API_PATH: tempApiDir,
+          EASY_MCP_SERVER_PORT: '9999' // Use a different port to avoid conflicts
         }
       });
 
