@@ -33,8 +33,14 @@ class HotReloader {
     }
 
     console.log('🔄 Setting up hot reloading for API files...');
-    
-    this.watcher = chokidar.watch('api/**/*.js', {
+
+    // Watch the configured API path rather than a hardcoded 'api/'
+    const apiRoot = this.apiLoader && this.apiLoader.apiPath
+      ? this.apiLoader.apiPath
+      : path.join(process.cwd(), 'api');
+    const watchPattern = path.join(apiRoot, '**/*.js');
+
+    this.watcher = chokidar.watch(watchPattern, {
       ignored: [
         /(^|[/\\])\./, // Ignore hidden files
         /node_modules/,   // Ignore node_modules
@@ -73,7 +79,8 @@ class HotReloader {
    * Queue a reload operation with debouncing
    */
   queueReload(filePath, event) {
-    const relativePath = path.relative(process.cwd(), filePath);
+    const base = (this.apiLoader && this.apiLoader.apiPath) || process.cwd();
+    const relativePath = path.relative(base, filePath);
     console.log(`🔄 API file ${event}: ${relativePath}`);
     
     // Clear existing debounce timeout
@@ -112,7 +119,16 @@ class HotReloader {
         this.apiLoader.clearCache(item.filePath);
       });
       
-      // Reload all routes
+      // Reload all routes (clear express routes first to avoid duplicates)
+      try {
+        const stack = this.apiLoader.app && this.apiLoader.app._router && this.apiLoader.app._router.stack;
+        if (Array.isArray(stack)) {
+          this.apiLoader.app._router.stack = stack.filter(layer => {
+            return !(layer && layer.route && layer.route.path);
+          });
+        }
+      } catch (e) { /* ignore route cleanup errors */ }
+
       const newRoutes = this.apiLoader.reloadAPIs();
       
       // Update MCP server if available
