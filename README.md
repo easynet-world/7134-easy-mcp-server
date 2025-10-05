@@ -91,8 +91,8 @@ EASY_MCP_SERVER_PORT=8080 EASY_MCP_SERVER_MCP_PORT=8081 npx easy-mcp-server
 - 📊 **Error Reporting**: Clear error messages with helpful suggestions
 
 **Access Points:**
-- 🌐 **REST API**: http://localhost:8887
-- 🤖 **MCP Server**: http://localhost:8888  
+- 🌐 **REST API**: http://localhost:8887 (default)
+- 🤖 **MCP Server**: http://localhost:8888 (default)
 - 📚 **OpenAPI**: http://localhost:8887/openapi.json
 - 🔍 **Swagger UI**: http://localhost:8887/docs
 - 📁 **Static Files**: http://localhost:8887/ (serves from `public/` directory)

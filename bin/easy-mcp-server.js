@@ -447,16 +447,16 @@ describe('Easy MCP Server', () => {
    3. easy-mcp-server
 
 📚 Your server will be available at:
-   - Server: http://localhost:8887
-   - API Docs: http://localhost:8887/docs
-   - Health Check: http://localhost:8887/health
-   - OpenAPI Spec: http://localhost:8887/openapi.json
-   - API Info: http://localhost:8887/api-info
+   - Server: http://localhost:${config.port}
+   - API Docs: http://localhost:${config.port}/docs
+   - Health Check: http://localhost:${config.port}/health
+   - OpenAPI Spec: http://localhost:${config.port}/openapi.json
+   - API Info: http://localhost:${config.port}/api-info
 
 🔌 MCP (Model Context Protocol) Integration:
-   - MCP Server: http://localhost:8888
-   - MCP Tools: http://localhost:8887/mcp/tools
-   - MCP Schema: http://localhost:8887/mcp/schema
+   - MCP Server: http://localhost:${config.mcpPort}
+   - MCP Tools: http://localhost:${config.port}/mcp/tools
+   - MCP Schema: http://localhost:${config.port}/mcp/schema
    - Transport Types: Streamable HTTP, Server-Sent Events (SSE)
    - MCP Endpoints: GET /sse, POST /mcp, POST / (StreamableHttp)
 

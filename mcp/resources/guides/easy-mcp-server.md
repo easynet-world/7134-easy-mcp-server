@@ -42,10 +42,10 @@ module.exports = GetUsers;
 ```bash
 npx easy-mcp-server
 ```
-- 🌐 **REST API**: http://localhost:8887
-- 🤖 **MCP Server**: http://localhost:8888
-- 📚 **OpenAPI**: http://localhost:8887/openapi.json
-- 🔍 **Swagger UI**: http://localhost:8887/docs
+- 🌐 **REST API**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}
+- 🤖 **MCP Server**: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}
+- 📚 **OpenAPI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/openapi.json
+- 🔍 **Swagger UI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/docs
 
 ---
 
@@ -200,19 +200,19 @@ module.exports = MyAPI;
 easy-mcp-server
 
 # Test REST API
-curl http://localhost:8887/users
+curl http://localhost:${EASY_MCP_SERVER_PORT:-8887}/users
 
 # Test MCP Tools
-curl -X POST http://localhost:8888/mcp \
+curl -X POST http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
 ### 4. Access Points
-- 🌐 **REST API**: http://localhost:8887
-- 🤖 **MCP Server**: http://localhost:8888
-- 📚 **OpenAPI**: http://localhost:8887/openapi.json
-- 🔍 **Swagger UI**: http://localhost:8887/docs
+- 🌐 **REST API**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}
+- 🤖 **MCP Server**: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}
+- 📚 **OpenAPI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/openapi.json
+- 🔍 **Swagger UI**: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/docs
 
 ## 🚀 **Production Deployment**
 
@@ -377,8 +377,8 @@ DEBUG=* easy-mcp-server
 
 ### Health Check
 ```bash
-curl http://localhost:8887/health
-curl http://localhost:8888/health
+curl http://localhost:${EASY_MCP_SERVER_PORT:-8887}/health
+curl http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/health
 ```
 
 ## 🚀 **Advanced Features**

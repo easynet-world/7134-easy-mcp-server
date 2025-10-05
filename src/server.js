@@ -563,7 +563,7 @@ function startServer() {
     console.log('');
     if (mcpServer) {
       console.log('  🤖  MCP SERVER:');
-      console.log(`     • WebSocket:       ws://${process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0'}:${parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888}`);
+      console.log(`     • WebSocket:       ws://${mcpServer.host}:${mcpServer.port}`);
       console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
     }
