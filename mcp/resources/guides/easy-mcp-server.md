@@ -459,7 +459,6 @@ easy-mcp-server [options]
 
 Options:
   --port <number>        REST API port (default: 8887)
-  --mcp-port <number>    MCP server port (default: 8888)
   --host <string>        Server host (default: 0.0.0.0)
   --api-dir <string>     API directory (default: ./api)
   --mcp-dir <string>     MCP directory (default: ./mcp)
