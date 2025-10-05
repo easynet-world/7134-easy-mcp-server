@@ -50,7 +50,7 @@ app.use(express.static(staticPath, {
   etag: true, // Enable ETags for caching
   lastModified: true // Enable Last-Modified headers
 }));
-console.log(`✅ Static file middleware applied successfully`);
+console.log('✅ Static file middleware applied successfully');
 
 // Handle root route with index.html if it exists
 if (staticConfig.serveIndex) {
@@ -572,24 +572,24 @@ function startServer() {
       console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
       console.log('');
     }
-  console.log('  ⚡  FEATURES:');
-  console.log('     • Auto-discovery of API endpoints');
-  console.log('     • Real-time MCP tool generation');
-  console.log('     • Automatic OpenAPI documentation');
-  console.log('     • Hot reloading enabled');
-  if (staticConfig.enabled && fs.existsSync(path.resolve(staticConfig.directory))) {
-    console.log('     • Static file serving enabled');
-  }
-  console.log('');
-  console.log('  🎯  Ready to serve your APIs!');
-  console.log('  ' + '═'.repeat(78));
-  console.log('');
+    console.log('  ⚡  FEATURES:');
+    console.log('     • Auto-discovery of API endpoints');
+    console.log('     • Real-time MCP tool generation');
+    console.log('     • Automatic OpenAPI documentation');
+    console.log('     • Hot reloading enabled');
+    if (staticConfig.enabled && fs.existsSync(path.resolve(staticConfig.directory))) {
+      console.log('     • Static file serving enabled');
+    }
+    console.log('');
+    console.log('  🎯  Ready to serve your APIs!');
+    console.log('  ' + '═'.repeat(78));
+    console.log('');
   });
 
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${basePort} is already in use. Please choose a different port or stop the process using that port.`);
-      console.error(`   You can set a different port using: EASY_MCP_SERVER_PORT=<port>`);
+      console.error('   You can set a different port using: EASY_MCP_SERVER_PORT=<port>');
       process.exit(1);
     } else {
       console.error(`❌ Server error: ${error.message}`);
