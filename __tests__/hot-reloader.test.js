@@ -64,8 +64,9 @@ describe('HotReloader', () => {
       
       hotReloader.startWatching();
       
+      // Accept absolute or relative paths that end with the api glob pattern
       expect(mockChokidar.watch).toHaveBeenCalledWith(
-        'api/**/*.js',
+        expect.stringMatching(/.*api\/\*\*\/\*\.js$/),
         expect.objectContaining({
           ignored: expect.any(Array),
           persistent: true
