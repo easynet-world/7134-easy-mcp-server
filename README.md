@@ -442,7 +442,7 @@ EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 ```
 
 **3. Priority Order:**
-1. CLI arguments (`--port`/`--api-port`, `--mcp-port`)
+1. CLI arguments (`--port`)
 2. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
 3. Default values (8887 for REST API, 8888 for MCP)
 
