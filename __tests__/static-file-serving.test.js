@@ -101,7 +101,7 @@ describe('Static File Serving', () => {
         .expect(200);
 
       // Should serve index.html, not directory listing
-      expect(response.text).toContain('<!DOCTYPE html>');
+      expect(response.text).toContain('<h1>Hello World!</h1>');
     });
   });
 

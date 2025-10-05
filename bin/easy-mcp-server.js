@@ -39,11 +39,12 @@ Options:
   --mcp-port <number>    Set the MCP server port (default: 3001)
 
 Environment Variables:
-  EASY_MCP_SERVER_PORT   REST API server port (recommended)
-  EASY_MCP_SERVER_MCP_PORT MCP server port (recommended)
-  PORT                   REST API server port (fallback)
-  MCP_PORT               MCP server port (fallback)
-  SERVER_PORT            Alternative name for REST API port (fallback)
+  EASY_MCP_SERVER_PORT   REST API server port
+  EASY_MCP_SERVER_MCP_PORT MCP server port
+  EASY_MCP_SERVER_HOST   REST API server host
+  EASY_MCP_SERVER_MCP_HOST MCP server host
+  EASY_MCP_SERVER_STATIC_ENABLED Enable static file serving
+  EASY_MCP_SERVER_STATIC_DIRECTORY Static files directory
 
 Features:
   • Auto .env loading     Automatically loads .env, .env.development, .env.local files
@@ -149,14 +150,23 @@ module.exports = {
   fs.writeFileSync(path.join(projectDir, 'index.js'), indexJs);
   
   // Create .env file
-  const envFile = `# Server Configuration
-PORT=3000
+  const envFile = `# Easy MCP Server Configuration
+EASY_MCP_SERVER_PORT=3000
+EASY_MCP_SERVER_MCP_PORT=3001
+EASY_MCP_SERVER_HOST=0.0.0.0
+EASY_MCP_SERVER_MCP_HOST=0.0.0.0
 NODE_ENV=development
 
+# Static File Serving
+EASY_MCP_SERVER_STATIC_ENABLED=true
+EASY_MCP_SERVER_STATIC_DIRECTORY=./public
+EASY_MCP_SERVER_SERVE_INDEX=true
+EASY_MCP_SERVER_DEFAULT_FILE=index.html
+
 # CORS Configuration
-API_CORS_ORIGIN=*
-API_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
-API_CORS_CREDENTIALS=false
+EASY_MCP_SERVER_CORS_ORIGIN=*
+EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
+EASY_MCP_SERVER_CORS_CREDENTIALS=false
 
 # Add your API keys and other environment variables here
 `;
@@ -290,9 +300,9 @@ module.exports = GetExample;
 Copy \`.env.example\` to \`.env\` and configure:
 - \`PORT\`: Server port (default: 3000)
 - \`NODE_ENV\`: Environment (development/production)
-- \`API_CORS_ORIGIN\`: CORS origin
-- \`API_CORS_METHODS\`: Allowed HTTP methods
-- \`API_CORS_CREDENTIALS\`: Allow credentials
+- \`EASY_MCP_SERVER_CORS_ORIGIN\`: CORS origin
+- \`EASY_MCP_SERVER_CORS_METHODS\`: Allowed HTTP methods
+- \`EASY_MCP_SERVER_CORS_CREDENTIALS\`: Allow credentials
 
 ## Learn More
 
