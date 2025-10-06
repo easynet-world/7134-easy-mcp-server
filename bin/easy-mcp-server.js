@@ -95,7 +95,7 @@ function initProject() {
       'test': 'jest'
     },
     'dependencies': {
-      'easy-mcp-server': '^1.0.40',
+      'easy-mcp-server': '^1.0.93',
       'express': '^4.18.2',
       'cors': '^2.8.5',
       'dotenv': '^16.3.1'
@@ -507,19 +507,6 @@ function initializeEnvHotReloader() {
   }
 }
 
-// Set MCP server reference for env hot reloader
-function setMCPServerForHotReloader(mcpServer) {
-  if (envHotReloader) {
-    envHotReloader.setMCPServer(mcpServer);
-  }
-}
-
-// Set API loader reference for env hot reloader
-function setAPILoaderForHotReloader(apiLoader) {
-  if (envHotReloader) {
-    envHotReloader.setAPILoader(apiLoader);
-  }
-}
 
 // Auto-install missing dependencies
 async function autoInstallDependencies() {
@@ -542,7 +529,7 @@ async function autoInstallDependencies() {
       stdio: 'inherit'
     });
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       installProcess.on('close', (code) => {
         if (code === 0) {
           console.log('✅ Dependencies installed successfully');
@@ -565,13 +552,10 @@ async function autoInstallDependencies() {
 
 // Parse command line arguments for port configuration
 function parsePortArguments() {
-  const args = process.argv.slice(2);
   const config = {
     port: process.env.EASY_MCP_SERVER_PORT || 8887,
     mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 8888
   };
-  
-  
   
   return config;
 }

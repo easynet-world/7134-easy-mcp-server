@@ -166,19 +166,6 @@ class EnvHotReloader {
    * This is a best-effort approach since we can't track which variables were set by .env
    */
   clearEnvVariables() {
-    // Common environment variables that might be set by .env files
-    const _commonEnvVars = [
-      'EASY_MCP_SERVER_PORT', 'EASY_MCP_SERVER_MCP_PORT',
-      'EASY_MCP_SERVER_HOST', 'EASY_MCP_SERVER_MCP_HOST',
-      'EASY_MCP_SERVER_API_PATH', 'EASY_MCP_SERVER_MCP_BASE_PATH',
-      'EASY_MCP_SERVER_STATIC_ENABLED', 'EASY_MCP_SERVER_STATIC_DIRECTORY',
-      'EASY_MCP_SERVER_SERVE_INDEX', 'EASY_MCP_SERVER_DEFAULT_FILE',
-      'EASY_MCP_SERVER_CORS_ORIGIN', 'EASY_MCP_SERVER_CORS_METHODS', 'EASY_MCP_SERVER_CORS_CREDENTIALS',
-      'EASY_MCP_SERVER_LOG_LEVEL', 'EASY_MCP_SERVER_LOG_FORMAT', 'EASY_MCP_SERVER_SERVICE_NAME',
-      'EASY_MCP_SERVER_MCP_ENABLED', 'EASY_MCP_SERVER_HOT_RELOAD_ENABLED',
-      'NODE_ENV', 'OPENAI_API_KEY'
-    ];
-
     // Note: We can't actually clear process.env variables that were already set
     // This is more of a conceptual placeholder for future enhancement
     // The dotenv override: true option will handle the actual reloading
