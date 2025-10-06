@@ -82,7 +82,7 @@ class APILoader {
     }
     
     try {
-      const ProcessorClass = require(filePath);
+      const ProcessorClass = require(path.resolve(filePath));
       
       // Validate the class
       if (typeof ProcessorClass !== 'function') {
