@@ -87,9 +87,116 @@ class DynamicAPIMCPServer {
       }
     };
     
+    // Optional bridge reloader to merge external MCP tools
+    this.bridgeReloader = options.bridgeReloader || null;
+
     // File watchers
     this.promptsWatcher = null;
     this.resourcesWatcher = null;
+  }
+
+  /**
+   * Attach listeners to MCP bridge servers and forward notifications to MCP clients.
+   * Also refresh and broadcast merged tools on relevant notifications.
+   */
+  attachBridgeListeners() {
+    if (!this.bridgeReloader) return;
+    try {
+      const bridges = this.bridgeReloader.ensureBridges();
+      for (const [, bridge] of bridges.entries()) {
+        if (!bridge || typeof bridge.on !== 'function') continue;
+        bridge.on('notification', async (msg) => {
+          try {
+            // Forward any bridge notification to clients for visibility
+            this.broadcastNotification({
+              jsonrpc: '2.0',
+              method: msg?.method || 'notifications/bridge',
+              params: msg?.params || { source: 'bridge' }
+            });
+
+            // On config/tools changes, refresh merged tools and notify clients
+            const method = msg && msg.method ? String(msg.method) : '';
+            if (method.includes('tools') || method.includes('configChanged')) {
+              const mergedTools = await this.buildMergedToolsList();
+              this.broadcastNotification({
+                jsonrpc: '2.0',
+                method: 'notifications/toolsChanged',
+                params: { tools: mergedTools }
+              });
+            }
+          } catch (_) {
+            // ignore notification forwarding errors
+          }
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  /**
+   * Build the merged tools list from local routes and bridge servers.
+   */
+  async buildMergedToolsList() {
+    const routes = this.getLoadedRoutes();
+    const tools = routes.map(route => {
+      const processor = route.processorInstance;
+      const openApi = processor?.openApi;
+      const inputSchema = {
+        type: 'object',
+        properties: {
+          body: { type: 'object', description: 'Request body' },
+          query: { type: 'object', description: 'Query parameters' },
+          headers: { type: 'object', description: 'Request headers' }
+        }
+      };
+      if (openApi?.requestBody?.content?.['application/json']?.schema) {
+        inputSchema.properties.body = {
+          ...inputSchema.properties.body,
+          ...openApi.requestBody.content['application/json'].schema
+        };
+      }
+      if (openApi?.requestBody?.content?.['application/json']?.schema?.required) {
+        inputSchema.required = ['body'];
+      }
+      return {
+        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+        description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
+        inputSchema,
+        responseSchema: openApi?.responses?.['200']?.content?.['application/json']?.schema || null,
+        method: route.method,
+        path: route.path,
+        tags: openApi?.tags || ['api']
+      };
+    });
+
+    if (this.bridgeReloader) {
+      try {
+        const bridges = this.bridgeReloader.ensureBridges();
+        for (const [, bridge] of bridges.entries()) {
+          try {
+            const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
+            if (bridgeResult && Array.isArray(bridgeResult.tools)) {
+              bridgeResult.tools.forEach(t => {
+                tools.push({
+                  name: t.name,
+                  description: t.description || 'Bridge tool',
+                  inputSchema: t.inputSchema || { type: 'object', properties: {} },
+                  responseSchema: null,
+                  tags: ['bridge']
+                });
+              });
+            }
+          } catch (e) {
+            // Log bridge errors but don't fail the whole list
+            console.warn(`⚠️  Bridge tools unavailable: ${e.message}`);
+          }
+        }
+      } catch (_) {
+        // ignore overall bridge errors
+      }
+    }
+    return tools;
   }
 
   /**
@@ -1136,6 +1243,35 @@ class DynamicAPIMCPServer {
       };
     });
     
+    // If bridge reloader is available, attempt to merge bridge tools
+    if (this.bridgeReloader) {
+      try {
+        const bridges = this.bridgeReloader.ensureBridges();
+        for (const [, bridge] of bridges.entries()) {
+          try {
+            const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
+            if (bridgeResult && Array.isArray(bridgeResult.tools)) {
+              // Normalize bridge tools into a compatible shape (keep name/description; leave schemas empty)
+              bridgeResult.tools.forEach(t => {
+                tools.push({
+                  name: t.name,
+                  description: t.description || 'Bridge tool',
+                  inputSchema: t.inputSchema || { type: 'object', properties: {} },
+                  responseSchema: null,
+                  tags: ['bridge']
+                });
+              });
+            }
+          } catch (e) {
+            // Log bridge errors but don't fail the whole list
+            console.warn(`⚠️  Bridge tools unavailable: ${e.message}`);
+          }
+        }
+      } catch (e) {
+        // Ignore overall bridge errors
+      }
+    }
+
     return {
       jsonrpc: '2.0',
       id: data.id,
@@ -2013,6 +2149,8 @@ class DynamicAPIMCPServer {
    */
   async run() {
     this.createServer();
+    // Attach bridge listeners so notifications are forwarded
+    this.attachBridgeListeners();
     
     return new Promise((resolve, reject) => {
       // Force IPv4 binding to avoid IPv6 issues

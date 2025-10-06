@@ -458,7 +458,7 @@ app.get('/bridge/list-tools', async (req, res) => {
     const promises = [];
     for (const [name, bridge] of bridges.entries()) {
       promises.push(
-        bridge.rpcRequest('list_tools', {}).then((r) => { results[name] = r; }).catch((e) => { results[name] = { error: e.message }; })
+        bridge.rpcRequest('tools/list', {}).then((r) => { results[name] = r; }).catch((e) => { results[name] = { error: e.message }; })
       );
     }
     await Promise.all(promises);
@@ -476,7 +476,7 @@ app.post('/bridge/call-tool', async (req, res) => {
     if (server) {
       const bridge = bridges.get(server);
       if (!bridge) return res.status(404).json({ error: `server not found: ${server}` });
-      const result = await bridge.rpcRequest('call_tool', { name: toolName, arguments: args || {} });
+      const result = await bridge.rpcRequest('tools/call', { name: toolName, arguments: args || {} });
       return res.json(result);
     }
     // If no server specified, try all servers and aggregate results
@@ -484,7 +484,7 @@ app.post('/bridge/call-tool', async (req, res) => {
     const promises = [];
     for (const [name, bridge] of bridges.entries()) {
       promises.push(
-        bridge.rpcRequest('call_tool', { name: toolName, arguments: args || {} })
+        bridge.rpcRequest('tools/call', { name: toolName, arguments: args || {} })
           .then((r) => { results[name] = r; })
           .catch((e) => { results[name] = { error: e.message }; })
       );
@@ -583,7 +583,9 @@ function startServer() {
         {
           mcp: {
             basePath: mcpBasePath
-          }
+          },
+          // Provide bridge reloader so MCP tools/list can include bridge tools
+          bridgeReloader
         }
       );
       
