@@ -546,7 +546,11 @@ function startServer() {
         mcpServer.setRoutes(loadedRoutes);
         
         // Initialize hot reloading after MCP server is ready
-        hotReloader = new HotReloader(apiLoader, mcpServer);
+        hotReloader = new HotReloader(apiLoader, mcpServer, {
+          autoInstall: true, // Enable auto package installation
+          userCwd: process.cwd(),
+          logger: console
+        });
         hotReloader.startWatching();
         
         // Initialize .env hot reloader
