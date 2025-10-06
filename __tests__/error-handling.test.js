@@ -82,9 +82,19 @@ describe('Error Handling Improvements', () => {
       // Clean up
       testServer.close();
       serverProcess.kill('SIGTERM');
-      setTimeout(() => {
-        serverProcess.kill('SIGKILL');
-      }, 1000);
+      
+      // Wait for the process to be killed
+      await new Promise(resolve => {
+        if (serverProcess.killed) {
+          resolve();
+        } else {
+          serverProcess.on('exit', resolve);
+          setTimeout(() => {
+            serverProcess.kill('SIGKILL');
+            resolve();
+          }, 1000);
+        }
+      });
 
       // Server should have been created and killed
       // Note: The server might not generate a port conflict error if it handles it gracefully
