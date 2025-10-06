@@ -445,7 +445,7 @@
   });
 
   try {
-    const sseUrl = (location.protocol === 'https:' ? 'https://' : 'http://') + location.hostname + ':' + (window.location.port || 'auto') + '/sse';
+    const sseUrl = (location.protocol === 'https:' ? 'https://' : 'http://') + location.hostname + ':8888/sse';
     const es = new EventSource(sseUrl);
     es.onopen = () => setStatus('Connected', true);
     es.onerror = () => setStatus('Disconnected', false);
