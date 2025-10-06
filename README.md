@@ -95,6 +95,7 @@ EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 - 📚 **OpenAPI**: http://localhost:8887/openapi.json
 - 🔍 **Swagger UI**: http://localhost:8887/docs
 - 📁 **Static Files**: http://localhost:8887/ (serves from `public/` directory)
+  - Note: MCP HTTP server also serves from `public/`; root `/` serves `public/index.html` only (no MCP info fallback)
 
 ### 4. Add MCP Features (AI Integration)
 ```bash
