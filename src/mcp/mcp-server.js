@@ -759,12 +759,82 @@ class DynamicAPIMCPServer {
     } else if (req.url === '/' && req.method === 'POST') {
       // StreamableHttp transport
       this.handleStreamableHttpRequest(req, res);
-    } else if (req.url === '/' && req.method === 'GET') {
-      // Serve MCP server info page
-      this.handleMCPInfoPage(req, res);
+    } else if (req.method === 'GET' && this.tryServeStatic(req, res)) {
+      // served static file for non-root requests
+      return;
     } else {
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Not found' }));
+    }
+  }
+
+  /**
+   * Try to serve static files from public directory for MCP HTTP server
+   */
+  tryServeStatic(req, res) {
+    try {
+      const fsSync = require('fs');
+      const staticDir = path.resolve(process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public');
+      const urlPath = decodeURIComponent(req.url.split('?')[0] || '/');
+      let requestedPath = urlPath;
+      if (requestedPath === '/') {
+        requestedPath = (process.env.EASY_MCP_SERVER_DEFAULT_FILE || 'index.html');
+      } else if (requestedPath.startsWith('/')) {
+        requestedPath = requestedPath.slice(1);
+      }
+      const filePath = path.resolve(staticDir, requestedPath);
+      if (!filePath.startsWith(staticDir)) {
+        return false; // prevent path traversal
+      }
+      try {
+        const stat = fsSync.statSync(filePath);
+        if (stat.isDirectory()) {
+          return false;
+        }
+        const data = fsSync.readFileSync(filePath);
+        const contentType = this.getContentTypeByExt(path.extname(filePath).toLowerCase());
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+        return true;
+      } catch (_err) {
+        return false;
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
+  serveFileIfExists(filePath, res) {
+    return fs.stat(filePath)
+      .then((stat) => {
+        if (stat.isDirectory()) {
+          // No directory listing
+          return false;
+        }
+        return fs.readFile(filePath).then((data) => {
+          const contentType = this.getContentTypeByExt(path.extname(filePath).toLowerCase());
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(data);
+          return true;
+        });
+      })
+      .catch(() => false);
+  }
+
+  getContentTypeByExt(ext) {
+    switch (ext) {
+    case '.html': return 'text/html; charset=utf-8';
+    case '.css': return 'text/css; charset=utf-8';
+    case '.js': return 'application/javascript; charset=utf-8';
+    case '.json': return 'application/json; charset=utf-8';
+    case '.png': return 'image/png';
+    case '.jpg':
+    case '.jpeg': return 'image/jpeg';
+    case '.gif': return 'image/gif';
+    case '.svg': return 'image/svg+xml';
+    case '.ico': return 'image/x-icon';
+    case '.txt': return 'text/plain; charset=utf-8';
+    default: return 'application/octet-stream';
     }
   }
 

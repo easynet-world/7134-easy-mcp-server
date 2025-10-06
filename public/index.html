@@ -444,32 +444,45 @@
     location.reload();
   });
 
-  try {
-    const sseUrl = (location.protocol === 'https:' ? 'https://' : 'http://') + location.hostname + ':8888/sse';
-    const es = new EventSource(sseUrl);
-    es.onopen = () => setStatus('Connected', true);
-    es.onerror = () => setStatus('Disconnected', false);
-    es.onmessage = (evt) => {
+  function tryEventSource(urls){
+    let es = null;
+    let idx = 0;
+    function next(){
+      if (es) { try { es.close(); } catch(_){} }
+      if (idx >= urls.length) { setStatus('Unavailable', false); return; }
+      const url = urls[idx++];
       try {
-        const msg = JSON.parse(evt.data);
-        if (msg && msg.method === 'notifications/promptsChanged') {
-          promptsChanged = true;
-          updateCard();
-        } else if (msg && msg.method === 'notifications/resourcesChanged') {
-          resourcesChanged = true;
-          updateCard();
-        } else if (msg && msg.method === 'notifications/routesChanged') {
-          toolsChanged = true;
-          updateCard();
-        } else if (msg && msg.method === 'notifications/toolsChanged') {
-          toolsChanged = true;
-          updateCard();
-        } else if (msg && msg.method === 'notifications/configChanged') {
-          configChanged = true;
-          updateCard();
-        }
-      } catch (_) {}
-    };
+        es = new EventSource(url);
+        es.onopen = () => setStatus('Connected', true);
+        es.onerror = () => { setStatus('Disconnected', false); next(); };
+        es.onmessage = (evt) => {
+          try {
+            const msg = JSON.parse(evt.data);
+            if (msg && msg.method === 'notifications/promptsChanged') { promptsChanged = true; updateCard(); }
+            else if (msg && msg.method === 'notifications/resourcesChanged') { resourcesChanged = true; updateCard(); }
+            else if (msg && msg.method === 'notifications/routesChanged') { toolsChanged = true; updateCard(); }
+            else if (msg && msg.method === 'notifications/toolsChanged') { toolsChanged = true; updateCard(); }
+            else if (msg && msg.method === 'notifications/configChanged') { configChanged = true; updateCard(); }
+          } catch (_) {}
+        };
+      } catch (_) {
+        next();
+      }
+    }
+    next();
+  }
+
+  try {
+    const sameOrigin = '/sse';
+    const proto = (location.protocol === 'https:' ? 'https://' : 'http://');
+    const host = location.hostname;
+    const candidates = [
+      sameOrigin,
+      proto + host + ':8888/sse',
+      proto + '127.0.0.1:8888/sse',
+      proto + 'localhost:8888/sse'
+    ];
+    tryEventSource(candidates);
   } catch (sseInitError) {
     setStatus('Unavailable', false);
   }

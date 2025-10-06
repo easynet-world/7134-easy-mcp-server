@@ -6,7 +6,7 @@ const os = require('os');
 // Import the MCP server
 const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
 
-describe('MCP Info Page Customization', () => {
+describe('MCP Root Static Serving', () => {
   let mcpServer;
   let tempDir;
   let customHtmlPath;
@@ -68,87 +68,104 @@ describe('MCP Info Page Customization', () => {
     });
   };
 
-  test('should serve default MCP info page when no custom file exists', async () => {
-    const response = await makeRequest('/');
+  test('serves public/index.html at root when present', async () => {
+    const publicDir = path.resolve('./public');
+    const indexPath = path.join(publicDir, 'index.html');
+    const backupPath = path.join(publicDir, 'index.backup.test.html');
 
-    expect(response.statusCode).toBe(200);
-    expect(response.headers['content-type']).toMatch(/text\/html/);
-    expect(response.text).toContain('Easy MCP Server');
-    expect(response.text).toContain('Model Context Protocol Server');
-  });
+    // Backup existing index if present
+    if (fs.existsSync(indexPath)) {
+      fs.renameSync(indexPath, backupPath);
+    }
 
-  test('should serve custom HTML file from project root', async () => {
-    // Create a custom HTML file in project root
-    const customHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Custom MCP Server</title>
-</head>
-<body>
-    <h1>🚀 My Custom MCP Server</h1>
-    <p>This is my custom MCP info page!</p>
-</body>
-</html>`;
-
-    const projectRootHtmlPath = path.join(process.cwd(), 'mcp-info.html');
-    
-    // Write custom HTML to project root
-    fs.writeFileSync(projectRootHtmlPath, customHtml);
+    // Create a minimal index.html for test
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<!doctype html><html><head><title>Public Index</title></head><body><h1>Public Root</h1></body></html>');
 
     try {
       const response = await makeRequest('/');
-
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/text\/html/);
-      expect(response.text).toContain('My Custom MCP Server');
-      expect(response.text).toContain('This is my custom MCP info page!');
+      expect(response.text).toContain('Public Root');
     } finally {
-      // Clean up the custom HTML file
-      if (fs.existsSync(projectRootHtmlPath)) {
-        fs.unlinkSync(projectRootHtmlPath);
+      // Restore original file if backed up
+      if (fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, indexPath);
+      } else if (fs.existsSync(indexPath)) {
+        fs.unlinkSync(indexPath);
       }
     }
   });
 
-  test('should serve custom HTML file from environment variable path', async () => {
-    // Create a custom HTML file
-    const customHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Environment Custom MCP Server</title>
-</head>
-<body>
-    <h1>🌍 Environment Custom MCP Server</h1>
-    <p>This is loaded from environment variable!</p>
-</body>
-</html>`;
+  test('ignores project-root mcp-info.html and still serves public index', async () => {
+    const publicDir = path.resolve('./public');
+    const indexPath = path.join(publicDir, 'index.html');
+    const backupPath = path.join(publicDir, 'index.backup.test.html');
+    const projectRootHtmlPath = path.join(process.cwd(), 'mcp-info.html');
 
-    fs.writeFileSync(customHtmlPath, customHtml);
+    // Backup existing index if present
+    if (fs.existsSync(indexPath)) {
+      fs.renameSync(indexPath, backupPath);
+    }
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<!doctype html><html><body><h1>Public Root 2</h1></body></html>');
 
-    // Set environment variable
+    // Write a project-root mcp-info.html which should be ignored now
+    fs.writeFileSync(projectRootHtmlPath, '<!doctype html><html><body><h1>Project MCP Info</h1></body></html>');
+
+    try {
+      const response = await makeRequest('/');
+      expect(response.statusCode).toBe(200);
+      expect(response.headers['content-type']).toMatch(/text\/html/);
+      expect(response.text).toContain('Public Root 2');
+      expect(response.text).not.toContain('Project MCP Info');
+    } finally {
+      if (fs.existsSync(projectRootHtmlPath)) fs.unlinkSync(projectRootHtmlPath);
+      if (fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, indexPath);
+      } else if (fs.existsSync(indexPath)) {
+        fs.unlinkSync(indexPath);
+      }
+    }
+  });
+
+  test('ignores EASY_MCP_SERVER_MCP_INFO_HTML_PATH and serves public index', async () => {
+    const publicDir = path.resolve('./public');
+    const indexPath = path.join(publicDir, 'index.html');
+    const backupPath = path.join(publicDir, 'index.backup.test.html');
+
+    if (fs.existsSync(indexPath)) {
+      fs.renameSync(indexPath, backupPath);
+    }
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<!doctype html><html><body><h1>Public Root 3</h1></body></html>');
+
+    // Create an env HTML file which should be ignored
+    fs.writeFileSync(customHtmlPath, '<!doctype html><html><body><h1>Env MCP Info</h1></body></html>');
     const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
     process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = customHtmlPath;
 
     try {
       const response = await makeRequest('/');
-
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/text\/html/);
-      expect(response.text).toContain('Environment Custom MCP Server');
-      expect(response.text).toContain('This is loaded from environment variable!');
+      expect(response.text).toContain('Public Root 3');
+      expect(response.text).not.toContain('Env MCP Info');
     } finally {
-      // Restore original environment variable
       if (originalEnv) {
         process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
       } else {
         delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
+      if (fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, indexPath);
+      } else if (fs.existsSync(indexPath)) {
+        fs.unlinkSync(indexPath);
+      }
     }
   });
 
-  test('should prioritize environment variable over project root file', async () => {
+  test('always serves public index regardless of env or project files', async () => {
     // Create two different custom HTML files
     const projectRootHtml = `
 <!DOCTYPE html>
@@ -175,10 +192,20 @@ describe('MCP Info Page Customization', () => {
 </html>`;
 
     const projectRootHtmlPath = path.join(process.cwd(), 'mcp-info.html');
-    
+    const publicDir = path.resolve('./public');
+    const indexPath = path.join(publicDir, 'index.html');
+    const backupPath = path.join(publicDir, 'index.backup.test.html');
+
     // Write both files
     fs.writeFileSync(projectRootHtmlPath, projectRootHtml);
     fs.writeFileSync(customHtmlPath, envHtml);
+
+    // Prepare public index which should be served
+    if (fs.existsSync(indexPath)) {
+      fs.renameSync(indexPath, backupPath);
+    }
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<!doctype html><html><body><h1>Public Root 4</h1></body></html>');
 
     // Set environment variable
     const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
@@ -189,9 +216,8 @@ describe('MCP Info Page Customization', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/text\/html/);
-      // Should serve the environment variable file, not the project root file
-      expect(response.text).toContain('Environment MCP Server');
-      expect(response.text).toContain('This is from environment variable!');
+      expect(response.text).toContain('Public Root 4');
+      expect(response.text).not.toContain('Environment MCP Server');
       expect(response.text).not.toContain('Project Root MCP Server');
     } finally {
       // Clean up files and environment
@@ -203,54 +229,54 @@ describe('MCP Info Page Customization', () => {
       } else {
         delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
       }
-    }
-  });
-
-  test('should handle missing custom HTML file gracefully', async () => {
-    // Set environment variable to non-existent file
-    const originalEnv = process.env.MCP_INFO_HTML_PATH;
-    process.env.MCP_INFO_HTML_PATH = '/path/to/nonexistent/file.html';
-
-    try {
-      const response = await makeRequest('/');
-
-      // Should fall back to default page
-      expect(response.statusCode).toBe(200);
-      expect(response.headers['content-type']).toMatch(/text\/html/);
-      expect(response.text).toContain('Easy MCP Server');
-    } finally {
-      // Restore original environment variable
-      if (originalEnv) {
-        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
-      } else {
-        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
+      if (fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, indexPath);
+      } else if (fs.existsSync(indexPath)) {
+        fs.unlinkSync(indexPath);
       }
     }
   });
 
-  test('should handle invalid HTML file gracefully', async () => {
-    // Create an invalid HTML file
-    const invalidHtml = 'This is not valid HTML content';
-    fs.writeFileSync(customHtmlPath, invalidHtml);
+  test('returns 404 when public index missing and no static match', async () => {
+    const publicDir = path.resolve('./public');
+    const indexPath = path.join(publicDir, 'index.html');
+    const backupPath = path.join(publicDir, 'index.backup.test.html');
 
-    // Set environment variable
-    const originalEnv = process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
-    process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = customHtmlPath;
+    // Temporarily remove index.html if present
+    if (fs.existsSync(indexPath)) {
+      fs.renameSync(indexPath, backupPath);
+    }
 
     try {
       const response = await makeRequest('/');
-
-      // Should still serve the file (even if invalid HTML)
-      expect(response.statusCode).toBe(200);
-      expect(response.headers['content-type']).toMatch(/text\/html/);
-      expect(response.text).toContain('This is not valid HTML content');
+      // Root GET without index should 404 now
+      expect(response.statusCode).toBe(404);
     } finally {
-      // Restore original environment variable
-      if (originalEnv) {
-        process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH = originalEnv;
-      } else {
-        delete process.env.EASY_MCP_SERVER_MCP_INFO_HTML_PATH;
+      if (fs.existsSync(backupPath)) {
+        fs.renameSync(backupPath, indexPath);
       }
+    }
+  });
+
+  test('static file serving works for non-root paths', async () => {
+    const publicDir = path.resolve('./public');
+    const filePath = path.join(publicDir, 'test.txt');
+    const backupIndex = path.join(publicDir, 'index.backup.test.html');
+    const indexPath = path.join(publicDir, 'index.html');
+
+    // Ensure index exists for other tests, but this test targets non-root path
+    if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+    if (fs.existsSync(indexPath)) fs.renameSync(indexPath, backupIndex);
+
+    fs.writeFileSync(filePath, 'hello world');
+    try {
+      const response = await makeRequest('/test.txt');
+      expect(response.statusCode).toBe(200);
+      expect(response.headers['content-type']).toMatch(/text\/plain/);
+      expect(response.text).toContain('hello world');
+    } finally {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      if (fs.existsSync(backupIndex)) fs.renameSync(backupIndex, indexPath);
     }
   });
 });

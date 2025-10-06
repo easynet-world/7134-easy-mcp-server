@@ -9,6 +9,7 @@ const OpenAPIGenerator = require(path.join(__dirname, 'core', 'openapi-generator
 const DynamicAPIMCPServer = require(path.join(__dirname, 'mcp', 'mcp-server'));
 const HotReloader = require(path.join(__dirname, 'utils', 'hot-reloader'));
 const EnvHotReloader = require(path.join(__dirname, 'utils', 'env-hot-reloader'));
+const MCPBridgeReloader = require(path.join(__dirname, 'utils', 'mcp-bridge-reloader'));
 
 // Create Express app
 const app = express();
@@ -94,6 +95,8 @@ app.use((err, req, res, next) => {
 // Initialize core services
 const apiLoader = new APILoader(app, process.env.EASY_MCP_SERVER_API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
+const bridgeReloader = new MCPBridgeReloader({ root: process.cwd(), configFile: 'mcp-bridge.json', logger: console });
+bridgeReloader.startWatching();
 
 // Enhanced health check endpoint with API status
 app.get('/health', (req, res) => {
@@ -444,6 +447,52 @@ app.post('/mcp/execute/:toolName', (req, res) => {
       error: `Error executing API endpoint: ${error.message}`,
       timestamp: new Date().toISOString()
     });
+  }
+});
+
+// Simple HTTP Bridge endpoints
+app.get('/bridge/list-tools', async (req, res) => {
+  try {
+    const bridges = bridgeReloader.ensureBridges();
+    const results = {};
+    const promises = [];
+    for (const [name, bridge] of bridges.entries()) {
+      promises.push(
+        bridge.rpcRequest('list_tools', {}).then((r) => { results[name] = r; }).catch((e) => { results[name] = { error: e.message }; })
+      );
+    }
+    await Promise.all(promises);
+    res.json({ servers: results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/bridge/call-tool', async (req, res) => {
+  const { toolName, args, server } = req.body || {};
+  if (!toolName) return res.status(400).json({ error: 'toolName required' });
+  try {
+    const bridges = bridgeReloader.ensureBridges();
+    if (server) {
+      const bridge = bridges.get(server);
+      if (!bridge) return res.status(404).json({ error: `server not found: ${server}` });
+      const result = await bridge.rpcRequest('call_tool', { name: toolName, arguments: args || {} });
+      return res.json(result);
+    }
+    // If no server specified, try all servers and aggregate results
+    const results = {};
+    const promises = [];
+    for (const [name, bridge] of bridges.entries()) {
+      promises.push(
+        bridge.rpcRequest('call_tool', { name: toolName, arguments: args || {} })
+          .then((r) => { results[name] = r; })
+          .catch((e) => { results[name] = { error: e.message }; })
+      );
+    }
+    await Promise.all(promises);
+    res.json({ servers: results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
