@@ -385,8 +385,8 @@ All project-specific environment variables use the `EASY_MCP_SERVER_` prefix for
 
 ```bash
 # .env
-EASY_MCP_SERVER_PORT=8887                    # REST API port
-EASY_MCP_SERVER_MCP_PORT=8888               # MCP server port
+EASY_MCP_SERVER_PORT=8887                  # REST API port (default: 8887)
+EASY_MCP_SERVER_MCP_PORT=8888              # MCP server port (default: 8888)
 EASY_MCP_SERVER_HOST=0.0.0.0                # REST API host
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0            # MCP server host
 EASY_MCP_SERVER_MCP_BASE_PATH=./mcp         # MCP base directory
