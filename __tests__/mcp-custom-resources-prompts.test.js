@@ -263,7 +263,7 @@ arguments:
       // Test prompts/list
       const listResponse = await server.processListPrompts({ id: 1 });
       expect(listResponse.jsonrpc).toBe('2.0');
-      expect(listResponse.result.prompts).toHaveLength(6);
+      expect(listResponse.result.prompts).toHaveLength(5);
 
       const prompts = listResponse.result.prompts;
       
