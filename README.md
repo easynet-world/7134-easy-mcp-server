@@ -411,6 +411,10 @@ NODE_ENV=development                         # Environment
 - 📚 **Better Documentation**: Makes configuration more organized and understandable
 - 🚀 **Future-Proof**: Consistent pattern for any new environment variables
 
+#### MCP Bridge Configuration
+
+See the dedicated section below: [MCP Bridge (Multi-Server)](#mcp-bridge-multi-server).
+
 ### CLI Options
 ```bash
 # Port configuration
@@ -421,6 +425,45 @@ EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
 
 # Help
 easy-mcp-server --help
+```
+
+### MCP Bridge (Multi-Server)
+
+The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`).
+
+Endpoints:
+- GET `/bridge/list-tools` → returns `{ servers: { <name>: <toolsResult>|{error} } }`
+- POST `/bridge/call-tool` → body `{ toolName, args?, server? }`
+  - When `server` is omitted, the tool is invoked on all bridges and results are aggregated as `{ servers: { <name>: <result>|{error} } }`.
+
+Configuration:
+```bash
+# Optional: path to bridge config (absolute or relative to project root)
+EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
+# Optional: disable bridge spawning (useful for CI/tests)
+EASY_MCP_SERVER_BRIDGE_ENABLED=true
+```
+
+Default `mcp-bridge.json` (Cursor-compatible):
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp"]
+    }
+  }
+}
+```
+
+Add more servers by appending entries under `mcpServers`:
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": { "command": "npx", "args": ["chrome-devtools-mcp"] },
+    "another-server":  { "command": "node", "args": ["path/to/server.js"] }
+  }
+}
 ```
 
 ### Port Configuration
