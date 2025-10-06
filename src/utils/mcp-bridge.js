@@ -163,7 +163,7 @@ class MCPBridge extends EventEmitter {
 
   _onData(chunk) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
-    console.log(`🔌 Bridge stdout raw:`, JSON.stringify(chunk.toString()));
+    console.log('🔌 Bridge stdout raw:', JSON.stringify(chunk.toString()));
     
     // Parse newline-delimited JSON
     const data = this.buffer.toString('utf8');
@@ -179,18 +179,18 @@ class MCPBridge extends EventEmitter {
           const msg = JSON.parse(line);
           this._handleMessage(msg);
         } catch (err) {
-          console.log(`🔌 Bridge: Failed to parse line:`, line, err.message);
+          console.log('🔌 Bridge: Failed to parse line:', line, err.message);
         }
       }
     }
   }
 
   _handleMessage(msg) {
-    console.log(`🔌 Bridge: Received message:`, JSON.stringify(msg, null, 2));
+    console.log('🔌 Bridge: Received message:', JSON.stringify(msg, null, 2));
 
     // Notification (no id)
     if (msg && typeof msg === 'object' && msg.method && msg.id == null) {
-      console.log(`🔌 Bridge: Emitting notification:`, msg.method);
+      console.log('🔌 Bridge: Emitting notification:', msg.method);
       this.emit('notification', msg);
       return;
     }

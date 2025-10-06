@@ -68,12 +68,13 @@ describe('Error Handling Improvements', () => {
         env: { ...process.env, EASY_MCP_SERVER_PORT: testPort.toString() }
       });
 
-      let output = '';
       serverProcess.stdout.on('data', (data) => {
-        output += data.toString();
+        // Collect output for debugging if needed
+        console.log('Server output:', data.toString());
       });
       serverProcess.stderr.on('data', (data) => {
-        output += data.toString();
+        // Log stderr for debugging if needed
+        console.log('Server stderr:', data.toString());
       });
 
       // Wait for the server to attempt startup and fail
