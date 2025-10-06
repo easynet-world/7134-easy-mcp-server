@@ -152,6 +152,15 @@ class HotReloader {
       if (this.mcpServer) {
         this.mcpServer.setRoutes(newRoutes);
         console.log(`🔄 MCP Server: Routes updated (${newRoutes.length} routes)`);
+        
+        // Step 4.1: Refresh MCP cache if available
+        if (this.mcpServer.cacheManager) {
+          this.mcpServer.cacheManager.clearCache('all');
+          console.log('🔄 MCP Cache: Cleared cache for hot reload');
+        }
+      
+        // Step 4.2: Notify clients about all MCP components refresh
+        this.notifyMCPComponentsRefresh();
       }
       
       // Step 5: Validate routes
@@ -342,6 +351,48 @@ class HotReloader {
    */
   addKnownPackages(packages) {
     this.packageDetector.addKnownPackages(packages);
+  }
+
+  /**
+   * Notify connected clients about MCP components refresh after hot reload
+   */
+  notifyMCPComponentsRefresh() {
+    if (!this.mcpServer) {
+      return;
+    }
+
+    console.log('🔄 Notifying clients about MCP components refresh...');
+    
+    try {
+      // Notify about tools/routes changes (already handled by setRoutes)
+      // The setRoutes method already calls notifyRouteChanges()
+      
+      // Notify about prompts changes
+      if (this.mcpServer.notifyPromptsChanged) {
+        this.mcpServer.notifyPromptsChanged();
+      }
+      
+      // Notify about resources changes  
+      if (this.mcpServer.notifyResourcesChanged) {
+        this.mcpServer.notifyResourcesChanged();
+      }
+      
+      // Send a comprehensive refresh notification
+      this.mcpServer.broadcastNotification({
+        jsonrpc: '2.0',
+        method: 'notifications/mcpComponentsRefreshed',
+        params: {
+          timestamp: new Date().toISOString(),
+          components: ['tools', 'prompts', 'resources'],
+          message: 'All MCP components have been refreshed due to hot reload'
+        }
+      });
+      
+      console.log('✅ MCP components refresh notifications sent to all connected clients');
+      
+    } catch (error) {
+      console.warn('⚠️  Failed to notify clients about MCP components refresh:', error.message);
+    }
   }
 }
 

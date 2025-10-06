@@ -110,6 +110,10 @@ class DynamicAPIMCPServer {
     
     // Notify all connected clients about route changes
     this.notifyRouteChanges(routes);
+    
+    // Also notify about prompts and resources changes after hot reload
+    this.notifyPromptsChanged();
+    this.notifyResourcesChanged();
   }
 
   /**
