@@ -40,7 +40,7 @@ describe('MCP tools/list merges bridge tools (HTTP MCP)', () => {
     const resp = await mcpServer.processMCPRequest({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
     expect(resp && resp.result && Array.isArray(resp.result.tools)).toBe(true);
     const names = resp.result.tools.map(t => t.name);
-    expect(names).toContain('mock_bridge_tool');
+    expect(names).toContain('mock_mock_bridge_tool');
   });
 });
 
