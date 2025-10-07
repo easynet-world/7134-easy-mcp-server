@@ -4,7 +4,7 @@
       "command": "npx",
       "args": ["chrome-devtools-mcp", "--isolated"]
     },
-    "iterm-mcp": {
+    "iterm2": {
       "command": "npx",
       "args": ["-y", "iterm-mcp"]
     }

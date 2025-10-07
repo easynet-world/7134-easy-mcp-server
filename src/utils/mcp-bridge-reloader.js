@@ -43,10 +43,6 @@ class MCPBridgeReloader {
         }
       }
     }
-    // Always support chrome-devtools by default if not present
-    if (!servers.find(s => s.name === 'chrome-devtools')) {
-      servers.push({ name: 'chrome-devtools', command: 'npx', args: ['chrome-devtools-mcp'] });
-    }
     return servers;
   }
 
