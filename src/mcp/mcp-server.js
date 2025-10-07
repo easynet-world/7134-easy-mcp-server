@@ -1453,7 +1453,7 @@ class DynamicAPIMCPServer {
         }
         
         return {
-          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          name: `${route.path}_${route.method.toLowerCase()}`,
           description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
           inputSchema: inputSchema,
           // Add response schema information
@@ -1488,11 +1488,10 @@ class DynamicAPIMCPServer {
     try {
       const { name, arguments: args } = data;
       
-      // Parse the tool name to get method and path (method is now at the end)
-      const parts = name.split('_');
-      const method = parts[parts.length - 1]; // Last part is the method
-      const pathParts = parts.slice(0, -1); // Everything except the last part is the path
-      const path = '/' + pathParts.join('/');
+      // Parse the tool name to get method and path (format: [full_path]_[http_method])
+      const lastUnderscoreIndex = name.lastIndexOf('_');
+      const method = name.substring(lastUnderscoreIndex + 1); // Everything after the last underscore is the method
+      const path = name.substring(0, lastUnderscoreIndex); // Everything before the last underscore is the path
       
       console.log('🔍 MCP Server: Tool call request:', { name, method, path });
       
