@@ -3,6 +3,10 @@
     "chrome-devtools": {
       "command": "npx",
       "args": ["chrome-devtools-mcp"]
+    },
+    "iterm-mcp": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"]
     }
   }
 }
