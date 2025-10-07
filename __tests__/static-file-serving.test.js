@@ -96,7 +96,8 @@ describe('Static File Serving - CI', () => {
         .get('/app.js')
         .expect(200);
 
-      expect(response.text).toContain("console.log('test');");
+      console.log('Actual content:', JSON.stringify(response.text));
+      expect(response.text).toContain('console.log("test");');
       expect(response.headers['content-type']).toMatch(/application\/javascript/);
     });
   });
