@@ -47,3 +47,4 @@
 - All tests pass (green `npm test`).
 - Lint passes with no errors (`npm run lint`).
 - Changes are minimal, focused, and readable.
+- **README.md verification**: Before committing, check README.md to ensure everything is accurate and updated, especially regarding recent changes.
