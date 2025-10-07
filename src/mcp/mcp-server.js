@@ -1288,32 +1288,59 @@ class DynamicAPIMCPServer {
     const { name, arguments: args } = data.params || data;
     const routes = this.getLoadedRoutes();
     
+    // First try to find API route
     const route = routes.find(r => 
       `${r.method.toLowerCase()}_${r.path.replace(/\//g, '_').replace(/^_/, '')}` === name
     );
     
-    if (!route) {
+    if (route) {
+      // Handle API route
+      const result = await this.executeAPIEndpoint(route, args);
       return {
         jsonrpc: '2.0',
         id: data.id,
-        error: {
-          code: -32602,
-          message: `Tool not found: ${name}`
+        result: {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2)
+            }
+          ]
         }
       };
     }
     
-    const result = await this.executeAPIEndpoint(route, args);
+    // If not found in API routes, try bridge tools
+    if (this.bridgeReloader) {
+      try {
+        const bridges = this.bridgeReloader.ensureBridges();
+        for (const [, bridge] of bridges.entries()) {
+          try {
+            const bridgeResult = await bridge.rpcRequest('tools/call', { name, arguments: args }, 5000);
+            if (bridgeResult && bridgeResult.content) {
+              return {
+                jsonrpc: '2.0',
+                id: data.id,
+                result: bridgeResult
+              };
+            }
+          } catch (e) {
+            // Continue to next bridge if this one fails
+            continue;
+          }
+        }
+      } catch (e) {
+        // Bridge error, fall through to not found
+      }
+    }
+    
+    // Tool not found in either API routes or bridge tools
     return {
       jsonrpc: '2.0',
       id: data.id,
-      result: {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(result, null, 2)
-          }
-        ]
+      error: {
+        code: -32602,
+        message: `Tool not found: ${name}`
       }
     };
   }
