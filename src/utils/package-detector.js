@@ -20,7 +20,7 @@ class PackageDetector {
       'cheerio', 'puppeteer', 'playwright',
       'nodemailer', 'twilio', 'stripe',
       'aws-sdk', 'google-cloud', 'azure',
-      'openai', 'anthropic', 'cohere',
+      'anthropic', 'cohere',
       'uuid', 'crypto', 'crypto-js',
       'validator', 'joi', 'yup',
       'winston', 'pino', 'bunyan',
