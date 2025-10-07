@@ -28,6 +28,22 @@ class DynamicAPIMCPServer {
     this.prompts = new Map();
     this.resources = new Map();
     
+    // Add quiet mode option
+    this.quiet = options.quiet || process.env.EASY_MCP_SERVER_QUIET === 'true';
+    
+    // Helper method for conditional logging
+    this.log = (...args) => {
+      if (!this.quiet) {
+        console.log(...args);
+      }
+    };
+    
+    this.warn = (...args) => {
+      if (!this.quiet) {
+        console.warn(...args);
+      }
+    };
+    
     // Initialize MCP Cache Manager for intelligent caching
     // Use configured base path instead of hardcoded './mcp'
     const originalBasePath = options.mcp?.basePath || './mcp';
@@ -89,6 +105,11 @@ class DynamicAPIMCPServer {
     
     // Optional bridge reloader to merge external MCP tools
     this.bridgeReloader = options.bridgeReloader || null;
+    
+    // Pass quiet mode to bridge reloader if available
+    if (this.bridgeReloader && this.bridgeReloader.setQuiet) {
+      this.bridgeReloader.setQuiet(this.quiet);
+    }
 
     // File watchers
     this.promptsWatcher = null;

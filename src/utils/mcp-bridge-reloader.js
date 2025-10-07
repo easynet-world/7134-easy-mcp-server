@@ -10,6 +10,11 @@ class MCPBridgeReloader {
     this.logger = options.logger || console;
     this.watcher = null;
     this.bridges = new Map(); // name -> MCPBridge
+    this.quiet = options.quiet || false;
+  }
+
+  setQuiet(quiet) {
+    this.quiet = quiet;
   }
 
   getConfigPath() {
@@ -59,7 +64,7 @@ class MCPBridgeReloader {
       const servers = this.resolveAllServers(rawCfg);
       servers.forEach(({ name, command, args }) => {
         try {
-          const bridge = new MCPBridge({ command, args });
+          const bridge = new MCPBridge({ command, args, quiet: this.quiet });
           bridge.start();
           bridge.on('notification', (msg) => {
             try {
