@@ -1252,7 +1252,7 @@ class DynamicAPIMCPServer {
       }
 
       return {
-        name: `/api/${route.path}/${route.method.toLowerCase()}`,
+        name: `api_${route.path.replace(/\//g, '_')}_${route.method.toLowerCase()}`,
         description: enhancedDescription,
         inputSchema: inputSchema,
         // Add response schema information as separate field for compatibility
@@ -1309,9 +1309,9 @@ class DynamicAPIMCPServer {
     const { name, arguments: args } = data.params || data;
     const routes = this.getLoadedRoutes();
     
-    // First try to find API route (format: /api/[full_path]/[http_method])
+    // First try to find API route (format: api_[path]_[http_method])
     const route = routes.find(r => 
-      `/api/${r.path}/${r.method.toLowerCase()}` === name
+      `api_${r.path.replace(/\//g, '_')}_${r.method.toLowerCase()}` === name
     );
     
     if (route) {
