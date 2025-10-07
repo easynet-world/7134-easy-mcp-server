@@ -10,6 +10,7 @@
 Write **ONE function** → Get **EVERYTHING**:
 - ✅ **REST API** - Instant HTTP endpoints
 - ✅ **MCP Tools** - AI models can call your functions  
+- ✅ **Chrome Web Browsing** - AI models can control web browsers
 - ✅ **MCP Prompts** - Template-based prompts with parameters
 - ✅ **MCP Resources** - Documentation and data access
 - ✅ **OpenAPI** - Complete API documentation
@@ -180,6 +181,58 @@ your-project/
 ## 🤖 **MCP Integration (AI Features)**
 
 MCP (Model Context Protocol) lets AI models interact with your APIs and use your prompts/resources.
+
+### 🌐 **Chrome Web Browsing Support**
+
+The framework includes built-in support for Chrome web browsing through MCP bridge integration. AI models can now control web browsers, navigate pages, fill forms, take screenshots, and perform automated web interactions.
+
+**Features:**
+- ✅ **Browser Automation**: Open pages, navigate, click, fill forms
+- ✅ **Screenshot Capture**: Take full page or element screenshots  
+- ✅ **Page Interaction**: Click buttons, fill inputs, handle dialogs
+- ✅ **Network Monitoring**: Track requests, analyze performance
+- ✅ **JavaScript Execution**: Run custom scripts in browser context
+- ✅ **Multi-Page Support**: Manage multiple browser tabs/windows
+
+**Quick Setup:**
+```bash
+# The framework automatically includes Chrome DevTools MCP bridge
+# No additional configuration needed - it's enabled by default!
+npx easy-mcp-server
+```
+
+**Available Chrome Tools:**
+- `new_page` - Create new browser pages
+- `navigate_page` - Navigate to URLs
+- `take_snapshot` - Get page content with element UIDs
+- `take_screenshot` - Capture page/element images
+- `click` - Click on page elements
+- `fill` - Fill form inputs
+- `evaluate_script` - Run JavaScript in browser
+- `list_pages` - List open browser pages
+- `select_page` - Switch between pages
+- `wait_for` - Wait for text to appear
+- `handle_dialog` - Handle browser dialogs
+- `list_network_requests` - Monitor network activity
+- `performance_start_trace` - Performance monitoring
+- And 20+ more browser automation tools!
+
+**Example Usage:**
+```javascript
+// AI models can now control browsers through MCP
+// Example: Navigate to Google and search
+1. new_page({ url: "https://www.google.com" })
+2. take_snapshot() // Get page elements
+3. fill({ uid: "search-box", value: "easy-mcp-server" })
+4. click({ uid: "search-button" })
+5. take_screenshot() // Capture results
+```
+
+**Unified MCP Interface:**
+- **Port 8888**: Single MCP server with both your APIs AND Chrome tools
+- **Seamless Integration**: AI models access everything through one interface
+- **No Configuration**: Chrome tools work out-of-the-box
+- **Hot Reload**: Changes to bridge config are detected automatically
 
 ### 📁 **Simple MCP Structure**
 ```
@@ -430,7 +483,13 @@ easy-mcp-server --help
 
 ### MCP Bridge (Multi-Server)
 
-The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`).
+The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`). **Chrome web browsing is included by default** through the `chrome-devtools-mcp` bridge.
+
+**🌐 Chrome Web Browsing Features:**
+- **Unified Interface**: Chrome tools accessible through port 8888 MCP server
+- **No Setup Required**: Chrome DevTools MCP bridge enabled by default
+- **Full Browser Control**: Navigate, click, fill forms, take screenshots
+- **AI Integration**: AI models can control web browsers seamlessly
 
 Endpoints:
 - GET `/bridge/list-tools` → returns `{ servers: { <name>: <toolsResult>|{error} } }`
