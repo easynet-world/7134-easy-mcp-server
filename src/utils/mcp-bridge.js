@@ -34,7 +34,13 @@ class MCPBridge extends EventEmitter {
     this.proc.stderr.on('data', (chunk) => {
       // Surface stderr as warning but do not crash
       const msg = chunk.toString();
-      if (!this.quiet) {
+      
+      // Filter out common warning messages in quiet mode
+      const isWarningMessage = msg.includes('exposes content of the browser instance') ||
+                              msg.includes('Avoid sharing sensitive or personal information') ||
+                              msg.includes('chrome-devtools-mcp exposes content');
+      
+      if (!this.quiet || !isWarningMessage) {
         console.log(`🔌 Bridge stderr: ${msg}`);
       }
       this.emit('stderr', msg);
