@@ -1252,7 +1252,7 @@ class DynamicAPIMCPServer {
       }
 
       return {
-        name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+        name: `${route.path}/${route.method.toLowerCase()}`,
         description: enhancedDescription,
         inputSchema: inputSchema,
         // Add response schema information as separate field for compatibility
@@ -1453,7 +1453,7 @@ class DynamicAPIMCPServer {
         }
         
         return {
-          name: `${route.method.toLowerCase()}_${route.path.replace(/\//g, '_').replace(/^_/, '')}`,
+          name: `${route.path}/${route.method.toLowerCase()}`,
           description: processor?.mcpDescription || openApi?.description || processor?.description || `Execute ${route.method} request to ${route.path}`,
           inputSchema: inputSchema,
           // Add response schema information
@@ -1488,11 +1488,10 @@ class DynamicAPIMCPServer {
     try {
       const { name, arguments: args } = data;
       
-      // Parse the tool name to get method and path (method is now at the end)
-      const parts = name.split('_');
-      const method = parts[parts.length - 1]; // Last part is the method
-      const pathParts = parts.slice(0, -1); // Everything except the last part is the path
-      const path = '/' + pathParts.join('/');
+      // Parse the tool name to get method and path (format: [full_path]/[http_method])
+      const lastSlashIndex = name.lastIndexOf('/');
+      const method = name.substring(lastSlashIndex + 1); // Everything after the last slash is the method
+      const path = name.substring(0, lastSlashIndex); // Everything before the last slash is the path
       
       console.log('🔍 MCP Server: Tool call request:', { name, method, path });
       
