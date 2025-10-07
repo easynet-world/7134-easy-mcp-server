@@ -389,7 +389,7 @@ app.get('/mcp/tools', (req, res) => {
   try {
     const routes = apiLoader.getRoutes();
     const tools = routes.map(route => ({
-      name: `${route.path}_${route.method.toLowerCase()}`,
+      name: `${route.path}/${route.method.toLowerCase()}`,
       description: route.processorInstance?.description || `Execute ${route.method} request to ${route.path}`,
       method: route.method,
       path: route.path,
@@ -416,10 +416,10 @@ app.post('/mcp/execute/:toolName', (req, res) => {
   const { body, query, headers } = req.body;
   
   try {
-    // Parse the tool name to get method and path (format: [full_path]_[http_method])
-    const lastUnderscoreIndex = toolName.lastIndexOf('_');
-    const method = toolName.substring(lastUnderscoreIndex + 1); // Everything after the last underscore is the method
-    const path = toolName.substring(0, lastUnderscoreIndex); // Everything before the last underscore is the path
+    // Parse the tool name to get method and path (format: [full_path]/[http_method])
+    const lastSlashIndex = toolName.lastIndexOf('/');
+    const method = toolName.substring(lastSlashIndex + 1); // Everything after the last slash is the method
+    const path = toolName.substring(0, lastSlashIndex); // Everything before the last slash is the path
     
     // Find the route
     const routes = apiLoader.getRoutes();
