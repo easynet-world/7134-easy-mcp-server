@@ -17,6 +17,7 @@ class EnvHotReloader {
     this.onReload = options.onReload || (() => {});
     this.logger = options.logger || console;
     this.mcpServer = options.mcpServer || null;
+    this.bridgeReloader = options.bridgeReloader || null;
     this.apiLoader = options.apiLoader || null;
   }
 
@@ -29,23 +30,10 @@ class EnvHotReloader {
       return;
     }
 
-    // Find all .env files that exist
-    const existingEnvFiles = this.envFiles.filter(envFile => {
-      const envPath = path.join(this.userCwd, envFile);
-      return fs.existsSync(envPath);
-    });
+    // Create file patterns to watch (always watch for CRUD of these files)
+    const watchPatterns = this.envFiles.map(envFile => path.join(this.userCwd, envFile));
 
-    if (existingEnvFiles.length === 0) {
-      this.logger.log('📄 No .env files found - skipping hot reload setup');
-      return;
-    }
-
-    // Create file patterns to watch
-    const watchPatterns = existingEnvFiles.map(envFile => 
-      path.join(this.userCwd, envFile)
-    );
-
-    this.logger.log(`🔄 Setting up .env hot reload for: ${existingEnvFiles.join(', ')}`);
+    this.logger.log(`🔄 Setting up .env hot reload for: ${this.envFiles.join(', ')}`);
 
     // Create watcher
     this.watcher = chokidar.watch(watchPatterns, {
@@ -60,6 +48,11 @@ class EnvHotReloader {
     });
 
     this.watcher.on('add', (filePath) => {
+      this.handleEnvChange(filePath);
+    });
+
+    // Handle file deletions
+    this.watcher.on('unlink', (filePath) => {
       this.handleEnvChange(filePath);
     });
 
@@ -136,6 +129,15 @@ class EnvHotReloader {
         this.updateAPILoaderConfiguration();
         
         this.onReload();
+
+        // Restart MCP bridges if available to pick up new credentials/config
+        try {
+          if (this.bridgeReloader && typeof this.bridgeReloader.restartBridges === 'function') {
+            this.bridgeReloader.restartBridges();
+          }
+        } catch (bridgeErr) {
+          this.logger.warn(`⚠️  Failed to restart MCP bridges after env reload: ${bridgeErr.message}`);
+        }
 
         // Notify connected MCP clients about configuration changes
         try {
@@ -247,6 +249,13 @@ class EnvHotReloader {
    */
   setAPILoader(apiLoader) {
     this.apiLoader = apiLoader;
+  }
+
+  /**
+   * Set MCP bridge reloader reference for restarting bridges on env changes
+   */
+  setBridgeReloader(bridgeReloader) {
+    this.bridgeReloader = bridgeReloader;
   }
 
   /**

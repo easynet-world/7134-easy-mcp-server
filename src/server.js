@@ -622,7 +622,8 @@ function startServer() {
           },
           logger: console,
           mcpServer: mcpServer,
-          apiLoader: apiLoader
+          apiLoader: apiLoader,
+          bridgeReloader: bridgeReloader
         });
         envHotReloader.startWatching();
         

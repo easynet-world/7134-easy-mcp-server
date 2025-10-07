@@ -13,6 +13,25 @@ class MCPBridgeReloader {
     this.quiet = options.quiet || false;
   }
 
+
+  // Build environment variables for MCP server based on EASY_MCP_SERVER.[SERVER_NAME].[PARAM] pattern
+  buildServerEnv(serverName) {
+    const env = {};
+    const prefix = `EASY_MCP_SERVER.${serverName.toLowerCase()}.`;
+    
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith(prefix)) {
+        // Convert EASY_MCP_SERVER.github.token -> GITHUB_TOKEN
+        const paramName = key.substring(prefix.length);
+        // Convert snake_case to UPPER_CASE for the final environment variable
+        const envKey = paramName.toUpperCase().replace(/\./g, '_');
+        env[envKey] = value;
+      }
+    }
+    
+    return Object.keys(env).length > 0 ? env : null;
+  }
+
   setQuiet(quiet) {
     this.quiet = quiet;
   }
@@ -39,7 +58,11 @@ class MCPBridgeReloader {
     if (config && config.mcpServers && typeof config.mcpServers === 'object') {
       for (const [name, entry] of Object.entries(config.mcpServers)) {
         if (entry && (entry.command || entry.args)) {
-          servers.push({ name, command: entry.command, args: Array.isArray(entry.args) ? entry.args : [] });
+          servers.push({
+            name,
+            command: entry.command,
+            args: Array.isArray(entry.args) ? entry.args : []
+          });
         }
       }
     }
@@ -60,8 +83,14 @@ class MCPBridgeReloader {
       const servers = this.resolveAllServers(rawCfg);
       servers.forEach(({ name, command, args }) => {
         try {
-          const bridge = new MCPBridge({ command, args, quiet: this.quiet });
+          // Build environment variables for this server
+          const childEnv = this.buildServerEnv(name);
+          
+          const bridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv });
+          
+          // Try to start the bridge and handle failures gracefully
           bridge.start();
+          
           bridge.on('notification', (msg) => {
             try {
               if (msg && msg.method === 'notifications/configChanged') {
@@ -71,8 +100,23 @@ class MCPBridgeReloader {
               this.logger.warn(`⚠️  MCP Bridge notification handler error (${name}): ${err && err.message ? err.message : String(err)}`);
             }
           });
-          this.bridges.set(name, bridge);
-          this.logger.log(`🔌 MCP Bridge started: ${name}`);
+          
+          bridge.on('error', (err) => {
+            this.logger.warn(`⚠️  MCP Bridge '${name}' error: ${err && err.message ? err.message : String(err)}`);
+            // Remove failed bridge from the map
+            this.bridges.delete(name);
+          });
+          
+          // Check if bridge started successfully after a short delay
+          setTimeout(() => {
+            if (bridge.proc && bridge.proc.exitCode === null) {
+              this.bridges.set(name, bridge);
+              this.logger.log(`🔌 MCP Bridge started: ${name}`);
+            } else {
+              this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start - check your environment variables (EASY_MCP_SERVER.${name.toLowerCase()}.*)`);
+            }
+          }, 1000);
+          
         } catch (err) {
           this.logger.warn(`⚠️  Failed to start MCP Bridge '${name}': ${err && err.message ? err.message : String(err)}`);
         }
@@ -80,6 +124,7 @@ class MCPBridgeReloader {
     }
     return this.bridges;
   }
+
 
   restartBridges() {
     if (this.bridges.size > 0) {
