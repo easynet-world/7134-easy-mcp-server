@@ -1275,7 +1275,7 @@ class DynamicAPIMCPServer {
               // Normalize bridge tools into a compatible shape with server name prefix
               bridgeResult.tools.forEach(t => {
                 tools.push({
-                  name: `/${serverName}/${t.name}`, // Add server name as prefix with forward slash
+                  name: `${serverName}_${t.name}`, // Add server name as prefix with underscore
                   description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
@@ -1337,8 +1337,8 @@ class DynamicAPIMCPServer {
         const bridges = this.bridgeReloader.ensureBridges();
         for (const [serverName, bridge] of bridges.entries()) {
           try {
-            // Check if the tool name starts with the server name prefix (format: /[serverName]/[toolName])
-            const prefix = `/${serverName}/`;
+            // Check if the tool name starts with the server name prefix (format: [serverName]_[toolName])
+            const prefix = `${serverName}_`;
             if (name.startsWith(prefix)) {
               // Remove the prefix to get the original tool name
               const originalToolName = name.substring(prefix.length);
