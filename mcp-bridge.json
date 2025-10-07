@@ -7,6 +7,10 @@
     "iterm2": {
       "command": "npx",
       "args": ["-y", "iterm-mcp"]
+    },
+    "kubernetes": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-kubernetes"]
     }
   }
 }
