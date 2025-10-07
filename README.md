@@ -497,6 +497,8 @@ EASY_MCP_SERVER_DEFAULT_FILE=index.html     # Default file name
 EASY_MCP_SERVER_LOG_LEVEL=info              # Log level
 EASY_MCP_SERVER_LOG_FORMAT=text             # Log format
 EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server # Service name
+EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json # MCP bridge config path
+EASY_MCP_SERVER_BRIDGE_ENABLED=true         # Enable MCP bridge functionality
 OPENAI_API_KEY=your-key-here                # OpenAI API key (optional)
 NODE_ENV=development                         # Environment
 ```

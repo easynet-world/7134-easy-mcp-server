@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "chrome-devtools": {
+    "chrome": {
       "command": "npx",
       "args": ["chrome-devtools-mcp", "--isolated"]
     },
