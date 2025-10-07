@@ -1247,24 +1247,24 @@ class DynamicAPIMCPServer {
     if (this.bridgeReloader) {
       try {
         const bridges = this.bridgeReloader.ensureBridges();
-        for (const [, bridge] of bridges.entries()) {
+        for (const [serverName, bridge] of bridges.entries()) {
           try {
             const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
-              // Normalize bridge tools into a compatible shape (keep name/description; leave schemas empty)
+              // Normalize bridge tools into a compatible shape with server name prefix
               bridgeResult.tools.forEach(t => {
                 tools.push({
-                  name: t.name,
-                  description: t.description || 'Bridge tool',
+                  name: `${serverName}_${t.name}`, // Add server name as prefix
+                  description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
-                  tags: ['bridge']
+                  tags: ['bridge', serverName]
                 });
               });
             }
           } catch (e) {
             // Log bridge errors but don't fail the whole list
-            console.warn(`⚠️  Bridge tools unavailable: ${e.message}`);
+            console.warn(`⚠️  Bridge tools unavailable for ${serverName}: ${e.message}`);
           }
         }
       } catch (e) {
@@ -1314,15 +1314,21 @@ class DynamicAPIMCPServer {
     if (this.bridgeReloader) {
       try {
         const bridges = this.bridgeReloader.ensureBridges();
-        for (const [, bridge] of bridges.entries()) {
+        for (const [serverName, bridge] of bridges.entries()) {
           try {
-            const bridgeResult = await bridge.rpcRequest('tools/call', { name, arguments: args }, 5000);
-            if (bridgeResult && bridgeResult.content) {
-              return {
-                jsonrpc: '2.0',
-                id: data.id,
-                result: bridgeResult
-              };
+            // Check if the tool name starts with the server name prefix
+            const prefix = `${serverName}_`;
+            if (name.startsWith(prefix)) {
+              // Remove the prefix to get the original tool name
+              const originalToolName = name.substring(prefix.length);
+              const bridgeResult = await bridge.rpcRequest('tools/call', { name: originalToolName, arguments: args }, 5000);
+              if (bridgeResult && bridgeResult.content) {
+                return {
+                  jsonrpc: '2.0',
+                  id: data.id,
+                  result: bridgeResult
+                };
+              }
             }
           } catch (e) {
             // Continue to next bridge if this one fails
