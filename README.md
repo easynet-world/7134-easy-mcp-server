@@ -11,6 +11,7 @@ Write **ONE function** → Get **EVERYTHING**:
 - ✅ **REST API** - Instant HTTP endpoints
 - ✅ **MCP Tools** - AI models can call your functions  
 - ✅ **Chrome Web Browsing** - AI models can control web browsers
+- ✅ **iTerm2 Integration** - AI models can control terminal sessions
 - ✅ **MCP Prompts** - Template-based prompts with parameters
 - ✅ **MCP Resources** - Documentation and data access
 - ✅ **OpenAPI** - Complete API documentation
@@ -232,6 +233,47 @@ npx easy-mcp-server
 - **Port 8888**: Single MCP server with both your APIs AND Chrome tools
 - **Seamless Integration**: AI models access everything through one interface
 - **No Configuration**: Chrome tools work out-of-the-box
+- **Hot Reload**: Changes to bridge config are detected automatically
+```
+
+### 💻 **iTerm2 Terminal Integration**
+
+The framework includes built-in support for iTerm2 terminal control through MCP bridge integration. AI models can now interact with terminal sessions, execute commands, and read output seamlessly.
+
+**Features:**
+- ✅ **Terminal Control**: Execute commands in active iTerm2 sessions
+- ✅ **Output Reading**: Read terminal output and command results
+- ✅ **Command Execution**: Run shell commands, scripts, and programs
+- ✅ **Control Characters**: Send special control sequences (Ctrl+C, etc.)
+- ✅ **Multi-Session Support**: Work with multiple terminal sessions
+- ✅ **Real-time Interaction**: Live terminal interaction and monitoring
+
+**Quick Setup:**
+```bash
+# The framework automatically includes iTerm2 MCP bridge
+# No additional configuration needed - it's enabled by default!
+npx easy-mcp-server
+```
+
+**Available iTerm2 Tools:**
+- `iterm-mcp_write_to_terminal` - Execute commands in active terminal
+- `iterm-mcp_read_terminal_output` - Read terminal output and results
+- `iterm-mcp_send_control_character` - Send control characters (Ctrl+C, etc.)
+
+**Example Usage:**
+```javascript
+// AI models can now control terminal sessions through MCP
+// Example: Execute commands and read results
+1. iterm-mcp_write_to_terminal({ command: "ls -la" })
+2. iterm-mcp_read_terminal_output({ linesOfOutput: 10 })
+3. iterm-mcp_write_to_terminal({ command: "git status" })
+4. iterm-mcp_send_control_character({ letter: "C" }) // Ctrl+C
+```
+
+**Unified MCP Interface:**
+- **Port 8888**: Single MCP server with both your APIs AND iTerm2 tools
+- **Seamless Integration**: AI models access everything through one interface
+- **No Configuration**: iTerm2 tools work out-of-the-box
 - **Hot Reload**: Changes to bridge config are detected automatically
 
 ### 📁 **Simple MCP Structure**
@@ -483,13 +525,19 @@ easy-mcp-server --help
 
 ### MCP Bridge (Multi-Server)
 
-The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`). **Chrome web browsing is included by default** through the `chrome-devtools-mcp` bridge.
+The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`). **Chrome web browsing and iTerm2 terminal control are included by default** through the respective MCP bridges.
 
 **🌐 Chrome Web Browsing Features:**
 - **Unified Interface**: Chrome tools accessible through port 8888 MCP server
 - **No Setup Required**: Chrome DevTools MCP bridge enabled by default
 - **Full Browser Control**: Navigate, click, fill forms, take screenshots
 - **AI Integration**: AI models can control web browsers seamlessly
+
+**💻 iTerm2 Terminal Features:**
+- **Unified Interface**: iTerm2 tools accessible through port 8888 MCP server
+- **No Setup Required**: iTerm2 MCP bridge enabled by default
+- **Full Terminal Control**: Execute commands, read output, send control characters
+- **AI Integration**: AI models can control terminal sessions seamlessly
 
 Endpoints:
 - GET `/bridge/list-tools` → returns `{ servers: { <name>: <toolsResult>|{error} } }`
@@ -511,6 +559,10 @@ Default `mcp-bridge.json` (Cursor-compatible):
     "chrome-devtools": {
       "command": "npx",
       "args": ["chrome-devtools-mcp"]
+    },
+    "iterm-mcp": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"]
     }
   }
 }
@@ -521,6 +573,7 @@ Add more servers by appending entries under `mcpServers`:
 {
   "mcpServers": {
     "chrome-devtools": { "command": "npx", "args": ["chrome-devtools-mcp"] },
+    "iterm-mcp": { "command": "npx", "args": ["-y", "iterm-mcp"] },
     "another-server":  { "command": "node", "args": ["path/to/server.js"] }
   }
 }
