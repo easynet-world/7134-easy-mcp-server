@@ -15,6 +15,7 @@ class MCPBridge extends EventEmitter {
     this.pending = new Map(); // id -> { resolve, reject }
     this.initialized = false;
     this.initPromise = null;
+    this.quiet = options.quiet || false;
 
     // Parser state
     this.buffer = Buffer.alloc(0);
@@ -33,7 +34,9 @@ class MCPBridge extends EventEmitter {
     this.proc.stderr.on('data', (chunk) => {
       // Surface stderr as warning but do not crash
       const msg = chunk.toString();
-      console.log(`🔌 Bridge stderr: ${msg}`);
+      if (!this.quiet) {
+        console.log(`🔌 Bridge stderr: ${msg}`);
+      }
       this.emit('stderr', msg);
     });
     this.proc.on('exit', (code, signal) => {
@@ -66,13 +69,17 @@ class MCPBridge extends EventEmitter {
 
       const message = JSON.stringify(initRequest) + '\n';
       
-      console.log('🔌 Bridge: Sending initialization message:', JSON.stringify(message));
+      if (!this.quiet) {
+        console.log('🔌 Bridge: Sending initialization message:', JSON.stringify(message));
+      }
 
       // Set up a one-time listener for the initialization response
       const initHandler = (msg) => {
         if (msg.id === 0) {
           this.initialized = true;
-          console.log('🔌 Bridge: Initialization completed');
+          if (!this.quiet) {
+            console.log('🔌 Bridge: Initialization completed');
+          }
           resolve(msg);
         }
       };
@@ -87,13 +94,17 @@ class MCPBridge extends EventEmitter {
       }, 10000);
 
       try {
-        console.log('🔌 Bridge: Writing to stdin...');
+        if (!this.quiet) {
+          console.log('🔌 Bridge: Writing to stdin...');
+        }
         this.proc.stdin.write(message);
-        console.log('🔌 Bridge: Sent initialization request');
-        
-        // Check if stdin is writable
-        console.log('🔌 Bridge: stdin writable:', this.proc.stdin.writable);
-        console.log('🔌 Bridge: stdin destroyed:', this.proc.stdin.destroyed);
+        if (!this.quiet) {
+          console.log('🔌 Bridge: Sent initialization request');
+          
+          // Check if stdin is writable
+          console.log('🔌 Bridge: stdin writable:', this.proc.stdin.writable);
+          console.log('🔌 Bridge: stdin destroyed:', this.proc.stdin.destroyed);
+        }
         
       } catch (err) {
         clearTimeout(timeoutId);
@@ -163,7 +174,9 @@ class MCPBridge extends EventEmitter {
 
   _onData(chunk) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
-    console.log('🔌 Bridge stdout raw:', JSON.stringify(chunk.toString()));
+    if (!this.quiet) {
+      console.log('🔌 Bridge stdout raw:', JSON.stringify(chunk.toString()));
+    }
     
     // Parse newline-delimited JSON
     const data = this.buffer.toString('utf8');
@@ -179,39 +192,53 @@ class MCPBridge extends EventEmitter {
           const msg = JSON.parse(line);
           this._handleMessage(msg);
         } catch (err) {
-          console.log('🔌 Bridge: Failed to parse line:', line, err.message);
+          if (!this.quiet) {
+            console.log('🔌 Bridge: Failed to parse line:', line, err.message);
+          }
         }
       }
     }
   }
 
   _handleMessage(msg) {
-    console.log('🔌 Bridge: Received message:', JSON.stringify(msg, null, 2));
+    if (!this.quiet) {
+      console.log('🔌 Bridge: Received message:', JSON.stringify(msg, null, 2));
+    }
 
     // Notification (no id)
     if (msg && typeof msg === 'object' && msg.method && msg.id == null) {
-      console.log('🔌 Bridge: Emitting notification:', msg.method);
+      if (!this.quiet) {
+        console.log('🔌 Bridge: Emitting notification:', msg.method);
+      }
       this.emit('notification', msg);
       return;
     }
 
     // Response
     if (msg && Object.prototype.hasOwnProperty.call(msg, 'id')) {
-      console.log(`🔌 Bridge: Emitting response for id ${msg.id}`);
+      if (!this.quiet) {
+        console.log(`🔌 Bridge: Emitting response for id ${msg.id}`);
+      }
       // Emit response event for initialization handling
       this.emit('response', msg);
-      
+
       const pending = this.pending.get(msg.id);
       if (!pending) {
-        console.log(`🔌 Bridge: No pending request for id ${msg.id}`);
+        if (!this.quiet) {
+          console.log(`🔌 Bridge: No pending request for id ${msg.id}`);
+        }
         return;
       }
       this.pending.delete(msg.id);
       if (msg.error) {
-        console.log(`🔌 Bridge: Rejecting request ${msg.id} with error:`, msg.error);
+        if (!this.quiet) {
+          console.log(`🔌 Bridge: Rejecting request ${msg.id} with error:`, msg.error);
+        }
         pending.reject(new Error(msg.error.message || 'MCP error'));
       } else {
-        console.log(`🔌 Bridge: Resolving request ${msg.id} with result:`, msg.result);
+        if (!this.quiet) {
+          console.log(`🔌 Bridge: Resolving request ${msg.id} with result:`, msg.result);
+        }
         pending.resolve(msg.result);
       }
     }

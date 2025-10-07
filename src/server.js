@@ -585,7 +585,9 @@ function startServer() {
             basePath: mcpBasePath
           },
           // Provide bridge reloader so MCP tools/list can include bridge tools
-          bridgeReloader
+          bridgeReloader,
+          // Add quiet mode option
+          quiet: process.env.EASY_MCP_SERVER_QUIET === 'true'
         }
       );
       
