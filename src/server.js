@@ -95,7 +95,7 @@ app.use((err, req, res, next) => {
 // Initialize core services
 const apiLoader = new APILoader(app, process.env.EASY_MCP_SERVER_API_PATH || null);
 const openapiGenerator = new OpenAPIGenerator(apiLoader);
-const bridgeReloader = new MCPBridgeReloader({ root: process.cwd(), configFile: 'mcp-bridge.json', logger: console });
+const bridgeReloader = new MCPBridgeReloader({ root: process.cwd(), logger: console });
 bridgeReloader.startWatching();
 
 // Enhanced health check endpoint with API status
