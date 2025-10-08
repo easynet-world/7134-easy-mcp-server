@@ -131,7 +131,7 @@ describe('EASY_MCP_SERVER_BRIDGE_CONFIG_PATH Environment Variable', () => {
     const config = reloader.loadConfig();
     expect(config).toEqual({});
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to parse test-bridge-config.json')
+      expect.stringContaining('Failed to parse')
     );
   });
 

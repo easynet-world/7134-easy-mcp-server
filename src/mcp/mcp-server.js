@@ -31,17 +31,134 @@ class DynamicAPIMCPServer {
     // Add quiet mode option
     this.quiet = options.quiet || process.env.EASY_MCP_SERVER_QUIET === 'true';
     
-    // Helper method for conditional logging
-    this.log = (...args) => {
-      if (!this.quiet) {
-        console.log(...args);
+    // Enhanced performance monitoring and metrics
+    this.metrics = {
+      startTime: Date.now(),
+      requestCount: 0,
+      errorCount: 0,
+      toolCalls: 0,
+      promptRequests: 0,
+      resourceRequests: 0,
+      bridgeRequests: 0,
+      averageResponseTime: 0,
+      responseTimes: [],
+      errorTypes: new Map(),
+      lastActivity: Date.now()
+    };
+    
+    // Enhanced error handling configuration
+    this.errorHandling = {
+      maxRetries: options.maxRetries || 3,
+      retryDelay: options.retryDelay || 1000,
+      enableDetailedErrors: options.enableDetailedErrors !== false,
+      logLevel: options.logLevel || 'info'
+    };
+    
+    // Enhanced logging methods with structured logging
+    this.log = (level, message, data = {}) => {
+      if (!this.quiet && this.shouldLog(level)) {
+        const timestamp = new Date().toISOString();
+        const logEntry = {
+          timestamp,
+          level,
+          message,
+          data,
+          server: 'mcp-server',
+          host: this.host,
+          port: this.port
+        };
+        
+        if (level === 'error') {
+          console.error(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data);
+        } else if (level === 'warn') {
+          console.warn(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data);
+        } else {
+          console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data);
+        }
       }
     };
     
-    this.warn = (...args) => {
-      if (!this.quiet) {
-        console.warn(...args);
+    this.warn = (message, data = {}) => {
+      this.log('warn', message, data);
+    };
+    
+    this.error = (message, data = {}) => {
+      this.log('error', message, data);
+      this.metrics.errorCount++;
+    };
+    
+    this.info = (message, data = {}) => {
+      this.log('info', message, data);
+    };
+    
+    this.debug = (message, data = {}) => {
+      this.log('debug', message, data);
+    };
+    
+    // Helper method to determine if we should log at this level
+    this.shouldLog = (level) => {
+      const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+      return levels[level] >= levels[this.errorHandling.logLevel];
+    };
+    
+    // Performance tracking methods
+    this.trackRequest = (type, startTime, success = true, errorType = null) => {
+      const responseTime = Date.now() - startTime;
+      this.metrics.requestCount++;
+      this.metrics.lastActivity = Date.now();
+      
+      if (success) {
+        // Map type to specific metric counters
+        if (type === 'tool') {
+          this.metrics.toolCalls++;
+        } else if (type === 'prompt') {
+          this.metrics.promptRequests++;
+        } else if (type === 'resource') {
+          this.metrics.resourceRequests++;
+        } else if (type === 'bridge') {
+          this.metrics.bridgeRequests++;
+        } else {
+          // Generic counter for other types
+          this.metrics[`${type}Requests`] = (this.metrics[`${type}Requests`] || 0) + 1;
+        }
+      } else {
+        this.metrics.errorCount++;
+        if (errorType) {
+          this.metrics.errorTypes.set(errorType, (this.metrics.errorTypes.get(errorType) || 0) + 1);
+        }
       }
+      
+      // Track response times (keep last 100)
+      this.metrics.responseTimes.push(responseTime);
+      if (this.metrics.responseTimes.length > 100) {
+        this.metrics.responseTimes.shift();
+      }
+      
+      // Calculate average response time
+      this.metrics.averageResponseTime = this.metrics.responseTimes.reduce((a, b) => a + b, 0) / this.metrics.responseTimes.length;
+    };
+    
+    // Enhanced error handling method
+    this.handleError = (error, context = {}) => {
+      const errorInfo = {
+        message: error.message,
+        stack: error.stack,
+        context,
+        timestamp: new Date().toISOString(),
+        server: 'mcp-server'
+      };
+      
+      this.error('MCP Server Error', errorInfo);
+      
+      // Return structured error response
+      return {
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: this.errorHandling.enableDetailedErrors ? error.message : 'Internal Server Error',
+          data: this.errorHandling.enableDetailedErrors ? errorInfo : undefined
+        }
+      };
     };
     
     // Initialize MCP Cache Manager for intelligent caching
@@ -1155,32 +1272,53 @@ class DynamicAPIMCPServer {
    * Process MCP requests
    */
   async processMCPRequest(data) {
+    const startTime = Date.now();
+    
     try {
+      let result;
+      
       if (data.method === 'tools/list') {
-        return await this.processListTools(data);
+        result = await this.processListTools(data);
+        this.trackRequest('tool', startTime, true);
       } else if (data.method === 'tools/call') {
-        return await this.processCallTool(data);
+        result = await this.processCallTool(data);
+        this.trackRequest('tool', startTime, true);
       } else if (data.method === 'prompts/list') {
-        return await this.processListPrompts(data);
+        result = await this.processListPrompts(data);
+        this.trackRequest('prompt', startTime, true);
       } else if (data.method === 'prompts/get') {
-        return await this.processGetPrompt(data);
+        result = await this.processGetPrompt(data);
+        this.trackRequest('prompt', startTime, true);
       } else if (data.method === 'resources/list') {
-        return await this.processListResources(data);
+        result = await this.processListResources(data);
+        this.trackRequest('resource', startTime, true);
       } else if (data.method === 'resources/read') {
-        return await this.processReadResource(data);
+        result = await this.processReadResource(data);
+        this.trackRequest('resource', startTime, true);
       } else if (data.method === 'resources/templates/list') {
-        return await this.processListResourceTemplates(data);
+        result = await this.processListResourceTemplates(data);
+        this.trackRequest('resource', startTime, true);
       } else if (data.method === 'ping') {
-        return { 
+        result = { 
           jsonrpc: '2.0', 
           id: data.id, 
           result: { type: 'pong' } 
         };
+        this.trackRequest('ping', startTime, true);
       } else if (data.method === 'cache/stats') {
-        return await this.processCacheStats(data);
+        result = await this.processCacheStats(data);
+        this.trackRequest('cache', startTime, true);
       } else if (data.method === 'cache/clear') {
-        return await this.processCacheClear(data);
+        result = await this.processCacheClear(data);
+        this.trackRequest('cache', startTime, true);
+      } else if (data.method === 'health') {
+        result = await this.processHealth(data);
+        this.trackRequest('health', startTime, true);
+      } else if (data.method === 'metrics') {
+        result = await this.processMetrics(data);
+        this.trackRequest('metrics', startTime, true);
       } else {
+        this.trackRequest('unknown', startTime, false, 'method_not_found');
         return { 
           jsonrpc: '2.0', 
           id: data.id, 
@@ -1190,15 +1328,11 @@ class DynamicAPIMCPServer {
           } 
         };
       }
+      
+      return result;
     } catch (error) {
-      return { 
-        jsonrpc: '2.0', 
-        id: data.id, 
-        error: { 
-          code: -32603, 
-          message: `Internal error: ${error.message}` 
-        } 
-      };
+      this.trackRequest('error', startTime, false, 'internal_error');
+      return this.handleError(error, { method: data.method, id: data.id });
     }
   }
 
@@ -1207,7 +1341,7 @@ class DynamicAPIMCPServer {
    */
   async processListTools(data) {
     const routes = this.getLoadedRoutes();
-    console.log('🔍 MCP HTTP: Routes loaded:', routes.length);
+    this.debug('MCP HTTP: Routes loaded', { count: routes.length });
     
     const tools = routes.map(route => {
       const processor = route.processorInstance;
@@ -1285,7 +1419,7 @@ class DynamicAPIMCPServer {
             }
           } catch (e) {
             // Log bridge errors but don't fail the whole list
-            console.warn(`⚠️  Bridge tools unavailable for ${serverName}: ${e.message}`);
+            this.warn(`Bridge tools unavailable for ${serverName}`, { error: e.message, serverName });
           }
         }
       } catch (e) {
@@ -2320,6 +2454,115 @@ class DynamicAPIMCPServer {
           message: `Failed to clear cache: ${error.message}`
         }
       };
+    }
+  }
+
+  /**
+   * Process health check request
+   */
+  async processHealth(data) {
+    const startTime = Date.now();
+    
+    try {
+      const uptime = Date.now() - this.metrics.startTime;
+      const routes = this.getLoadedRoutes();
+      const isHealthy = this.metrics.errorCount < this.metrics.requestCount * 0.1; // Less than 10% error rate
+      
+      const health = {
+        status: isHealthy ? 'healthy' : 'degraded',
+        uptime,
+        server: {
+          host: this.host,
+          port: this.port,
+          clients: this.clients.size,
+          httpClients: this.httpClients.size
+        },
+        metrics: {
+          totalRequests: this.metrics.requestCount,
+          errorRate: this.metrics.requestCount > 0 ? (this.metrics.errorCount / this.metrics.requestCount) * 100 : 0,
+          averageResponseTime: this.metrics.averageResponseTime,
+          lastActivity: new Date(this.metrics.lastActivity).toISOString()
+        },
+        resources: {
+          prompts: this.prompts.size,
+          resources: this.resources.size,
+          routes: routes.length
+        },
+        cache: this.cacheManager ? await this.cacheManager.getCacheStats() : null
+      };
+      
+      this.trackRequest('health', startTime, true);
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: health
+      };
+    } catch (error) {
+      this.trackRequest('health', startTime, false, 'health_check_error');
+      return this.handleError(error, { method: 'health' });
+    }
+  }
+
+  /**
+   * Process metrics request
+   */
+  async processMetrics(data) {
+    const startTime = Date.now();
+    
+    try {
+      const uptime = Date.now() - this.metrics.startTime;
+      const routes = this.getLoadedRoutes();
+      
+      const metrics = {
+        server: {
+          uptime,
+          startTime: new Date(this.metrics.startTime).toISOString(),
+          lastActivity: new Date(this.metrics.lastActivity).toISOString(),
+          host: this.host,
+          port: this.port
+        },
+        performance: {
+          totalRequests: this.metrics.requestCount,
+          averageResponseTime: this.metrics.averageResponseTime,
+          responseTimes: {
+            min: Math.min(...this.metrics.responseTimes),
+            max: Math.max(...this.metrics.responseTimes),
+            avg: this.metrics.averageResponseTime,
+            count: this.metrics.responseTimes.length
+          }
+        },
+        requests: {
+          toolCalls: this.metrics.toolCalls,
+          promptRequests: this.metrics.promptRequests,
+          resourceRequests: this.metrics.resourceRequests,
+          bridgeRequests: this.metrics.bridgeRequests
+        },
+        errors: {
+          total: this.metrics.errorCount,
+          errorRate: this.metrics.requestCount > 0 ? (this.metrics.errorCount / this.metrics.requestCount) * 100 : 0,
+          types: Object.fromEntries(this.metrics.errorTypes)
+        },
+        resources: {
+          prompts: this.prompts.size,
+          resources: this.resources.size,
+          routes: routes.length,
+          clients: this.clients.size,
+          httpClients: this.httpClients.size
+        },
+        cache: this.cacheManager ? await this.cacheManager.getCacheStats() : null
+      };
+      
+      this.trackRequest('metrics', startTime, true);
+      
+      return {
+        jsonrpc: '2.0',
+        id: data.id,
+        result: metrics
+      };
+    } catch (error) {
+      this.trackRequest('metrics', startTime, false, 'metrics_error');
+      return this.handleError(error, { method: 'metrics' });
     }
   }
 }
