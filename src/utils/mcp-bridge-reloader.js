@@ -6,7 +6,9 @@ const MCPBridge = require('./mcp-bridge');
 class MCPBridgeReloader {
   constructor(options = {}) {
     this.root = options.root || process.cwd();
-    this.configFile = options.configFile || process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH || 'mcp-bridge.json';
+    // Handle empty EASY_MCP_SERVER_BRIDGE_CONFIG_PATH - if empty, don't load bridge
+    const bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+    this.configFile = options.configFile || (bridgeConfigPath && bridgeConfigPath.trim() !== '' ? bridgeConfigPath : 'mcp-bridge.json');
     this.logger = options.logger || console;
     this.watcher = null;
     this.bridges = new Map(); // name -> MCPBridge
@@ -71,14 +73,23 @@ class MCPBridgeReloader {
 
   ensureBridges() {
     if (this.bridges.size === 0) {
-      if (process.env.NODE_ENV === 'test' || process.env.EASY_MCP_SERVER_BRIDGE_ENABLED === 'false') {
-        // Provide a disabled stub in tests/disabled mode
+      if (process.env.NODE_ENV === 'test') {
+        // Provide a disabled stub in tests
         this.bridges.set('disabled', {
           rpcRequest: async () => ({ jsonrpc: '2.0', id: 0, result: { disabled: true } }),
           on: () => {}
         });
         return this.bridges;
       }
+      
+      // Check if EASY_MCP_SERVER_BRIDGE_CONFIG_PATH is empty or not set
+      const bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+      if (!bridgeConfigPath || bridgeConfigPath.trim() === '') {
+        // If bridge config path is empty, don't load any bridges
+        this.logger.log('🔌 MCP Bridge disabled - EASY_MCP_SERVER_BRIDGE_CONFIG_PATH is empty');
+        return this.bridges;
+      }
+      
       const rawCfg = this.loadConfig();
       const servers = this.resolveAllServers(rawCfg);
       servers.forEach(({ name, command, args }) => {
