@@ -39,17 +39,81 @@ class MCPBridgeReloader {
   }
 
   getConfigPath() {
-    return path.join(this.root, this.configFile);
+    // Check multiple locations in priority order:
+    // 1. Explicit path from environment variable (absolute or relative to cwd)
+    // 2. Current working directory
+    // 3. Project root (where package.json is located)
+    // 4. Package directory (fallback to package's example config)
+    
+    const bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+    
+    if (bridgeConfigPath && bridgeConfigPath.trim() !== '') {
+      // Use explicit path from environment variable
+      if (path.isAbsolute(bridgeConfigPath)) {
+        return bridgeConfigPath;
+      } else {
+        return path.resolve(this.root, bridgeConfigPath);
+      }
+    }
+    
+    // Check current working directory first
+    const cwdPath = path.join(this.root, this.configFile);
+    if (fs.existsSync(cwdPath)) {
+      return cwdPath;
+    }
+    
+    // Check project root (where package.json is located)
+    const projectRoot = this.findProjectRoot();
+    if (projectRoot && projectRoot !== this.root) {
+      const projectPath = path.join(projectRoot, this.configFile);
+      if (fs.existsSync(projectPath)) {
+        return projectPath;
+      }
+    }
+    
+    // Fallback to current working directory (will return non-existent path)
+    return cwdPath;
+  }
+  
+  findProjectRoot() {
+    let currentDir = this.root;
+    const maxDepth = 10; // Prevent infinite loops
+    let depth = 0;
+    
+    while (currentDir && depth < maxDepth) {
+      const packageJsonPath = path.join(currentDir, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+          // Check if this is a project that uses easy-mcp-server
+          if (packageJson.dependencies && packageJson.dependencies['easy-mcp-server']) {
+            return currentDir;
+          }
+        } catch (e) {
+          // Ignore parse errors, continue searching
+        }
+      }
+      currentDir = path.dirname(currentDir);
+      depth++;
+    }
+    
+    return null;
   }
 
   loadConfig() {
     const cfgPath = this.getConfigPath();
-    if (!fs.existsSync(cfgPath)) return {};
+    if (!fs.existsSync(cfgPath)) {
+      this.logger.log(`🔌 No MCP bridge config found at ${cfgPath}`);
+      return {};
+    }
+    
     try {
       const raw = fs.readFileSync(cfgPath, 'utf8');
-      return JSON.parse(raw);
+      const config = JSON.parse(raw);
+      this.logger.log(`🔌 Loaded MCP bridge config from ${cfgPath}`);
+      return config;
     } catch (e) {
-      this.logger.warn(`⚠️  Failed to parse ${this.configFile}: ${e.message}`);
+      this.logger.warn(`⚠️  Failed to parse ${cfgPath}: ${e.message}`);
       return {};
     }
   }
