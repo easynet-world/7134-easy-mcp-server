@@ -390,15 +390,31 @@ This resource now has updated content.`;
         fs.writeFile(resourceFile, updatedResourceContent)
       ]);
 
-      // Wait for hot reload
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Wait for hot reload with retry logic for updates
+      let updateRetries = 0;
+      let prompt = null;
+      let resource = null;
+      
+      while (updateRetries < 20) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        updateRetries++;
+        
+        if (mcpServer.prompts.size === 1 && mcpServer.resources.size === 1) {
+          prompt = Array.from(mcpServer.prompts.values())[0];
+          resource = Array.from(mcpServer.resources.values())[0];
+          
+          // Check if the update has been applied
+          if (prompt.arguments && prompt.arguments.length === 3 && 
+              resource.content && resource.content.includes('updated content')) {
+            break;
+          }
+        }
+        console.log(`Update retry ${updateRetries}: prompt args = ${prompt?.arguments?.length || 'undefined'}, resource updated = ${resource?.content?.includes('updated content') || false}`);
+      }
 
       // Verify updates
       expect(mcpServer.prompts.size).toBe(1);
       expect(mcpServer.resources.size).toBe(1);
-
-      const prompt = Array.from(mcpServer.prompts.values())[0];
-      const resource = Array.from(mcpServer.resources.values())[0];
 
       expect(prompt.arguments).toHaveLength(3);
       expect(resource.content).toContain('updated content');
