@@ -134,4 +134,31 @@ describe('EASY_MCP_SERVER_BRIDGE_CONFIG_PATH Environment Variable', () => {
       expect.stringContaining('Failed to parse test-bridge-config.json')
     );
   });
+
+  test('should not override environment variable when configFile is not provided', () => {
+    // This test verifies that the MCPBridgeReloader respects the environment variable
+    // when no configFile option is provided (as fixed in server.js)
+    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = 'test-bridge-config.json';
+    
+    const reloader = new MCPBridgeReloader({
+      root: __dirname + '/..',
+      logger: { log: jest.fn(), warn: jest.fn() }
+      // Note: no configFile option provided - this is the fix
+    });
+    
+    expect(reloader.configFile).toBe('test-bridge-config.json');
+    expect(reloader.getConfigPath()).toBe(testConfigPath);
+  });
+
+  test('should use default when environment variable is empty string', () => {
+    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = '';
+    
+    const reloader = new MCPBridgeReloader({
+      root: __dirname + '/..',
+      logger: { log: jest.fn(), warn: jest.fn() }
+    });
+    
+    expect(reloader.configFile).toBe('mcp-bridge.json');
+    expect(reloader.getConfigPath()).toBe(path.join(__dirname, '..', 'mcp-bridge.json'));
+  });
 });
