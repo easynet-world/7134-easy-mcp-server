@@ -3,54 +3,66 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-> **Transform any function into a complete API ecosystem with AI integration**
+> **Why is it simple and easy to use? Write one function, get a complete API ecosystem with AI integration!**
 
-## 🎯 **What You Get**
+## 🎯 **Why Choose easy-mcp-server?**
 
-Write **ONE function** → Get **EVERYTHING**:
-- ✅ **REST API** - Instant HTTP endpoints
-- ✅ **MCP Tools** - AI models can call your functions  
-- ✅ **Chrome Web Browsing** - AI models can control web browsers
-- ✅ **iTerm2 Integration** - AI models can control terminal sessions
-- ✅ **MCP Prompts** - Template-based prompts with parameters
-- ✅ **MCP Resources** - Documentation and data access
-- ✅ **OpenAPI** - Complete API documentation
-- ✅ **Swagger UI** - Interactive API explorer
+### Traditional Development vs easy-mcp-server
+
+| Traditional Development | easy-mcp-server |
+|------------------------|----------------|
+| ❌ Write API → Write docs → Write tests → Configure AI | ✅ **Write one function = Get everything** |
+| ❌ Manual route, middleware, validation setup | ✅ **File path = API path** |
+| ❌ Manual AI model integration | ✅ **Automatic AI integration** |
+| ❌ Manual documentation generation | ✅ **Automatic OpenAPI docs** |
+| ❌ Complex deployment configuration | ✅ **One command to start** |
+
+### 🚀 **3 seconds to start, 30 seconds to complete**
+
+```bash
+# 1. Create API file
+mkdir -p api/users && touch api/users/get.js
+
+# 2. Write one function
+echo 'const BaseAPI = require("easy-mcp-server/base-api");
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+}
+module.exports = GetUsers;' > api/users/get.js
+
+# 3. Start server
+npx easy-mcp-server
+```
+
+**Done!** You now have:
+- 🌐 **REST API**: `GET /users`
+- 🤖 **AI Tools**: AI models can call your APIs
+- 📚 **Auto Documentation**: OpenAPI + Swagger UI
+- 🔥 **Hot Reload**: Code changes take effect immediately
 
 ---
 
-## ⚡ **3 Simple Rules**
+## ⚡ **Core Principles: 3 Simple Rules**
 
 | Rule | Example | Result |
 |------|---------|--------|
 | **File Path = API Path** | `api/users/profile/get.js` | `GET /users/profile` |
 | **File Name = HTTP Method** | `post.js` | `POST` |
-| **One Function = Everything** | `process(req, res)` | REST + MCP + OpenAPI |
-
-### Quick Example
-```javascript
-const BaseAPI = require('easy-mcp-server/base-api');
-
-class MyAPI extends BaseAPI {
-  process(req, res) {
-    res.json({ message: 'Hello World' });
-  }
-}
-
-module.exports = MyAPI;
-```
+| **One Function = Everything** | `process(req, res)` | REST + AI + Documentation |
 
 ---
 
 ## 🚀 **Quick Start**
 
-### Option 1: Run Directly (Recommended)
+### Method 1: Run Directly (Recommended)
 ```bash
 # No installation needed - just run!
 npx easy-mcp-server
 ```
 
-### Option 2: Install & Setup
+### Method 2: Install & Setup
 ```bash
 npm install easy-mcp-server
 mkdir -p api/users && touch api/users/get.js
@@ -75,132 +87,39 @@ module.exports = GetUsers;
 # Basic usage
 npx easy-mcp-server
 
-# With custom ports (using environment variables)
+# Custom ports
 EASY_MCP_SERVER_PORT=8887 npx easy-mcp-server
-
-# Using environment variables (recommended)
-EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
-
 ```
 
-**✨ Features:**
-- 🔄 **Auto .env Loading**: Automatically loads `.env`, `.env.development`, `.env.local` files
-- 🔥 **.env Hot Reload**: Automatically detects and reloads .env file changes without restart
-- 📦 **Auto npm Install**: Automatically runs `npm install` before starting server
-- ⚙️ **Configurable Ports**: Set ports via CLI arguments or environment variables
-- 🛡️ **Graceful Error Handling**: Continues running even with some broken APIs
-- 📊 **Error Reporting**: Clear error messages with helpful suggestions
-
 **Access Points:**
-- 🌐 **REST API**: http://localhost:8887 (default)
-- 🤖 **MCP Server**: http://localhost:8888 (default)
-- 📚 **OpenAPI**: http://localhost:8887/openapi.json
-- 🔍 **Swagger UI**: http://localhost:8887/docs
-- 📁 **Static Files**: http://localhost:8887/ (serves from `public/` directory)
-  - Note: MCP HTTP server also serves from `public/`; root `/` serves `public/index.html` only (no MCP info fallback)
+- 🌐 **REST API**: http://localhost:8887
+- 🤖 **AI Server**: http://localhost:8888
+- 📚 **API Documentation**: http://localhost:8887/docs
+- 📁 **Static Files**: http://localhost:8887/
 
-### 4. Add MCP Features (AI Integration)
+---
+
+## 🤖 **AI Integration (MCP Features)**
+
+### Why AI Integration Matters?
+- **Traditional way**: AI models cannot directly call your APIs
+- **easy-mcp-server**: AI models can automatically discover and call all your APIs
+
+### Add AI Prompts and Resources
 ```bash
-# Add AI prompts (templates with parameters)
-mkdir -p mcp/prompts/analysis
-cat > mcp/prompts/analysis/data-analysis.md << 'EOF'
-<!-- description: Analyze data with custom parameters -->
+# Create AI prompt templates
+mkdir -p mcp/prompts
+echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
 
-Analyze {{dataset}} and create a {{report_type}} report.
-Focus on: {{focus_area}}
-EOF
-
-# Add AI resources (documentation)
-mkdir -p mcp/resources/guides
-echo '# API Guide
-
-This API helps you manage users and products.' > mcp/resources/guides/api-guide.md
+# Create AI resources
+mkdir -p mcp/resources
+echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
 ```
 
 **Result**: AI models can now use your prompts and access your documentation!
 
----
-
-## 📁 **Static File Serving**
-
-The framework now supports serving static files (HTML, CSS, JS, images) alongside your APIs, making it perfect for building web applications with admin panels, documentation sites, or any static content.
-
-### Quick Setup
-```bash
-# Create public directory for static files
-mkdir public
-
-# Add your static files
-echo '<h1>Hello World!</h1>' > public/index.html
-echo 'body { color: blue; }' > public/style.css
-echo 'console.log("Hello!");' > public/app.js
-```
-
-### Configuration Options
-```bash
-# Environment variables for static file serving
-EASY_MCP_SERVER_STATIC_ENABLED=true          # Enable static serving (default: true)
-EASY_MCP_SERVER_STATIC_DIRECTORY=./public    # Static directory (default: ./public)
-EASY_MCP_SERVER_SERVE_INDEX=true            # Serve index.html at root (default: true)
-EASY_MCP_SERVER_DEFAULT_FILE=index.html     # Default file name (default: index.html)
-```
-
-### Features
-- ✅ **Automatic Detection**: Serves static files if `public/` directory exists
-- ✅ **Root Route Support**: Serves `index.html` at `/` when available
-- ✅ **Security**: Prevents access to files outside the public directory
-- ✅ **Content Types**: Automatic MIME type detection for all file types
-- ✅ **Caching**: Proper HTTP caching headers for static assets
-- ✅ **Hot Reload**: Static files are served directly (no restart needed)
-
-### Example Structure
-```
-your-project/
-├── api/                    # API endpoints
-│   └── users/
-│       └── get.js
-├── public/                 # Static files (served at root)
-│   ├── index.html         # Served at /
-│   ├── style.css          # Served at /style.css
-│   ├── app.js            # Served at /app.js
-│   └── images/
-│       └── logo.png       # Served at /images/logo.png
-└── mcp/                   # MCP prompts and resources
-    ├── prompts/
-    └── resources/
-```
-
-### Use Cases
-- 🎨 **Admin Panels**: Build web interfaces for your MCP servers
-- 📚 **Documentation Sites**: Serve documentation alongside APIs
-- 🔧 **Settings Pages**: Create web-based configuration interfaces
-- 🎯 **Single Page Applications**: Serve React, Vue, or Angular apps
-- 📊 **Dashboards**: Build monitoring and analytics dashboards
-
----
-
-## 🤖 **MCP Integration (AI Features)**
-
-MCP (Model Context Protocol) lets AI models interact with your APIs and use your prompts/resources.
-
 ### 🌐 **Chrome Web Browsing Support**
-
-The framework includes built-in support for Chrome web browsing through MCP bridge integration. AI models can now control web browsers, navigate pages, fill forms, take screenshots, and perform automated web interactions.
-
-**Features:**
-- ✅ **Browser Automation**: Open pages, navigate, click, fill forms
-- ✅ **Screenshot Capture**: Take full page or element screenshots  
-- ✅ **Page Interaction**: Click buttons, fill inputs, handle dialogs
-- ✅ **Network Monitoring**: Track requests, analyze performance
-- ✅ **JavaScript Execution**: Run custom scripts in browser context
-- ✅ **Multi-Page Support**: Manage multiple browser tabs/windows
-
-**Quick Setup:**
-```bash
-# The framework automatically includes Chrome DevTools MCP bridge
-# No additional configuration needed - it's enabled by default!
-npx easy-mcp-server
-```
+AI models can control web browsers, navigate pages, fill forms, take screenshots, and perform automated web interactions.
 
 **Available Chrome Tools:**
 - `new_page` - Create new browser pages
@@ -210,177 +129,62 @@ npx easy-mcp-server
 - `click` - Click on page elements
 - `fill` - Fill form inputs
 - `evaluate_script` - Run JavaScript in browser
-- `list_pages` - List open browser pages
-- `select_page` - Switch between pages
-- `wait_for` - Wait for text to appear
-- `handle_dialog` - Handle browser dialogs
-- `list_network_requests` - Monitor network activity
-- `performance_start_trace` - Performance monitoring
 - And 20+ more browser automation tools!
 
-**Example Usage:**
-```javascript
-// AI models can now control browsers through MCP
-// Example: Navigate to Google and search
-1. new_page({ url: "https://www.google.com" })
-2. take_snapshot() // Get page elements
-3. fill({ uid: "search-box", value: "easy-mcp-server" })
-4. click({ uid: "search-button" })
-5. take_screenshot() // Capture results
-```
-
-**Unified MCP Interface:**
-- **Port 8888**: Single MCP server with both your APIs AND Chrome tools
-- **Seamless Integration**: AI models access everything through one interface
-- **No Configuration**: Chrome tools work out-of-the-box
-- **Hot Reload**: Changes to bridge config are detected automatically
-```
-
 ### 💻 **iTerm2 Terminal Integration**
-
-The framework includes built-in support for iTerm2 terminal control through MCP bridge integration. AI models can now interact with terminal sessions, execute commands, and read output seamlessly.
-
-**Features:**
-- ✅ **Terminal Control**: Execute commands in active iTerm2 sessions
-- ✅ **Output Reading**: Read terminal output and command results
-- ✅ **Command Execution**: Run shell commands, scripts, and programs
-- ✅ **Control Characters**: Send special control sequences (Ctrl+C, etc.)
-- ✅ **Multi-Session Support**: Work with multiple terminal sessions
-- ✅ **Real-time Interaction**: Live terminal interaction and monitoring
-
-**Quick Setup:**
-```bash
-# The framework automatically includes iTerm2 MCP bridge
-# No additional configuration needed - it's enabled by default!
-npx easy-mcp-server
-```
+AI models can interact with terminal sessions, execute commands, and read output seamlessly.
 
 **Available iTerm2 Tools:**
 - `iterm-mcp_write_to_terminal` - Execute commands in active terminal
 - `iterm-mcp_read_terminal_output` - Read terminal output and results
 - `iterm-mcp_send_control_character` - Send control characters (Ctrl+C, etc.)
 
-**Example Usage:**
-```javascript
-// AI models can now control terminal sessions through MCP
-// Example: Execute commands and read results
-1. iterm-mcp_write_to_terminal({ command: "ls -la" })
-2. iterm-mcp_read_terminal_output({ linesOfOutput: 10 })
-3. iterm-mcp_write_to_terminal({ command: "git status" })
-4. iterm-mcp_send_control_character({ letter: "C" }) // Ctrl+C
+---
+
+## 📁 **File Structure Example**
+
 ```
-
-**Unified MCP Interface:**
-- **Port 8888**: Single MCP server with both your APIs AND iTerm2 tools
-- **Seamless Integration**: AI models access everything through one interface
-- **No Configuration**: iTerm2 tools work out-of-the-box
-- **Hot Reload**: Changes to bridge config are detected automatically
-
-### 📁 **Simple MCP Structure**
+your-project/
+├── api/                    # API endpoints
+│   ├── users/
+│   │   ├── get.js         # GET /users
+│   │   ├── post.js        # POST /users
+│   │   └── profile/
+│   │       ├── get.js     # GET /users/profile
+│   │       └── put.js     # PUT /users/profile
+│   └── products/
+│       ├── get.js         # GET /products
+│       └── post.js        # POST /products
+├── mcp/                   # AI features
+│   ├── prompts/           # AI prompt templates
+│   └── resources/         # AI resource documentation
+└── public/                # Static files
+    ├── index.html
+    └── style.css
 ```
-mcp/
-├── prompts/          # AI prompts (templates)
-│   └── my-prompt.md
-└── resources/       # Documentation & data
-    └── guide.md
-```
-
-### 🤖 **MCP Prompts** (AI Templates)
-- **Purpose**: Create reusable AI prompts with dynamic parameters
-- **Location**: Put files in `mcp/prompts/` folder
-- **Parameters**: Use `{{name}}` for dynamic content
-- **Example**:
-  ```markdown
-  <!-- description: Analyze data with custom parameters -->
-  
-  Analyze {{dataset}} and create a {{report_type}} report.
-  Focus on: {{focus_area}}
-  ```
-
-### 📚 **MCP Resources** (Documentation & Data)
-- **Purpose**: Provide documentation, guides, and data to AI models
-- **Location**: Put files in `mcp/resources/` folder
-- **Formats**: Supports common formats like `.md`, `.txt`, `.json`, `.yaml`
-- **Example**: Create `mcp/resources/api-guide.md` with your API documentation
-
-### ⚡ **Auto-Discovery & Hot Reload**
-- **Auto-Load**: Files are automatically detected when server starts
-- **Hot Reload**: Changes are picked up instantly (no restart needed)
-- **Template Support**: Any file can use `{{parameter}}` placeholders
-
-### 🔄 **Resource Templates**
-- **Static Files**: Regular files (like `guide.md`) are loaded as-is
-- **Template Files**: Files with `{{parameter}}` become dynamic templates
-- **Usage**: AI models can call templates with specific parameters
-- **Example**: `mcp/resources/email-template.html` with `{{name}}` becomes a reusable email template
 
 ---
 
-## 📦 **API Structure Made Easy**
+## 🔥 **Hot Reload Features**
 
-### File Structure → API Endpoints
+### Automatic Hot Reload
+- ✅ **API Files**: Changes to `api/**/*.js` files are detected instantly
+- ✅ **Prompts**: Changes to `mcp/prompts/` files update immediately
+- ✅ **Resources**: Changes to `mcp/resources/` files reload automatically
+- ✅ **Environment**: `.env` file changes are picked up without restart
+- ✅ **MCP Bridge**: Configuration changes restart bridges automatically
 
-The framework uses **convention-over-configuration** - your file structure becomes your API structure.
-
-#### HTTP Method Mapping Rules
-
-| File Name | HTTP Method | Purpose | Example |
-|-----------|-------------|---------|---------|
-| `get.js` | `GET` | Retrieve data | `api/users/get.js` → `GET /users` |
-| `post.js` | `POST` | Create resources | `api/users/post.js` → `POST /users` |
-| `put.js` | `PUT` | Update/replace resources | `api/users/put.js` → `PUT /users` |
-| `patch.js` | `PATCH` | Partial updates | `api/users/patch.js` → `PATCH /users` |
-| `delete.js` | `DELETE` | Remove resources | `api/users/delete.js` → `DELETE /users` |
-| `head.js` | `HEAD` | Get headers only | `api/users/head.js` → `HEAD /users` |
-| `options.js` | `OPTIONS` | Get allowed methods | `api/users/options.js` → `OPTIONS /users` |
-
-#### Path Mapping Rules
-
-| File Structure | API Endpoint | Description |
-|----------------|--------------|-------------|
-| `api/users/get.js` | `GET /users` | Root level endpoint |
-| `api/users/profile/get.js` | `GET /users/profile` | Nested path |
-| `api/users/profile/settings/get.js` | `GET /users/profile/settings` | Deep nesting |
-| `api/v1/users/get.js` | `GET /v1/users` | Versioned API |
-| `api/admin/users/get.js` | `GET /admin/users` | Namespaced API |
-
-#### Complete File Structure Example
-```
-api/
-├── users/
-│   ├── get.js              → GET /users
-│   ├── post.js             → POST /users
-│   ├── profile/
-│   │   ├── get.js          → GET /users/profile
-│   │   ├── put.js          → PUT /users/profile
-│   │   └── settings/
-│   │       ├── get.js      → GET /users/profile/settings
-│   │       └── patch.js    → PATCH /users/profile/settings
-│   └── delete.js           → DELETE /users
-├── products/
-│   ├── get.js              → GET /products
-│   ├── post.js             → POST /products
-│   └── {id}/
-│       ├── get.js          → GET /products/{id}
-│       ├── put.js          → PUT /products/{id}
-│       └── delete.js       → DELETE /products/{id}
-└── v1/
-    └── legacy/
-        └── get.js          → GET /v1/legacy
-```
-
-#### What Each API File Becomes
-Each API file automatically becomes:
-- 🌐 **REST Endpoint**: Available at the mapped HTTP path
-- 🤖 **MCP Tool**: AI models can call the endpoint via MCP protocol
-- 📚 **OpenAPI Schema**: Auto-generated documentation
-- 🔍 **Swagger UI**: Interactive API explorer
+### Hot Reload Benefits
+- 🔄 **No Restart Required**: Changes take effect immediately
+- 📦 **Auto Package Install**: Missing dependencies installed automatically
+- 🚀 **Fast Development**: Instant feedback during development
+- 🛡️ **Error Recovery**: Graceful handling of invalid files
 
 ---
 
 ## 🛠 **Advanced Features**
 
-### Enhanced API (LLM + Logging)
+### Enhanced API (AI + Logging)
 ```javascript
 const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 
@@ -398,163 +202,45 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
 }
 ```
 
-### Auto-Generated OpenAPI with JSDoc Annotations
-
-Add comments to your functions for automatic API documentation:
-
-#### Supported Annotations
-
-| Annotation | Purpose | Example |
-|------------|---------|---------|
-| `@description` | Detailed API description | `@description Get user information with optional filtering` |
-| `@summary` | Short summary for OpenAPI | `@summary Retrieve user details` |
-| `@tags` | API categorization | `@tags users,data-access` |
-| `@requestBody` | Request body schema (JSON) | `@requestBody { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } }` |
-| `@responseSchema` | Response schema (JSON) | `@responseSchema { "type": "object", "properties": { "data": { "type": "array" } } }` |
-| `@errorResponses` | Error response schemas (JSON) | `@errorResponses { "400": { "description": "Validation error" } }` |
-
-#### Complete Example with All Annotations
+### Auto-Generated Documentation
 ```javascript
 /**
- * @description Create a new user with validation and comprehensive error handling
- * @summary Create user endpoint with full validation
- * @tags users,authentication
- * @requestBody {
- *   "type": "object",
- *   "required": ["name", "email"],
- *   "properties": {
- *     "name": { "type": "string", "minLength": 2, "maxLength": 50 },
- *     "email": { "type": "string", "format": "email" },
- *     "age": { "type": "integer", "minimum": 0, "maximum": 120 },
- *     "isActive": { "type": "boolean", "default": true }
- *   }
- * }
- * @responseSchema {
- *   "type": "object",
- *   "properties": {
- *     "success": { "type": "boolean" },
- *     "data": {
- *       "type": "object",
- *       "properties": {
- *         "id": { "type": "string", "format": "uuid" },
- *         "name": { "type": "string" },
- *         "email": { "type": "string", "format": "email" },
- *         "age": { "type": "integer" },
- *         "isActive": { "type": "boolean" },
- *         "createdAt": { "type": "string", "format": "date-time" }
- *       }
- *     },
- *     "message": { "type": "string" }
- *   }
- * }
- * @errorResponses {
- *   "400": { "description": "Validation error", "schema": { "type": "object", "properties": { "error": { "type": "string" } } } },
- *   "409": { "description": "User already exists", "schema": { "type": "object", "properties": { "error": { "type": "string" } } } }
- * }
+ * @description Get user information
+ * @summary Retrieve user details
+ * @tags users
  */
-class CreateUser extends BaseAPI {
+class GetUser extends BaseAPI {
   process(req, res) {
-    // Your implementation here
+    res.json({ user: {} });
   }
 }
 ```
-
-#### Annotation Benefits
-- ✅ **Auto-Generated OpenAPI**: Annotations automatically create complete OpenAPI specifications
-- ✅ **Swagger UI Integration**: Rich interactive documentation with request/response examples
-- ✅ **MCP Tool Enhancement**: Better AI model integration with detailed schemas
-- ✅ **Type Safety**: JSON schema validation for requests and responses
-- ✅ **Developer Experience**: IntelliSense and auto-completion in IDEs
 
 ---
 
 ## 🔧 **Configuration**
 
 ### Environment Variables
-The server automatically loads `.env` files from your project directory in this order:
-1. `.env.local` (highest priority)
-2. `.env.development` 
-3. `.env` (lowest priority)
-
-**🔧 Environment Variable Naming Convention:**
-All project-specific environment variables use the `EASY_MCP_SERVER_` prefix for consistency and to avoid conflicts with other applications.
-
 ```bash
 # .env
-EASY_MCP_SERVER_PORT=8887                  # REST API port (default: 8887)
-EASY_MCP_SERVER_MCP_PORT=8888              # MCP server port (default: 8888)
-EASY_MCP_SERVER_HOST=0.0.0.0                # REST API host
-EASY_MCP_SERVER_MCP_HOST=0.0.0.0            # MCP server host
-EASY_MCP_SERVER_MCP_BASE_PATH=./mcp         # MCP base directory
-EASY_MCP_SERVER_API_PATH=./api              # API directory
-EASY_MCP_SERVER_CORS_ORIGIN=*               # CORS origin
-EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE  # CORS methods
-EASY_MCP_SERVER_CORS_CREDENTIALS=false      # CORS credentials
-EASY_MCP_SERVER_STATIC_ENABLED=true         # Enable static file serving
-EASY_MCP_SERVER_STATIC_DIRECTORY=./public   # Static files directory
-EASY_MCP_SERVER_SERVE_INDEX=true           # Serve index.html at root
-EASY_MCP_SERVER_DEFAULT_FILE=index.html     # Default file name
-EASY_MCP_SERVER_LOG_LEVEL=info              # Log level
-EASY_MCP_SERVER_LOG_FORMAT=text             # Log format
-EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server # Service name
-EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json # MCP bridge config path
-EASY_MCP_SERVER_BRIDGE_ENABLED=true         # Enable MCP bridge functionality
-OPENAI_API_KEY=your-key-here                # OpenAI API key (optional)
-NODE_ENV=development                         # Environment
-```
+EASY_MCP_SERVER_PORT=8887          # REST API port
+EASY_MCP_SERVER_MCP_PORT=8888      # AI server port
+EASY_MCP_SERVER_HOST=0.0.0.0       # Server address
+NODE_ENV=development               # Environment
 
-**Benefits of Standardized Naming:**
-- 🔍 **Clear Identification**: Easy to identify which variables belong to easy-mcp-server
-- 🛡️ **No Conflicts**: Prevents conflicts with other applications' environment variables
-- 📚 **Better Documentation**: Makes configuration more organized and understandable
-- 🚀 **Future-Proof**: Consistent pattern for any new environment variables
+# Hot Reload
+EASY_MCP_SERVER_HOT_RELOAD=true    # Enable hot reload
+EASY_MCP_SERVER_API_PATH=./api     # API directory
+EASY_MCP_SERVER_MCP_BASE_PATH=./mcp # MCP directory
 
-#### MCP Bridge Configuration
-
-See the dedicated section below: [MCP Bridge (Multi-Server)](#mcp-bridge-multi-server).
-
-### CLI Options
-```bash
-# Port configuration
-EASY_MCP_SERVER_PORT=8887 easy-mcp-server
-
-# Environment variables
-EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server
-
-# Help
-easy-mcp-server --help
-```
-
-### MCP Bridge (Multi-Server)
-
-The server can spawn HTTP bridges to multiple external MCP servers defined in a Cursor-compatible config file (`mcp-bridge.json`). **Chrome web browsing and iTerm2 terminal control are included by default** through the respective MCP bridges.
-
-**🌐 Chrome Web Browsing Features:**
-- **Unified Interface**: Chrome tools accessible through port 8888 MCP server
-- **No Setup Required**: Chrome DevTools MCP bridge enabled by default
-- **Full Browser Control**: Navigate, click, fill forms, take screenshots
-- **AI Integration**: AI models can control web browsers seamlessly
-
-**💻 iTerm2 Terminal Features:**
-- **Unified Interface**: iTerm2 tools accessible through port 8888 MCP server
-- **No Setup Required**: iTerm2 MCP bridge enabled by default
-- **Full Terminal Control**: Execute commands, read output, send control characters
-- **AI Integration**: AI models can control terminal sessions seamlessly
-
-Endpoints:
-- GET `/bridge/list-tools` → returns `{ servers: { <name>: <toolsResult>|{error} } }`
-- POST `/bridge/call-tool` → body `{ toolName, args?, server? }`
-  - When `server` is omitted, the tool is invoked on all bridges and results are aggregated as `{ servers: { <name>: <result>|{error} } }`.
-
-Configuration:
-```bash
-# Optional: path to bridge config (absolute or relative to project root)
+# MCP Bridge Configuration
 EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
-# Optional: disable bridge spawning (useful for CI/tests)
 EASY_MCP_SERVER_BRIDGE_ENABLED=true
 ```
 
-Default `mcp-bridge.json` (Cursor-compatible):
+### MCP Bridge Configuration
+The framework includes built-in support for multiple MCP servers:
+
 ```json
 {
   "mcpServers": {
@@ -570,84 +256,12 @@ Default `mcp-bridge.json` (Cursor-compatible):
 }
 ```
 
-Add more servers by appending entries under `mcpServers`:
-```json
-{
-  "mcpServers": {
-    "chrome-devtools": { "command": "npx", "args": ["chrome-devtools-mcp"] },
-    "iterm-mcp": { "command": "npx", "args": ["-y", "iterm-mcp"] },
-    "another-server":  { "command": "node", "args": ["path/to/server.js"] }
-  }
-}
-```
-
-### Port Configuration
-The server supports multiple ways to configure ports:
-
-**1. Command Line Arguments:**
+### Static File Serving
 ```bash
-npx EASY_MCP_SERVER_PORT=8887 easy-mcp-server
+# Create static files directory
+mkdir public
+echo '<h1>Hello World!</h1>' > public/index.html
 ```
-
-**2. Environment Variables:**
-```bash
-# In .env file (recommended)
-EASY_MCP_SERVER_PORT=8887
-EASY_MCP_SERVER_MCP_PORT=8888
-
-# Or inline (recommended)
-EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
-```
-
-**3. Priority Order:**
-1. Environment variables (`EASY_MCP_SERVER_PORT`, `EASY_MCP_SERVER_MCP_PORT`) - **Recommended**
-2. Default values (8887 for REST API, 8888 for MCP)
-
-### Auto npm Install
-The server automatically runs `npm install` before starting if a `package.json` file is found in your project directory:
-
-```bash
-# Server will automatically run npm install if package.json exists
-npx easy-mcp-server
-```
-
-**What it does:**
-- ✅ Checks for `package.json` in your project directory
-- ✅ Runs `npm install` automatically before starting server
-- ✅ Continues server startup even if npm install fails
-- ✅ Shows clear status messages during the process
-
-**Benefits:**
-- 🚀 **Zero Setup**: No need to manually install dependencies
-- 🔄 **Always Fresh**: Ensures all dependencies are up to date
-- 🛡️ **Fault Tolerant**: Server starts even if some dependencies fail to install
-
-### .env Hot Reload
-The server automatically detects changes to `.env` files and reloads environment variables without requiring a restart:
-
-```bash
-# Start the server
-npx easy-mcp-server
-
-# In another terminal, modify your .env file
-echo "NEW_VAR=value" >> .env
-# The server will automatically detect and reload the changes
-```
-
-**Supported Files (in priority order):**
-- `.env.local` (highest priority)
-- `.env.development`
-- `.env` (lowest priority)
-
-**Benefits:**
-- 🔥 **No Restart**: Environment changes take effect immediately
-- 🤖 **MCP Integration**: MCP server automatically uses latest configuration
-- ⚡ **Seamless Development**: Modify environment variables without interrupting workflow
-- 🔍 **Automatic Detection**: New environment variables are picked up automatically
-
-### MCP Runtime Parsing & Cache
-- **Parser**: `src/utils/parameter-template-parser.js` extracts `{{name}}` placeholders across Markdown/YAML/JSON/TXT
-- **Cache**: `src/utils/mcp-cache-manager.js` caches parsed prompts/resources and hot-swaps on file changes
 
 ---
 
@@ -655,68 +269,17 @@ echo "NEW_VAR=value" >> .env
 
 | Feature | Description |
 |---------|-------------|
-| **Hot Reloading** | Instant updates during development |
-| **Auto-Discovery** | Automatic loading of prompts and resources |
-| **MCP Protocol** | Full AI model integration |
-| **LLM Integration** | AI service integration |
-| **Health Monitoring** | Built-in health checks |
-| **Structured Logging** | Comprehensive logging |
-| **Graceful Initialization** | Server continues running even if some APIs fail to initialize |
+| **Hot Reload** | Instant updates during development |
+| **Auto Discovery** | Automatic loading of APIs and resources |
+| **AI Integration** | Complete AI model integration |
+| **Health Checks** | Built-in health monitoring |
+| **Graceful Degradation** | Server continues running even if some APIs fail |
 
-### 🛡️ **Graceful API Initialization**
-
-The framework includes **graceful initialization** to prevent server crashes when individual APIs fail to initialize. This is crucial for production environments where partial service availability is better than complete downtime.
-
-**Key Features:**
+### Graceful API Initialization
 - ✅ **Server stays running** even if some APIs fail to initialize
 - ✅ **Failed APIs return 503** with helpful error messages
 - ✅ **Automatic retry mechanism** for failed initializations
 - ✅ **Enhanced health checks** showing API status
-- ✅ **Management endpoints** for retrying failed APIs
-
-**Example Health Check Response:**
-```json
-{
-  "status": "partial",
-  "server": "running",
-  "apis": {
-    "total": 15,
-    "healthy": 14,
-    "failed": 1,
-    "details": [
-      {
-        "serviceName": "opensearch-api",
-        "initializationStatus": "failed",
-        "error": "Connection timeout",
-        "retryCount": 2,
-        "maxRetries": 3
-      }
-    ]
-  }
-}
-```
-
-**Retry Failed APIs:**
-```bash
-# Retry a specific API
-curl -X POST http://localhost:${EASY_MCP_SERVER_PORT:-8887}/admin/retry-initialization \
-  -H "Content-Type: application/json" \
-  -d '{"api": "opensearch-api"}'
-```
-
-**Configuration Options:**
-```javascript
-// In your API class
-class MyAPI extends BaseAPIEnhanced {
-  constructor() {
-    super('my-service', {
-      maxRetries: 5,        // Max retry attempts
-      retryDelay: 10000,    // Delay between retries (ms)
-      autoRetry: true       // Enable automatic retry
-    });
-  }
-}
-```
 
 ---
 
@@ -724,44 +287,39 @@ class MyAPI extends BaseAPIEnhanced {
 
 | Document | Purpose | Best For |
 |----------|---------|----------|
-| **[Framework Guide](mcp/resources/guides/easy-mcp-server.md)** | Complete framework documentation | Deep dive, production setup |
-| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI-powered applications |
-| **[Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)** | Monitoring and observability | Production monitoring |
+| **[Development Guide](DEVELOPMENT.md)** | Detailed development documentation | Deep development |
+| **[Agent Context](Agent.md)** | AI agent integration guide | Building AI applications |
 | **[LLM Context](LLM.txt)** | LLM-specific information | AI model integration |
-
-### 📋 **Quick Reference**
-- **Getting Started**: [Quick Start](#-quick-start) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
-- **AI Integration**: [Agent Context](Agent.md) → [MCP Integration](#-mcp-integration)
-- **Production**: [Production Ready](#-production-ready) → [Health Monitoring](mcp/resources/guides/easy-mcp-server.md#-monitoring-and-logging)
-- **Advanced**: [Advanced Features](#-advanced-features) → [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
 
 ---
 
 ## 🔧 **Troubleshooting**
 
-### Custom Prompts & Resources Not Showing Up?
+### Common Issues
+1. **Port conflicts**: Use `EASY_MCP_SERVER_PORT=8888` to set different port
+2. **APIs not working**: Check file paths and HTTP method naming
+3. **AI features not showing**: Ensure files are in `mcp/prompts/` and `mcp/resources/` directories
+4. **Hot reload not working**: Check if `EASY_MCP_SERVER_HOT_RELOAD=true` is set
 
-The framework supports **ALL file formats** for prompts and resources. If your custom content isn't appearing:
-
-1. **Check Directory Structure**: Ensure files are in `mcp/prompts/` and `mcp/resources/`
-2. **Verify Configuration**: Make sure `formats: ['*']` is set in your MCP server config
-3. **Check File Permissions**: Ensure the server can read your files
-4. **Use MCP Inspector**: Run `npx @modelcontextprotocol/inspector` to see loaded content
-5. **Check Server Logs**: Look for `🔌 MCP Server: Added prompt/resource` messages
-
-**Quick Test:**
+### Quick Test
 ```bash
-# Create test files
-echo '{"name": "Test Prompt", "instructions": "Test with {{param}}"}' > mcp/prompts/test.json
-echo '# Test Resource\n\nWith {{variable}}' > mcp/resources/test.md
+# Test API
+curl http://localhost:8887/users
 
-# Start server and check logs
-node src/server.js
+# Test AI features
+curl -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+
+# Test hot reload
+echo 'console.log("Hot reload test");' >> api/test.js
+# Check server logs for hot reload messages
 ```
 
-**Supported Formats**: `.js`, `.py`, `.md`, `.json`, `.yaml`, `.txt`, `.html`, `.css`, `.sql`, `.ini`, `.properties`, `.dockerfile`, `.makefile`, and 70+ more!
-
-📖 **Full Guide**: See the [Framework Guide](mcp/resources/guides/easy-mcp-server.md) for detailed troubleshooting steps.
+### Debug Mode
+```bash
+DEBUG=* easy-mcp-server
+```
 
 ---
 
@@ -778,11 +336,11 @@ node src/server.js
 ## 📞 **Support**
 
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
-- **Documentation**: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
+- **Documentation**: [Development Guide](DEVELOPMENT.md)
 - **Examples**: Check the `api/example/` directory
 
 ---
 
 ## 📄 **License**
 
-MIT License - see the [package.json](package.json) for license details.
+MIT License - see [package.json](package.json) for license details.

@@ -48,3 +48,11 @@
 - Lint passes with no errors (`npm run lint`).
 - Changes are minimal, focused, and readable.
 - **README.md verification**: Before committing, check README.md to ensure everything is accurate and updated, especially regarding recent changes.
+
+### Documentation policy
+
+- **documentation-files**: Only maintain two documentation files:
+  - `README.md`: User-facing documentation, installation guide, and usage examples.
+  - `DEVELOPMENT.md`: Developer guide for contributors and maintainers.
+- **other-docs**: Do not create or maintain additional documentation files (e.g., extra guides, tutorials, or supplementary docs) unless explicitly requested by the user.
+- **language**: All comments and documentation must be written in English.
