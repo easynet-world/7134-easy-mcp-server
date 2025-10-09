@@ -10,6 +10,7 @@
 | [🛠 Framework Features](#-framework-features) | Core capabilities overview | Understanding features |
 | [📝 API Design](#-api-design-best-practices) | Best practices and patterns | API development |
 | [🤖 MCP Integration](#-mcp-integration) | AI model integration | AI application development |
+| [🔥 Hot Reload](#-hot-reload-functionality) | Development workflow | Daily development |
 | [🏗 Development Workflow](#-development-workflow) | Development process | Daily development |
 | [🚀 Production Deployment](#-production-deployment) | Production environment setup | Deployment |
 | [📊 Monitoring](#-monitoring-and-logging) | Observability | Production monitoring |
@@ -173,6 +174,92 @@ this.resources = [{
   mimeType: 'text/markdown',
   content: '# API Documentation...'
 }];
+```
+
+---
+
+## 🔥 **Hot Reload Functionality**
+
+### Overview
+The easy-mcp-server project has comprehensive hot reload functionality for APIs, prompts, and resources. All hot reload features are working correctly and have been thoroughly tested.
+
+### Hot Reload Components
+
+#### 1. **API Hot Reload** (`src/utils/hot-reloader.js`)
+- **Watches**: `api/**/*.js` files
+- **Features**:
+  - Automatic file change detection using chokidar
+  - Debounced reloading (1 second delay)
+  - Automatic package installation for new dependencies
+  - Route cleanup and regeneration
+  - MCP server integration
+  - Error handling and validation
+
+#### 2. **Prompts Hot Reload** (`src/mcp/mcp-server.js`)
+- **Watches**: `mcp/prompts/` directory
+- **Features**:
+  - File format support: `.md`, `.json`, `.yaml`, `.yml`, `.txt`
+  - Parameter extraction from templates
+  - Nested directory support
+  - Real-time prompt updates
+  - MCP protocol integration
+
+#### 3. **Resources Hot Reload** (`src/mcp/mcp-server.js`)
+- **Watches**: `mcp/resources/` directory
+- **Features**:
+  - Multiple file format support
+  - URI generation for resources
+  - Content type detection
+  - Nested directory structure support
+  - Real-time resource updates
+
+#### 4. **Environment Hot Reload** (`src/utils/env-hot-reloader.js`)
+- **Watches**: `.env.local`, `.env.development`, `.env` files
+- **Features**:
+  - Priority-based loading
+  - MCP bridge restart on env changes
+  - Configuration updates
+  - Client notifications
+
+#### 5. **MCP Bridge Hot Reload** (`src/utils/mcp-bridge-reloader.js`)
+- **Watches**: `mcp-bridge.json` configuration file
+- **Features**:
+  - Bridge configuration changes
+  - Environment variable updates
+  - Automatic bridge restart
+
+### Hot Reload Configuration
+```bash
+# Enable/disable hot reload
+EASY_MCP_SERVER_HOT_RELOAD=true
+
+# API directory
+EASY_MCP_SERVER_API_PATH=./api
+
+# MCP directory
+EASY_MCP_SERVER_MCP_BASE_PATH=./mcp
+
+# Hot reload debounce delay (ms)
+EASY_MCP_SERVER_HOT_RELOAD_DELAY=1000
+```
+
+### Hot Reload File Structure
+```
+project/
+├── api/                    # API files (auto-reloaded)
+│   ├── users/
+│   │   ├── get.js
+│   │   └── post.js
+│   └── products/
+│       └── get.js
+├── mcp/
+│   ├── prompts/           # Prompt files (auto-reloaded)
+│   │   ├── chat.md
+│   │   └── analysis.json
+│   └── resources/         # Resource files (auto-reloaded)
+│       ├── guides/
+│       └── templates/
+└── .env                   # Environment files (auto-reloaded)
 ```
 
 ---
@@ -385,6 +472,7 @@ app.use(cors({
 | **File not found** | Ensure API files are in the `api/` directory |
 | **MCP connection** | Verify MCP server is running on correct port |
 | **Validation errors** | Verify request body matches schema |
+| **Hot reload not working** | Check if `EASY_MCP_SERVER_HOT_RELOAD=true` is set |
 
 ### Debug Mode
 ```bash
@@ -395,6 +483,15 @@ DEBUG=* easy-mcp-server
 ```bash
 curl http://localhost:8887/health
 curl http://localhost:8888/health
+```
+
+### Hot Reload Debugging
+```bash
+# Check hot reload status
+curl http://localhost:8887/health | jq '.hotReload'
+
+# Monitor hot reload logs
+tail -f logs/hot-reload.log
 ```
 
 ---
@@ -433,6 +530,30 @@ class WebSocketAPI extends BaseAPI {
 }
 ```
 
+### MCP Bridge Configuration
+The framework supports multiple MCP servers through environment variables:
+
+```bash
+# GitHub MCP Server
+EASY_MCP_SERVER.github.token=your_github_token_here
+EASY_MCP_SERVER.github.api_url=https://api.github.com
+
+# Postgres MCP Server
+EASY_MCP_SERVER.postgres.host=localhost
+EASY_MCP_SERVER.postgres.db=myapp
+EASY_MCP_SERVER.postgres.user=postgres
+EASY_MCP_SERVER.postgres.password=secret
+EASY_MCP_SERVER.postgres.port=5432
+
+# Chrome DevTools
+EASY_MCP_SERVER.chrome.debug_port=9222
+EASY_MCP_SERVER.chrome.user_data_dir=/tmp/chrome-profile
+
+# iTerm2
+EASY_MCP_SERVER.iterm2.session_id=w0t0p0
+EASY_MCP_SERVER.iterm2.profile=Default
+```
+
 ---
 
 ## ✅ **Best Practices Summary**
@@ -459,6 +580,16 @@ EASY_MCP_SERVER_PORT=8887                    # REST API port
 EASY_MCP_SERVER_MCP_PORT=8888                # MCP server port
 HOST=0.0.0.0                # Server host
 NODE_ENV=production         # Environment
+
+# Hot Reload Configuration
+EASY_MCP_SERVER_HOT_RELOAD=true              # Enable hot reload
+EASY_MCP_SERVER_API_PATH=./api               # API directory
+EASY_MCP_SERVER_MCP_BASE_PATH=./mcp          # MCP directory
+EASY_MCP_SERVER_HOT_RELOAD_DELAY=1000        # Debounce delay (ms)
+
+# MCP Bridge Configuration
+EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
+EASY_MCP_SERVER_BRIDGE_ENABLED=true
 
 # LLM Configuration
 OPENAI_API_KEY=your-key-here

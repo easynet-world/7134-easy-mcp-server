@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-> **Why is it simple and easy to use? Write one function, get a complete API ecosystem!**
+> **Why is it simple and easy to use? Write one function, get a complete API ecosystem with AI integration!**
 
 ## 🎯 **Why Choose easy-mcp-server?**
 
@@ -118,6 +118,27 @@ echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resour
 
 **Result**: AI models can now use your prompts and access your documentation!
 
+### 🌐 **Chrome Web Browsing Support**
+AI models can control web browsers, navigate pages, fill forms, take screenshots, and perform automated web interactions.
+
+**Available Chrome Tools:**
+- `new_page` - Create new browser pages
+- `navigate_page` - Navigate to URLs
+- `take_snapshot` - Get page content with element UIDs
+- `take_screenshot` - Capture page/element images
+- `click` - Click on page elements
+- `fill` - Fill form inputs
+- `evaluate_script` - Run JavaScript in browser
+- And 20+ more browser automation tools!
+
+### 💻 **iTerm2 Terminal Integration**
+AI models can interact with terminal sessions, execute commands, and read output seamlessly.
+
+**Available iTerm2 Tools:**
+- `iterm-mcp_write_to_terminal` - Execute commands in active terminal
+- `iterm-mcp_read_terminal_output` - Read terminal output and results
+- `iterm-mcp_send_control_character` - Send control characters (Ctrl+C, etc.)
+
 ---
 
 ## 📁 **File Structure Example**
@@ -141,6 +162,23 @@ your-project/
     ├── index.html
     └── style.css
 ```
+
+---
+
+## 🔥 **Hot Reload Features**
+
+### Automatic Hot Reload
+- ✅ **API Files**: Changes to `api/**/*.js` files are detected instantly
+- ✅ **Prompts**: Changes to `mcp/prompts/` files update immediately
+- ✅ **Resources**: Changes to `mcp/resources/` files reload automatically
+- ✅ **Environment**: `.env` file changes are picked up without restart
+- ✅ **MCP Bridge**: Configuration changes restart bridges automatically
+
+### Hot Reload Benefits
+- 🔄 **No Restart Required**: Changes take effect immediately
+- 📦 **Auto Package Install**: Missing dependencies installed automatically
+- 🚀 **Fast Development**: Instant feedback during development
+- 🛡️ **Error Recovery**: Graceful handling of invalid files
 
 ---
 
@@ -189,6 +227,33 @@ EASY_MCP_SERVER_PORT=8887          # REST API port
 EASY_MCP_SERVER_MCP_PORT=8888      # AI server port
 EASY_MCP_SERVER_HOST=0.0.0.0       # Server address
 NODE_ENV=development               # Environment
+
+# Hot Reload
+EASY_MCP_SERVER_HOT_RELOAD=true    # Enable hot reload
+EASY_MCP_SERVER_API_PATH=./api     # API directory
+EASY_MCP_SERVER_MCP_BASE_PATH=./mcp # MCP directory
+
+# MCP Bridge Configuration
+EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
+EASY_MCP_SERVER_BRIDGE_ENABLED=true
+```
+
+### MCP Bridge Configuration
+The framework includes built-in support for multiple MCP servers:
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp"]
+    },
+    "iterm-mcp": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"]
+    }
+  }
+}
 ```
 
 ### Static File Serving
@@ -210,6 +275,12 @@ echo '<h1>Hello World!</h1>' > public/index.html
 | **Health Checks** | Built-in health monitoring |
 | **Graceful Degradation** | Server continues running even if some APIs fail |
 
+### Graceful API Initialization
+- ✅ **Server stays running** even if some APIs fail to initialize
+- ✅ **Failed APIs return 503** with helpful error messages
+- ✅ **Automatic retry mechanism** for failed initializations
+- ✅ **Enhanced health checks** showing API status
+
 ---
 
 ## 📚 **Documentation**
@@ -228,6 +299,7 @@ echo '<h1>Hello World!</h1>' > public/index.html
 1. **Port conflicts**: Use `EASY_MCP_SERVER_PORT=8888` to set different port
 2. **APIs not working**: Check file paths and HTTP method naming
 3. **AI features not showing**: Ensure files are in `mcp/prompts/` and `mcp/resources/` directories
+4. **Hot reload not working**: Check if `EASY_MCP_SERVER_HOT_RELOAD=true` is set
 
 ### Quick Test
 ```bash
@@ -238,6 +310,15 @@ curl http://localhost:8887/users
 curl -X POST http://localhost:8888/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+
+# Test hot reload
+echo 'console.log("Hot reload test");' >> api/test.js
+# Check server logs for hot reload messages
+```
+
+### Debug Mode
+```bash
+DEBUG=* easy-mcp-server
 ```
 
 ---

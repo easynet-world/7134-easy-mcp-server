@@ -58,15 +58,16 @@ class DynamicAPIMCPServer {
     this.log = (level, message, data = {}) => {
       if (!this.quiet && this.shouldLog(level)) {
         const timestamp = new Date().toISOString();
-        const logEntry = {
-          timestamp,
-          level,
-          message,
-          data,
-          server: 'mcp-server',
-          host: this.host,
-          port: this.port
-        };
+        // Structured log entry for future use (currently unused but kept for potential structured logging)
+        // const logEntry = {
+        //   timestamp,
+        //   level,
+        //   message,
+        //   data,
+        //   server: 'mcp-server',
+        //   host: this.host,
+        //   port: this.port
+        // };
         
         if (level === 'error') {
           console.error(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data);
