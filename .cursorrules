@@ -56,3 +56,4 @@
   - `DEVELOPMENT.md`: Developer guide for contributors and maintainers.
 - **other-docs**: Do not create or maintain additional documentation files (e.g., extra guides, tutorials, or supplementary docs) unless explicitly requested by the user.
 - **language**: All comments and documentation must be written in English.
+- **release-notes**: We provide detailed release notes in every version release.

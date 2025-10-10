@@ -39,7 +39,7 @@ class HotReloader {
       return;
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.EASY_MCP_SERVER_PRODUCTION_MODE === 'true') {
       console.log('ℹ️  Hot reloading disabled in production');
       return;
     }

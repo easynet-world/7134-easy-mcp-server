@@ -63,7 +63,7 @@ class DynamicAPIServer {
         status: 'OK',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
+        environment: 'development',
         version: '1.0.0'
       });
     });
@@ -81,7 +81,7 @@ class DynamicAPIServer {
         errors: errors,
         validationIssues: validationIssues,
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: 'development'
       });
     });
     
