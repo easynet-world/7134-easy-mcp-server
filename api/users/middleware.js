@@ -21,7 +21,7 @@ const validateUser = (req, res, next) => {
 // User permissions middleware
 const checkUserPermissions = (req, res, next) => {
   const { user } = req;
-  const { method, path } = req;
+  const { method } = req;
   
   // Check if user can perform this action
   if (method === 'DELETE' && user.role !== 'admin') {
