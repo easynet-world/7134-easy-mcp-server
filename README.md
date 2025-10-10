@@ -33,6 +33,16 @@
 
 ## **Quick Start**
 
+### Option 1: Try the Example Project
+```bash
+# Clone and explore the complete example
+git clone https://github.com/easynet-world/7134-easy-mcp-server.git
+cd 7134-easy-mcp-server/example-project
+npx easy-mcp-server
+# Open http://localhost:8887 for interactive demo
+```
+
+### Option 2: Create Your Own API
 ```bash
 # Install the framework
 npm install easy-mcp-server
@@ -202,11 +212,17 @@ module.exports = [authenticate];
 ```
 
 ### Automated Documentation Generation
+
+**Why Annotations Are Essential:**
+JSDoc annotations provide automated generation of OpenAPI specifications, MCP protocol integration for AI agents, and comprehensive API documentation. This eliminates the need for manual Swagger configuration and separate AI integration infrastructure.
+
 ```javascript
 /**
- * @description Get user information
+ * @description Get user information with optional filtering
  * @summary Retrieve user details
- * @tags users
+ * @tags users,data-access
+ * @requestBody { "type": "object", "properties": { "limit": { "type": "number", "default": 10 } } }
+ * @responseSchema { "type": "object", "properties": { "users": { "type": "array", "items": { "type": "string" } } } }
  */
 class GetUser extends BaseAPI {
   process(req, res) {
@@ -214,6 +230,14 @@ class GetUser extends BaseAPI {
   }
 }
 ```
+
+**Supported JSDoc Annotations:**
+- `@description` - API endpoint description
+- `@summary` - Brief summary for documentation  
+- `@tags` - Categorization tags (comma-separated)
+- `@requestBody` - JSON schema for request body validation
+- `@responseSchema` - JSON schema for response structure
+- `@errorResponses` - Error response definitions
 
 ---
 
