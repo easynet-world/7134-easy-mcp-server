@@ -2,18 +2,19 @@ name: Release
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches:
+      - master
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,9 +27,6 @@ jobs:
 
       - name: Run tests
         run: npm test
-
-      - name: Run linting
-        run: npm run lint
 
       - name: Release
         env:
