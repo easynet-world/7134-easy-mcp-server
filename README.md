@@ -13,8 +13,8 @@
 
 > **Why choose easy-mcp-server as Express replacement in AI Era?**  
 > 
-> **Traditional Express Development**: Manual routing → Configure middleware → Integrate AI SDK → Write docs → Deploy config = **2-3 hours**  
-> **easy-mcp-server Development**: Write one function → Get everything = **30 seconds**  
+> **Traditional Express Development**: Manual routing → Configure middleware → Integrate AI SDK → Write docs → Deploy config  
+> **easy-mcp-server Development**: Write one function → Get everything  
 > 
 > **This is how AI-era development works: Let AI work for you, not work for AI.**
 
@@ -30,7 +30,7 @@
 | ❌ Manual maintenance | ✅ **Hot reload** - Auto updates |
 | ❌ Human-focused design | ✅ **AI-optimized** architecture |
 
-**Development Speed**: Express (2-3 hours) → easy-mcp-server (30 seconds) = **420x faster** 🚀
+**Development Experience**: Express (manual setup) → easy-mcp-server (zero config) = **Much simpler** 🚀
 
 ## 🚀 Quick Start
 
