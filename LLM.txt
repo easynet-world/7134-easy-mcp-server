@@ -1,7 +1,7 @@
 # easy-mcp-server - LLM Context
 
 ## Framework Overview
-easy-mcp-server is a dynamic API framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI models with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard.
+easy-mcp-server is an enterprise-grade Node.js framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI models with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard, enabling seamless AI integration with convention-based development.
 
 ## Key LLM Integration Features
 
@@ -33,6 +33,7 @@ const BaseAPI = require('easy-mcp-server/base-api');
  * @description Brief description of what this endpoint does
  * @summary Short summary for OpenAPI
  * @tags category1,category2
+ * @responseSchema { "type": "object", "properties": { "message": { "type": "string" } } }
  */
 class MyAPI extends BaseAPI {
   process(req, res) {
@@ -210,7 +211,7 @@ api/
 
 ### Tool Schema Generation
 The framework automatically generates MCP tool schemas from:
-- JSDoc annotations (`@requestBody`, `@responseSchema`)
+- JSDoc annotations (`@description`, `@summary`, `@tags`, `@requestBody`, `@responseSchema`, `@errorResponses`)
 - File structure (path and method)
 - Parameter validation rules
 - Response format standards
@@ -247,6 +248,8 @@ The framework automatically generates MCP tool schemas from:
  * @description Analyze user sentiment from text input
  * @summary Sentiment analysis endpoint
  * @tags ai,analysis
+ * @requestBody { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" } } }
+ * @responseSchema { "type": "object", "properties": { "sentiment": { "type": "string" }, "confidence": { "type": "number" } } }
  */
 ```
 
@@ -300,6 +303,7 @@ if (!body.text || typeof body.text !== 'string') {
 ### Environment Variables
 ```bash
 EASY_MCP_SERVER_MCP_PORT=8888    # MCP server port
+EASY_MCP_SERVER_LOG_LEVEL=info   # Logging level
 OPENAI_API_KEY=your-key-here     # OpenAI API key
 REDIS_URL=redis://localhost:6379 # Redis for caching
 NODE_ENV=production              # Environment
@@ -361,7 +365,7 @@ class AnthropicAPI extends BaseAPIEnhanced {
 
 ### Debug Mode
 ```bash
-DEBUG=* easy-mcp-server
+EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 ```
 
 ### Health Check
@@ -388,3 +392,16 @@ curl http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/health
 - Health monitoring
 
 For complete framework documentation, see: [Framework Guide](mcp/resources/guides/easy-mcp-server.md)
+
+## Supported JSDoc Annotations
+
+The framework supports the following JSDoc annotations for automatic API documentation and MCP tool generation:
+
+- **`@description`**: Detailed description of the API endpoint
+- **`@summary`**: Brief summary for OpenAPI documentation
+- **`@tags`**: Comma-separated tags for categorization
+- **`@requestBody`**: JSON schema for request body validation
+- **`@responseSchema`**: JSON schema for response structure
+- **`@errorResponses`**: JSON schema for error response handling
+
+These annotations enable automatic OpenAPI specification generation, MCP tool creation, and comprehensive API documentation without manual maintenance.
