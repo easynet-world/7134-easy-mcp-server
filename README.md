@@ -7,7 +7,7 @@
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
 [![Express Alternative](https://img.shields.io/badge/Express-Alternative-blue.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
-[![Zero Config](https://img.shields.io/badge/Zero-Config-orange.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
+[![Convention-based](https://img.shields.io/badge/Convention-based-orange.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 [![Hot Reload](https://img.shields.io/badge/Hot-Reload-red.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 [![File Routing](https://img.shields.io/badge/File-Routing-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
@@ -68,30 +68,13 @@ npx easy-mcp-server
 
 ## **Installation & Setup**
 
-### Option 1: Direct Execution (Recommended)
+### Quick Installation
 ```bash
-# Execute without installation
+# Option 1: Direct execution (recommended)
 npx easy-mcp-server
-```
 
-### Option 2: Local Installation
-```bash
+# Option 2: Local installation
 npm install easy-mcp-server
-mkdir -p api/users && touch api/users/get.js
-```
-
-### API Implementation
-```javascript
-// api/users/get.js
-const BaseAPI = require('easy-mcp-server/base-api');
-
-class GetUsers extends BaseAPI {
-  process(req, res) {
-    res.json({ users: [] });
-  }
-}
-
-module.exports = GetUsers;
 ```
 
 ### Server Configuration
@@ -130,26 +113,15 @@ echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resour
 
 **Outcome**: AI models gain access to your prompts and documentation resources.
 
-### **Chrome Web Automation**
-AI models can control web browsers, navigate pages, fill forms, capture screenshots, and perform automated web interactions.
+### **Browser & Terminal Integration**
+AI models can control web browsers and terminal sessions for comprehensive automation.
 
-**Available Chrome Tools:**
-- `new_page` - Create new browser pages
-- `navigate_page` - Navigate to URLs
-- `take_snapshot` - Extract page content with element UIDs
-- `take_screenshot` - Capture page/element images
-- `click` - Interact with page elements
-- `fill` - Populate form inputs
-- `evaluate_script` - Execute JavaScript in browser context
+**Browser Automation:**
+- `new_page`, `navigate_page`, `take_screenshot`, `click`, `fill`, `evaluate_script`
 - Plus 20+ additional browser automation capabilities
 
-### **Terminal Integration**
-AI models can interact with terminal sessions, execute commands, and process output seamlessly.
-
-**Available Terminal Tools:**
-- `iterm-mcp_write_to_terminal` - Execute commands in active terminal
-- `iterm-mcp_read_terminal_output` - Process terminal output and results
-- `iterm-mcp_send_control_character` - Send control characters (Ctrl+C, etc.)
+**Terminal Integration:**
+- `iterm-mcp_write_to_terminal`, `iterm-mcp_read_terminal_output`, `iterm-mcp_send_control_character`
 
 ---
 
@@ -172,7 +144,8 @@ your-project/
 │   └── resources/         # AI resource documentation
 └── public/                # Static files
     ├── index.html
-    └── style.css
+    ├── style.css
+    └── app.js
 ```
 
 ---
@@ -194,27 +167,6 @@ your-project/
 - 🛡️ **Error Handling**: Graceful management of invalid configurations
 - 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
 
-### Middleware Management
-The framework provides **intelligent middleware management** with automatic lifecycle handling:
-
-```javascript
-// api/middleware.js - Global middleware
-const authenticate = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-  next();
-};
-
-module.exports = [authenticate];
-```
-
-**Capabilities:**
-- ✅ **Change Detection**: Instant recognition of `middleware.js` modifications
-- ✅ **Lifecycle Management**: Automatic removal of deprecated middleware layers
-- ✅ **Scope Control**: Path-based middleware application to routes and subdirectories
-- ✅ **Format Support**: Function, array, and object export patterns
-- ✅ **Error Resilience**: Graceful handling of invalid middleware configurations
-
 ---
 
 ## **Advanced Capabilities**
@@ -235,6 +187,18 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
     this.responseUtils.sendSuccessResponse(res, { data: 'Hello World' });
   }
 }
+```
+
+### Middleware Management
+```javascript
+// api/middleware.js - Global middleware
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+};
+
+module.exports = [authenticate];
 ```
 
 ### Automated Documentation Generation
@@ -259,14 +223,13 @@ class GetUser extends BaseAPI {
 
 The Easy MCP Server **exclusively supports environment variables prefixed with `EASY_MCP_SERVER_`**. This approach ensures security, consistency, and prevents conflicts with other applications.
 
-#### 🔒 **Security & Consistency**
-
+#### **Security & Consistency**
 - ✅ **Only `EASY_MCP_SERVER_` prefixed variables are supported**
 - ✅ **Non-prefixed variables are ignored** (e.g., `PORT`, `HOST`, `NODE_ENV`)
 - ✅ **Prevents conflicts** with other applications
 - ✅ **Centralized configuration** management
 
-#### 📋 **Server Configuration Variables**
+#### **Server Configuration Variables**
 
 ```bash
 # Server Settings
@@ -285,13 +248,13 @@ EASY_MCP_SERVER_SERVE_INDEX=true
 EASY_MCP_SERVER_DEFAULT_FILE=index.html
 
 # API Configuration
-EASY_MCP_SERVER_API_PATH=./api
+EASY_MCP_SERVER_API_PATH=api
 
 # MCP Server Settings
 EASY_MCP_SERVER_MCP_ENABLED=true
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0
 EASY_MCP_SERVER_MCP_PORT=8888
-EASY_MCP_SERVER_MCP_BASE_PATH=../mcp
+EASY_MCP_SERVER_MCP_BASE_PATH=mcp
 
 # Bridge Configuration
 EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
@@ -305,9 +268,12 @@ EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server
 EASY_MCP_SERVER_QUIET=false
 EASY_MCP_SERVER_PRODUCTION_MODE=false
 EASY_MCP_SERVER_TEST_MODE=false
+
+# MCP Info Customization
+EASY_MCP_SERVER_MCP_INFO_HTML_PATH=./custom-info.html
 ```
 
-#### 🔌 **MCP Bridge Server Variables**
+#### **MCP Bridge Server Variables**
 
 For external MCP servers, use the dot notation pattern:
 
@@ -350,22 +316,7 @@ EASY_MCP_SERVER.contentful.space_id=your_space_id
 EASY_MCP_SERVER.contentful.access_token=your_access_token
 ```
 
-#### 🚫 **Ignored Variables**
-
-These variables are **NOT supported** and will be ignored:
-
-```bash
-# ❌ These are IGNORED
-PORT=3000                    # Use EASY_MCP_SERVER_PORT instead
-HOST=localhost               # Use EASY_MCP_SERVER_HOST instead
-CORS_ORIGIN=*                # Use EASY_MCP_SERVER_CORS_ORIGIN instead
-NODE_ENV=production          # Use EASY_MCP_SERVER_PRODUCTION_MODE instead
-DEBUG=*                      # Use EASY_MCP_SERVER_LOG_LEVEL instead
-GITHUB_TOKEN=xxx             # Use EASY_MCP_SERVER.github.token instead
-SLACK_TOKEN=xxx              # Use EASY_MCP_SERVER.slack.token instead
-```
-
-#### 🔧 **Configuration Examples**
+#### **Configuration Examples**
 
 **Basic Server Setup:**
 ```bash
@@ -404,7 +355,7 @@ export EASY_MCP_SERVER.salesforce.password=xxx
 export EASY_MCP_SERVER.salesforce.security_token=xxx
 ```
 
-#### 🛡️ **Security Benefits**
+#### **Security Benefits**
 
 1. **Namespace Isolation**: Only `EASY_MCP_SERVER_` variables are processed
 2. **No Conflicts**: Won't interfere with other applications' environment variables
@@ -441,15 +392,24 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ## **Production Deployment**
 
+### Production Features
 | Feature | Description |
 |---------|-------------|
-| **Hot Reload** | Instant updates during development |
 | **Auto Discovery** | Automatic loading of APIs and resources |
 | **AI Integration** | Complete AI model integration |
 | **Health Checks** | Built-in health monitoring |
 | **Graceful Degradation** | Server continues running even if some APIs fail |
+| **Error Recovery** | Automatic retry mechanism for failed initializations |
 
-### Graceful API Initialization
+### Deployment Configuration
+```bash
+# Production environment variables
+EASY_MCP_SERVER_PRODUCTION_MODE=true
+EASY_MCP_SERVER_LOG_LEVEL=info
+EASY_MCP_SERVER_QUIET=false
+```
+
+### Health Monitoring
 - ✅ **Server stays running** even if some APIs fail to initialize
 - ✅ **Failed APIs return 503** with helpful error messages
 - ✅ **Automatic retry mechanism** for failed initializations
@@ -477,8 +437,8 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ### Quick Test
 ```bash
-# Test API
-curl http://localhost:8887/users
+# Test server health
+curl http://localhost:8887/health
 
 # Test AI features
 curl -X POST http://localhost:8888/mcp \
@@ -492,7 +452,7 @@ echo 'console.log("Hot reload test");' >> api/test.js
 
 ### Debug Mode
 ```bash
-DEBUG=* easy-mcp-server
+EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 ```
 
 ---
