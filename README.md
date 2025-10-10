@@ -1,5 +1,5 @@
 # easy-mcp-server
-## 🚀 AI-Era Node.js Express Server
+## Enterprise-Grade Node.js Server with AI Integration
 
 [![npm version](https://img.shields.io/npm/v/easy-mcp-server.svg)](https://www.npmjs.com/package/easy-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -11,33 +11,33 @@
 [![Hot Reload](https://img.shields.io/badge/Hot-Reload-red.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 [![File Routing](https://img.shields.io/badge/File-Routing-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
-> **Why choose easy-mcp-server for modern development?**  
+> **Enterprise Development Simplified**  
 > 
-> **Traditional Development**: Manual routing → Configure middleware → Integrate AI SDK → Write docs → Deploy config  
-> **easy-mcp-server Development**: Write one function → Get everything  
+> **Traditional Approach**: Manual routing → Middleware configuration → AI SDK integration → Documentation → Deployment  
+> **easy-mcp-server**: Single function implementation → Complete API ecosystem with AI integration  
 > 
-> **Modern development made simple: Focus on your logic, let the framework handle the rest.**
+> **Streamlined development workflow: Focus on business logic while the framework manages infrastructure.**
 
-## 🚀 **Why Choose easy-mcp-server?**
+## **Architectural Advantages**
 
-| Traditional Approach | **easy-mcp-server** |
-|---------------------|-------------------|
-| Manual AI integration | ✅ **AI-Native** - Built-in MCP protocol |
-| Manual routing & middleware | ✅ **File-based** - Zero configuration |
-| Limited AI agent access | ✅ **Auto AI Tools** - Every API becomes AI-callable |
-| Steep learning curve | ✅ **Simple learning** - File path = API path |
-| Manual maintenance | ✅ **Hot reload** - Automatic updates |
-| Traditional design patterns | ✅ **AI-optimized** architecture |
+| Traditional Development | **easy-mcp-server** |
+|------------------------|-------------------|
+| Manual AI integration | ✅ **Native AI Support** - Built-in MCP protocol |
+| Manual routing & middleware | ✅ **Convention-based** - Zero configuration required |
+| Limited AI agent access | ✅ **AI-Ready APIs** - Automatic tool generation |
+| Complex learning curve | ✅ **Intuitive Design** - File structure maps to API endpoints |
+| Manual maintenance | ✅ **Hot Reload** - Real-time development updates |
+| Legacy architecture patterns | ✅ **AI-Optimized** - Modern architectural approach |
 
-**Development Experience**: Traditional setup → easy-mcp-server = **Simplified workflow** 🚀
+**Development Efficiency**: Traditional setup → easy-mcp-server = **Streamlined workflow**
 
-## 🚀 Quick Start
+## **Quick Start**
 
 ```bash
-# Install
+# Install the framework
 npm install easy-mcp-server
 
-# Create your first API
+# Create your first API endpoint
 mkdir -p api/users
 echo "const BaseAPI = require('easy-mcp-server/base-api');
 class GetUsers extends BaseAPI {
@@ -47,40 +47,40 @@ class GetUsers extends BaseAPI {
 }
 module.exports = GetUsers;" > api/users/get.js
 
-# Start server
+# Launch the server
 npx easy-mcp-server
 ```
 
-**That's it!** You now have:
-- ✅ REST API: `GET /users`
-- ✅ AI Tools: Auto-generated for AI agents
-- ✅ OpenAPI docs: Auto-generated
-- ✅ Hot reload: Built-in
-- ✅ MCP protocol: Ready for AI models
+**Immediate Results:**
+- ✅ **REST API**: `GET /users` endpoint active
+- ✅ **AI Integration**: Auto-generated tools for AI agents
+- ✅ **Documentation**: OpenAPI specification generated
+- ✅ **Development**: Hot reload enabled
+- ✅ **MCP Protocol**: AI model integration ready
 
-## ⚡ **Core Principles: 3 Simple Rules**
+## **Core Architecture Principles**
 
-| Rule | Example | Result |
-|------|---------|--------|
-| **File Path = API Path** | `api/users/profile/get.js` | `GET /users/profile` |
-| **File Name = HTTP Method** | `post.js` | `POST` |
-| **One Function = Everything** | `process(req, res)` | REST + AI + Documentation |
+| Principle | Implementation | Result |
+|-----------|----------------|--------|
+| **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
+| **HTTP Method Mapping** | `post.js` | `POST` method |
+| **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
 
-## 🚀 **Installation & Usage**
+## **Installation & Setup**
 
-### Method 1: Run Directly (Recommended)
+### Option 1: Direct Execution (Recommended)
 ```bash
-# No installation needed - just run!
+# Execute without installation
 npx easy-mcp-server
 ```
 
-### Method 2: Install & Setup
+### Option 2: Local Installation
 ```bash
 npm install easy-mcp-server
 mkdir -p api/users && touch api/users/get.js
 ```
 
-### Write Your API
+### API Implementation
 ```javascript
 // api/users/get.js
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -94,66 +94,66 @@ class GetUsers extends BaseAPI {
 module.exports = GetUsers;
 ```
 
-### Start & Access
+### Server Configuration
 ```bash
-# Basic usage
+# Standard execution
 npx easy-mcp-server
 
-# Custom ports
+# Custom port configuration
 EASY_MCP_SERVER_PORT=8887 npx easy-mcp-server
 ```
 
-**Access Points:**
+**Service Endpoints:**
 - 🌐 **REST API**: http://localhost:8887
 - 🤖 **AI Server**: http://localhost:8888
 - 📚 **API Documentation**: http://localhost:8887/docs
-- 📁 **Static Files**: http://localhost:8887/
+- 📁 **Static Assets**: http://localhost:8887/
 
 ---
 
-## 🤖 **AI Integration (MCP Features)**
+## **AI Integration (MCP Protocol)**
 
-### Why AI Integration Matters?
-- **Traditional way**: AI models cannot directly call your APIs
-- **easy-mcp-server**: AI models can automatically discover and call all your APIs
+### Enterprise AI Integration
+- **Traditional Approach**: AI models require manual API integration
+- **easy-mcp-server**: Automatic AI model discovery and API consumption
 
-### Add AI Prompts and Resources
+### AI Resource Configuration
 ```bash
-# Create AI prompt templates
+# Configure AI prompt templates
 mkdir -p mcp/prompts
 echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
 
-# Create AI resources
+# Setup AI resource documentation
 mkdir -p mcp/resources
 echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
 ```
 
-**Result**: AI models can now use your prompts and access your documentation!
+**Outcome**: AI models gain access to your prompts and documentation resources.
 
-### 🌐 **Chrome Web Browsing Support**
-AI models can control web browsers, navigate pages, fill forms, take screenshots, and perform automated web interactions.
+### **Chrome Web Automation**
+AI models can control web browsers, navigate pages, fill forms, capture screenshots, and perform automated web interactions.
 
 **Available Chrome Tools:**
 - `new_page` - Create new browser pages
 - `navigate_page` - Navigate to URLs
-- `take_snapshot` - Get page content with element UIDs
+- `take_snapshot` - Extract page content with element UIDs
 - `take_screenshot` - Capture page/element images
-- `click` - Click on page elements
-- `fill` - Fill form inputs
-- `evaluate_script` - Run JavaScript in browser
-- And 20+ more browser automation tools!
+- `click` - Interact with page elements
+- `fill` - Populate form inputs
+- `evaluate_script` - Execute JavaScript in browser context
+- Plus 20+ additional browser automation capabilities
 
-### 💻 **iTerm2 Terminal Integration**
-AI models can interact with terminal sessions, execute commands, and read output seamlessly.
+### **Terminal Integration**
+AI models can interact with terminal sessions, execute commands, and process output seamlessly.
 
-**Available iTerm2 Tools:**
+**Available Terminal Tools:**
 - `iterm-mcp_write_to_terminal` - Execute commands in active terminal
-- `iterm-mcp_read_terminal_output` - Read terminal output and results
+- `iterm-mcp_read_terminal_output` - Process terminal output and results
 - `iterm-mcp_send_control_character` - Send control characters (Ctrl+C, etc.)
 
 ---
 
-## 📁 **File Structure Example**
+## **Project Structure**
 
 ```
 your-project/
@@ -177,25 +177,25 @@ your-project/
 
 ---
 
-## 🔥 **Hot Reload Features**
+## **Development Features**
 
-### Automatic Hot Reload
-- ✅ **API Files**: Changes to `api/**/*.js` files are detected instantly
-- ✅ **Middleware**: Changes to `middleware.js` files are applied immediately
-- ✅ **Prompts**: Changes to `mcp/prompts/` files update immediately
-- ✅ **Resources**: Changes to `mcp/resources/` files reload automatically
-- ✅ **Environment**: `.env` file changes are picked up without restart
-- ✅ **MCP Bridge**: Configuration changes restart bridges automatically
+### Real-time Development
+- ✅ **API Files**: Instant detection of `api/**/*.js` file modifications
+- ✅ **Middleware**: Immediate application of `middleware.js` changes
+- ✅ **Prompts**: Real-time updates for `mcp/prompts/` file changes
+- ✅ **Resources**: Automatic reload of `mcp/resources/` modifications
+- ✅ **Environment**: Seamless `.env` file change detection
+- ✅ **MCP Bridge**: Automatic bridge restart on configuration changes
 
-### Hot Reload Benefits
-- 🔄 **No Restart Required**: Changes take effect immediately
-- 📦 **Auto Package Install**: Missing dependencies installed automatically
-- 🚀 **Fast Development**: Instant feedback during development
-- 🛡️ **Error Recovery**: Graceful handling of invalid files
-- 🧹 **Smart Cleanup**: Old middleware is automatically removed before applying new changes
+### Development Benefits
+- 🔄 **Zero Restart**: Immediate change application
+- 📦 **Dependency Management**: Automatic installation of missing packages
+- 🚀 **Rapid Development**: Instant feedback loop
+- 🛡️ **Error Handling**: Graceful management of invalid configurations
+- 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
 
-### Middleware Hot Reload
-The framework now supports **intelligent middleware hot reload** with automatic cleanup:
+### Middleware Management
+The framework provides **intelligent middleware management** with automatic lifecycle handling:
 
 ```javascript
 // api/middleware.js - Global middleware
@@ -208,18 +208,18 @@ const authenticate = (req, res, next) => {
 module.exports = [authenticate];
 ```
 
-**Features:**
-- ✅ **Automatic Detection**: Changes to `middleware.js` files are detected instantly
-- ✅ **Smart Cleanup**: Old middleware layers are removed before applying new ones
-- ✅ **Path-based Loading**: Middleware applies to routes in the same directory and subdirectories
-- ✅ **Multiple Formats**: Support for function, array, and object exports
-- ✅ **Error Recovery**: Invalid middleware changes are handled gracefully
+**Capabilities:**
+- ✅ **Change Detection**: Instant recognition of `middleware.js` modifications
+- ✅ **Lifecycle Management**: Automatic removal of deprecated middleware layers
+- ✅ **Scope Control**: Path-based middleware application to routes and subdirectories
+- ✅ **Format Support**: Function, array, and object export patterns
+- ✅ **Error Resilience**: Graceful handling of invalid middleware configurations
 
 ---
 
-## 🛠 **Advanced Features**
+## **Advanced Capabilities**
 
-### Enhanced API (AI + Logging)
+### Enhanced API with AI Integration
 ```javascript
 const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
 
@@ -231,13 +231,13 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
   }
 
   async process(req, res) {
-    // this.llm, this.responseUtils available
+    // AI and utility services available
     this.responseUtils.sendSuccessResponse(res, { data: 'Hello World' });
   }
 }
 ```
 
-### Auto-Generated Documentation
+### Automated Documentation Generation
 ```javascript
 /**
  * @description Get user information
@@ -253,11 +253,11 @@ class GetUser extends BaseAPI {
 
 ---
 
-## 🔧 **Configuration**
+## **Configuration Management**
 
 ### Environment Variables
 
-The Easy MCP Server **only supports environment variables that start with `EASY_MCP_SERVER_`**. This ensures security, consistency, and prevents conflicts with other applications.
+The Easy MCP Server **exclusively supports environment variables prefixed with `EASY_MCP_SERVER_`**. This approach ensures security, consistency, and prevents conflicts with other applications.
 
 #### 🔒 **Security & Consistency**
 
@@ -439,7 +439,7 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ---
 
-## 🚀 **Production Ready**
+## **Production Deployment**
 
 | Feature | Description |
 |---------|-------------|
@@ -457,7 +457,7 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ---
 
-## 📚 **Documentation**
+## **Documentation Resources**
 
 | Document | Purpose | Best For |
 |----------|---------|----------|
@@ -467,7 +467,7 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ---
 
-## 🔧 **Troubleshooting**
+## **Troubleshooting Guide**
 
 ### Common Issues
 1. **Port conflicts**: Use `EASY_MCP_SERVER_PORT=8888` to set different port
@@ -497,7 +497,7 @@ DEBUG=* easy-mcp-server
 
 ---
 
-## 🤝 **Contributing**
+## **Contributing Guidelines**
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -507,7 +507,7 @@ DEBUG=* easy-mcp-server
 
 ---
 
-## 📞 **Support**
+## **Support & Resources**
 
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
 - **Documentation**: [Development Guide](DEVELOPMENT.md)
@@ -515,6 +515,6 @@ DEBUG=* easy-mcp-server
 
 ---
 
-## 📄 **License**
+## **License Information**
 
 MIT License - see [package.json](package.json) for license details.
