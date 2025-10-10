@@ -182,6 +182,7 @@ your-project/
 
 ### Automatic Hot Reload
 - ✅ **API Files**: Changes to `api/**/*.js` files are detected instantly
+- ✅ **Middleware**: Changes to `middleware.js` files are applied immediately
 - ✅ **Prompts**: Changes to `mcp/prompts/` files update immediately
 - ✅ **Resources**: Changes to `mcp/resources/` files reload automatically
 - ✅ **Environment**: `.env` file changes are picked up without restart
@@ -192,6 +193,28 @@ your-project/
 - 📦 **Auto Package Install**: Missing dependencies installed automatically
 - 🚀 **Fast Development**: Instant feedback during development
 - 🛡️ **Error Recovery**: Graceful handling of invalid files
+- 🧹 **Smart Cleanup**: Old middleware is automatically removed before applying new changes
+
+### Middleware Hot Reload
+The framework now supports **intelligent middleware hot reload** with automatic cleanup:
+
+```javascript
+// api/middleware.js - Global middleware
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+};
+
+module.exports = [authenticate];
+```
+
+**Features:**
+- ✅ **Automatic Detection**: Changes to `middleware.js` files are detected instantly
+- ✅ **Smart Cleanup**: Old middleware layers are removed before applying new ones
+- ✅ **Path-based Loading**: Middleware applies to routes in the same directory and subdirectories
+- ✅ **Multiple Formats**: Support for function, array, and object exports
+- ✅ **Error Recovery**: Invalid middleware changes are handled gracefully
 
 ---
 

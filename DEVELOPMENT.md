@@ -1204,15 +1204,17 @@ app.use((error, req, res, next) => {
 });
 ```
 
-### **Auto-Loading Middleware (New Feature!)**
+### **Auto-Loading Middleware (Enhanced Feature!)**
 
-easy-mcp-server now supports **automatic middleware loading** from `middleware.js` files at any directory level!
+easy-mcp-server now supports **automatic middleware loading** from `middleware.js` files at any directory level with **intelligent hot reload**!
 
 #### **How Auto-Loading Works**
 - **File Detection**: Framework automatically scans for `middleware.js` files
 - **Path-based Loading**: Middleware applies to routes in the same directory and subdirectories
 - **Hot Reload**: Middleware changes are detected and applied automatically
+- **Smart Cleanup**: Old middleware layers are automatically removed before applying new ones
 - **Multiple Formats**: Support for function, array, and object exports
+- **Error Recovery**: Invalid middleware changes are handled gracefully
 
 #### **Directory Structure**
 ```
@@ -1295,6 +1297,47 @@ module.exports = (req, res, next) => {
 2. **Directory middleware** (`api/users/middleware.js`) - Applied to routes in that directory
 3. **Subdirectory middleware** - Applied to routes in subdirectories
 4. **Route-specific middleware** - Applied in API class constructors
+
+#### **Middleware Hot Reload Implementation**
+
+The framework includes sophisticated middleware hot reload capabilities:
+
+**Core Features:**
+- **Layer Tracking**: Each middleware layer is tracked by file path and route
+- **Smart Cleanup**: Old middleware layers are removed before applying new ones
+- **Force Reload**: Middleware changes trigger a complete reload to ensure changes are applied
+- **Error Handling**: Invalid middleware changes are handled gracefully without breaking the server
+
+**Implementation Details:**
+```javascript
+// APILoader tracks middleware layers
+this.middlewareLayers = new Map(); // Track middleware layers by file path
+
+// When middleware is loaded
+trackMiddlewareLayer(filePath, routePath, middlewareFunctions) {
+  // Store reference to middleware functions for cleanup
+  this.middlewareLayers.set(filePath, {
+    routePath,
+    middlewareFunctions,
+    stackLengthBefore: this.app._router.stack.length
+  });
+}
+
+// During hot reload
+forceMiddlewareReload() {
+  // Clear all middleware layers from Express app
+  this.clearMiddlewareFromApp();
+  // Reload all middleware files
+  this.loadMiddleware(this.apiPath);
+}
+```
+
+**Hot Reload Process:**
+1. **File Change Detection**: `chokidar` detects changes to `middleware.js` files
+2. **Cache Clearing**: Module cache is cleared for the changed file
+3. **Layer Cleanup**: Old middleware layers are removed from Express router stack
+4. **Reload**: New middleware is loaded and applied
+5. **Verification**: Middleware is verified to be working correctly
 
 #### **Example: Complete Middleware Setup**
 

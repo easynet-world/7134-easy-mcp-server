@@ -5,9 +5,9 @@
  * Tests all Express features to ensure easy-mcp-server is a complete Express alternative
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+// const { execSync } = require('child_process');
+// const fs = require('fs');
+// const path = require('path');
 
 console.log('🧪 Comprehensive Express Functionality Test\n');
 

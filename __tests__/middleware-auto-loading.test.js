@@ -126,7 +126,7 @@ module.exports = TestAPI;
 
   describe('Middleware Loading', () => {
     test('should load middleware from middleware.js files', () => {
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       const middleware = apiLoader.getMiddleware();
       
       expect(middleware).toHaveLength(3);
@@ -188,8 +188,9 @@ module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
       // Use the existing APILoader instance and reload APIs
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
+      const routes = apiLoader.getRoutes();
       expect(routes).toHaveLength(3);
       expect(routes.find(r => r.path === '/')).toBeDefined();
       expect(routes.find(r => r.path === '/users')).toBeDefined();
@@ -204,7 +205,7 @@ module.exports = "invalid middleware";
 `;
       fs.writeFileSync(path.join(tempDir, 'api', 'invalid', 'middleware.js'), invalidMiddleware);
       
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       const errors = apiLoader.getErrors();
       
       expect(errors.length).toBeGreaterThan(0);
@@ -230,7 +231,7 @@ module.exports = RootAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
       
       // Use the existing APILoader instance and reload APIs
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
       const response = await request(app)
         .get('/')
@@ -252,7 +253,7 @@ module.exports = UsersAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
       
       // Use the existing APILoader instance and reload APIs
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
       // Should fail without authentication
       await request(app)
@@ -282,7 +283,7 @@ module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
       // Use the existing APILoader instance and reload APIs
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
       // Should fail without authentication (admin middleware returns 403)
       await request(app)
@@ -316,7 +317,7 @@ module.exports = TestAPI;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), testAPI);
       
       // Use the existing APILoader instance and reload APIs
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
       // Global middleware should add timestamp
       const response = await request(app)
@@ -377,7 +378,7 @@ module.exports = TestAPI;
     });
 
     test('should get middleware for specific path', () => {
-      const routes = apiLoader.loadAPIs();
+      apiLoader.loadAPIs();
       
       const userMiddleware = apiLoader.getMiddlewareForPath('/users');
       expect(userMiddleware).toHaveLength(1);

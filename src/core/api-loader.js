@@ -14,6 +14,7 @@ class APILoader {
     this.processors = new Map();
     this.errors = [];
     this.middleware = new Map(); // Store loaded middleware
+    this.middlewareLayers = new Map(); // Track middleware layers by file path
   }
 
   /**
@@ -32,6 +33,7 @@ class APILoader {
     this.routes = [];
     this.processors.clear();
     this.middleware.clear();
+    this.middlewareLayers.clear();
     this.errors = [];
     
     // Load middleware first
@@ -101,6 +103,8 @@ class APILoader {
           middleware: middlewareModule,
           filePath: filePath
         });
+        // Track the layer for cleanup
+        this.trackMiddlewareLayer(filePath, routePath, [middlewareModule]);
         console.log(`✅ Loaded middleware: ${routePath} (function)`);
       } else if (Array.isArray(middlewareModule)) {
         // Array of middleware functions
@@ -111,6 +115,8 @@ class APILoader {
           middleware: middlewareModule,
           filePath: filePath
         });
+        // Track the layer for cleanup
+        this.trackMiddlewareLayer(filePath, routePath, middlewareModule);
         console.log(`✅ Loaded middleware: ${routePath} (${middlewareModule.length} functions)`);
       } else if (middlewareModule && typeof middlewareModule === 'object') {
         // Object with middleware methods
@@ -123,6 +129,8 @@ class APILoader {
             middleware: middlewareFunctions,
             filePath: filePath
           });
+          // Track the layer for cleanup
+          this.trackMiddlewareLayer(filePath, routePath, middlewareFunctions);
           console.log(`✅ Loaded middleware: ${routePath} (${middlewareFunctions.length} functions from object)`);
         } else {
           this.errors.push(`No valid middleware functions found in ${filePath}`);
@@ -352,7 +360,120 @@ class APILoader {
       }
     });
     
+    // Force middleware reload to ensure changes are applied
+    this.forceMiddlewareReload();
+    
     return this.loadAPIs();
+  }
+
+  /**
+   * Track middleware layer for cleanup
+   */
+  trackMiddlewareLayer(filePath, routePath, middlewareFunctions) {
+    if (!this.middlewareLayers.has(filePath)) {
+      this.middlewareLayers.set(filePath, []);
+    }
+    
+    // Store the current stack length before adding middleware
+    const currentStackLength = this.app._router.stack.length;
+    this.middlewareLayers.get(filePath).push({
+      routePath,
+      middlewareFunctions,
+      stackLengthBefore: currentStackLength
+    });
+  }
+
+  /**
+   * Clear middleware from Express app
+   */
+  clearMiddlewareFromApp() {
+    if (!this.app || !this.app._router || !this.app._router.stack) {
+      return;
+    }
+
+    try {
+      let totalRemoved = 0;
+      
+      // Clear middleware layers for each file
+      for (const [, layers] of this.middlewareLayers) {
+        for (const layer of layers) {
+          // Remove middleware layers that were added for this file
+          const stack = this.app._router.stack;
+          const middlewareToRemove = [];
+          
+          // Find layers that match our middleware functions
+          for (let i = 0; i < stack.length; i++) {
+            const stackLayer = stack[i];
+            if (stackLayer && stackLayer.handle) {
+              // Check if this layer matches one of our middleware functions
+              for (const middlewareFunc of layer.middlewareFunctions) {
+                if (stackLayer.handle === middlewareFunc) {
+                  middlewareToRemove.push(i);
+                  break;
+                }
+              }
+            }
+          }
+          
+          // Remove middleware in reverse order to maintain indices
+          for (let i = middlewareToRemove.length - 1; i >= 0; i--) {
+            stack.splice(middlewareToRemove[i], 1);
+            totalRemoved++;
+          }
+        }
+      }
+      
+      // Clear the tracking map
+      this.middlewareLayers.clear();
+      
+      console.log(`🧹 Cleared ${totalRemoved} middleware layers from Express app`);
+    } catch (error) {
+      console.warn('⚠️  Error clearing middleware from Express app:', error.message);
+    }
+  }
+
+  /**
+   * Force middleware reload by recreating the Express app middleware stack
+   */
+  forceMiddlewareReload() {
+    if (!this.app) {
+      return;
+    }
+
+    try {
+      // Store current middleware that should be preserved
+      const preservedMiddleware = [];
+      const stack = this.app._router.stack || [];
+      
+      // Preserve core Express middleware (query, expressInit, etc.)
+      for (const layer of stack) {
+        if (layer && layer.name && (
+          layer.name === 'query' ||
+          layer.name === 'expressInit' ||
+          layer.name === 'corsMiddleware' ||
+          layer.name === 'jsonParser' ||
+          layer.name === 'urlencodedParser' ||
+          layer.name === 'serveStatic' ||
+          layer.name === 'securityHeaders' ||
+          layer.name.includes('bound dispatch') ||
+          layer.name.includes('anonymous')
+        )) {
+          preservedMiddleware.push(layer);
+        }
+      }
+      
+      // Clear the entire stack
+      this.app._router.stack = [];
+      
+      // Re-add preserved middleware
+      for (const layer of preservedMiddleware) {
+        this.app._router.stack.push(layer);
+      }
+      
+      console.log(`🔄 Force reloaded middleware stack, preserved ${preservedMiddleware.length} core layers`);
+    } catch (error) {
+      console.warn('⚠️  Error force reloading middleware:', error.message);
+    }
   }
 }
 
