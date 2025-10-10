@@ -150,6 +150,43 @@ module.exports = TestAPI;
     });
 
     test('should load API routes correctly', () => {
+      // Create API files for testing
+      fs.mkdirSync(path.join(tempDir, 'api', 'users'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'api', 'admin'), { recursive: true });
+      
+      // Create root API
+      const rootAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class RootAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ message: 'Root API' });
+  }
+}
+module.exports = RootAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
+      
+      // Create users API
+      const usersAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class UsersAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+}
+module.exports = UsersAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
+      
+      // Create admin API
+      const adminAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class AdminAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ admin: true });
+  }
+}
+module.exports = AdminAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
+      
       const routes = apiLoader.loadAPIs();
       
       expect(routes).toHaveLength(3);
@@ -176,6 +213,21 @@ module.exports = "invalid middleware";
 
   describe('Middleware Execution', () => {
     test('should apply global middleware to all routes', async () => {
+      // Create API files for testing
+      fs.mkdirSync(path.join(tempDir, 'api', 'users'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'api', 'admin'), { recursive: true });
+      
+      // Create root API
+      const rootAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class RootAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ message: 'Root API', timestamp: req.timestamp });
+  }
+}
+module.exports = RootAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
+      
       const routes = apiLoader.loadAPIs();
       
       const response = await request(app)
@@ -186,6 +238,17 @@ module.exports = "invalid middleware";
     });
 
     test('should apply user middleware to user routes', async () => {
+      // Create users API
+      const usersAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class UsersAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ users: [], user: req.user });
+  }
+}
+module.exports = UsersAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
+      
       const routes = apiLoader.loadAPIs();
       
       // Should fail without authentication
@@ -204,6 +267,17 @@ module.exports = "invalid middleware";
     });
 
     test('should apply admin middleware to admin routes', async () => {
+      // Create admin API
+      const adminAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+class AdminAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ admin: true, user: req.user });
+  }
+}
+module.exports = AdminAPI;`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
+      
       const routes = apiLoader.loadAPIs();
       
       // Should fail without authentication
