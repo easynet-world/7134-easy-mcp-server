@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const APILoader = require('../src/core/api-loader');
 
-describe.skip('Middleware Auto-Loading', () => {
+describe('Middleware Auto-Loading', () => {
   let app;
   let apiLoader;
   let tempDir;
@@ -187,9 +187,8 @@ class AdminAPI extends BaseAPI {
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
-      // Create a new APILoader instance with the updated directory
-      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
-      const routes = newApiLoader.loadAPIs();
+      // Use the existing APILoader instance and reload APIs
+      const routes = apiLoader.loadAPIs();
       
       expect(routes).toHaveLength(3);
       expect(routes.find(r => r.path === '/')).toBeDefined();
@@ -230,9 +229,8 @@ class RootAPI extends BaseAPI {
 module.exports = RootAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
       
-      // Create a new APILoader instance with the updated directory
-      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
-      const routes = newApiLoader.loadAPIs();
+      // Use the existing APILoader instance and reload APIs
+      const routes = apiLoader.loadAPIs();
       
       const response = await request(app)
         .get('/')
@@ -253,9 +251,8 @@ class UsersAPI extends BaseAPI {
 module.exports = UsersAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
       
-      // Create a new APILoader instance with the updated directory
-      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
-      const routes = newApiLoader.loadAPIs();
+      // Use the existing APILoader instance and reload APIs
+      const routes = apiLoader.loadAPIs();
       
       // Should fail without authentication
       await request(app)
@@ -284,14 +281,13 @@ class AdminAPI extends BaseAPI {
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
-      // Create a new APILoader instance with the updated directory
-      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
-      const routes = newApiLoader.loadAPIs();
+      // Use the existing APILoader instance and reload APIs
+      const routes = apiLoader.loadAPIs();
       
-      // Should fail without authentication
+      // Should fail without authentication (admin middleware returns 403)
       await request(app)
         .get('/admin')
-        .expect(401);
+        .expect(403);
       
       // Should fail with user authentication (not admin)
       await request(app)
@@ -301,9 +297,26 @@ module.exports = AdminAPI;`;
     });
 
     test('should apply middleware in correct order', async () => {
-      // Create a new APILoader instance with the updated directory
-      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
-      const routes = newApiLoader.loadAPIs();
+      // Create API file for testing
+      const testAPI = `
+const BaseAPI = require('easy-mcp-server/base-api');
+
+class TestAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ 
+      message: 'Hello World',
+      timestamp: req.timestamp,
+      user: req.user || null
+    });
+  }
+}
+
+module.exports = TestAPI;
+`;
+      fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), testAPI);
+      
+      // Use the existing APILoader instance and reload APIs
+      const routes = apiLoader.loadAPIs();
       
       // Global middleware should add timestamp
       const response = await request(app)
@@ -317,6 +330,9 @@ module.exports = AdminAPI;`;
 
   describe('Middleware Export Formats', () => {
     test('should handle array export format', () => {
+      // Load APIs to ensure middleware is loaded
+      apiLoader.loadAPIs();
+      
       const middleware = apiLoader.getMiddleware();
       const globalMiddleware = middleware.find(m => m.path === '/');
       
@@ -325,6 +341,9 @@ module.exports = AdminAPI;`;
     });
 
     test('should handle object export format', () => {
+      // Load APIs to ensure middleware is loaded
+      apiLoader.loadAPIs();
+      
       const middleware = apiLoader.getMiddleware();
       const userMiddleware = middleware.find(m => m.path === '/users');
       
@@ -333,17 +352,24 @@ module.exports = AdminAPI;`;
     });
 
     test('should handle function export format', () => {
+      // Load APIs to ensure middleware is loaded
+      apiLoader.loadAPIs();
+      
       const middleware = apiLoader.getMiddleware();
       const adminMiddleware = middleware.find(m => m.path === '/admin');
       
       expect(adminMiddleware.type).toBe('function');
-      expect(typeof adminMiddleware.middleware[0]).toBe('function');
+      expect(typeof adminMiddleware.middleware).toBe('function');
     });
   });
 
   describe('Middleware Path Resolution', () => {
     test('should resolve middleware paths correctly', () => {
+      // Load APIs to ensure middleware is loaded
+      apiLoader.loadAPIs();
+      
       const middleware = apiLoader.getMiddleware();
+      
       
       expect(middleware.find(m => m.path === '/')).toBeDefined();
       expect(middleware.find(m => m.path === '/users')).toBeDefined();
