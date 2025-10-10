@@ -1,7 +1,7 @@
 {
   "name": "easy-mcp-server",
   "version": "1.0.111",
-  "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models",
+  "description": "AI-era Express replacement with zero-config MCP integration - Build AI-ready APIs in 30 seconds",
   "main": "index.js",
   "bin": {
     "easy-mcp-server": "./bin/easy-mcp-server.js"
@@ -24,7 +24,11 @@
     "clean": "rm -rf node_modules package-lock.json && npm install",
     "publish:npm": "npm publish --registry=https://registry.npmjs.org/",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com",
-    "publish:both": "npm run publish:npm && npm run publish:github"
+    "publish:both": "npm run publish:npm && npm run publish:github",
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run",
+    "release:check": "semantic-release --dry-run --no-ci",
+    "release:test": "semantic-release --dry-run --no-ci --extends releaserc.test.js"
   },
   "dependencies": {
     "chokidar": "^3.5.3",
@@ -47,15 +51,15 @@
     "supertest": "^7.1.4"
   },
   "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "api",
-    "framework",
-    "dynamic",
-    "express",
-    "nodejs",
-    "ai",
-    "inspector"
+    "ai-native", "ai-first", "ai-era",
+    "mcp", "model-context-protocol",
+    "llm", "openai", "claude", "anthropic",
+    "agent", "ai-agent", "autonomous",
+    "express", "nodejs", "api", "framework",
+    "zero-config", "file-based-routing",
+    "hot-reload", "dynamic-api",
+    "chatgpt-plugin", "ai-tools",
+    "intelligent-api", "ai-integration"
   ],
   "author": "Your Name",
   "license": "MIT",

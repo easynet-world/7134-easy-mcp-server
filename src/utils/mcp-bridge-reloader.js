@@ -137,7 +137,7 @@ class MCPBridgeReloader {
 
   ensureBridges() {
     if (this.bridges.size === 0) {
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.EASY_MCP_SERVER_TEST_MODE === 'true') {
         // Provide a disabled stub in tests
         this.bridges.set('disabled', {
           rpcRequest: async () => ({ jsonrpc: '2.0', id: 0, result: { disabled: true } }),

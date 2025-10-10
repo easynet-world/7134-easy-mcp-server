@@ -1,4 +1,6 @@
 {
+  "_comment": "MCP Bridge Configuration - AI-Era Express Server Bridge Configuration",
+  "_description": "This file configures MCP servers that extend your API with AI capabilities",
   "mcpServers": {
     "chrome": {
       "command": "npx",

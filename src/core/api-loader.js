@@ -13,6 +13,7 @@ class APILoader {
     this.routes = [];
     this.processors = new Map();
     this.errors = [];
+    this.middleware = new Map(); // Store loaded middleware
   }
 
   /**
@@ -30,8 +31,13 @@ class APILoader {
 
     this.routes = [];
     this.processors.clear();
+    this.middleware.clear();
     this.errors = [];
     
+    // Load middleware first
+    this.loadMiddleware(apiDir);
+    
+    // Then load APIs
     this.scanDirectory(apiDir);
     this.attachProcessorsToRoutes();
     
@@ -40,6 +46,94 @@ class APILoader {
     }
     
     return this.routes;
+  }
+
+  /**
+   * Load middleware from middleware.js files
+   */
+  loadMiddleware(apiDir) {
+    try {
+      this.scanForMiddleware(apiDir);
+    } catch (error) {
+      this.errors.push(`Failed to load middleware: ${error.message}`);
+    }
+  }
+
+  /**
+   * Recursively scan for middleware.js files
+   */
+  scanForMiddleware(dir, basePath = '') {
+    try {
+      const items = fs.readdirSync(dir);
+      
+      items.forEach(item => {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+          // Recursively scan subdirectories
+          this.scanForMiddleware(fullPath, path.join(basePath, item));
+        } else if (stat.isFile() && item === 'middleware.js') {
+          // Found a middleware file
+          this.loadMiddlewareFile(fullPath, basePath);
+        }
+      });
+    } catch (error) {
+      this.errors.push(`Failed to scan for middleware in ${dir}: ${error.message}`);
+    }
+  }
+
+  /**
+   * Load a single middleware file
+   */
+  loadMiddlewareFile(filePath, basePath) {
+    try {
+      const middlewareModule = require(path.resolve(filePath));
+      const routePath = '/' + basePath.replace(/\\/g, '/');
+      
+      // Handle different middleware export formats
+      if (typeof middlewareModule === 'function') {
+        // Single middleware function
+        this.app.use(routePath, middlewareModule);
+        this.middleware.set(filePath, {
+          type: 'function',
+          path: routePath,
+          middleware: middlewareModule,
+          filePath: filePath
+        });
+        console.log(`✅ Loaded middleware: ${routePath} (function)`);
+      } else if (Array.isArray(middlewareModule)) {
+        // Array of middleware functions
+        this.app.use(routePath, ...middlewareModule);
+        this.middleware.set(filePath, {
+          type: 'array',
+          path: routePath,
+          middleware: middlewareModule,
+          filePath: filePath
+        });
+        console.log(`✅ Loaded middleware: ${routePath} (${middlewareModule.length} functions)`);
+      } else if (middlewareModule && typeof middlewareModule === 'object') {
+        // Object with middleware methods
+        const middlewareFunctions = Object.values(middlewareModule).filter(fn => typeof fn === 'function');
+        if (middlewareFunctions.length > 0) {
+          this.app.use(routePath, ...middlewareFunctions);
+          this.middleware.set(filePath, {
+            type: 'object',
+            path: routePath,
+            middleware: middlewareFunctions,
+            filePath: filePath
+          });
+          console.log(`✅ Loaded middleware: ${routePath} (${middlewareFunctions.length} functions from object)`);
+        } else {
+          this.errors.push(`No valid middleware functions found in ${filePath}`);
+        }
+      } else {
+        this.errors.push(`Invalid middleware export in ${filePath}: must be function, array, or object`);
+      }
+    } catch (error) {
+      this.errors.push(`Failed to load middleware from ${filePath}: ${error.message}`);
+      console.error(`❌ Failed to load middleware from ${filePath}:`, error.message);
+    }
   }
 
   /**
@@ -56,8 +150,8 @@ class APILoader {
         if (stat.isDirectory()) {
           // Recursively scan subdirectories
           this.scanDirectory(fullPath, path.join(basePath, item));
-        } else if (stat.isFile() && item.endsWith('.js')) {
-          // Found an API file
+        } else if (stat.isFile() && item.endsWith('.js') && item !== 'middleware.js') {
+          // Found an API file (exclude middleware.js)
           this.loadAPIFile(fullPath, basePath, item);
         }
       });
@@ -207,6 +301,20 @@ class APILoader {
    */
   getErrors() {
     return [...this.errors];
+  }
+
+  /**
+   * Get all loaded middleware
+   */
+  getMiddleware() {
+    return Array.from(this.middleware.values());
+  }
+
+  /**
+   * Get middleware for a specific path
+   */
+  getMiddlewareForPath(path) {
+    return Array.from(this.middleware.values()).filter(mw => mw.path === path);
   }
 
   /**

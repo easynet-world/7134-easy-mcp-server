@@ -138,7 +138,7 @@ app.get('/health', (req, res) => {
     server: 'running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
+    environment: 'development',
     version: '1.0.0',
     apis: {
       total: totalAPIs,
@@ -223,7 +223,7 @@ app.get('/api-info', (req, res) => {
     errors: errors,
     validationIssues: validationIssues,
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: 'development'
   });
 });
 
@@ -651,7 +651,7 @@ function startServer() {
     console.log('  🚀  SERVER STARTED SUCCESSFULLY');
     console.log('  ' + '═'.repeat(78));
     console.log(`  📍 Server Address: ${host}:${basePort}`);
-    console.log(`  🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('  🌍 Environment: development');
     console.log('');
     console.log('  📡  API ENDPOINTS:');
     console.log(`     • Health Check:     http://localhost:${basePort}/health`);
