@@ -49,6 +49,13 @@
 - Changes are minimal, focused, and readable.
 - **README.md verification**: Before committing, check README.md to ensure everything is accurate and updated, especially regarding recent changes.
 
+### API maintenance rules
+
+- **annotation-sync**: Whenever API endpoints are updated, modified, or refactored, always review and update the corresponding JSDoc annotations to ensure they accurately reflect the current implementation.
+- **parameter-validation**: Ensure all parameter annotations match the actual function signatures and validation logic.
+- **response-schema**: Keep response schema annotations synchronized with actual return values and error handling.
+- **api-documentation**: Update OpenAPI/Swagger documentation when API changes are made.
+
 ### Documentation policy
 
 - **documentation-files**: Only maintain two documentation files:
@@ -56,4 +63,5 @@
   - `DEVELOPMENT.md`: Developer guide for contributors and maintainers.
 - **other-docs**: Do not create or maintain additional documentation files (e.g., extra guides, tutorials, or supplementary docs) unless explicitly requested by the user.
 - **language**: All comments and documentation must be written in English.
+- **professional-tone**: Maintain a very professional tone in all documentation and comments. Use clear, concise, and formal language appropriate for technical documentation.
 - **release-notes**: We provide detailed release notes in every version release.
