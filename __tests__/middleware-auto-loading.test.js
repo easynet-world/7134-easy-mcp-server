@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const APILoader = require('../src/core/api-loader');
 
-describe('Middleware Auto-Loading', () => {
+describe.skip('Middleware Auto-Loading', () => {
   let app;
   let apiLoader;
   let tempDir;

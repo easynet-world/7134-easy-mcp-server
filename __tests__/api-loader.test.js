@@ -67,8 +67,9 @@ describe('APILoader', () => {
       const result = apiLoader.loadAPIs();
       
       expect(result).toEqual([]);
-      expect(apiLoader.errors).toHaveLength(1);
-      expect(apiLoader.errors[0]).toContain('Failed to scan directory');
+      expect(apiLoader.errors).toHaveLength(2); // One for middleware scan, one for API scan
+      expect(apiLoader.errors[0]).toContain('Failed to scan');
+      expect(apiLoader.errors[1]).toContain('Failed to scan');
     });
   });
 
