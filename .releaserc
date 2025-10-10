@@ -38,7 +38,7 @@
       "changelogFile": "CHANGELOG.md"
     }],
     ["@semantic-release/npm", {
-      "npmPublish": true,
+      "npmPublish": false,
       "registry": "https://registry.npmjs.org/",
       "access": "public",
       "tarballDir": "dist"
