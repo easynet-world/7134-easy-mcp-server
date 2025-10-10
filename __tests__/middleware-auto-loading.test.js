@@ -160,11 +160,11 @@ module.exports = TestAPI;
 
     test('should handle middleware loading errors gracefully', () => {
       // Create invalid middleware file
+      fs.mkdirSync(path.join(tempDir, 'api', 'invalid'), { recursive: true });
       const invalidMiddleware = `
 module.exports = "invalid middleware";
 `;
       fs.writeFileSync(path.join(tempDir, 'api', 'invalid', 'middleware.js'), invalidMiddleware);
-      fs.mkdirSync(path.join(tempDir, 'api', 'invalid'), { recursive: true });
       
       const routes = apiLoader.loadAPIs();
       const errors = apiLoader.getErrors();
