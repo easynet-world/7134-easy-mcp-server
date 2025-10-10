@@ -257,21 +257,161 @@ class GetUser extends BaseAPI {
 ## 🔧 **Configuration**
 
 ### Environment Variables
+
+The Easy MCP Server **only supports environment variables that start with `EASY_MCP_SERVER_`**. This ensures security, consistency, and prevents conflicts with other applications.
+
+#### 🔒 **Security & Consistency**
+
+- ✅ **Only `EASY_MCP_SERVER_` prefixed variables are supported**
+- ✅ **Non-prefixed variables are ignored** (e.g., `PORT`, `HOST`, `NODE_ENV`)
+- ✅ **Prevents conflicts** with other applications
+- ✅ **Centralized configuration** management
+
+#### 📋 **Server Configuration Variables**
+
 ```bash
-# .env
-EASY_MCP_SERVER_PORT=8887          # REST API port
-EASY_MCP_SERVER_MCP_PORT=8888      # AI server port
-EASY_MCP_SERVER_HOST=0.0.0.0       # Server address
+# Server Settings
+EASY_MCP_SERVER_PORT=8887
+EASY_MCP_SERVER_HOST=0.0.0.0
 
-# Hot Reload
-EASY_MCP_SERVER_HOT_RELOAD=true    # Enable hot reload
-EASY_MCP_SERVER_API_PATH=./api     # API directory
-EASY_MCP_SERVER_MCP_BASE_PATH=./mcp # MCP directory
+# CORS Settings
+EASY_MCP_SERVER_CORS_ORIGIN=*
+EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
+EASY_MCP_SERVER_CORS_CREDENTIALS=true
 
-# MCP Bridge Configuration
+# Static File Serving
+EASY_MCP_SERVER_STATIC_ENABLED=true
+EASY_MCP_SERVER_STATIC_DIRECTORY=./public
+EASY_MCP_SERVER_SERVE_INDEX=true
+EASY_MCP_SERVER_DEFAULT_FILE=index.html
+
+# API Configuration
+EASY_MCP_SERVER_API_PATH=./api
+
+# MCP Server Settings
+EASY_MCP_SERVER_MCP_ENABLED=true
+EASY_MCP_SERVER_MCP_HOST=0.0.0.0
+EASY_MCP_SERVER_MCP_PORT=8888
+EASY_MCP_SERVER_MCP_BASE_PATH=../mcp
+
+# Bridge Configuration
 EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
-EASY_MCP_SERVER_BRIDGE_ENABLED=true
+
+# Logging
+EASY_MCP_SERVER_LOG_LEVEL=info
+EASY_MCP_SERVER_LOG_FORMAT=text
+EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server
+
+# Development/Production
+EASY_MCP_SERVER_QUIET=false
+EASY_MCP_SERVER_PRODUCTION_MODE=false
+EASY_MCP_SERVER_TEST_MODE=false
 ```
+
+#### 🔌 **MCP Bridge Server Variables**
+
+For external MCP servers, use the dot notation pattern:
+
+```bash
+# Pattern: EASY_MCP_SERVER.<server_name>.<parameter>
+# Example: EASY_MCP_SERVER.github.token -> GITHUB_TOKEN
+
+# GitHub MCP Server
+EASY_MCP_SERVER.github.token=ghp_your_github_token
+EASY_MCP_SERVER.github.owner=your-organization
+EASY_MCP_SERVER.github.repo=your-repository
+
+# Slack MCP Server
+EASY_MCP_SERVER.slack.token=xoxb-your-slack-token
+EASY_MCP_SERVER.slack.channel=#general
+
+# Chrome DevTools MCP Server
+EASY_MCP_SERVER.chrome.debug_port=9222
+EASY_MCP_SERVER.chrome.headless=true
+
+# Filesystem MCP Server
+EASY_MCP_SERVER.filesystem.root_path=/path/to/allowed/directory
+
+# PostgreSQL MCP Server
+EASY_MCP_SERVER.postgres.connection_string=postgresql://user:pass@localhost:5432/db
+EASY_MCP_SERVER.postgres.schema=public
+
+# Salesforce MCP Server
+EASY_MCP_SERVER.salesforce.client_id=your_client_id
+EASY_MCP_SERVER.salesforce.client_secret=your_client_secret
+EASY_MCP_SERVER.salesforce.username=your_username
+EASY_MCP_SERVER.salesforce.password=your_password
+EASY_MCP_SERVER.salesforce.security_token=your_security_token
+
+# Notion MCP Server
+EASY_MCP_SERVER.notion.api_key=secret_your_notion_api_key
+
+# Contentful MCP Server
+EASY_MCP_SERVER.contentful.space_id=your_space_id
+EASY_MCP_SERVER.contentful.access_token=your_access_token
+```
+
+#### 🚫 **Ignored Variables**
+
+These variables are **NOT supported** and will be ignored:
+
+```bash
+# ❌ These are IGNORED
+PORT=3000                    # Use EASY_MCP_SERVER_PORT instead
+HOST=localhost               # Use EASY_MCP_SERVER_HOST instead
+CORS_ORIGIN=*                # Use EASY_MCP_SERVER_CORS_ORIGIN instead
+NODE_ENV=production          # Use EASY_MCP_SERVER_PRODUCTION_MODE instead
+DEBUG=*                      # Use EASY_MCP_SERVER_LOG_LEVEL instead
+GITHUB_TOKEN=xxx             # Use EASY_MCP_SERVER.github.token instead
+SLACK_TOKEN=xxx              # Use EASY_MCP_SERVER.slack.token instead
+```
+
+#### 🔧 **Configuration Examples**
+
+**Basic Server Setup:**
+```bash
+export EASY_MCP_SERVER_PORT=8887
+export EASY_MCP_SERVER_HOST=0.0.0.0
+export EASY_MCP_SERVER_CORS_ORIGIN=*
+export EASY_MCP_SERVER_MCP_ENABLED=true
+```
+
+**GitHub Integration:**
+```bash
+export EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
+export EASY_MCP_SERVER.github.token=ghp_your_token_here
+export EASY_MCP_SERVER.github.owner=your-org
+```
+
+**Multi-Service Setup:**
+```bash
+# Server
+export EASY_MCP_SERVER_PORT=8887
+export EASY_MCP_SERVER_MCP_ENABLED=true
+
+# GitHub
+export EASY_MCP_SERVER.github.token=ghp_xxx
+export EASY_MCP_SERVER.github.owner=my-org
+
+# Slack
+export EASY_MCP_SERVER.slack.token=xoxb-xxx
+export EASY_MCP_SERVER.slack.channel=#dev
+
+# Salesforce
+export EASY_MCP_SERVER.salesforce.client_id=xxx
+export EASY_MCP_SERVER.salesforce.client_secret=xxx
+export EASY_MCP_SERVER.salesforce.username=xxx
+export EASY_MCP_SERVER.salesforce.password=xxx
+export EASY_MCP_SERVER.salesforce.security_token=xxx
+```
+
+#### 🛡️ **Security Benefits**
+
+1. **Namespace Isolation**: Only `EASY_MCP_SERVER_` variables are processed
+2. **No Conflicts**: Won't interfere with other applications' environment variables
+3. **Clear Ownership**: Easy to identify which variables belong to Easy MCP Server
+4. **Centralized Management**: All configuration in one predictable namespace
+5. **Prevents Accidental Exposure**: Non-prefixed variables are ignored
 
 ### MCP Bridge Configuration
 The framework includes built-in support for multiple MCP servers:
