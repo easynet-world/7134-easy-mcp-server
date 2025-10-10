@@ -35,12 +35,18 @@
 
 ### Option 1: Try the Example Project
 ```bash
-# Clone and explore the complete example
+# Clone and explore the complete example project
 git clone https://github.com/easynet-world/7134-easy-mcp-server.git
 cd 7134-easy-mcp-server/example-project
 npx easy-mcp-server
 # Open http://localhost:8887 for interactive demo
 ```
+
+**Example Project Features:**
+- Complete API implementation with users and products endpoints
+- AI prompts and resources for MCP integration
+- JSDoc annotations for automated documentation
+- Real-world development patterns and best practices
 
 ### Option 2: Create Your Own API
 ```bash
@@ -445,9 +451,10 @@ EASY_MCP_SERVER_QUIET=false
 
 | Document | Purpose | Best For |
 |----------|---------|----------|
-| **[Development Guide](DEVELOPMENT.md)** | Detailed development documentation | Deep development |
+| **[Development Guide](DEVELOPMENT.md)** | Comprehensive development documentation with Express migration guide, middleware patterns, and advanced features | Deep development, enterprise migration, production deployment |
 | **[Agent Context](Agent.md)** | AI agent integration guide | Building AI applications |
 | **[LLM Context](LLM.txt)** | LLM-specific information | AI model integration |
+| **Example Project** | Complete working example with users/products APIs, AI integration, and JSDoc annotations | Learning by example, best practices reference |
 
 ---
 
@@ -494,8 +501,9 @@ EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 ## **Support & Resources**
 
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
-- **Documentation**: [Development Guide](DEVELOPMENT.md)
-- **Examples**: Check the `api/example/` directory
+- **Documentation**: [Development Guide](DEVELOPMENT.md) - Comprehensive development documentation with Express migration guide
+- **Example Project**: Complete working example in `example-project/` directory with users/products APIs, AI integration, and JSDoc annotations
+- **API Examples**: Additional examples in `api/example/` directory
 
 ---
 
