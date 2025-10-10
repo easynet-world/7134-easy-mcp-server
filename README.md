@@ -452,6 +452,7 @@ EASY_MCP_SERVER_QUIET=false
 | Document | Purpose | Best For |
 |----------|---------|----------|
 | **[Development Guide](DEVELOPMENT.md)** | Comprehensive development documentation with Express migration guide, middleware patterns, and advanced features | Deep development, enterprise migration, production deployment |
+| **[LLM Context](LLM.txt)** | LLM-specific information and context for AI model integration | AI model integration |
 | **[Example Project](example-project/)** | Complete working example with users/products APIs, AI integration, and JSDoc annotations | Learning by example, best practices reference |
 
 ---
