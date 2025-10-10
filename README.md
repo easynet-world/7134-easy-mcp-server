@@ -11,26 +11,14 @@
 [![Hot Reload](https://img.shields.io/badge/Hot-Reload-red.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 [![File Routing](https://img.shields.io/badge/File-Routing-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
-> **Why choose easy-mcp-server as Express replacement in AI Era?**  
+> **Why choose easy-mcp-server for modern development?**  
 > 
-> **Traditional Express Development**: Manual routing → Configure middleware → Integrate AI SDK → Write docs → Deploy config  
+> **Traditional Development**: Manual routing → Configure middleware → Integrate AI SDK → Write docs → Deploy config  
 > **easy-mcp-server Development**: Write one function → Get everything  
 > 
-> **This is how AI-era development works: Let AI work for you, not work for AI.**
+> **Modern development made simple: Focus on your logic, let the framework handle the rest.**
 
 
-## 🚨 **AI Era Warning: Express is Outdated!**
-
-| Traditional Express | **easy-mcp-server** |
-|-------------------|-------------------|
-| ❌ Manual AI integration | ✅ **AI-Native** - Built-in MCP protocol |
-| ❌ Manual routing & middleware | ✅ **File-based** - Zero config |
-| ❌ AI agents can't use APIs | ✅ **Auto AI Tools** - Every API becomes AI-callable |
-| ❌ High learning curve | ✅ **Zero learning** - File path = API path |
-| ❌ Manual maintenance | ✅ **Hot reload** - Auto updates |
-| ❌ Human-focused design | ✅ **AI-optimized** architecture |
-
-**Development Experience**: Express (manual setup) → easy-mcp-server (zero config) = **Much simpler** 🚀
 
 ## 🚀 Quick Start
 
