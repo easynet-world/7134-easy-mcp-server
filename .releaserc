@@ -40,8 +40,14 @@
     ["@semantic-release/npm", {
       "npmPublish": true,
       "registry": "https://registry.npmjs.org/",
-      "access": "public"
+      "access": "public",
+      "tarballDir": "dist"
     }],
-    "@semantic-release/github"
+    ["@semantic-release/github", {
+      "failComment": false,
+      "failTitle": false,
+      "successComment": false,
+      "releasedLabels": false
+    }]
   ]
 }
