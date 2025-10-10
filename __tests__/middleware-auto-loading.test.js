@@ -187,7 +187,9 @@ class AdminAPI extends BaseAPI {
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
-      const routes = apiLoader.loadAPIs();
+      // Create a new APILoader instance with the updated directory
+      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
+      const routes = newApiLoader.loadAPIs();
       
       expect(routes).toHaveLength(3);
       expect(routes.find(r => r.path === '/')).toBeDefined();
@@ -228,7 +230,9 @@ class RootAPI extends BaseAPI {
 module.exports = RootAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
       
-      const routes = apiLoader.loadAPIs();
+      // Create a new APILoader instance with the updated directory
+      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
+      const routes = newApiLoader.loadAPIs();
       
       const response = await request(app)
         .get('/')
@@ -249,7 +253,9 @@ class UsersAPI extends BaseAPI {
 module.exports = UsersAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
       
-      const routes = apiLoader.loadAPIs();
+      // Create a new APILoader instance with the updated directory
+      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
+      const routes = newApiLoader.loadAPIs();
       
       // Should fail without authentication
       await request(app)
@@ -278,7 +284,9 @@ class AdminAPI extends BaseAPI {
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
       
-      const routes = apiLoader.loadAPIs();
+      // Create a new APILoader instance with the updated directory
+      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
+      const routes = newApiLoader.loadAPIs();
       
       // Should fail without authentication
       await request(app)
@@ -293,7 +301,9 @@ module.exports = AdminAPI;`;
     });
 
     test('should apply middleware in correct order', async () => {
-      const routes = apiLoader.loadAPIs();
+      // Create a new APILoader instance with the updated directory
+      const newApiLoader = new APILoader(app, path.join(tempDir, 'api'));
+      const routes = newApiLoader.loadAPIs();
       
       // Global middleware should add timestamp
       const response = await request(app)
