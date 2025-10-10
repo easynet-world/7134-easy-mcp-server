@@ -42,11 +42,6 @@
       "registry": "https://registry.npmjs.org/",
       "access": "public"
     }],
-    ["@semantic-release/github", {
-      "failComment": false,
-      "failTitle": false,
-      "successComment": false,
-      "releasedLabels": false
-    }]
+    "@semantic-release/github"
   ]
 }
