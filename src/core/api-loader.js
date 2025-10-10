@@ -165,7 +165,8 @@ class APILoader {
    */
   loadAPIFile(filePath, basePath, fileName) {
     const httpMethod = path.basename(fileName, '.js').toUpperCase();
-    const routePath = path.join(basePath, path.dirname(fileName));
+    const dirName = path.dirname(fileName);
+    const routePath = dirName === '.' ? basePath : path.join(basePath, dirName);
     const normalizedPath = '/' + routePath.replace(/\\/g, '/');
     
     // Validate HTTP method
