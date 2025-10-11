@@ -8,15 +8,26 @@ This is a complete example project demonstrating how to build an AI-ready e-comm
 # Navigate to the example project
 cd example-project
 
-# The .env file contains default configuration (already included)
-# Start the server
-npx easy-mcp-server
+# Install dependencies
+npm install
 
-# Or with custom ports
-EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
+# Start the server (uses .env configuration)
+npm start
+
+# Or run directly with custom ports
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npm start
 ```
 
 > **Note**: This example project includes a `.env` file with default configuration. You can modify it to customize ports, paths, and other settings.
+
+### Alternative: Run without installation
+
+You can also run this project directly using `npx` without installing dependencies:
+
+```bash
+cd example-project
+npx easy-mcp-server
+```
 
 ## 📁 Project Structure
 
@@ -41,6 +52,7 @@ example-project/
 ├── public/                       # Static files
 │   └── index.html               # Demo frontend
 ├── .env                         # Environment configuration
+├── package.json                 # Project dependencies and scripts
 ├── mcp-bridge.json              # MCP bridge configuration
 ├── start.sh                     # Start script
 ├── stop.sh                      # Stop script
