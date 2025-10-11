@@ -158,3 +158,6 @@ jspm_packages/
 
 # Environment variables
 .env
+
+# Exception: Allow .env in example-project for demonstration
+!example-project/.env
