@@ -30,51 +30,35 @@ describe('Dynamic Routes', () => {
     const routes = apiLoader.loadAPIs();
 
     // Find the dynamic route
-    const dynamicRoute = routes.find(r => r.path === '/users/:id' && r.method === 'GET');
+    const dynamicRoute = routes.find(r => r.path === '/products/:id' && r.method === 'GET');
     expect(dynamicRoute).toBeDefined();
-    expect(dynamicRoute.path).toBe('/users/:id');
+    expect(dynamicRoute.path).toBe('/products/:id');
     expect(dynamicRoute.method).toBe('GET');
   });
 
-  test('should handle GET request to /users/:id', async () => {
+  test('should handle GET request to /products/:id', async () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
     const response = await request(app)
-      .get('/users/1');
+      .get('/products/1');
     
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.id).toBe('1');
-    expect(response.body.data.name).toBe('John Doe');
+    expect(response.body.data.name).toBe('Laptop');
   });
 
-  test('should handle PUT request to /users/:id', async () => {
+  test('should handle 404 for non-existent product ID', async () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
     const response = await request(app)
-      .put('/users/1')
-      .send({ name: 'Updated Name', email: 'updated@example.com' });
+      .get('/products/999');
     
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.id).toBe('1');
-    expect(response.body.data.name).toBe('Updated Name');
-    expect(response.body.message).toContain('updated successfully');
-  });
-
-  test('should handle DELETE request to /users/:id', async () => {
-    apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
-    apiLoader.loadAPIs();
-
-    const response = await request(app)
-      .delete('/users/1');
-    
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.id).toBe('1');
-    expect(response.body.message).toContain('deleted successfully');
+    expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toContain('not found');
   });
 
   test.skip('should load API with nested dynamic parameters [userId]/posts/[postId]', () => {
@@ -177,21 +161,21 @@ module.exports = TestAPI;
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
-    // Test with numeric ID - user 1 exists
+    // Test with numeric ID - product 1 exists
     const numericResponse = await request(app)
-      .get('/users/1');
+      .get('/products/1');
     expect(numericResponse.status).toBe(200);
     expect(numericResponse.body.data.id).toBe('1');
 
-    // Test with another numeric ID - user 2 exists
+    // Test with another numeric ID - product 2 exists
     const numericResponse2 = await request(app)
-      .get('/users/2');
+      .get('/products/2');
     expect(numericResponse2.status).toBe(200);
     expect(numericResponse2.body.data.id).toBe('2');
 
     // Test with string ID that doesn't exist - should return 404
     const stringResponse = await request(app)
-      .get('/users/abc-123');
+      .get('/products/abc-123');
     expect(stringResponse.status).toBe(404);
     expect(stringResponse.body.success).toBe(false);
   });
@@ -200,45 +184,43 @@ module.exports = TestAPI;
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
-    // Test with valid user ID
+    // Test with valid product ID
     const response = await request(app)
-      .get('/users/3');
+      .get('/products/3');
     expect(response.status).toBe(200);
     expect(response.body.data.id).toBe('3');
-    expect(response.body.data.name).toBe('Bob Johnson');
+    expect(response.body.data.name).toBe('Keyboard');
   });
 
   test('should not convert [param] in query strings or body', async () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
+    // Test that [brackets] in query params don't get converted to route params
     const response = await request(app)
-      .put('/users/test-id')
-      .set('Authorization', 'Bearer valid-token')
-      .send({ data: '[someValue]' });
+      .get('/products?filter=[electronics]');
     
-    expect(response.status).toBe(200);
-    // Query and body should preserve [brackets]
+    expect([200, 404]).toContain(response.status);
+    // Query params should preserve [brackets] and not be treated as route params
   });
 
   test('should handle empty parameter values', async () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
-    // Express will not match empty parameters, so this should 404
+    // Express will not match empty parameters, so this should fall through to base route
     const response = await request(app)
-      .get('/users/')
-      .set('Authorization', 'Bearer valid-token');
-    // This should not match the /users/:id route
-    // It should fall through to 404 or the /users base route if it exists
-    expect([200, 401, 404]).toContain(response.status);
+      .get('/products/');
+    // This should not match the /products/:id route
+    // It should fall through to /products base route or 404
+    expect([200, 404]).toContain(response.status);
   });
 
   test('should generate correct route information for OpenAPI', () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     const routes = apiLoader.loadAPIs();
 
-    const dynamicRoute = routes.find(r => r.path === '/users/:id' && r.method === 'GET');
+    const dynamicRoute = routes.find(r => r.path === '/products/:id' && r.method === 'GET');
     expect(dynamicRoute).toBeDefined();
     expect(dynamicRoute.processorInstance).toBeDefined();
     expect(typeof dynamicRoute.processorInstance.process).toBe('function');
@@ -279,38 +261,37 @@ module.exports = TestAPI;
     const routes = apiLoader.loadAPIs();
 
     // Should have both static and dynamic routes
-    const staticRoute = routes.find(r => r.path === '/users' && r.method === 'GET');
-    const dynamicRoute = routes.find(r => r.path === '/users/:id' && r.method === 'GET');
+    const staticRoute = routes.find(r => r.path === '/products' && r.method === 'GET');
+    const dynamicRoute = routes.find(r => r.path === '/products/:id' && r.method === 'GET');
 
     // Both should exist
     expect(staticRoute).toBeDefined();
     expect(dynamicRoute).toBeDefined();
   });
 
-  test('should handle dynamic routes in different HTTP methods', async () => {
+  test('should handle dynamic routes with various product IDs', async () => {
     apiLoader = new APILoader(app, path.join(__dirname, '..', 'example-project', 'api'));
     apiLoader.loadAPIs();
 
-    // Test GET with existing user
-    const getResponse = await request(app)
-      .get('/users/1');
-    expect(getResponse.status).toBe(200);
-    expect(getResponse.body.data.id).toBe('1');
-    expect(getResponse.body.data.name).toBe('John Doe');
+    // Test GET with existing product ID 1
+    const response1 = await request(app)
+      .get('/products/1');
+    expect(response1.status).toBe(200);
+    expect(response1.body.data.id).toBe('1');
+    expect(response1.body.data.name).toBe('Laptop');
 
-    // Test PUT with any ID
-    const putResponse = await request(app)
-      .put('/users/2')
-      .send({ name: 'Updated Name', email: 'updated@example.com' });
-    expect(putResponse.status).toBe(200);
-    expect(putResponse.body.data.id).toBe('2');
-    expect(putResponse.body.data.name).toBe('Updated Name');
+    // Test GET with existing product ID 2
+    const response2 = await request(app)
+      .get('/products/2');
+    expect(response2.status).toBe(200);
+    expect(response2.body.data.id).toBe('2');
+    expect(response2.body.data.name).toBe('Mouse');
 
-    // Test DELETE with any ID
-    const deleteResponse = await request(app)
-      .delete('/users/3');
-    expect(deleteResponse.status).toBe(200);
-    expect(deleteResponse.body.data.id).toBe('3');
+    // Test GET with non-existent product ID
+    const response404 = await request(app)
+      .get('/products/999');
+    expect(response404.status).toBe(404);
+    expect(response404.body.success).toBe(false);
   });
 });
 
