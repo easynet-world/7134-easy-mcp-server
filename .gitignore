@@ -161,3 +161,19 @@ jspm_packages/
 
 # Exception: Allow .env in example-project for demonstration
 !example-project/.env
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
