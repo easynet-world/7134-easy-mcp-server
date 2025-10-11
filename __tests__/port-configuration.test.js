@@ -41,7 +41,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -94,7 +94,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server with default ports
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -154,7 +154,7 @@ EASY_MCP_SERVER_MCP_PORT=8888
     fs.writeFileSync(path.join(tempDir, '.env'), envContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,
       env: {
@@ -220,7 +220,7 @@ MCP_PORT=8888
     fs.writeFileSync(path.join(tempDir, '.env'), envContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,
       env: {
@@ -279,7 +279,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server with environment variables
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,
       env: {

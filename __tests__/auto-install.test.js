@@ -51,7 +51,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -114,7 +114,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -182,7 +182,7 @@ module.exports = TestAPI;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    const serverProcess = spawn('node', ['../../bin/easy-mcp-server.js'], {
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir
     });
