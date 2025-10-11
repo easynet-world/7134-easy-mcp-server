@@ -8,15 +8,26 @@ This is a complete example project demonstrating how to build an AI-ready e-comm
 # Navigate to the example project
 cd example-project
 
-# The .env file contains default configuration (already included)
-# Start the server
-npx easy-mcp-server
+# Install dependencies
+npm install
 
-# Or with custom ports
-EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
+# Start the server (uses .env configuration)
+npm start
+
+# Or run directly with custom ports
+EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npm start
 ```
 
 > **Note**: This example project includes a `.env` file with default configuration. You can modify it to customize ports, paths, and other settings.
+
+### Alternative: Run without installation
+
+You can also run this project directly using `npx` without installing dependencies:
+
+```bash
+cd example-project
+npx easy-mcp-server
+```
 
 ## 📁 Project Structure
 
@@ -26,18 +37,12 @@ example-project/
 │   ├── middleware.js            # Custom middleware
 │   ├── users/
 │   │   ├── get.js               # GET /users
-│   │   ├── post.js              # POST /users
-│   │   └── [id]/                # Dynamic routes
-│   │       ├── get.js           # GET /users/:id
-│   │       ├── put.js           # PUT /users/:id
-│   │       └── delete.js        # DELETE /users/:id
+│   │   └── post.js              # POST /users
 │   └── products/
 │       ├── get.js               # GET /products
 │       ├── post.js              # POST /products
-│       └── [id]/                # Dynamic routes
-│           ├── get.js           # GET /products/:id
-│           ├── put.js           # PUT /products/:id
-│           └── delete.js        # DELETE /products/:id
+│       └── [id]/                # 📌 OPTIONAL: Dynamic route example
+│           └── get.js           # GET /products/:id
 ├── mcp/                          # AI integration
 │   ├── prompts/                  # AI prompt templates
 │   │   ├── user-recommendations.md
@@ -47,7 +52,7 @@ example-project/
 ├── public/                       # Static files
 │   └── index.html               # Demo frontend
 ├── .env                         # Environment configuration
-├── .env.example                 # Example configuration
+├── package.json                 # Project dependencies and scripts
 ├── mcp-bridge.json              # MCP bridge configuration
 ├── start.sh                     # Start script
 ├── stop.sh                      # Stop script
@@ -59,17 +64,37 @@ example-project/
 ### Users API
 - **GET /users** - Get all users
 - **POST /users** - Create a new user
-- **GET /users/:id** - Get user by ID
-- **PUT /users/:id** - Update user by ID
-- **DELETE /users/:id** - Delete user by ID
 
 ### Products API
 - **GET /products** - Get all products
 - **GET /products?category=electronics** - Filter products by category
 - **POST /products** - Create a new product
 - **GET /products/:id** - Get product by ID
-- **PUT /products/:id** - Update product by ID
-- **DELETE /products/:id** - Delete product by ID
+
+### 📌 About Dynamic Routes (Optional Feature)
+
+The `/products/:id` endpoint demonstrates **dynamic routing** - an **optional** feature of easy-mcp-server. 
+
+**What is it?**
+- Create a `[id]` or `[param]` directory to capture URL parameters
+- Becomes `:id` or `:param` in Express routes
+- Access via `req.params.id` in your API code
+
+**Important Notes:**
+- ✅ **This is completely optional** - most APIs work great with just static routes
+- ✅ Use it only when you need URL parameters (like `/products/:id`, `/users/:userId`)
+- ✅ For simple CRUD, consider using query params instead (like `?id=123`)
+- ✅ The `users` API doesn't use this feature - it works perfectly without it!
+
+**When to use:**
+- RESTful APIs with resource IDs (`/products/:id`)
+- Nested resources (`/users/:userId/orders/:orderId`)
+- Cleaner URLs for public-facing APIs
+
+**When NOT to use:**
+- Simple data queries (use query params: `?id=123`)
+- If it adds unnecessary complexity to your project
+- When static routes meet your needs
 
 ## 🤖 AI Integration
 

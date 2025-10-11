@@ -1,0 +1,24 @@
+{
+  "name": "easy-mcp-server-example",
+  "version": "1.0.0",
+  "description": "Example e-commerce API built with easy-mcp-server",
+  "main": "index.js",
+  "scripts": {
+    "start": "easy-mcp-server",
+    "dev": "easy-mcp-server",
+    "test": "echo \"No tests configured for example project\" && exit 0"
+  },
+  "keywords": [
+    "easy-mcp-server",
+    "api",
+    "ecommerce",
+    "mcp",
+    "ai-ready"
+  ],
+  "author": "easynet.world",
+  "license": "MIT",
+  "dependencies": {
+    "easy-mcp-server": "^1.0.0"
+  }
+}
+

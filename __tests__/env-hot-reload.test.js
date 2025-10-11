@@ -38,9 +38,12 @@ describe('Environment Hot Reload', () => {
   });
 
   test('should detect .env file changes and reload environment variables', (done) => {
+    // Use a random port to avoid conflicts
+    const randomPort = 10000 + Math.floor(Math.random() * 10000);
+    
     // Create initial .env file
     const envFile = path.join(tempDir, '.env');
-    fs.writeFileSync(envFile, 'TEST_VAR=initial_value\nEASY_MCP_SERVER_PORT=8887\n');
+    fs.writeFileSync(envFile, `TEST_VAR=initial_value\nEASY_MCP_SERVER_PORT=${randomPort}\n`);
 
     // Create a simple API file
     const apiDir = path.join(tempDir, 'api');
@@ -68,7 +71,7 @@ module.exports = router;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    serverProcess = spawn('node', [path.join(__dirname, '..', 'bin', 'easy-mcp-server.js')], {
+    serverProcess = spawn('node', [path.join(__dirname, '..', 'src', 'easy-mcp-server.js')], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -76,6 +79,7 @@ module.exports = router;
     let output = '';
     let envReloaded = false;
     let serverStarted = false;
+    let timeoutId;
 
     serverProcess.stdout.on('data', (data) => {
       output += data.toString();
@@ -85,8 +89,8 @@ module.exports = router;
         serverStarted = true;
         // Wait a bit for server to fully start
         setTimeout(() => {
-          // Modify .env file
-          fs.writeFileSync(envFile, 'TEST_VAR=updated_value\nEASY_MCP_SERVER_PORT=8888\n');
+          // Modify .env file (keep same port to avoid restart)
+          fs.writeFileSync(envFile, `TEST_VAR=updated_value\nEASY_MCP_SERVER_PORT=${randomPort}\n`);
         }, 2000);
       }
       
@@ -95,6 +99,7 @@ module.exports = router;
           output.includes('📄 Reloaded environment from .env') ||
           output.includes('✅ Reloaded 1 .env file(s)')) {
         envReloaded = true;
+        clearTimeout(timeoutId);
         done();
       }
     });
@@ -108,7 +113,7 @@ module.exports = router;
     });
 
     // Timeout after 15 seconds
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       if (!envReloaded) {
         done(new Error('Environment hot reload did not detect .env file changes'));
       }
@@ -149,7 +154,7 @@ module.exports = router;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    serverProcess = spawn('node', [path.join(__dirname, '..', 'bin', 'easy-mcp-server.js')], {
+    serverProcess = spawn('node', [path.join(__dirname, '..', 'src', 'easy-mcp-server.js')], {
       stdio: 'pipe',
       cwd: tempDir
     });
@@ -209,7 +214,7 @@ module.exports = router;
     fs.writeFileSync(apiFile, apiContent);
 
     // Start the server
-    serverProcess = spawn('node', [path.join(__dirname, '..', 'bin', 'easy-mcp-server.js')], {
+    serverProcess = spawn('node', [path.join(__dirname, '..', 'src', 'easy-mcp-server.js')], {
       stdio: 'pipe',
       cwd: tempDir
     });
