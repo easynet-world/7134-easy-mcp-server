@@ -59,7 +59,7 @@ if (staticMiddleware) {
 }
 
 describe('Static File Serving - CI', () => {
-  const publicDir = path.join(__dirname, '..', 'public');
+  const publicDir = path.join(__dirname, '..', 'example-project', 'public');
 
   afterAll(() => {
     // Clean up test files (but keep the professional index.html)
