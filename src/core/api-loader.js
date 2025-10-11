@@ -175,7 +175,9 @@ class APILoader {
     const httpMethod = path.basename(fileName, '.js').toUpperCase();
     const dirName = path.dirname(fileName);
     const routePath = dirName === '.' ? basePath : path.join(basePath, dirName);
-    const normalizedPath = '/' + routePath.replace(/\\/g, '/');
+    
+    // Convert [param] notation to :param for Express routing
+    const normalizedPath = '/' + routePath.replace(/\\/g, '/').replace(/\[([^\]]+)\]/g, ':$1');
     
     // Validate HTTP method
     const validMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];

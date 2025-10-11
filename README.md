@@ -80,6 +80,7 @@ npx easy-mcp-server
 |-----------|----------------|--------|
 | **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
 | **HTTP Method Mapping** | `post.js` | `POST` method |
+| **Dynamic Routes** | `api/users/[id]/get.js` | `GET /users/:id` |
 | **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
 
 ## **Installation & Setup**
@@ -149,12 +150,19 @@ your-project/
 │   ├── users/
 │   │   ├── get.js         # GET /users
 │   │   ├── post.js        # POST /users
+│   │   ├── [id]/          # Dynamic route parameter
+│   │   │   ├── get.js     # GET /users/:id
+│   │   │   ├── put.js     # PUT /users/:id
+│   │   │   └── delete.js  # DELETE /users/:id
 │   │   └── profile/
 │   │       ├── get.js     # GET /users/profile
 │   │       └── put.js     # PUT /users/profile
 │   └── products/
 │       ├── get.js         # GET /products
-│       └── post.js        # POST /products
+│       ├── post.js        # POST /products
+│       └── [id]/          # Dynamic route parameter
+│           ├── get.js     # GET /products/:id
+│           └── put.js     # PUT /products/:id
 ├── mcp/                   # AI features
 │   ├── prompts/           # AI prompt templates
 │   └── resources/         # AI resource documentation

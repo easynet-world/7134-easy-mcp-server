@@ -65,6 +65,21 @@ class OpenAPIGenerator {
           Object.assign(apiInfo, processor.openApi);
         }
         
+        // Extract path parameters from route and add them to the API info
+        const pathParams = this.extractPathParameters(route.path);
+        if (pathParams.length > 0) {
+          // Merge with existing parameters if any
+          apiInfo.parameters = apiInfo.parameters || [];
+          
+          // Add path parameters that don't already exist
+          pathParams.forEach(param => {
+            const existingParam = apiInfo.parameters.find(p => p.name === param.name && p.in === 'path');
+            if (!existingParam) {
+              apiInfo.parameters.push(param);
+            }
+          });
+        }
+        
         // Only auto-generate responses if no annotation-based responses are available
         if (!apiInfo.responses || Object.keys(apiInfo.responses).length === 0) {
           apiInfo.responses = this.generateResponseSchema(processor);
@@ -269,6 +284,32 @@ class OpenAPIGenerator {
     });
     
     return tags;
+  }
+
+  /**
+   * Extract path parameters from route path
+   * @param {string} path - The route path (e.g., /users/:userId/posts/:postId)
+   * @returns {Array} Array of OpenAPI parameter objects
+   */
+  extractPathParameters(path) {
+    const params = [];
+    const paramRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
+    let match;
+    
+    while ((match = paramRegex.exec(path)) !== null) {
+      const paramName = match[1];
+      params.push({
+        name: paramName,
+        in: 'path',
+        required: true,
+        description: `${paramName} parameter`,
+        schema: {
+          type: 'string'
+        }
+      });
+    }
+    
+    return params;
   }
 
   /**
