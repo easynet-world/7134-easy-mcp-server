@@ -20,8 +20,8 @@ module.exports = {
   // Restore mocks between tests
   restoreMocks: true,
   
-  // Reset modules between tests
-  resetModules: true,
+  // Don't reset modules between tests to avoid route loading issues
+  resetModules: false,
   
   // Verbose output for debugging
   verbose: true
