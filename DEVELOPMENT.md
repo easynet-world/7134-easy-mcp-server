@@ -265,7 +265,8 @@ RATE_LIMIT_MAX=100
 EASY_MCP_SERVER_PORT=8887
 EASY_MCP_SERVER_MCP_PORT=8888
 EASY_MCP_SERVER_HOST=0.0.0.0
-EASY_MCP_SERVER_HOT_RELOAD=true
+# Hot reload is enabled by default in development
+# To disable, set: EASY_MCP_SERVER_PRODUCTION_MODE=true
 OPENAI_API_KEY=your-key-here
 ```
 
@@ -287,7 +288,7 @@ OPENAI_API_KEY=your-key-here
 {
   "scripts": {
     "start": "npx easy-mcp-server",
-    "dev": "EASY_MCP_SERVER_HOT_RELOAD=true npx easy-mcp-server",
+    "dev": "npx easy-mcp-server",
     "test": "jest"
   }
 }
@@ -422,7 +423,7 @@ spec:
 | **Port conflicts** | Change `EASY_MCP_SERVER_PORT=8888` |
 | **File not found** | Ensure files are in `api/` directory |
 | **MCP not working** | Check `EASY_MCP_SERVER_MCP_PORT=8888` |
-| **Hot reload not working** | Set `EASY_MCP_SERVER_HOT_RELOAD=true` |
+| **Hot reload not working** | Hot reload is enabled by default. Check if `EASY_MCP_SERVER_PRODUCTION_MODE=true` is disabling it |
 | **AI features missing** | Create `mcp/prompts/` and `mcp/resources/` directories |
 
 ### **Migration Validation Checklist**
@@ -2519,18 +2520,25 @@ The easy-mcp-server project has comprehensive hot reload functionality for APIs,
   - Automatic bridge restart
 
 ### Hot Reload Configuration
+
+Hot reload is **enabled by default** in development mode and automatically watches for changes in:
+- API files (`api/**/*.js`)
+- Middleware files (`middleware.js`)
+- Prompts (`mcp/prompts/`)
+- Resources (`mcp/resources/`)
+- Environment files (`.env`)
+- MCP Bridge config (`mcp-bridge.json`)
+
 ```bash
-# Enable/disable hot reload
-EASY_MCP_SERVER_HOT_RELOAD=true
+# Hot reload is ENABLED by default
+# To DISABLE hot reload (production mode):
+EASY_MCP_SERVER_PRODUCTION_MODE=true
 
 # API directory
 EASY_MCP_SERVER_API_PATH=./api
 
 # MCP directory
 EASY_MCP_SERVER_MCP_BASE_PATH=./mcp
-
-# Hot reload debounce delay (ms)
-EASY_MCP_SERVER_HOT_RELOAD_DELAY=1000
 ```
 
 ### Hot Reload File Structure
@@ -2762,7 +2770,7 @@ app.use(cors({
 | **File not found** | Ensure API files are in the `api/` directory |
 | **MCP connection** | Verify MCP server is running on correct port |
 | **Validation errors** | Verify request body matches schema |
-| **Hot reload not working** | Check if `EASY_MCP_SERVER_HOT_RELOAD=true` is set |
+| **Hot reload not working** | Hot reload is enabled by default. Disable it only in production with `EASY_MCP_SERVER_PRODUCTION_MODE=true` |
 
 ### Debug Mode
 ```bash
@@ -2870,11 +2878,10 @@ EASY_MCP_SERVER_PORT=8887                    # REST API port
 EASY_MCP_SERVER_MCP_PORT=8888                # MCP server port
 EASY_MCP_SERVER_HOST=0.0.0.0                 # Server host
 
-# Hot Reload Configuration
-EASY_MCP_SERVER_HOT_RELOAD=true              # Enable hot reload
+# Hot Reload Configuration (enabled by default)
+EASY_MCP_SERVER_PRODUCTION_MODE=false        # Set to true to disable hot reload
 EASY_MCP_SERVER_API_PATH=./api               # API directory
 EASY_MCP_SERVER_MCP_BASE_PATH=./mcp          # MCP directory
-EASY_MCP_SERVER_HOT_RELOAD_DELAY=1000        # Debounce delay (ms)
 
 # MCP Bridge Configuration
 EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json

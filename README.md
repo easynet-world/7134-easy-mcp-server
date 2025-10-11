@@ -469,7 +469,7 @@ EASY_MCP_SERVER_QUIET=false
 1. **Port conflicts**: Use `EASY_MCP_SERVER_PORT=8888` to set different port
 2. **APIs not working**: Check file paths and HTTP method naming
 3. **AI features not showing**: Ensure files are in `mcp/prompts/` and `mcp/resources/` directories
-4. **Hot reload not working**: Check if `EASY_MCP_SERVER_HOT_RELOAD=true` is set
+4. **Hot reload not working**: Hot reload is enabled by default in development. It's only disabled when `EASY_MCP_SERVER_PRODUCTION_MODE=true`
 
 ### Quick Test
 ```bash
