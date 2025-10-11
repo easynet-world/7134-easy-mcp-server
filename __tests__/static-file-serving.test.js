@@ -7,8 +7,8 @@ const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 
-// Create public directory and test files before importing the server
-const publicDir = path.join(__dirname, '..', 'public');
+// Use example-project public directory for testing
+const publicDir = path.join(__dirname, '..', 'example-project', 'public');
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
@@ -59,7 +59,7 @@ if (staticMiddleware) {
 }
 
 describe('Static File Serving - CI', () => {
-  const publicDir = path.join(__dirname, '..', 'public');
+  const publicDir = path.join(__dirname, '..', 'example-project', 'public');
 
   afterAll(() => {
     // Clean up test files (but keep the professional index.html)
