@@ -27,8 +27,7 @@
     "publish:both": "npm run publish:npm && npm run publish:github",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run",
-    "release:check": "semantic-release --dry-run --no-ci",
-    "release:test": "semantic-release --dry-run --no-ci --extends releaserc.test.js"
+    "release:check": "semantic-release --dry-run --no-ci"
   },
   "dependencies": {
     "chokidar": "^3.5.3",

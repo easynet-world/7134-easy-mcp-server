@@ -149,28 +149,26 @@ your-project/
 ├── api/                    # API endpoints
 │   ├── users/
 │   │   ├── get.js         # GET /users
-│   │   ├── post.js        # POST /users
-│   │   ├── [id]/          # Dynamic route parameter
-│   │   │   ├── get.js     # GET /users/:id
-│   │   │   ├── put.js     # PUT /users/:id
-│   │   │   └── delete.js  # DELETE /users/:id
-│   │   └── profile/
-│   │       ├── get.js     # GET /users/profile
-│   │       └── put.js     # PUT /users/profile
+│   │   └── post.js        # POST /users
 │   └── products/
 │       ├── get.js         # GET /products
 │       ├── post.js        # POST /products
-│       └── [id]/          # Dynamic route parameter
-│           ├── get.js     # GET /products/:id
-│           └── put.js     # PUT /products/:id
-├── mcp/                   # AI features
+│       └── [id]/          # 📌 OPTIONAL: Dynamic route example
+│           └── get.js     # GET /products/:id
+├── mcp/                   # AI features (optional)
 │   ├── prompts/           # AI prompt templates
 │   └── resources/         # AI resource documentation
-└── public/                # Static files
-    ├── index.html
-    ├── style.css
-    └── app.js
+├── public/                # Static files (optional)
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── package.json           # Project dependencies
+├── .env                   # Environment configuration
+├── mcp-bridge.json        # 🚀 OPTIONAL but powerful: Bridge to other MCP servers
+└── README.md
 ```
+
+> **💡 Tip**: Dynamic routes with `[param]` syntax are **completely optional**! Most APIs work perfectly with just static routes like the users API shown above. See the [example-project](./example-project) for a working demonstration.
 
 ---
 

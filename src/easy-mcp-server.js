@@ -382,7 +382,7 @@ module.exports = PostExample;
   fs.writeFileSync(path.join(exampleApiDir, 'post.js'), postExampleApi);
   
   // Create tests directory
-  const testsDir = path.join(projectDir, '__tests__');
+  const testsDir = path.join(projectDir, 'test');
   fs.mkdirSync(testsDir, { recursive: true });
   
   const testFile = `const request = require('supertest');
@@ -435,7 +435,7 @@ describe('Easy MCP Server', () => {
    │   ├── example/
    │   │   ├── get.js
    │   │   └── post.js
-   └── __tests__/
+   └── test/
        └── server.test.js
 
 🚀 Next steps:
