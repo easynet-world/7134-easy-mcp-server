@@ -381,6 +381,302 @@ module.exports = PostExample;
   fs.writeFileSync(path.join(exampleApiDir, 'get.js'), getExampleApi);
   fs.writeFileSync(path.join(exampleApiDir, 'post.js'), postExampleApi);
   
+  // Create mcp-bridge.json
+  const mcpBridgeJson = {
+    "mcpServers": {
+      "chrome-devtools": {
+        "command": "npx",
+        "args": ["-y", "chrome-devtools-mcp"],
+        "env": {
+          "CHROME_DEBUG_PORT": "9222"
+        },
+        "description": "Chrome DevTools MCP server for browser automation"
+      }
+    }
+  };
+  
+  fs.writeFileSync(
+    path.join(projectDir, 'mcp-bridge.json'),
+    JSON.stringify(mcpBridgeJson, null, 2)
+  );
+  
+  // Create start.sh
+  const startSh = `#!/bin/bash
+
+# Easy MCP Server Start Script
+# This script loads environment variables and starts the server
+
+# Load environment variables from .env file
+if [ -f .env ]; then
+  export $(cat .env | grep -v '^#' | xargs)
+  echo "📄 Loaded environment variables from .env"
+fi
+
+# Start the server
+echo "🚀 Starting Easy MCP Server..."
+npx easy-mcp-server
+
+# Keep the script running if server exits
+exit $?
+`;
+  
+  fs.writeFileSync(path.join(projectDir, 'start.sh'), startSh);
+  fs.chmodSync(path.join(projectDir, 'start.sh'), '755'); // Make executable
+  
+  // Create stop.sh
+  const stopSh = `#!/bin/bash
+
+# Easy MCP Server Stop Script
+# This script stops the running server
+
+echo "🛑 Stopping Easy MCP Server..."
+
+# Find and kill the server process
+PID=$(ps aux | grep 'easy-mcp-server' | grep -v grep | awk '{print $2}')
+
+if [ -z "$PID" ]; then
+  echo "⚠️  No running Easy MCP Server found"
+  exit 1
+fi
+
+# Kill the process
+kill $PID
+
+if [ $? -eq 0 ]; then
+  echo "✅ Server stopped successfully (PID: $PID)"
+else
+  echo "❌ Failed to stop server"
+  exit 1
+fi
+`;
+  
+  fs.writeFileSync(path.join(projectDir, 'stop.sh'), stopSh);
+  fs.chmodSync(path.join(projectDir, 'stop.sh'), '755'); // Make executable
+  
+  // Create MCP directories
+  const mcpDir = path.join(projectDir, 'mcp');
+  const promptsDir = path.join(mcpDir, 'prompts');
+  const resourcesDir = path.join(mcpDir, 'resources');
+  
+  fs.mkdirSync(promptsDir, { recursive: true });
+  fs.mkdirSync(resourcesDir, { recursive: true });
+  
+  // Create example prompt
+  const examplePrompt = `# Example Analysis Prompt
+
+## Role
+AI assistant for analyzing data and providing insights.
+
+## Input
+- **data**: {{data}}
+- **analysis_type**: {{analysis_type}}
+
+## Instructions
+1. Analyze the provided data
+2. Identify key patterns and trends
+3. Provide actionable insights
+4. Format results clearly
+
+## Output Format
+- **Summary**: Brief overview of findings
+- **Insights**: List of key insights
+- **Recommendations**: Actionable recommendations
+`;
+  
+  fs.writeFileSync(path.join(promptsDir, 'example-analysis.md'), examplePrompt);
+  
+  // Create example resource
+  const exampleResource = `# API Documentation
+
+## Overview
+This is your API documentation that AI agents can access through MCP.
+
+## Available Endpoints
+
+### GET /example
+Retrieves example data.
+
+**Response:**
+\`\`\`json
+{
+  "data": {
+    "message": "string",
+    "timestamp": "number"
+  }
+}
+\`\`\`
+
+### POST /example
+Creates new example data.
+
+**Request Body:**
+\`\`\`json
+{
+  "message": "string"
+}
+\`\`\`
+
+**Response:**
+\`\`\`json
+{
+  "data": {
+    "message": "string",
+    "timestamp": "number",
+    "id": "string"
+  }
+}
+\`\`\`
+`;
+  
+  fs.writeFileSync(path.join(resourcesDir, 'api-documentation.md'), exampleResource);
+  
+  // Create public directory with example HTML
+  const publicDir = path.join(projectDir, 'public');
+  fs.mkdirSync(publicDir, { recursive: true });
+  
+  const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${projectName} - Easy MCP Server</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 2.5em;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.2em;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .feature {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .feature h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .links {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .link {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .link:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .status {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 ${projectName}</h1>
+    <p class="subtitle">Powered by Easy MCP Server</p>
+    
+    <div class="features">
+      <div class="feature">
+        <h3>📡 REST API</h3>
+        <p>File-based routing with automatic endpoint discovery</p>
+      </div>
+      
+      <div class="feature">
+        <h3>🤖 MCP Integration</h3>
+        <p>Native AI agent support with Model Context Protocol</p>
+      </div>
+      
+      <div class="feature">
+        <h3>🔄 Hot Reload</h3>
+        <p>Real-time updates during development</p>
+      </div>
+      
+      <div class="feature">
+        <h3>📚 Auto Documentation</h3>
+        <p>OpenAPI spec and Swagger UI automatically generated</p>
+      </div>
+    </div>
+    
+    <div class="links">
+      <a href="/docs" class="link">📖 API Documentation</a>
+      <a href="/openapi.json" class="link">📄 OpenAPI Spec</a>
+      <a href="/health" class="link">❤️ Health Check</a>
+      <a href="/example" class="link">🧪 Example API</a>
+    </div>
+    
+    <div class="status">
+      <strong>✅ Server Status:</strong> Running
+      <br>
+      <strong>🔌 MCP Server:</strong> Enabled
+      <br>
+      <strong>⚡ Hot Reload:</strong> Active
+    </div>
+  </div>
+</body>
+</html>
+`;
+  
+  fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtml);
+  
   // Create tests directory
   const testsDir = path.join(projectDir, 'test');
   fs.mkdirSync(testsDir, { recursive: true });
@@ -431,17 +727,27 @@ describe('Easy MCP Server', () => {
    ├── .env
    ├── .gitignore
    ├── README.md
+   ├── start.sh            # 🚀 Convenient start script
+   ├── stop.sh             # 🛑 Convenient stop script
+   ├── mcp-bridge.json     # 🔌 MCP bridge configuration
    ├── api/
-   │   ├── example/
-   │   │   ├── get.js
-   │   │   └── post.js
+   │   └── example/
+   │       ├── get.js
+   │       └── post.js
+   ├── mcp/                # 🤖 AI integration
+   │   ├── prompts/
+   │   │   └── example-analysis.md
+   │   └── resources/
+   │       └── api-documentation.md
+   ├── public/             # 🌐 Static files
+   │   └── index.html
    └── test/
        └── server.test.js
 
 🚀 Next steps:
    1. cd ${projectName}
    2. npm install
-   3. easy-mcp-server
+   3. ./start.sh           # Or: easy-mcp-server
 
 📚 Your server will be available at:
   - Server: http://localhost:${'${config.port}'}
