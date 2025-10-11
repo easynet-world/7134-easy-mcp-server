@@ -11,14 +11,37 @@ cd example-project
 # Install dependencies
 npm install
 
-# Start the server (uses .env configuration)
+# Start the server (automatically loads .env configuration)
 npm start
+
+# Or use the convenience script
+./start.sh
 
 # Or run directly with custom ports
 EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npm start
 ```
 
-> **Note**: This example project includes a `.env` file with default configuration. You can modify it to customize ports, paths, and other settings.
+> **Note**: The `start.sh` script automatically loads configuration from `.env` file. Default ports are 8887 (API) and 8888 (MCP) with 0.0.0.0 binding for network accessibility.
+
+## ⚙️ Configuration
+
+The example project uses `.env` file for configuration. The `start.sh` script automatically loads these settings:
+
+```bash
+# Server Configuration
+EASY_MCP_SERVER_PORT=8887              # API server port (default: 8887)
+EASY_MCP_SERVER_HOST=0.0.0.0           # Bind to all network interfaces
+
+# MCP Server Configuration  
+EASY_MCP_SERVER_MCP_PORT=8888          # MCP WebSocket port (default: 8888)
+EASY_MCP_SERVER_MCP_HOST=0.0.0.0       # MCP server host
+
+# Static Files
+EASY_MCP_SERVER_STATIC_ENABLED=true    # Enable static file serving
+EASY_MCP_SERVER_STATIC_DIRECTORY=./public
+```
+
+You can modify `.env` to customize these settings. The `start.sh` script will automatically apply your changes.
 
 ### Alternative: Run without installation
 
