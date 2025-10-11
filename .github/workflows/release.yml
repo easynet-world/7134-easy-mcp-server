@@ -30,7 +30,9 @@ jobs:
         run: npm ci
 
       - name: Link package for local testing
-        run: npm link
+        run: |
+          npm link
+          cd example-project && npm link easy-mcp-server
 
       - name: Run tests
         run: npm test
