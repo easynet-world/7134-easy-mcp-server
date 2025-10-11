@@ -8,6 +8,7 @@ This is a complete example project demonstrating how to build an AI-ready e-comm
 # Navigate to the example project
 cd example-project
 
+# The .env file contains default configuration (already included)
 # Start the server
 npx easy-mcp-server
 
@@ -15,25 +16,41 @@ npx easy-mcp-server
 EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 npx easy-mcp-server
 ```
 
+> **Note**: This example project includes a `.env` file with default configuration. You can modify it to customize ports, paths, and other settings.
+
 ## 📁 Project Structure
 
 ```
 example-project/
 ├── api/                          # API endpoints
+│   ├── middleware.js            # Custom middleware
 │   ├── users/
 │   │   ├── get.js               # GET /users
-│   │   └── post.js              # POST /users
+│   │   ├── post.js              # POST /users
+│   │   └── [id]/                # Dynamic routes
+│   │       ├── get.js           # GET /users/:id
+│   │       ├── put.js           # PUT /users/:id
+│   │       └── delete.js        # DELETE /users/:id
 │   └── products/
 │       ├── get.js               # GET /products
-│       └── post.js              # POST /products
+│       ├── post.js              # POST /products
+│       └── [id]/                # Dynamic routes
+│           ├── get.js           # GET /products/:id
+│           ├── put.js           # PUT /products/:id
+│           └── delete.js        # DELETE /products/:id
 ├── mcp/                          # AI integration
 │   ├── prompts/                  # AI prompt templates
-│   │   └── user-recommendations.md
+│   │   ├── user-recommendations.md
+│   │   └── product-analysis.md
 │   └── resources/                # AI resources
 │       └── api-documentation.md
 ├── public/                       # Static files
 │   └── index.html               # Demo frontend
+├── .env                         # Environment configuration
+├── .env.example                 # Example configuration
 ├── mcp-bridge.json              # MCP bridge configuration
+├── start.sh                     # Start script
+├── stop.sh                      # Stop script
 └── README.md                    # This file
 ```
 
@@ -42,10 +59,17 @@ example-project/
 ### Users API
 - **GET /users** - Get all users
 - **POST /users** - Create a new user
+- **GET /users/:id** - Get user by ID
+- **PUT /users/:id** - Update user by ID
+- **DELETE /users/:id** - Delete user by ID
 
 ### Products API
 - **GET /products** - Get all products
+- **GET /products?category=electronics** - Filter products by category
 - **POST /products** - Create a new product
+- **GET /products/:id** - Get product by ID
+- **PUT /products/:id** - Update product by ID
+- **DELETE /products/:id** - Delete product by ID
 
 ## 🤖 AI Integration
 
