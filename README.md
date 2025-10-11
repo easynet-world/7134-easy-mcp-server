@@ -164,6 +164,7 @@ your-project/
 │   └── app.js
 ├── package.json           # Project dependencies
 ├── .env                   # Environment configuration
+├── mcp-bridge.json        # 🚀 OPTIONAL but powerful: Bridge to other MCP servers
 └── README.md
 ```
 
