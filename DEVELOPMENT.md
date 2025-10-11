@@ -2870,6 +2870,40 @@ class WebSocketAPI extends BaseAPI {
 ```
 
 ### MCP Bridge Configuration
+
+**🔌 Native MCP Bridge Support**: The framework includes built-in, zero-configuration MCP bridge support to connect to external MCP servers. This enables powerful integrations with Chrome DevTools, iTerm2, GitHub, Slack, PostgreSQL, and more.
+
+**Chrome DevTools Integration** (Browser Automation):
+```json
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp"],
+      "description": "Chrome DevTools for browser automation"
+    }
+  }
+}
+```
+
+**Operations Available**: `new_page`, `navigate_page`, `click`, `fill`, `take_screenshot`, `evaluate_script`, `list_console_messages`, `emulate_network`, `emulate_cpu`, and 20+ more capabilities.
+
+**iTerm2 Integration** (Terminal Automation):
+```json
+{
+  "mcpServers": {
+    "iterm2": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"],
+      "description": "iTerm2 terminal automation"
+    }
+  }
+}
+```
+
+**Operations Available**: `write_to_terminal`, `read_terminal_output`, `send_control_character` for deployment automation, CI/CD, and system monitoring.
+
+**Additional MCP Servers**:
 The framework supports multiple MCP servers through environment variables:
 
 ```bash
@@ -2884,11 +2918,11 @@ EASY_MCP_SERVER.postgres.user=postgres
 EASY_MCP_SERVER.postgres.password=secret
 EASY_MCP_SERVER.postgres.port=5432
 
-# Chrome DevTools
+# Chrome DevTools (Optional Environment Variables)
 EASY_MCP_SERVER.chrome.debug_port=9222
 EASY_MCP_SERVER.chrome.user_data_dir=/tmp/chrome-profile
 
-# iTerm2
+# iTerm2 (Optional Environment Variables)
 EASY_MCP_SERVER.iterm2.session_id=w0t0p0
 EASY_MCP_SERVER.iterm2.profile=Default
 ```

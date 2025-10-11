@@ -164,15 +164,23 @@ echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resour
 
 **Outcome**: AI models gain access to your prompts and documentation resources.
 
-### **Browser & Terminal Integration**
-AI models can control web browsers and terminal sessions for comprehensive automation.
+### **🔌 Native MCP Bridge Integration**
 
-**Browser Automation:**
-- `new_page`, `navigate_page`, `take_screenshot`, `click`, `fill`, `evaluate_script`
+**Built-in Zero-Config Bridge Support**: Connect to external MCP servers like Chrome DevTools and iTerm2 without any complex setup.
+
+**Chrome DevTools Operations** (via `chrome-devtools-mcp`):
+- 🌐 **Web Automation**: `new_page`, `navigate_page`, `click`, `fill`, `evaluate_script`
+- 📸 **Testing & Debugging**: `take_screenshot`, `take_snapshot`, `list_console_messages`
+- 🚦 **Performance**: `emulate_network`, `emulate_cpu`, `list_network_requests`
+- 🎨 **UI Inspection**: `hover`, `drag`, `handle_dialog`, `upload_file`
 - Plus 20+ additional browser automation capabilities
 
-**Terminal Integration:**
-- `iterm-mcp_write_to_terminal`, `iterm-mcp_read_terminal_output`, `iterm-mcp_send_control_character`
+**iTerm2 Terminal Operations** (via `iterm-mcp`):
+- 🖥️ **Terminal Control**: `write_to_terminal`, `read_terminal_output`, `send_control_character`
+- 🚀 **Deployment**: Automate CI/CD pipelines and server operations
+- 📝 **Monitoring**: Real-time log analysis and system diagnostics
+
+**Setup**: Just add `mcp-bridge.json` to your project (automatically included with `init`)
 
 ---
 
@@ -439,22 +447,91 @@ export EASY_MCP_SERVER.salesforce.security_token=xxx
 5. **Prevents Accidental Exposure**: Non-prefixed variables are ignored
 
 ### MCP Bridge Configuration
-The framework includes built-in support for multiple MCP servers:
+
+**🔌 Native MCP Bridge Support**: `easy-mcp-server` includes built-in, zero-configuration MCP bridge support to connect to external MCP servers. Simply add a `mcp-bridge.json` file to your project to enable powerful integrations:
+
+#### **Browser Automation with Chrome DevTools**
+Automate Chrome for web testing, scraping, and UI debugging:
 
 ```json
 {
   "mcpServers": {
-    "chrome-devtools": {
+    "chrome": {
       "command": "npx",
-      "args": ["chrome-devtools-mcp"]
-    },
-    "iterm-mcp": {
-      "command": "npx",
-      "args": ["-y", "iterm-mcp"]
+      "args": ["-y", "chrome-devtools-mcp"],
+      "description": "Chrome DevTools for browser automation"
     }
   }
 }
 ```
+
+**Chrome Operations Available:**
+- 🌐 Web testing & automation
+- 📊 Performance analysis & debugging
+- 🎨 UI inspection & screenshot capture
+- 🔍 Web scraping & data extraction
+- 🚦 Network monitoring & request analysis
+
+#### **Terminal Automation with iTerm2**
+Automate system operations and terminal tasks:
+
+```json
+{
+  "mcpServers": {
+    "iterm2": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"],
+      "description": "iTerm2 terminal automation"
+    }
+  }
+}
+```
+
+**iTerm2 Operations Available:**
+- 🖥️ System diagnostics & monitoring
+- 🚀 Deployment automation & CI/CD
+- 📝 Log analysis & debugging
+- ⚙️ Server management & configuration
+- 🔧 Development environment setup
+
+#### **Complete MCP Bridge Example**
+The `example-project` includes comprehensive MCP bridge configuration with Chrome, iTerm2, GitHub, Slack, PostgreSQL, and more:
+
+```json
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp"],
+      "description": "Browser automation & testing"
+    },
+    "iterm2": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp"],
+      "description": "Terminal automation"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "" },
+      "description": "GitHub operations"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "description": "File system operations"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": { "POSTGRES_CONNECTION_STRING": "" },
+      "description": "Database operations"
+    }
+  }
+}
+```
+
+**💡 Pro Tip**: Use `"disabled": true` to temporarily disable servers without removing them from config.
 
 ### Static File Serving
 ```bash
