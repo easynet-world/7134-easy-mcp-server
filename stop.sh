@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# ========================================
-# easy-mcp-server Stop Script
-# AI-Era Express Server Stop Script
-# ========================================
-
 echo "🛑 Stopping easy-mcp-server..."
 echo "================================"
 
-# Find and kill easy-mcp-server processes
+# Kill easy-mcp-server processes
 PIDS=$(pgrep -f "easy-mcp-server" 2>/dev/null || true)
 
 if [ -z "$PIDS" ]; then
@@ -37,13 +32,25 @@ else
     echo "✅ easy-mcp-server stopped"
 fi
 
-# Also kill any node processes that might be related
-NODE_PIDS=$(pgrep -f "node.*easy-mcp-server" 2>/dev/null || true)
-if [ ! -z "$NODE_PIDS" ]; then
-    echo "🔍 Found related Node.js processes: $NODE_PIDS"
-    for PID in $NODE_PIDS; do
+# Kill processes using the default ports
+REST_PORT=${EASY_MCP_SERVER_PORT:-8887}
+MCP_PORT=${EASY_MCP_SERVER_MCP_PORT:-8888}
+
+PORT_PIDS=$(lsof -ti :$REST_PORT -ti :$MCP_PORT 2>/dev/null || true)
+if [ ! -z "$PORT_PIDS" ]; then
+    echo "🔍 Found processes using ports $REST_PORT/$MCP_PORT: $PORT_PIDS"
+    for PID in $PORT_PIDS; do
+        echo "   Killing process $PID using port"
         kill -TERM $PID 2>/dev/null || true
     done
 fi
 
 echo "✅ All easy-mcp-server processes stopped"
+
+# Clean up log file if it exists
+if [ -f "server.log" ]; then
+    echo "🧹 Cleaning up server log file..."
+    rm -f server.log
+fi
+
+echo "✅ Cleanup completed"

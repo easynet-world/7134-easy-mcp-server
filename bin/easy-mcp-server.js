@@ -592,37 +592,41 @@ async function startServer() {
   } else if (fs.existsSync(apiPath)) {
     console.log('📁 Found api/ directory - starting automatic server');
     
-    // Start the server using the full-featured server.js from source
+    // Start the server directly without spawn
     try {
       console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
       
-      // Start the full server with the user's API path and MCP directory
+      // Set up environment variables for the server
       const originalCwd = process.cwd();
       const mainProjectPath = path.join(__dirname, '..');
       
-      // Start the full server with the user's API path and MCP directory
-      const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['src/server.js'], {
-        stdio: 'inherit',
-        cwd: mainProjectPath, // Set working directory to main project
-        env: {
-          ...process.env,
-          EASY_MCP_SERVER_API_PATH: originalCwd + '/api', // Pass the user's API path
-          EASY_MCP_SERVER_MCP_BASE_PATH: originalCwd + '/mcp', // Pass the user's MCP directory
-          // If the user has a public directory, ensure the server serves static files from there
-          EASY_MCP_SERVER_STATIC_DIRECTORY: fs.existsSync(path.join(originalCwd, 'public'))
-            ? path.join(originalCwd, 'public')
-            : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(mainProjectPath, 'public')),
-          EASY_MCP_SERVER_PORT: portConfig.port.toString(), // Pass configured port
-          EASY_MCP_SERVER_MCP_PORT: portConfig.mcpPort.toString() // Pass configured MCP port
-        }
-      });
+      // Set environment variables for the server
+      process.env.EASY_MCP_SERVER_API_PATH = originalCwd + '/api';
+      process.env.EASY_MCP_SERVER_MCP_BASE_PATH = originalCwd + '/mcp';
+      process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = fs.existsSync(path.join(originalCwd, 'public'))
+        ? path.join(originalCwd, 'public')
+        : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(mainProjectPath, 'public'));
+      process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
+      process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
       
-      // Handle server process
-      serverProcess.on('error', (error) => {
-        console.error('❌ Failed to start server:', error.message);
-        process.exit(1);
-      });
+      // Change to the main project directory and require the server
+      const originalCwdProcess = process.cwd();
+      process.chdir(mainProjectPath);
+      
+      // Import and start the server directly
+      const serverPath = path.join(mainProjectPath, 'src', 'server.js');
+      const serverModule = require(serverPath);
+      
+      // Manually start the server since we're requiring it, not running it directly
+      const { startServer } = require(path.join(mainProjectPath, 'src', 'server.js'));
+      if (typeof startServer === 'function') {
+        startServer();
+      } else {
+        // Fallback: if startServer is not exported, we need to trigger it manually
+        console.log('🚀 Starting server...');
+        // The server should start automatically when required
+      }
+      
     } catch (error) {
       console.error('❌ Failed to start server:', error.message);
       process.exit(1);

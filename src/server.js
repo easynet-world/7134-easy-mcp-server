@@ -737,6 +737,7 @@ module.exports = {
   openapiGenerator,
   mcpServer: null, // Will be set when server starts
   hotReloader: null, // Will be set when server starts
-  getLoadedRoutes: () => apiLoader.getRoutes()
+  getLoadedRoutes: () => apiLoader.getRoutes(),
+  startServer // Export the startServer function
 };
 // Version 0.6.14
