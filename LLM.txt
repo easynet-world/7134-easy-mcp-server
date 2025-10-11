@@ -232,13 +232,18 @@ The framework automatically generates MCP tool schemas from:
 }
 ```
 
-### Common Error Codes
+### Recommended Error Codes
+
+The framework supports custom error codes through the `errorCode` parameter in error responses. These are **recommended conventions** for consistency, not enforced by the framework:
+
 - `VALIDATION_ERROR` - Request validation failed
 - `NOT_FOUND` - Resource not found
 - `UNAUTHORIZED` - Authentication required
 - `FORBIDDEN` - Access denied
 - `RATE_LIMITED` - Too many requests
 - `INTERNAL_ERROR` - Server error
+
+**Note**: Error codes are optional and can be customized based on your application's needs. The framework provides flexibility while these conventions help maintain consistency across APIs.
 
 ## Best Practices for LLM Integration
 
