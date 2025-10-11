@@ -4,7 +4,7 @@
   "description": "AI-era Express replacement with zero-config MCP integration - Build AI-ready APIs in 30 seconds",
   "main": "index.js",
   "bin": {
-    "easy-mcp-server": "./bin/easy-mcp-server.js"
+    "easy-mcp-server": "./src/easy-mcp-server.js"
   },
   "exports": {
     ".": "./index.js",
