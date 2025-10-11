@@ -26,6 +26,17 @@ fi
 echo "✅ Node.js version: $(node --version)"
 echo "✅ Starting AI-era Express Server..."
 echo ""
+
+# Load environment variables from .env file
+if [ -f .env ]; then
+    echo "📄 Loading configuration from .env file..."
+    export $(grep -v '^#' .env | grep -v '^$' | xargs)
+else
+    echo "⚠️  No .env file found, using default ports"
+    export EASY_MCP_SERVER_PORT=${EASY_MCP_SERVER_PORT:-8887}
+    export EASY_MCP_SERVER_MCP_PORT=${EASY_MCP_SERVER_MCP_PORT:-8888}
+fi
+
 echo "📡 Server will be available at:"
 echo "   🌐 REST API: http://localhost:${EASY_MCP_SERVER_PORT:-8887}"
 echo "   🤖 AI Server: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}"
@@ -35,6 +46,7 @@ echo ""
 # Start the server in background with output redirected
 echo "🚀 Starting with: $NPX_PATH easy-mcp-server"
 echo "🔄 Starting server in background..."
+
 $NPX_PATH easy-mcp-server > server.log 2>&1 &
 SERVER_PID=$!
 
