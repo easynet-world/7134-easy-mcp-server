@@ -45,6 +45,24 @@ This creates a complete project with:
 - **Context Awareness**: Built-in logging and context tracking for AI interactions
 - **Hot Reloading**: Real-time updates to tools and resources without restart
 
+### Native MCP Bridge Support (Chrome & iTerm2)
+
+**🔌 Built-in Zero-Config Bridge**: `easy-mcp-server` natively supports MCP bridge to external MCP servers. Simply add `mcp-bridge.json` to enable powerful integrations:
+
+**Chrome DevTools Operations** (via `chrome-devtools-mcp`):
+- Browser automation: `new_page`, `navigate_page`, `click`, `fill`, `evaluate_script`
+- Testing & debugging: `take_screenshot`, `take_snapshot`, `list_console_messages`
+- Performance analysis: `emulate_network`, `emulate_cpu`, `list_network_requests`
+- UI inspection: `hover`, `drag`, `handle_dialog`, `upload_file`
+- 20+ additional browser control capabilities
+
+**iTerm2 Terminal Operations** (via `iterm-mcp`):
+- Terminal control: `write_to_terminal`, `read_terminal_output`, `send_control_character`
+- Deployment automation: CI/CD pipelines, server operations
+- System monitoring: Real-time log analysis and diagnostics
+
+**Usage**: The `init` command automatically includes `mcp-bridge.json` with Chrome and iTerm2 pre-configured. Additional MCP servers (GitHub, Slack, PostgreSQL, Filesystem) are included as examples with `"disabled": true`.
+
 ## API Development Pattern for LLMs
 
 ### Basic API Class
