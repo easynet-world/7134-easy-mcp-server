@@ -9,6 +9,10 @@ const path = require('path');
 
 // Use example-project public directory for testing
 const publicDir = path.join(__dirname, '..', 'example-project', 'public');
+
+// Set environment variable BEFORE importing server
+process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = publicDir;
+
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
@@ -35,7 +39,7 @@ if (!fs.existsSync(indexPath)) {
   fs.writeFileSync(indexPath, '<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Test Index</h1></body></html>');
 }
 
-// Import server after files are set
+// Import server after files and env vars are set
 const { app } = require('../src/server');
 
 // Debug: Check if static file serving middleware is applied
@@ -108,7 +112,7 @@ describe('Static File Serving - CI', () => {
         .get('/')
         .expect(200);
 
-      expect(response.text).toContain('🚀 Easy MCP Server');
+      expect(response.text).toContain('🚀 Example E-commerce API');
       expect(response.headers['content-type']).toMatch(/text\/html/);
     });
   });

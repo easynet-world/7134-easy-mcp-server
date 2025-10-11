@@ -509,8 +509,7 @@ EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
 - **Documentation**: [Development Guide](DEVELOPMENT.md) - Comprehensive development documentation with Express migration guide
-- **Example Project**: Complete working example in `example-project/` directory with users/products APIs, AI integration, and JSDoc annotations
-- **API Examples**: Additional examples in `api/example/` directory
+- **Example Project**: Complete working example in `example-project/` directory with users/products APIs, dynamic routes, AI integration, and JSDoc annotations
 
 ---
 

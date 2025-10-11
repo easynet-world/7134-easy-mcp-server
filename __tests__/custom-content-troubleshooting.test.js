@@ -110,7 +110,7 @@ arguments:
       // Test listing prompts
       const promptsResponse = await server.processListPrompts({ id: 1 });
       
-      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(4);
+      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(3);
       
       // Verify specific prompts exist
       const promptNames = promptsResponse.result.prompts.map(p => p.name);
@@ -118,7 +118,6 @@ arguments:
       expect(promptNames).toContain('Custom JSON Prompt');
       expect(promptNames).toContain('my-custom-prompt');
       expect(promptNames).toContain('Custom YAML Prompt');
-      expect(promptNames).toContain('test-prompt'); // For test files
     });
 
     test('should handle prompts with template parameters', async () => {
@@ -343,7 +342,7 @@ data:
       const promptsResponse = await server.processListPrompts({ id: 1 });
       const resourcesResponse = await server.processListResources({ id: 1 });
 
-      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(2);
+      expect(promptsResponse.result.prompts.length).toBeGreaterThanOrEqual(1);
       expect(resourcesResponse.result.resources.length).toBeGreaterThanOrEqual(testFiles.length);
     });
   });
