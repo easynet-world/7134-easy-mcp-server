@@ -48,7 +48,24 @@ npx easy-mcp-server
 - JSDoc annotations for automated documentation
 - Real-world development patterns and best practices
 
-### Option 2: Create Your Own API
+### Option 2: Create Your Own API (Quick Init)
+```bash
+# Initialize a new project with everything set up
+npx easy-mcp-server init my-api-project
+
+# Navigate to your project
+cd my-api-project
+
+# Install dependencies
+npm install
+
+# Start the server
+./start.sh
+# Or: npm start
+# Or: easy-mcp-server
+```
+
+### Option 3: Manual Setup
 ```bash
 # Install the framework
 npm install easy-mcp-server
@@ -67,8 +84,18 @@ module.exports = GetUsers;" > api/users/get.js
 npx easy-mcp-server
 ```
 
+**What `init` Creates:**
+- ✅ **Complete Project Structure**: All directories and files
+- ✅ **Example APIs**: GET and POST endpoints ready to use
+- ✅ **MCP Integration**: Prompts and resources configured
+- ✅ **Scripts**: `start.sh` and `stop.sh` for convenience
+- ✅ **Bridge Config**: `mcp-bridge.json` pre-configured
+- ✅ **Static Files**: Beautiful landing page included
+- ✅ **Tests**: Test suite template ready
+- ✅ **Documentation**: README with usage examples
+
 **Immediate Results:**
-- ✅ **REST API**: `GET /users` endpoint active
+- ✅ **REST API**: Example endpoints active
 - ✅ **AI Integration**: Auto-generated tools for AI agents
 - ✅ **Documentation**: OpenAPI specification generated
 - ✅ **Development**: Hot reload enabled
@@ -164,9 +191,14 @@ your-project/
 │   └── app.js
 ├── package.json           # Project dependencies
 ├── .env                   # Environment configuration
-├── mcp-bridge.json        # 🚀 OPTIONAL but powerful: Bridge to other MCP servers
+├── .gitignore             # Git ignore patterns
+├── start.sh               # 🚀 Convenient start script
+├── stop.sh                # 🛑 Convenient stop script
+├── mcp-bridge.json        # 🔌 Bridge to other MCP servers
 └── README.md
 ```
+
+> **💡 Quick Start**: Run `npx easy-mcp-server init my-project` to create this structure automatically!
 
 > **💡 Tip**: Dynamic routes with `[param]` syntax are **completely optional**! Most APIs work perfectly with just static routes like the users API shown above. See the [example-project](./example-project) for a working demonstration.
 
