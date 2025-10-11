@@ -18,6 +18,47 @@
 
 ---
 
+## **Quick Start**
+
+### ⚡ **Fastest Way to Get Started**
+
+For new projects, use the `init` command to create a complete, production-ready setup in seconds:
+
+```bash
+# Create a new project with everything configured
+npx easy-mcp-server init my-api-project
+
+cd my-api-project
+npm install
+./start.sh
+```
+
+**What You Get:**
+- ✅ **2 Working API Endpoints** - GET and POST examples with validation
+- ✅ **AI Integration** - MCP protocol pre-configured with prompts and resources
+- ✅ **Beautiful Landing Page** - Professional UI with feature showcase
+- ✅ **Complete Documentation** - OpenAPI spec, Swagger UI, and guides
+- ✅ **Hot Reload** - Real-time code updates during development
+- ✅ **Server Scripts** - `start.sh` and `stop.sh` for easy management
+- ✅ **MCP Bridge** - Pre-configured `mcp-bridge.json` with Chrome DevTools example
+- ✅ **Test Suite** - Test templates ready to expand
+- ✅ **Environment Config** - `.env` file with all settings documented
+
+**Your server is now running at:**
+- API Server: `http://localhost:8887`
+- Swagger Docs: `http://localhost:8887/docs`
+- MCP Server: `http://localhost:8888`
+
+**Next Steps:**
+1. Edit `api/` folder to add your endpoints
+2. Add AI prompts to `mcp/prompts/`
+3. Add documentation resources to `mcp/resources/`
+4. Customize `public/index.html` with your branding
+
+**🎯 You're production-ready from day one!**
+
+---
+
 ## **Express to easy-mcp-server Migration Guide**
 
 ### **Enterprise Migration Benefits**

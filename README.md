@@ -33,6 +33,30 @@
 
 ## **Quick Start**
 
+### ⚡ **Fastest Way: Create Your Own Project** (Recommended)
+```bash
+# Create a new project with everything configured
+npx easy-mcp-server init my-api-project
+cd my-api-project
+npm install
+./start.sh
+
+# Your API is now running at http://localhost:8887 🚀
+```
+
+**What you get instantly:**
+- ✅ Working API endpoints (GET & POST examples)
+- ✅ AI integration (MCP) pre-configured
+- ✅ Beautiful landing page
+- ✅ Complete documentation
+- ✅ Hot reload enabled
+- ✅ Scripts for easy server management (`start.sh`, `stop.sh`)
+- ✅ Test suite template
+
+**🎯 You're ready to build! Just edit `api/` folder to add your endpoints.**
+
+---
+
 ### Option 1: Try the Example Project
 ```bash
 # Clone and explore the complete example project
@@ -48,24 +72,7 @@ npx easy-mcp-server
 - JSDoc annotations for automated documentation
 - Real-world development patterns and best practices
 
-### Option 2: Create Your Own API (Quick Init)
-```bash
-# Initialize a new project with everything set up
-npx easy-mcp-server init my-api-project
-
-# Navigate to your project
-cd my-api-project
-
-# Install dependencies
-npm install
-
-# Start the server
-./start.sh
-# Or: npm start
-# Or: easy-mcp-server
-```
-
-### Option 3: Manual Setup
+### Option 2: Manual Setup
 ```bash
 # Install the framework
 npm install easy-mcp-server

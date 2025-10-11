@@ -3,6 +3,28 @@
 ## Framework Overview
 easy-mcp-server is an enterprise-grade Node.js framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI models with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard, enabling seamless AI integration with convention-based development.
 
+## Quick Start for New Projects
+
+The fastest way to create a production-ready project:
+
+```bash
+npx easy-mcp-server init my-api-project
+cd my-api-project
+npm install
+./start.sh
+```
+
+This creates a complete project with:
+- Working API endpoints (GET & POST examples)
+- MCP integration (prompts, resources, tools)
+- Beautiful landing page
+- Complete documentation
+- Hot reload enabled
+- Server management scripts (start.sh, stop.sh)
+- MCP bridge configuration
+- Test suite template
+- Environment configuration
+
 ## Key LLM Integration Features
 
 ### Automatic MCP Tool Generation
