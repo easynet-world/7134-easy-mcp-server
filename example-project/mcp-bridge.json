@@ -25,6 +25,16 @@
       "description": "GitHub API operations (repos, issues, PRs)",
       "disabled": true
     },
+    "gitlab": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gitlab"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "",
+        "GITLAB_API_URL": "https://gitlab.com/api/v4"
+      },
+      "description": "GitLab API operations (projects, merge requests, issues)",
+      "disabled": true
+    },
     "postgres": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-postgres"],
@@ -42,6 +52,42 @@
         "SLACK_TEAM_ID": ""
       },
       "description": "Slack workspace operations (channels, messages, users)",
+      "disabled": true
+    },
+    "kubernetes": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-kubernetes"],
+      "env": {
+        "KUBECONFIG": ""
+      },
+      "description": "Kubernetes cluster operations (pods, deployments, services)",
+      "disabled": true
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory/knowledge graph storage for AI context",
+      "disabled": true
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "description": "Headless browser automation with Puppeteer",
+      "disabled": true
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": ""
+      },
+      "description": "Web search capabilities via Brave Search API",
+      "disabled": true
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "HTTP fetch operations for web content retrieval",
       "disabled": true
     }
   }

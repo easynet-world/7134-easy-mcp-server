@@ -36,9 +36,9 @@ EASY_MCP_SERVER_HOST=0.0.0.0           # Bind to all network interfaces
 EASY_MCP_SERVER_MCP_PORT=8888          # MCP WebSocket port (default: 8888)
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0       # MCP server host
 
-# Static Files
-EASY_MCP_SERVER_STATIC_ENABLED=true    # Enable static file serving
+# Static Files (auto-enabled if directory exists)
 EASY_MCP_SERVER_STATIC_DIRECTORY=./public
+EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Optional: serve at root path
 ```
 
 You can modify `.env` to customize these settings. The `start.sh` script will automatically apply your changes.
