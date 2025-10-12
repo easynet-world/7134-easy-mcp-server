@@ -326,7 +326,7 @@ EASY_MCP_SERVER_CORS_CREDENTIALS=true
 
 # Static File Serving (auto-enabled if directory exists)
 EASY_MCP_SERVER_STATIC_DIRECTORY=./public
-EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Optional: serve this file at root path
+EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Default file at root (defaults to index.html)
 
 # API Configuration
 EASY_MCP_SERVER_API_PATH=api
