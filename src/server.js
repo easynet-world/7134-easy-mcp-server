@@ -44,7 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 const fs = require('fs');
 const staticDirectory = process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public';
 const staticPath = path.resolve(staticDirectory);
-const defaultFile = process.env.EASY_MCP_SERVER_DEFAULT_FILE;
+const defaultFile = process.env.EASY_MCP_SERVER_DEFAULT_FILE || 'index.html';
 
 // Auto-enable static file serving if public directory exists
 if (fs.existsSync(staticPath)) {
@@ -59,17 +59,13 @@ if (fs.existsSync(staticPath)) {
   }));
   console.log('✅ Static file middleware applied successfully');
   
-  // Handle root route with default file if explicitly configured
-  if (defaultFile) {
-    const indexPath = path.join(staticPath, defaultFile);
-    if (fs.existsSync(indexPath)) {
-      app.get('/', (req, res) => {
-        res.sendFile(indexPath);
-      });
-      console.log(`🏠 Root route configured: serving ${defaultFile}`);
-    } else {
-      console.log(`⚠️  EASY_MCP_SERVER_DEFAULT_FILE set to '${defaultFile}' but file not found`);
-    }
+  // Handle root route with default file (defaults to index.html)
+  const indexPath = path.join(staticPath, defaultFile);
+  if (fs.existsSync(indexPath)) {
+    app.get('/', (req, res) => {
+      res.sendFile(indexPath);
+    });
+    console.log(`🏠 Root route configured: serving ${defaultFile}`);
   }
 } else {
   console.log(`📁 Static files disabled: ${staticPath} not found`);
