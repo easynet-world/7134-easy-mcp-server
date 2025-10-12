@@ -308,7 +308,7 @@ The Easy MCP Server **exclusively supports environment variables prefixed with `
 
 #### **Security & Consistency**
 - ✅ **Only `EASY_MCP_SERVER_` prefixed variables are supported**
-- ✅ **Non-prefixed variables are ignored** (e.g., `PORT`, `HOST`, `NODE_ENV`)
+- ✅ **Non-prefixed variables are ignored** (e.g., `PORT`, `HOST`)
 - ✅ **Prevents conflicts** with other applications
 - ✅ **Centralized configuration** management
 
@@ -324,11 +324,9 @@ EASY_MCP_SERVER_CORS_ORIGIN=*
 EASY_MCP_SERVER_CORS_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE
 EASY_MCP_SERVER_CORS_CREDENTIALS=true
 
-# Static File Serving
-EASY_MCP_SERVER_STATIC_ENABLED=true
+# Static File Serving (auto-enabled if directory exists)
 EASY_MCP_SERVER_STATIC_DIRECTORY=./public
-EASY_MCP_SERVER_SERVE_INDEX=true
-EASY_MCP_SERVER_DEFAULT_FILE=index.html
+EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Optional: serve this file at root path
 
 # API Configuration
 EASY_MCP_SERVER_API_PATH=api

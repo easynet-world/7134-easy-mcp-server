@@ -40,45 +40,39 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static file serving configuration - always enabled by default
-const staticConfig = {
-  enabled: process.env.EASY_MCP_SERVER_STATIC_ENABLED !== 'false',
-  directory: process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public',
-  serveIndex: process.env.EASY_MCP_SERVER_SERVE_INDEX !== 'false',
-  defaultFile: process.env.EASY_MCP_SERVER_DEFAULT_FILE || 'index.html'
-};
-
-// Setup static file serving - always enabled
+// Static file serving configuration - auto-detect public directory
 const fs = require('fs');
-const staticPath = path.resolve(staticConfig.directory);
+const staticDirectory = process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public';
+const staticPath = path.resolve(staticDirectory);
+const defaultFile = process.env.EASY_MCP_SERVER_DEFAULT_FILE;
 
-// Create static directory if it doesn't exist
-if (!fs.existsSync(staticPath)) {
-  fs.mkdirSync(staticPath, { recursive: true });
-  console.log(`📁 Created static directory: ${staticPath}`);
-}
-
-console.log(`📁 Static files enabled: serving from ${staticPath}`);
-
-// Serve static files - ensure this is applied early and always
-console.log(`🔧 Applying static file middleware to path: ${staticPath}`);
-app.use(express.static(staticPath, {
-  index: false, // Disable automatic index serving
-  dotfiles: 'ignore', // Ignore dotfiles for security
-  etag: true, // Enable ETags for caching
-  lastModified: true // Enable Last-Modified headers
-}));
-console.log('✅ Static file middleware applied successfully');
-
-// Handle root route with index.html if it exists
-if (staticConfig.serveIndex) {
-  const indexPath = path.join(staticPath, staticConfig.defaultFile);
-  if (fs.existsSync(indexPath)) {
-    app.get('/', (req, res) => {
-      res.sendFile(indexPath);
-    });
-    console.log(`🏠 Root route configured: serving ${staticConfig.defaultFile}`);
+// Auto-enable static file serving if public directory exists
+if (fs.existsSync(staticPath)) {
+  console.log(`📁 Static files enabled: serving from ${staticPath}`);
+  
+  // Serve static files
+  app.use(express.static(staticPath, {
+    index: false, // Disable automatic index serving
+    dotfiles: 'ignore', // Ignore dotfiles for security
+    etag: true, // Enable ETags for caching
+    lastModified: true // Enable Last-Modified headers
+  }));
+  console.log('✅ Static file middleware applied successfully');
+  
+  // Handle root route with default file if explicitly configured
+  if (defaultFile) {
+    const indexPath = path.join(staticPath, defaultFile);
+    if (fs.existsSync(indexPath)) {
+      app.get('/', (req, res) => {
+        res.sendFile(indexPath);
+      });
+      console.log(`🏠 Root route configured: serving ${defaultFile}`);
+    } else {
+      console.log(`⚠️  EASY_MCP_SERVER_DEFAULT_FILE set to '${defaultFile}' but file not found`);
+    }
   }
+} else {
+  console.log(`📁 Static files disabled: ${staticPath} not found`);
 }
 
 // Centralized Express error handler to prevent crashes on route errors

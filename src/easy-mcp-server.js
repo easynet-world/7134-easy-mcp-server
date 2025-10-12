@@ -41,8 +41,8 @@ Environment Variables:
   EASY_MCP_SERVER_MCP_PORT MCP server port
   EASY_MCP_SERVER_HOST   REST API server host
   EASY_MCP_SERVER_MCP_HOST MCP server host
-  EASY_MCP_SERVER_STATIC_ENABLED Enable static file serving
-  EASY_MCP_SERVER_STATIC_DIRECTORY Static files directory
+  EASY_MCP_SERVER_STATIC_DIRECTORY Static files directory (auto-enabled if exists)
+  EASY_MCP_SERVER_DEFAULT_FILE Default file to serve at root (optional)
 
 Features:
   • Auto .env loading     Automatically loads .env, .env.development, .env.local files
@@ -154,11 +154,9 @@ EASY_MCP_SERVER_MCP_PORT=8888
 EASY_MCP_SERVER_HOST=0.0.0.0
 EASY_MCP_SERVER_MCP_HOST=0.0.0.0
 
-# Static File Serving
-EASY_MCP_SERVER_STATIC_ENABLED=true
+# Static File Serving (auto-enabled if directory exists)
 EASY_MCP_SERVER_STATIC_DIRECTORY=./public
-EASY_MCP_SERVER_SERVE_INDEX=true
-EASY_MCP_SERVER_DEFAULT_FILE=index.html
+EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Optional: serve this file at root
 
 # CORS Configuration
 EASY_MCP_SERVER_CORS_ORIGIN=*
@@ -296,9 +294,9 @@ module.exports = GetExample;
 
 Copy \`.env.example\` to \`.env\` and configure:
 - \`EASY_MCP_SERVER_PORT\`: Server port (default: 8887)
-- \`NODE_ENV\`: Environment (development/production)
 - \`EASY_MCP_SERVER_CORS_ORIGIN\`: CORS origin
 - \`EASY_MCP_SERVER_CORS_METHODS\`: Allowed HTTP methods
+- \`EASY_MCP_SERVER_DEFAULT_FILE\`: Default file for root path (optional)
 - \`EASY_MCP_SERVER_CORS_CREDENTIALS\`: Allow credentials
 
 ## Learn More

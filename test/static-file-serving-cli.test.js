@@ -54,7 +54,7 @@ describe('CLI Static File Serving', () => {
       const expectedPathSnippet = path.join(tempDir, 'public');
       expect(output.includes('Static files enabled: serving from')).toBe(true);
       expect(output.includes(expectedPathSnippet)).toBe(true);
-      expect(output.includes('Applying static file middleware to path:')).toBe(true);
+      expect(output.includes('Static file middleware applied successfully')).toBe(true);
       // Clean up
       serverProcess.kill('SIGTERM');
       setTimeout(() => {
