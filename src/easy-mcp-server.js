@@ -907,15 +907,22 @@ async function startServer() {
       // Set environment variables for the server
       process.env.EASY_MCP_SERVER_API_PATH = originalCwd + '/api';
       process.env.EASY_MCP_SERVER_MCP_BASE_PATH = originalCwd + '/mcp';
+      // Set bridge config path if mcp-bridge.json exists in the current directory
+      const bridgeConfigPath = path.join(originalCwd, 'mcp-bridge.json');
+      if (!process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH && fs.existsSync(bridgeConfigPath)) {
+        process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = bridgeConfigPath;
+        console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
+      }
       process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = fs.existsSync(path.join(originalCwd, 'public'))
         ? path.join(originalCwd, 'public')
         : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(mainProjectPath, 'public'));
       process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
       process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
       
-      // Change to the main project directory and require the server
-      const originalCwdProcess = process.cwd();
-      process.chdir(mainProjectPath);
+      // Don't change directory - keep the original cwd so bridge config can be found
+      // The server.js will use environment variables to find files anyway
+      // const originalCwdProcess = process.cwd();
+      // process.chdir(mainProjectPath);
       
       // Import and start the server directly
       const serverPath = path.join(mainProjectPath, 'src', 'server.js');
