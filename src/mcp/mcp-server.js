@@ -312,17 +312,17 @@ class DynamicAPIMCPServer {
     if (this.bridgeReloader) {
       try {
         const bridges = this.bridgeReloader.ensureBridges();
-        for (const [, bridge] of bridges.entries()) {
+        for (const [serverName, bridge] of bridges.entries()) {
           try {
             const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
               bridgeResult.tools.forEach(t => {
                 tools.push({
-                  name: t.name,
-                  description: t.description || 'Bridge tool',
+                  name: `${serverName}_${t.name}`, // Add prefix for clarity
+                  description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
-                  tags: ['bridge']
+                  tags: ['bridge', serverName]
                 });
               });
             }
@@ -1407,14 +1407,17 @@ class DynamicAPIMCPServer {
           try {
             const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
-              // Use original tool names from bridge without adding prefix
+              // Add server name prefix to avoid collisions and make source explicit
               bridgeResult.tools.forEach(t => {
                 tools.push({
-                  name: t.name, // Use original tool name from bridge MCP
+                  name: `${serverName}_${t.name}`, // Add prefix for clarity and collision prevention
                   description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
-                  tags: ['bridge', serverName]
+                  tags: ['bridge', serverName],
+                  // Store original name for mapping
+                  _bridgeToolName: t.name,
+                  _bridgeServerName: serverName
                 });
               });
             }
@@ -1472,18 +1475,22 @@ class DynamicAPIMCPServer {
         const bridges = this.bridgeReloader.ensureBridges();
         for (const [serverName, bridge] of bridges.entries()) {
           try {
-            // Try calling the tool directly with the original name from bridge MCP
-            const bridgeResult = await bridge.rpcRequest('tools/call', { name: name, arguments: args }, 5000);
-            if (bridgeResult && bridgeResult.content) {
-              return {
-                jsonrpc: '2.0',
-                id: data.id,
-                result: bridgeResult
-              };
+            // Check if the tool name starts with this server's prefix
+            const prefix = `${serverName}_`;
+            if (name.startsWith(prefix)) {
+              // Strip the prefix to get the original tool name
+              const originalToolName = name.substring(prefix.length);
+              const bridgeResult = await bridge.rpcRequest('tools/call', { name: originalToolName, arguments: args }, 5000);
+              if (bridgeResult && bridgeResult.content) {
+                return {
+                  jsonrpc: '2.0',
+                  id: data.id,
+                  result: bridgeResult
+                };
+              }
             }
           } catch (e) {
             // Continue to next bridge if this one fails
-            // (tool might not exist on this bridge, try next one)
             continue;
           }
         }
