@@ -29,7 +29,7 @@ class MCPBridge extends EventEmitter {
     if (this.proc) return;
     const spawnEnv = this.env ? { ...process.env, ...this.env } : process.env;
     this.proc = spawn(this.command, this.args, {
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      stdio: ['pipe', 'pipe', 'pipe'],
       env: spawnEnv
     });
 
