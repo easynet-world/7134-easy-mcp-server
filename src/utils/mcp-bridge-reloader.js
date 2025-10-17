@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const chokidar = require('chokidar');
 const MCPBridge = require('./mcp-bridge');
+const MCPSchemaAdapter = require('./mcp-schema-adapter');
 
 class MCPBridgeReloader {
   constructor(options = {}) {
@@ -161,7 +162,10 @@ class MCPBridgeReloader {
           // Build environment variables for this server
           const childEnv = this.buildServerEnv(name);
           
-          const bridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv });
+          const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv });
+          
+          // Wrap bridge with schema adapter for Chrome DevTools and other MCP servers
+          const bridge = new MCPSchemaAdapter(rawBridge);
           
           // Try to start the bridge and handle failures gracefully
           bridge.start();

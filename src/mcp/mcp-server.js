@@ -317,12 +317,27 @@ class DynamicAPIMCPServer {
             const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
               bridgeResult.tools.forEach(t => {
+                // Only strip prefixes from Chrome DevTools to avoid naming conflicts
+                let cleanName = t.name;
+                if (serverName === 'chrome') {
+                  const prefixes = ['chrome_', 'mcp_'];
+                  for (const prefix of prefixes) {
+                    if (cleanName.startsWith(prefix)) {
+                      cleanName = cleanName.substring(prefix.length);
+                      break;
+                    }
+                  }
+                }
+                
                 tools.push({
-                  name: `${serverName}_${t.name}`, // Add prefix for clarity
+                  name: cleanName, // Cleaned name (only for Chrome tools)
                   description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
-                  tags: ['bridge', serverName]
+                  tags: ['bridge', serverName],
+                  // Store original name for mapping back when calling the tool
+                  _bridgeToolName: t.name,
+                  _bridgeServerName: serverName
                 });
               });
             }
@@ -1407,15 +1422,27 @@ class DynamicAPIMCPServer {
           try {
             const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
-              // Add server name prefix to avoid collisions and make source explicit
+              // Strip common prefixes from tool names for easier AI usage
               bridgeResult.tools.forEach(t => {
+                // Only strip prefixes from Chrome DevTools to avoid naming conflicts
+                let cleanName = t.name;
+                if (serverName === 'chrome') {
+                  const prefixes = ['chrome_', 'mcp_'];
+                  for (const prefix of prefixes) {
+                    if (cleanName.startsWith(prefix)) {
+                      cleanName = cleanName.substring(prefix.length);
+                      break;
+                    }
+                  }
+                }
+                
                 tools.push({
-                  name: `${serverName}_${t.name}`, // Add prefix for clarity and collision prevention
+                  name: cleanName, // Cleaned name (only for Chrome tools)
                   description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: t.inputSchema || { type: 'object', properties: {} },
                   responseSchema: null,
                   tags: ['bridge', serverName],
-                  // Store original name for mapping
+                  // Store original name for mapping back when calling the tool
                   _bridgeToolName: t.name,
                   _bridgeServerName: serverName
                 });
@@ -1475,22 +1502,30 @@ class DynamicAPIMCPServer {
         const bridges = this.bridgeReloader.ensureBridges();
         for (const [serverName, bridge] of bridges.entries()) {
           try {
-            // Check if the tool name starts with this server's prefix
-            const prefix = `${serverName}_`;
-            if (name.startsWith(prefix)) {
-              // Strip the prefix to get the original tool name
-              const originalToolName = name.substring(prefix.length);
-              const bridgeResult = await bridge.rpcRequest('tools/call', { name: originalToolName, arguments: args }, 5000);
-              if (bridgeResult && bridgeResult.content) {
-                return {
-                  jsonrpc: '2.0',
-                  id: data.id,
-                  result: bridgeResult
-                };
+            // Try different name variations to find the right tool
+            const namesToTry = [
+              name,                           // Original clean name
+              `${serverName}_${name}`,       // With server prefix
+              `${serverName}${serverName}_${name}` // With double prefix
+            ];
+            
+            for (const toolName of namesToTry) {
+              try {
+                const bridgeResult = await bridge.rpcRequest('tools/call', { name: toolName, arguments: args }, 5000);
+                if (bridgeResult && bridgeResult.content) {
+                  return {
+                    jsonrpc: '2.0',
+                    id: data.id,
+                    result: bridgeResult
+                  };
+                }
+              } catch (e) {
+                // This name variation didn't work, try next one
+                continue;
               }
             }
           } catch (e) {
-            // Continue to next bridge if this one fails
+            // Tool not found in this bridge, try next one
             continue;
           }
         }
