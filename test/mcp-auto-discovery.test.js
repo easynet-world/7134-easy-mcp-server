@@ -168,7 +168,8 @@ This is a test markdown resource with **bold** and *italic* text.
       expect(mcpServer.resources.has('resource://test.md')).toBe(true);
       const resource = mcpServer.resources.get('resource://test.md');
       expect(resource.name).toBe('test');
-      expect(resource.mimeType).toBe('text/markdown');
+      // MIME type may include charset parameter
+      expect(resource.mimeType).toMatch(/^text\/markdown(;|$)/);
       expect(resource.content).toContain('# Test Markdown Resource');
     });
 
@@ -184,7 +185,8 @@ No special formatting is applied.`;
       expect(mcpServer.resources.has('resource://test.txt')).toBe(true);
       const resource = mcpServer.resources.get('resource://test.txt');
       expect(resource.name).toBe('test');
-      expect(resource.mimeType).toBe('text/plain');
+      // MIME type may include charset parameter
+      expect(resource.mimeType).toMatch(/^text\/plain(;|$)/);
       expect(resource.content).toContain('This is a plain text resource.');
     });
   });

@@ -1342,6 +1342,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processListPrompts() instead
    */
   async processListPrompts(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processListPrompts(data);
   }
   
@@ -1391,6 +1403,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processGetPrompt() instead
    */
   async processGetPrompt(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processGetPrompt(data);
   }
   
@@ -1461,6 +1485,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processListResources() instead
    */
   async processListResources(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processListResources(data);
   }
   
@@ -1656,6 +1692,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processReadResource() instead
    */
   async processReadResource(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processReadResource(data);
   }
   
@@ -1996,6 +2044,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processHealth() instead
    */
   async processHealth(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processHealth(data);
   }
   
@@ -2050,6 +2110,18 @@ class DynamicAPIMCPServer {
    * @deprecated Use this.mcpRequestProcessor.processMetrics() instead
    */
   async processMetrics(data) {
+    if (!this.mcpRequestProcessor) {
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
     return this.mcpRequestProcessor.processMetrics(data);
   }
   
