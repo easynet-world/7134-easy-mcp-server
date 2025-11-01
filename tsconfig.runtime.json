@@ -14,8 +14,11 @@
     "noEmit": true,
     "noResolve": false,
     "typeRoots": [],
-    "types": []
+    "types": [],
+    "isolatedModules": true,
+    "noImplicitAny": false
   },
+  "files": [],
   "include": [
     "src/**/*",
     "example-project/**/*",
