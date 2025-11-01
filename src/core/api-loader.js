@@ -197,6 +197,16 @@ class APILoader {
    * Load a single API file and register the route with graceful initialization
    */
   loadAPIFile(filePath, basePath, fileName) {
+    // Skip files in test directories entirely
+    const normalizedFilePath = path.resolve(filePath).replace(/\\/g, '/');
+    if (normalizedFilePath.includes('/test/') || 
+        normalizedFilePath.includes('/__tests__/') ||
+        normalizedFilePath.includes('/__test__/') ||
+        normalizedFilePath.match(/\.test\.(ts|js)$/) ||
+        normalizedFilePath.match(/\.spec\.(ts|js)$/)) {
+      return; // Skip test files entirely
+    }
+    
     const httpMethod = path.parse(fileName).name.toUpperCase();
     const dirName = path.dirname(fileName);
     const routePath = dirName === '.' ? basePath : path.join(basePath, dirName);
