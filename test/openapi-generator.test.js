@@ -145,6 +145,82 @@ describe('OpenAPIGenerator', () => {
       expect(paths['/api/users/{id}/posts'].get.operationId).toBe('get_api_users__id__posts');
     });
 
+    test('should convert Express path format (:param) to OpenAPI format ({param})', () => {
+      const mockRoutes = [
+        {
+          method: 'GET',
+          path: '/api/users/:id',
+          processorInstance: {}
+        },
+        {
+          method: 'GET',
+          path: '/products/:id/reviews/:reviewId',
+          processorInstance: {}
+        }
+      ];
+      
+      const paths = openapiGenerator.generatePaths(mockRoutes);
+      
+      // Should convert :param to {param} in path keys
+      expect(paths).toHaveProperty('/api/users/{id}');
+      expect(paths).toHaveProperty('/products/{id}/reviews/{reviewId}');
+      
+      // Original Express format should not be in paths
+      expect(paths).not.toHaveProperty('/api/users/:id');
+      expect(paths).not.toHaveProperty('/products/:id/reviews/:reviewId');
+    });
+
+    test('should ensure all path parameters in OpenAPI path are defined in parameters array', () => {
+      const mockRoutes = [
+        {
+          method: 'GET',
+          path: '/api/users/:id',
+          processorInstance: {}
+        }
+      ];
+      
+      mockApiLoader.getRoutes.mockReturnValue(mockRoutes);
+      const spec = openapiGenerator.generateSpec();
+      const operation = spec.paths['/api/users/{id}'].get;
+      
+      expect(operation.parameters).toBeDefined();
+      expect(Array.isArray(operation.parameters)).toBe(true);
+      
+      // Should have path parameter defined
+      const idParam = operation.parameters.find(p => p.name === 'id' && p.in === 'path');
+      expect(idParam).toBeDefined();
+      expect(idParam.required).toBe(true);
+      expect(idParam.schema.type).toBe('string');
+    });
+
+    test('should ensure operationIds are unique', () => {
+      const mockRoutes = [
+        {
+          method: 'GET',
+          path: '/api/test',
+          processorInstance: {
+            openApi: { operationId: 'customId' }
+          }
+        },
+        {
+          method: 'POST',
+          path: '/api/test2',
+          processorInstance: {
+            openApi: { operationId: 'customId' }
+          }
+        }
+      ];
+      
+      mockApiLoader.getRoutes.mockReturnValue(mockRoutes);
+      const spec = openapiGenerator.generateSpec();
+      const operation1 = spec.paths['/api/test'].get;
+      const operation2 = spec.paths['/api/test2'].post;
+      
+      expect(operation1.operationId).toBe('customId');
+      expect(operation2.operationId).not.toBe('customId'); // Should be made unique
+      expect(operation2.operationId).toContain('customId');
+    });
+
     test('should merge OpenAPI info from processor instances', () => {
       const mockRoutes = [
         {
