@@ -63,7 +63,7 @@ describe('Error Handling Improvements', () => {
 
       // Test that the server fails when trying to use an occupied port
       const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['bin/easy-mcp-server.js'], {
+      const serverProcess = spawn('node', [path.join(__dirname, '..', 'src', 'easy-mcp-server.js')], {
         cwd: path.join(__dirname, '..'),
         env: { ...process.env, EASY_MCP_SERVER_PORT: testPort.toString() }
       });
