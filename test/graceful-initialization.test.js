@@ -3,7 +3,7 @@
  * Tests the enhanced BaseAPIEnhanced class with graceful error handling
  */
 
-const BaseAPIEnhanced = require('../src/lib/base-api-enhanced');
+const BaseAPIEnhanced = require('../src/lib/api/base-api-enhanced');
 const express = require('express');
 const request = require('supertest');
 

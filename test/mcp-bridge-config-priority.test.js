@@ -2,7 +2,7 @@
  * Test MCP bridge configuration file priority and resolution
  */
 
-const MCPBridgeReloader = require('../src/utils/mcp-bridge-reloader');
+const MCPBridgeReloader = require('../src/utils/mcp/mcp-bridge-reloader');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');

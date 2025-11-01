@@ -51,7 +51,7 @@ describe('MCP bridges: chrome-devtools and iterm2', () => {
       };
     });
 
-    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp-bridge-reloader.js');
+    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge-reloader.js');
     jest.doMock(reloaderModulePath, () => {
       const MockBridge = require(bridgeModulePath);
       return class MockReloader {
@@ -66,7 +66,7 @@ describe('MCP bridges: chrome-devtools and iterm2', () => {
     });
 
     DynamicAPIMCPServer = require('../src/mcp');
-    BridgeReloader = require('../src/utils/mcp-bridge-reloader');
+    BridgeReloader = require('../src/utils/mcp/mcp-bridge-reloader');
 
     // Create MCP server instance (no network bind needed for unit tests)
     const reloader = new BridgeReloader();

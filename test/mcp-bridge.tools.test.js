@@ -34,7 +34,7 @@ describe('MCP Bridge tools exposure', () => {
     });
 
     // Mock MCPBridgeReloader to bypass NODE_ENV === 'test' stub and return our mock bridge
-    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp-bridge-reloader.js');
+    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge-reloader.js');
     jest.doMock(reloaderModulePath, () => {
       const MockBridge = require(bridgeModulePath);
       return class MockReloader {
