@@ -1,16 +1,19 @@
-// Mock fs module before importing AnnotationParser
-const mockFs = {
-  existsSync: jest.fn(),
-  readFileSync: jest.fn()
-};
-
-jest.mock('fs', () => mockFs);
-
 const AnnotationParser = require('../src/utils/annotation-parser');
+const fs = require('fs');
 
 describe('AnnotationParser', () => {
+  let existsSpy;
+  let readFileSpy;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    readFileSpy = jest.spyOn(fs, 'readFileSync').mockImplementation(() => '');
+  });
+
+  afterEach(() => {
+    existsSpy.mockRestore();
+    readFileSpy.mockRestore();
   });
 
   describe('parseClassAnnotations', () => {
@@ -29,8 +32,8 @@ describe('AnnotationParser', () => {
     `;
 
     test('should parse valid JSDoc annotations', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(mockSourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(mockSourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -43,7 +46,7 @@ describe('AnnotationParser', () => {
     });
 
     test('should return null for non-existent file', () => {
-      mockFs.existsSync.mockReturnValue(false);
+      fs.existsSync.mockReturnValue(false);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/nonexistent/path.js');
 
@@ -51,8 +54,8 @@ describe('AnnotationParser', () => {
     });
 
     test('should return null when class not found', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue('class OtherClass {}');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue('class OtherClass {}');
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -60,8 +63,8 @@ describe('AnnotationParser', () => {
     });
 
     test('should return null for invalid JSDoc format', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue('class TestAPI {}');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue('class TestAPI {}');
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -78,8 +81,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCodeWithoutTags);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCodeWithoutTags);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -89,8 +92,8 @@ describe('AnnotationParser', () => {
     });
 
     test('should handle file read errors gracefully', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockImplementation(() => {
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockImplementation(() => {
         throw new Error('File read error');
       });
 
@@ -109,8 +112,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('testapi', '/test/path.js');
 
@@ -130,8 +133,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCodeWithWhitespace);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCodeWithWhitespace);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -363,8 +366,8 @@ describe('AnnotationParser', () => {
 
   describe('Edge Cases and Error Handling', () => {
     test('should handle empty file content', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue('');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue('');
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -372,8 +375,8 @@ describe('AnnotationParser', () => {
     });
 
     test('should handle file with only whitespace', () => {
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue('   \n  \t  \n  ');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue('   \n  \t  \n  ');
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -390,8 +393,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -412,8 +415,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -436,8 +439,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -458,8 +461,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -479,8 +482,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -519,8 +522,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -560,8 +563,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -592,8 +595,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -625,8 +628,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -656,8 +659,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -688,8 +691,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -713,8 +716,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -740,8 +743,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -766,8 +769,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -796,8 +799,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -816,8 +819,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
 
@@ -841,8 +844,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(largeContent);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(largeContent);
 
       const startTime = Date.now();
       const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
@@ -864,8 +867,8 @@ describe('AnnotationParser', () => {
         }
       `;
 
-      mockFs.existsSync.mockReturnValue(true);
-      mockFs.readFileSync.mockReturnValue(sourceCode);
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(sourceCode);
 
       const initialMemory = process.memoryUsage().heapUsed;
 

@@ -4,22 +4,20 @@
  */
 
 const fs = require('fs');
-// Ensure fs methods are mockable in this suite
-fs.existsSync = fs.existsSync && fs.existsSync.mockReturnValue ? fs.existsSync : jest.fn();
-fs.readFileSync = fs.readFileSync && fs.readFileSync.mockReturnValue ? fs.readFileSync : jest.fn();
 const AnnotationParser = require('../src/utils/annotation-parser');
 const OpenAPIGenerator = require('../src/core/openapi-generator');
-
-// Mock fs module
-jest.mock('fs');
 
 describe('@responseSchema Integration Tests', () => {
   let mockApiLoader;
   let openapiGenerator;
   let tempFilePath;
+  let existsSpy;
+  let readFileSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    readFileSpy = jest.spyOn(fs, 'readFileSync').mockImplementation(() => '');
     
     // Create mock API loader
     mockApiLoader = {
@@ -30,6 +28,11 @@ describe('@responseSchema Integration Tests', () => {
     
     // Create a unique temporary file path for each test
     tempFilePath = `/tmp/test-api-${Date.now()}-${Math.random()}.js`;
+  });
+
+  afterEach(() => {
+    existsSpy.mockRestore();
+    readFileSpy.mockRestore();
   });
 
   describe('Complete Flow: JSDoc → Annotation Parser → BaseAPI → OpenAPI', () => {
