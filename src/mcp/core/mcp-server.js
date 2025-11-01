@@ -172,7 +172,10 @@ class DynamicAPIMCPServer {
     
     // Check if custom MCP directory exists, otherwise fall back to package directory
     const fs = require('fs');
-    const customMcpPath = path.resolve(originalBasePath);
+    // Resolve custom path: if relative, resolve from current working directory; if absolute, use as-is
+    const customMcpPath = path.isAbsolute(originalBasePath) 
+      ? originalBasePath 
+      : path.resolve(process.cwd(), originalBasePath);
     // Resolve package MCP directory from project root (go up from src/mcp/core to project root, then to mcp)
     const packageMcpPath = path.resolve(__dirname, '..', '..', '..', 'mcp');
     
