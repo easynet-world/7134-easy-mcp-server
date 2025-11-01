@@ -13,7 +13,17 @@ describe('Function-exported API handlers', () => {
     app.use(express.json());
     const APILoader = require('../src/core/api-loader');
     tempDir = path.join(__dirname, 'temp-fn-api');
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+    // Clean up any existing temp directory first
+    if (fs.existsSync(tempDir)) {
+      try {
+        const files = fs.readdirSync(tempDir);
+        for (const f of files) {
+          fs.unlinkSync(path.join(tempDir, f));
+        }
+        fs.rmdirSync(tempDir);
+      } catch (_) {}
+    }
+    fs.mkdirSync(tempDir);
     apiLoader = new APILoader(app, tempDir);
   });
 

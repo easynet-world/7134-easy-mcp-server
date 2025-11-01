@@ -2,7 +2,7 @@
  * Tests for BaseAPIEnhanced
  */
 
-const BaseAPIEnhanced = require('../src/lib/base-api-enhanced');
+const BaseAPIEnhanced = require('../src/lib/api/base-api-enhanced');
 
 // Mock dependencies
 jest.mock('../src/utils/logger');
