@@ -36,7 +36,7 @@ describe('@responseSchema Integration Tests', () => {
     test('should process @responseSchema annotation through entire pipeline', () => {
       // 1. Create source code with @responseSchema annotation
       const sourceCode = `
-        const BaseAPI = require('../../src/core/base-api');
+        const BaseAPI = require('easy-mcp-server/base-api');
 
         /**
          * @description Create a new user with validation
@@ -175,7 +175,7 @@ describe('@responseSchema Integration Tests', () => {
     test('should not override @responseSchema with auto-generated schemas', () => {
       // Create source code with only @responseSchema (no @errorResponses)
       const sourceCode = `
-        const BaseAPI = require('../../src/core/base-api');
+        const BaseAPI = require('easy-mcp-server/base-api');
 
         /**
          * @responseSchema {
@@ -249,7 +249,7 @@ describe('@responseSchema Integration Tests', () => {
     test('should fall back to auto-generation when no annotations present', () => {
       // Create source code with no @responseSchema
       const sourceCode = `
-        const BaseAPI = require('../../src/core/base-api');
+        const BaseAPI = require('easy-mcp-server/base-api');
 
         /**
          * @description Simple endpoint without response schema
@@ -300,7 +300,7 @@ describe('@responseSchema Integration Tests', () => {
   describe('Edge Cases and Error Handling', () => {
     test('should handle malformed @responseSchema gracefully', () => {
       const sourceCode = `
-        const BaseAPI = require('../../src/core/base-api');
+        const BaseAPI = require('easy-mcp-server/base-api');
 
         /**
          * @responseSchema {
@@ -366,7 +366,7 @@ describe('@responseSchema Integration Tests', () => {
 
     test('should handle mixed valid and invalid annotations', () => {
       const sourceCode = `
-        const BaseAPI = require('../../src/core/base-api');
+        const BaseAPI = require('easy-mcp-server/base-api');
 
         /**
          * @description Valid description
