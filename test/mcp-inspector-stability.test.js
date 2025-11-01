@@ -90,8 +90,9 @@ describe('MCP Inspector stability - tool schemas persist across selections', () 
     expect(usersGetTool).toBeDefined();
     expect(usersGetTool.inputSchema).toBeDefined();
     expect(usersGetTool.inputSchema.properties).toBeDefined();
-    expect(usersGetTool.inputSchema.properties.query).toBeDefined();
-    expect(usersGetTool.inputSchema.properties.query.properties.active).toBeDefined();
+    // JSON-RPC tools/list uses flat format (properties.active), not nested (properties.query.properties.active)
+    // This differs from HTTP /mcp/tools which uses nested format
+    expect(usersGetTool.inputSchema.properties.active).toBeDefined();
     // 2) simulate selecting another tool (no-op, but we re-list)
     r = await list();
     expect(find('api__users_post')).toBeDefined();
@@ -99,7 +100,7 @@ describe('MCP Inspector stability - tool schemas persist across selections', () 
     r = await list();
     const usersGetTool2 = find('api__users_get');
     expect(usersGetTool2).toBeDefined();
-    expect(usersGetTool2.inputSchema.properties.query.properties.active).toBeDefined();
+    expect(usersGetTool2.inputSchema.properties.active).toBeDefined();
   });
 });
 
