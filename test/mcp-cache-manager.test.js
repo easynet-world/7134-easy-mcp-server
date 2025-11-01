@@ -4,7 +4,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const MCPCacheManager = require('../src/utils/mcp/mcp-cache-manager');
+const MCPCacheManager = require('../src/mcp/utils/mcp-cache-manager');
 
 describe('MCPCacheManager', () => {
   let cacheManager;

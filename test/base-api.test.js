@@ -1,8 +1,8 @@
-const BaseAPI = require('../src/core/base-api');
+const BaseAPI = require('../src/api/base/base-api');
 const { setupTestEnvironment } = require('../src/utils/test-utils');
 
 // Mock the AnnotationParser
-jest.mock('../src/utils/annotation-parser');
+jest.mock('../src/utils/parsers/annotation-parser');
 
 // Define TestAPI class at module level
 class TestAPI extends BaseAPI {
@@ -21,7 +21,7 @@ describe('BaseAPI Class', () => {
     baseAPI = new TestAPI();
     
     // Mock the AnnotationParser
-    mockAnnotationParser = require('../src/utils/annotation-parser');
+    mockAnnotationParser = require('../src/utils/parsers/annotation-parser');
     
     // Set up default mock behavior
     mockAnnotationParser.getAnnotationValue.mockReturnValue(null);

@@ -5,7 +5,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const APILoader = require('../src/core/api-loader');
+const APILoader = require('../src/utils/loaders/api-loader');
 
 describe('Error Handling Improvements', () => {
   let app;
@@ -223,7 +223,7 @@ describe('Error Handling Improvements', () => {
 
       // Test that server can start with mixed success/failure
       const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['src/app/server.js'], {
+      const serverProcess = spawn('node', ['src/orchestrator.js'], {
         cwd: path.join(__dirname, '..'),
         env: { 
           ...process.env, 

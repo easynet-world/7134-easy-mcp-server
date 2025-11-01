@@ -1,6 +1,25 @@
 /**
  * Tool Builder
- * Handles building MCP tool definitions from API routes
+ * 
+ * Builds MCP tool definitions from API routes.
+ * Transforms OpenAPI schemas into flat MCP tool input schemas,
+ * handling parameter flattening and schema normalization.
+ * 
+ * Features:
+ * - Converts API routes to MCP tool definitions
+ * - Flattens nested request body schemas to top-level properties
+ * - Merges query, header, and path parameters
+ * - Schema normalization via SchemaNormalizer
+ * - Bridge tool merging support
+ * - Tool naming convention (method_path_method)
+ * 
+ * Tool Schema Structure:
+ * - Flat input schema (all parameters at top level)
+ * - Normalized types (consistent schema format)
+ * - Required field tracking
+ * - Description and metadata preservation
+ * 
+ * @class ToolBuilder
  */
 
 const SchemaNormalizer = require('../utils/schema-normalizer');

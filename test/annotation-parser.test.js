@@ -1,4 +1,4 @@
-const AnnotationParser = require('../src/utils/annotation-parser');
+const AnnotationParser = require('../src/utils/parsers/annotation-parser');
 const fs = require('fs');
 
 describe('AnnotationParser', () => {

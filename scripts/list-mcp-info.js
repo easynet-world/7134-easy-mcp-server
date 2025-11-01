@@ -566,7 +566,7 @@ async function main() {
     console.error(`\n❌ Cannot connect to MCP server at ${options.host}:${options.port}`);
     console.error('\n💡 Make sure the MCP server is running:');
     console.error('   - Start the server: npm start');
-    console.error('   - Or: node src/app/server.js');
+    console.error('   - Or: node src/orchestrator.js');
     console.error(`   - Check MCP port in .env (EASY_MCP_SERVER_MCP_PORT, default: 8888)`);
     console.error(`   - Or specify port: npm run mcp:list -- --port 8888\n`);
     process.exit(1);

@@ -11,7 +11,7 @@ describe('Function-exported API handlers', () => {
   beforeAll(() => {
     app = express();
     app.use(express.json());
-    const APILoader = require('../src/core/api-loader');
+    const APILoader = require('../src/utils/loaders/api-loader');
     tempDir = path.join(__dirname, 'temp-fn-api');
     // Clean up any existing temp directory first
     if (fs.existsSync(tempDir)) {

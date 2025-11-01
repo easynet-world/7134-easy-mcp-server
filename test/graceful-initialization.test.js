@@ -3,7 +3,7 @@
  * Tests the enhanced BaseAPIEnhanced class with graceful error handling
  */
 
-const BaseAPIEnhanced = require('../src/lib/api/base-api-enhanced');
+const BaseAPIEnhanced = require('../src/api/base/base-api-enhanced');
 const express = require('express');
 const request = require('supertest');
 
@@ -210,7 +210,7 @@ describe('Graceful API Initialization', () => {
       const path = require('path');
       
       const failingApiCode = `
-const BaseAPIEnhanced = require('../../src/lib/api/base-api-enhanced');
+const BaseAPIEnhanced = require('../../src/api/base/base-api-enhanced');
 
 class FailingTestAPI extends BaseAPIEnhanced {
   async _initializeLLM() {
@@ -234,7 +234,7 @@ module.exports = FailingTestAPI;
       fs.writeFileSync(path.join(tempDir, 'get.js'), failingApiCode);
 
       // Create Express app with API loader
-      const APILoader = require('../src/core/api-loader');
+      const APILoader = require('../src/utils/loaders/api-loader');
       const apiLoader = new APILoader(app, path.join(__dirname, 'temp-api'));
 
       // Load APIs (should not crash server)
@@ -302,7 +302,7 @@ module.exports = FailingTestAPI;
     });
 
     test('should provide retry endpoint', async () => {
-      const APILoader = require('../src/core/api-loader');
+      const APILoader = require('../src/utils/loaders/api-loader');
       const apiLoader = new APILoader(app, null);
 
       // Mock a route with a processor that supports retry
@@ -392,7 +392,7 @@ module.exports = FailingTestAPI;
     });
 
     test('should handle retry endpoint errors', async () => {
-      const APILoader = require('../src/core/api-loader');
+      const APILoader = require('../src/utils/loaders/api-loader');
       const apiLoader = new APILoader(app, null);
 
       // Add retry endpoint
@@ -470,7 +470,7 @@ module.exports = FailingTestAPI;
 
   describe('Health Check Enhancement', () => {
     test('should show detailed API status in health check', async () => {
-      const APILoader = require('../src/core/api-loader');
+      const APILoader = require('../src/utils/loaders/api-loader');
       const apiLoader = new APILoader(app, null);
 
       // Mock routes with different statuses

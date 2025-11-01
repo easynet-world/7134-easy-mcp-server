@@ -6,10 +6,6 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
-[![Express Alternative](https://img.shields.io/badge/Express-Alternative-blue.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
-[![Convention-based](https://img.shields.io/badge/Convention-based-orange.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
-[![Hot Reload](https://img.shields.io/badge/Hot-Reload-red.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
-[![File Routing](https://img.shields.io/badge/File-Routing-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
 > **Enterprise Development Simplified**  
 > 
@@ -17,6 +13,29 @@
 > **easy-mcp-server**: Single function implementation → Complete API ecosystem with AI integration  
 > 
 > **Streamlined development workflow: Focus on business logic while the framework manages infrastructure.**
+
+---
+
+## Table of Contents
+
+- [Architectural Advantages](#architectural-advantages)
+- [Quick Start](#quick-start)
+- [Installation & Setup](#installation--setup)
+- [Core Features](#core-features)
+- [Project Structure](#project-structure)
+- [Framework Architecture](#framework-architecture)
+- [AI Integration (MCP Protocol)](#ai-integration-mcp-protocol)
+- [Development Features](#development-features)
+- [Configuration Management](#configuration-management)
+- [Server Architecture](#server-architecture)
+- [Source Code Structure](#source-code-structure)
+- [MCP Module Architecture](#mcp-module-architecture)
+- [Production Deployment](#production-deployment)
+- [Troubleshooting Guide](#troubleshooting-guide)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## **Architectural Advantages**
 
@@ -30,6 +49,8 @@
 | Legacy architecture patterns | ✅ **AI-Optimized** - Modern architectural approach |
 
 **Development Efficiency**: Traditional setup → easy-mcp-server = **Streamlined workflow**
+
+---
 
 ## **Quick Start**
 
@@ -47,7 +68,7 @@ npm install
 **What you get instantly:**
 - ✅ Working API endpoints (GET & POST examples)
 - ✅ AI integration (MCP) pre-configured
-- ✅ Beautiful landing page
+- ✅ Professional landing page
 - ✅ Complete documentation
 - ✅ Hot reload enabled
 - ✅ Scripts for easy server management (`start.sh`, `stop.sh`)
@@ -79,7 +100,7 @@ npm install easy-mcp-server
 
 # Create your first API endpoint
 mkdir -p api/users
-echo "const BaseAPI = require('easy-mcp-server/base-api');
+echo "const BaseAPI = require('easy-mcp-server/api/base-api');
 class GetUsers extends BaseAPI {
   process(req, res) {
     res.json({ users: [] });
@@ -91,31 +112,7 @@ module.exports = GetUsers;" > api/users/get.js
 npx easy-mcp-server
 ```
 
-**What `init` Creates:**
-- ✅ **Complete Project Structure**: All directories and files
-- ✅ **Example APIs**: GET and POST endpoints ready to use
-- ✅ **MCP Integration**: Prompts and resources configured
-- ✅ **Scripts**: `start.sh` and `stop.sh` for convenience
-- ✅ **Bridge Config**: `mcp-bridge.json` pre-configured
-- ✅ **Static Files**: Beautiful landing page included
-- ✅ **Tests**: Test suite template ready
-- ✅ **Documentation**: README with usage examples
-
-**Immediate Results:**
-- ✅ **REST API**: Example endpoints active
-- ✅ **AI Integration**: Auto-generated tools for AI agents
-- ✅ **Documentation**: OpenAPI specification generated
-- ✅ **Development**: Hot reload enabled
-- ✅ **MCP Protocol**: AI model integration ready
-
-## **Core Architecture Principles**
-
-| Principle | Implementation | Result |
-|-----------|----------------|--------|
-| **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
-| **HTTP Method Mapping** | `post.js` | `POST` method |
-| **Dynamic Routes** | `api/users/[id]/get.js` | `GET /users/:id` |
-| **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
+---
 
 ## **Installation & Setup**
 
@@ -145,42 +142,67 @@ EASY_MCP_SERVER_PORT=8887 npx easy-mcp-server
 
 ---
 
-## **AI Integration (MCP Protocol)**
+## **Core Features**
 
-### Enterprise AI Integration
-- **Traditional Approach**: AI models require manual API integration
-- **easy-mcp-server**: Automatic AI model discovery and API consumption
+### Core Architecture Principles
 
-### AI Resource Configuration
-```bash
-# Configure AI prompt templates
-mkdir -p mcp/prompts
-echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
+| Principle | Implementation | Result |
+|-----------|----------------|--------|
+| **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
+| **HTTP Method Mapping** | `post.js` | `POST` method |
+| **Dynamic Routes** | `api/users/[id]/get.js` | `GET /users/:id` |
+| **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
 
-# Setup AI resource documentation
-mkdir -p mcp/resources
-echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
+### File Structure Mapping
+
+```
+api/                    # API endpoints
+├── users/
+│   ├── get.js         # GET /users
+│   └── post.js          # POST /users
+└── products/
+    ├── get.js         # GET /products
+    ├── post.js        # POST /products
+    └── [id]/          # Dynamic route
+        └── get.js     # GET /products/:id
 ```
 
-**Outcome**: AI models gain access to your prompts and documentation resources.
+### Endpoint Export Options
 
-### **🔌 Native MCP Bridge Integration**
+You can define endpoints in three ways:
 
-**Built-in Zero-Config Bridge Support**: Connect to external MCP servers like Chrome DevTools and iTerm2 without any complex setup.
+1) Extend the `BaseAPI` class (recommended for OpenAPI and schema features):
+```javascript
+const BaseAPI = require('easy-mcp-server/api/base-api');
 
-**Chrome DevTools Operations** (via `chrome-devtools-mcp`):
-- 🌐 **Web Automation**: `new_page`, `navigate_page`, `click`, `fill`, `evaluate_script`
-- 📸 **Testing & Debugging**: `take_screenshot`, `take_snapshot`, `list_console_messages`
-- 🚦 **Performance**: `emulate_network`, `emulate_cpu`, `list_network_requests`
-- 🎨 **UI Inspection**: `hover`, `drag`, `handle_dialog`, `upload_file`
-- Plus 20+ additional browser automation capabilities
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+}
 
-**iTerm2 Terminal Operations** (via `iterm-mcp`):
-- 🖥️ **Terminal Control**: `write_to_terminal`, `read_terminal_output`, `send_control_character`
-- 🚀 **Deployment**: Automate CI/CD pipelines and server operations
-- 📝 **Monitoring**: Real-time log analysis and system diagnostics
+module.exports = GetUsers;
+```
 
-**Setup**: Just add `mcp-bridge.json` to your project (automatically included with `init`)
+2) Export a plain handler function:
+```javascript
+module.exports = (req, res) => {
+  res.json({ users: [] });
+};
+```
+
+3) Export an object with a `process(req, res)` method:
+```javascript
+module.exports = {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+};
+```
+
+**Notes:**
+- BaseAPI provides OpenAPI generation and annotation parsing; plain functions/objects will not auto-generate specs.
+- All forms are supported by the loader and mapped by file path and method name.
 
 ---
 
@@ -191,7 +213,7 @@ your-project/
 ├── api/                    # API endpoints
 │   ├── users/
 │   │   ├── get.js         # GET /users
-│   │   └── post.js        # POST /users
+│   │   └── post.js         # POST /users
 │   └── products/
 │       ├── get.js         # GET /products
 │       ├── post.js        # POST /products
@@ -215,60 +237,9 @@ your-project/
 
 > **💡 Quick Start**: Run `npx easy-mcp-server init my-project` to create this structure automatically!
 
-> **💡 Tip**: Dynamic routes with `[param]` syntax are **completely optional**! Most APIs work perfectly with just static routes like the users API shown above. See the [example-project](./example-project) for a working demonstration.
-
 ---
 
-## **Development Features**
-
-### Real-time Development
-- ✅ **API Files**: Instant detection of `api/**/*.js` file modifications
-- ✅ **Middleware**: Immediate application of `middleware.js` changes
-- ✅ **Prompts**: Real-time updates for `mcp/prompts/` file changes
-- ✅ **Resources**: Automatic reload of `mcp/resources/` modifications
-- ✅ **Environment**: Seamless `.env` file change detection
-- ✅ **MCP Bridge**: Automatic bridge restart on configuration changes
-
-### Development Benefits
-- 🔄 **Zero Restart**: Immediate change application
-- 📦 **Dependency Management**: Automatic installation of missing packages
-- 🚀 **Rapid Development**: Instant feedback loop
-- 🛡️ **Error Handling**: Graceful management of invalid configurations
-- 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
-
----
-
-## **Advanced Capabilities**
-
-### Enhanced API with AI Integration
-```javascript
-const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
-
-class MyEnhancedAPI extends BaseAPIEnhanced {
-  constructor() {
-    super('my-service', {
-      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
-    });
-  }
-
-  async process(req, res) {
-    // AI and utility services available
-    this.responseUtils.sendSuccessResponse(res, { data: 'Hello World' });
-  }
-}
-```
-
-### Middleware Management
-```javascript
-// api/middleware.js - Global middleware
-const authenticate = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-  next();
-};
-
-module.exports = [authenticate];
-```
+## **Framework Architecture**
 
 ### Automated Documentation Generation
 
@@ -313,132 +284,15 @@ class GetUser extends BaseAPI {
 | `array` | List of items | `"items": { "type": "array", "description": "List of products" }` |
 | `object` | Complex data structure | `"user": { "type": "object", "description": "User object" }` |
 
-**Supported Properties:**
-
-| Property | Purpose | Usage | Example |
-|----------|---------|-------|---------|
-| `type` | Data type (required) | Always specify | `"type": "string"` |
-| `description` | Human-readable description | Always recommended | `"description": "Product name"` |
-| `required` | Field requirement | Only set when `false` | `"required": false` |
-
 **Required Property Logic:**
-
 - ✅ **Default**: All fields are `required: true` by default
 - ✅ **Explicit False**: Only specify `"required": false` when field is optional
 - ✅ **Never Specify True**: Don't write `"required": true` (it's redundant)
 
-**Complete Example:**
-
-```javascript
-/**
- * @description Get users with optional filtering
- * @summary Retrieve user list
- * @query {
- *   "active": {
- *     "type": "boolean",
- *     "description": "Filter by active status",
- *     "required": false
- *   },
- *   "role": {
- *     "type": "string",
- *     "description": "Filter by user role",
- *     "enum": ["admin", "user"],
- *     "required": false
- *   }
- * }
- * @response {
- *   "users": {
- *     "type": "array",
- *     "description": "List of users"
- *   },
- *   "total": {
- *     "type": "integer",
- *     "description": "Total count"
- *   }
- * }
- */
-class GetUsers extends BaseAPI {
-  process(req, res) {
-    const { active, role } = req.query;
-    // Implementation...
-  }
-}
-```
-
----
-
-## **Framework Architecture**
-
-### Core Principles
-
-| Principle | Implementation | Result |
-|-----------|----------------|--------|
-| **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
-| **HTTP Method Mapping** | `post.js` | `POST` method |
-| **Dynamic Routes** | `api/users/[id]/get.js` | `GET /users/:id` |
-| **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
-
-### File Structure Mapping
-
-```
-api/                    # API endpoints
-├── users/
-│   ├── get.js         # GET /users
-│   └── post.js        # POST /users
-└── products/
-    ├── get.js         # GET /products
-    ├── post.js        # POST /products
-    └── [id]/          # Dynamic route
-        └── get.js     # GET /products/:id
-```
-
-### Endpoint Export Options
-
-You can define endpoints in three ways:
-
-1) Extend the `BaseAPI` class (recommended for OpenAPI and schema features):
-
-```javascript
-const BaseAPI = require('easy-mcp-server/base-api');
-
-class GetUsers extends BaseAPI {
-  process(req, res) {
-    // Your business logic here
-    res.json({ users: [] });
-  }
-}
-
-module.exports = GetUsers;
-```
-
-2) Export a plain handler function:
-
-```javascript
-// api/users/get.js
-module.exports = (req, res) => {
-  res.json({ users: [] });
-};
-```
-
-3) Export an object with a `process(req, res)` method:
-
-```javascript
-// api/users/get.js
-module.exports = {
-  process(req, res) {
-    res.json({ users: [] });
-  }
-};
-```
-
-Notes:
-- BaseAPI provides OpenAPI generation and annotation parsing; plain functions/objects will not auto-generate specs.
-- All forms are supported by the loader and mapped by file path and method name.
-
 ### Enhanced API with AI Integration
 
 ```javascript
-const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+const { BaseAPIEnhanced } = require('easy-mcp-server/api/base-api-enhanced');
 
 class MyEnhancedAPI extends BaseAPIEnhanced {
   constructor() {
@@ -453,27 +307,6 @@ class MyEnhancedAPI extends BaseAPIEnhanced {
   }
 }
 ```
-
----
-
-## **Development Workflow**
-
-### Real-time Development Features
-
-- ✅ **API Files**: Instant detection of `api/**/*.js` file modifications
-- ✅ **Middleware**: Immediate application of `middleware.js` changes
-- ✅ **Prompts**: Real-time updates for `mcp/prompts/` file changes
-- ✅ **Resources**: Automatic reload of `mcp/resources/` modifications
-- ✅ **Environment**: Seamless `.env` file change detection
-- ✅ **MCP Bridge**: Automatic bridge restart on configuration changes
-
-### Development Benefits
-
-- 🔄 **Zero Restart**: Immediate change application
-- 📦 **Dependency Management**: Automatic installation of missing packages
-- 🚀 **Rapid Development**: Instant feedback loop
-- 🛡️ **Error Handling**: Graceful management of invalid configurations
-- 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
 
 ### Middleware Management
 
@@ -490,13 +323,45 @@ module.exports = [authenticate];
 
 ---
 
-## **AI Agent Integration**
+## **AI Integration (MCP Protocol)**
 
-### Model Context Protocol (MCP) Integration
+### Enterprise AI Integration
+- **Traditional Approach**: AI models require manual API integration
+- **easy-mcp-server**: Automatic AI model discovery and API consumption
 
-easy-mcp-server provides native AI agent integration through the Model Context Protocol (MCP) 2024-11-05 standard. Every API endpoint automatically becomes an AI-callable tool.
+### AI Resource Configuration
 
-### Connection Setup
+```bash
+# Configure AI prompt templates
+mkdir -p mcp/prompts
+echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
+
+# Setup AI resource documentation
+mkdir -p mcp/resources
+echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
+```
+
+**Outcome**: AI models gain access to your prompts and documentation resources.
+
+### **🔌 Native MCP Bridge Integration**
+
+**Built-in Zero-Config Bridge Support**: Connect to external MCP servers like Chrome DevTools and iTerm2 without any complex setup.
+
+**Chrome DevTools Operations** (via `chrome-devtools-mcp`):
+- 🌐 **Web Automation**: `new_page`, `navigate_page`, `click`, `fill`, `evaluate_script`
+- 📸 **Testing & Debugging**: `take_screenshot`, `take_snapshot`, `list_console_messages`
+- 🚦 **Performance**: `emulate_network`, `emulate_cpu`, `list_network_requests`
+- 🎨 **UI Inspection**: `hover`, `drag`, `handle_dialog`, `upload_file`
+- Plus 20+ additional browser automation capabilities
+
+**iTerm2 Terminal Operations** (via `iterm-mcp`):
+- 🖥️ **Terminal Control**: `write_to_terminal`, `read_terminal_output`, `send_control_character`
+- 🚀 **Deployment**: Automate CI/CD pipelines and server operations
+- 📝 **Monitoring**: Real-time log analysis and system diagnostics
+
+**Setup**: Just add `mcp-bridge.json` to your project (automatically included with `init`)
+
+### MCP Connection Setup
 
 **WebSocket Connection:**
 ```
@@ -555,57 +420,24 @@ Content-Type: application/json
 }
 ```
 
-### AI Resource Configuration
-
-```bash
-# Configure AI prompt templates
-mkdir -p mcp/prompts
-echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
-
-# Setup AI resource documentation
-mkdir -p mcp/resources
-echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
-```
-
-**Outcome**: AI models gain access to your prompts and documentation resources.
-
 ---
 
-## **Production Deployment**
+## **Development Features**
 
-### Production Features
+### Real-time Development
+- ✅ **API Files**: Instant detection of `api/**/*.js` file modifications
+- ✅ **Middleware**: Immediate application of `middleware.js` changes
+- ✅ **Prompts**: Real-time updates for `mcp/prompts/` file changes
+- ✅ **Resources**: Automatic reload of `mcp/resources/` modifications
+- ✅ **Environment**: Seamless `.env` file change detection
+- ✅ **MCP Bridge**: Automatic bridge restart on configuration changes
 
-| Feature | Description |
-|---------|-------------|
-| **Auto Discovery** | Automatic loading of APIs and resources |
-| **AI Integration** | Complete AI model integration |
-| **Health Checks** | Built-in health monitoring |
-| **Graceful Degradation** | Server continues running even if some APIs fail |
-| **Error Recovery** | Automatic retry mechanism for failed initializations |
-
-### Deployment Configuration
-
-```bash
-# Production environment variables
-EASY_MCP_SERVER_PRODUCTION_MODE=true
-EASY_MCP_SERVER_LOG_LEVEL=info
-EASY_MCP_SERVER_QUIET=false
-```
-
-### Health Monitoring
-
-- ✅ **Server stays running** even if some APIs fail to initialize
-- ✅ **Failed APIs return 503** with helpful error messages
-- ✅ **Automatic retry mechanism** for failed initializations
-- ✅ **Enhanced health checks** showing API status
-
-### Static File Serving
-
-```bash
-# Create static files directory
-mkdir public
-echo '<h1>Hello World!</h1>' > public/index.html
-```
+### Development Benefits
+- 🔄 **Zero Restart**: Immediate change application
+- 📦 **Dependency Management**: Automatic installation of missing packages
+- 🚀 **Rapid Development**: Instant feedback loop
+- 🛡️ **Error Handling**: Graceful management of invalid configurations
+- 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
 
 ---
 
@@ -635,7 +467,7 @@ EASY_MCP_SERVER_CORS_CREDENTIALS=true
 
 # Static File Serving (auto-enabled if directory exists)
 EASY_MCP_SERVER_STATIC_DIRECTORY=./public
-EASY_MCP_SERVER_DEFAULT_FILE=index.html  # Default file at root (defaults to index.html)
+EASY_MCP_SERVER_DEFAULT_FILE=index.html
 
 # API Configuration
 EASY_MCP_SERVER_API_PATH=api
@@ -658,9 +490,6 @@ EASY_MCP_SERVER_SERVICE_NAME=easy-mcp-server
 EASY_MCP_SERVER_QUIET=false
 EASY_MCP_SERVER_PRODUCTION_MODE=false
 EASY_MCP_SERVER_TEST_MODE=false
-
-# MCP Info Customization
-EASY_MCP_SERVER_MCP_INFO_HTML_PATH=./custom-info.html
 ```
 
 #### **MCP Bridge Server Variables**
@@ -683,126 +512,11 @@ EASY_MCP_SERVER.slack.channel=#general
 # Chrome DevTools MCP Server
 EASY_MCP_SERVER.chrome.debug_port=9222
 EASY_MCP_SERVER.chrome.headless=true
-
-# Filesystem MCP Server
-EASY_MCP_SERVER.filesystem.root_path=/path/to/allowed/directory
-
-# PostgreSQL MCP Server
-EASY_MCP_SERVER.postgres.connection_string=postgresql://user:pass@localhost:5432/db
-EASY_MCP_SERVER.postgres.schema=public
-
-# Salesforce MCP Server
-EASY_MCP_SERVER.salesforce.client_id=your_client_id
-EASY_MCP_SERVER.salesforce.client_secret=your_client_secret
-EASY_MCP_SERVER.salesforce.username=your_username
-EASY_MCP_SERVER.salesforce.password=your_password
-EASY_MCP_SERVER.salesforce.security_token=your_security_token
-
-# Notion MCP Server
-EASY_MCP_SERVER.notion.api_key=secret_your_notion_api_key
-
-# Contentful MCP Server
-EASY_MCP_SERVER.contentful.space_id=your_space_id
-EASY_MCP_SERVER.contentful.access_token=your_access_token
 ```
-
-#### **Configuration Examples**
-
-**Basic Server Setup:**
-```bash
-export EASY_MCP_SERVER_PORT=8887
-export EASY_MCP_SERVER_HOST=0.0.0.0
-export EASY_MCP_SERVER_CORS_ORIGIN=*
-export EASY_MCP_SERVER_MCP_ENABLED=true
-```
-
-**GitHub Integration:**
-```bash
-export EASY_MCP_SERVER_BRIDGE_CONFIG_PATH=mcp-bridge.json
-export EASY_MCP_SERVER.github.token=ghp_your_token_here
-export EASY_MCP_SERVER.github.owner=your-org
-```
-
-**Multi-Service Setup:**
-```bash
-# Server
-export EASY_MCP_SERVER_PORT=8887
-export EASY_MCP_SERVER_MCP_ENABLED=true
-
-# GitHub
-export EASY_MCP_SERVER.github.token=ghp_xxx
-export EASY_MCP_SERVER.github.owner=my-org
-
-# Slack
-export EASY_MCP_SERVER.slack.token=xoxb-xxx
-export EASY_MCP_SERVER.slack.channel=#dev
-
-# Salesforce
-export EASY_MCP_SERVER.salesforce.client_id=xxx
-export EASY_MCP_SERVER.salesforce.client_secret=xxx
-export EASY_MCP_SERVER.salesforce.username=xxx
-export EASY_MCP_SERVER.salesforce.password=xxx
-export EASY_MCP_SERVER.salesforce.security_token=xxx
-```
-
-#### **Security Benefits**
-
-1. **Namespace Isolation**: Only `EASY_MCP_SERVER_` variables are processed
-2. **No Conflicts**: Won't interfere with other applications' environment variables
-3. **Clear Ownership**: Easy to identify which variables belong to Easy MCP Server
-4. **Centralized Management**: All configuration in one predictable namespace
-5. **Prevents Accidental Exposure**: Non-prefixed variables are ignored
 
 ### MCP Bridge Configuration
 
-**🔌 Native MCP Bridge Support**: `easy-mcp-server` includes built-in, zero-configuration MCP bridge support to connect to external MCP servers. Simply add a `mcp-bridge.json` file to your project to enable powerful integrations:
-
-#### **Browser Automation with Chrome DevTools**
-Automate Chrome for web testing, scraping, and UI debugging:
-
-```json
-{
-  "mcpServers": {
-    "chrome": {
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp"],
-      "description": "Chrome DevTools for browser automation"
-    }
-  }
-}
-```
-
-**Chrome Operations Available:**
-- 🌐 Web testing & automation
-- 📊 Performance analysis & debugging
-- 🎨 UI inspection & screenshot capture
-- 🔍 Web scraping & data extraction
-- 🚦 Network monitoring & request analysis
-
-#### **Terminal Automation with iTerm2**
-Automate system operations and terminal tasks:
-
-```json
-{
-  "mcpServers": {
-    "iterm2": {
-      "command": "npx",
-      "args": ["-y", "iterm-mcp"],
-      "description": "iTerm2 terminal automation"
-    }
-  }
-}
-```
-
-**iTerm2 Operations Available:**
-- 🖥️ System diagnostics & monitoring
-- 🚀 Deployment automation & CI/CD
-- 📝 Log analysis & debugging
-- ⚙️ Server management & configuration
-- 🔧 Development environment setup
-
-#### **Complete MCP Bridge Example**
-The `example-project` includes comprehensive MCP bridge configuration with Chrome, iTerm2, GitHub, Slack, PostgreSQL, and more:
+**Complete MCP Bridge Example:**
 
 ```json
 {
@@ -823,11 +537,6 @@ The `example-project` includes comprehensive MCP bridge configuration with Chrom
       "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "" },
       "description": "GitHub operations"
     },
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
-      "description": "File system operations"
-    },
     "postgres": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-postgres"],
@@ -841,6 +550,7 @@ The `example-project` includes comprehensive MCP bridge configuration with Chrom
 **💡 Pro Tip**: Use `"disabled": true` to temporarily disable servers without removing them from config.
 
 ### Static File Serving
+
 ```bash
 # Create static files directory
 mkdir public
@@ -849,9 +559,411 @@ echo '<h1>Hello World!</h1>' > public/index.html
 
 ---
 
+## **Server Architecture**
+
+### Server Implementations
+
+This project has **3 different server-related components** serving different purposes:
+
+#### 1. Server Orchestrator (`src/orchestrator.js`)
+**Type**: Procedural orchestrator (not a class)
+
+**Purpose**: Coordinates both API server and MCP server to provide a unified application server
+
+**Responsibilities:**
+- ✅ Express app initialization
+- ✅ Middleware setup (CORS, body parsing, static files)
+- ✅ API loading and routing
+- ✅ OpenAPI documentation endpoints
+- ✅ Integration with MCP server
+- ✅ Hot reloading support
+
+**Port**: `EASY_MCP_SERVER_PORT` (default: 8887)
+
+---
+
+#### 2. DynamicAPI Server (`src/api/api-server.js`)
+**Type**: Class-based wrapper (`DynamicAPIServer`)
+
+**Purpose**: Class-based Express server wrapper for REST API
+
+**Responsibilities:**
+- ✅ Express app wrapper
+- ✅ API loading and routing
+- ✅ OpenAPI specification generation
+- ✅ Health check endpoints
+- ✅ Hot reloading support
+- ✅ Static file serving
+- ✅ Optional features (LLM files, admin endpoints)
+
+**Usage:**
+```javascript
+const { DynamicAPIServer } = require('easy-mcp-server');
+const server = new DynamicAPIServer({
+  port: 8887,
+  apiPath: './api'
+});
+await server.start();
+```
+
+**Port**: `EASY_MCP_SERVER_PORT` (default: 8887)
+
+---
+
+#### 3. MCP Server (`src/mcp/mcp-server.js`)
+**Type**: Class-based MCP protocol server (`DynamicAPIMCPServer`)
+
+**Purpose**: Model Context Protocol server for AI model communication
+
+**Responsibilities:**
+- ✅ MCP protocol implementation (JSON-RPC 2.0)
+- ✅ WebSocket and HTTP transport
+- ✅ Tool execution (API endpoints as tools)
+- ✅ Prompt and resource management
+- ✅ Bridge integration (external MCP servers)
+- ✅ Metrics and health monitoring
+
+**Usage:**
+```javascript
+const { DynamicAPIMCPServer } = require('easy-mcp-server');
+const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888);
+await mcpServer.run();
+```
+
+**Port**: `EASY_MCP_SERVER_MCP_PORT` (default: 8888)
+
+---
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────┐
+│      Server Orchestrator (src/orchestrator.js)      │
+│  - Coordinates API & MCP servers                    │
+│  - Manages hot reloaders                           │
+│  - Handles MCP-specific endpoints                  │
+└──────────────┬──────────────────────────────────────┘
+               │
+               ├─────────────────┐
+               │                 │
+┌──────────────▼──────────┐   ┌──▼────────────────────┐
+│  DynamicAPIServer       │   │  DynamicAPIMCPServer │
+│  (REST API)             │   │  (MCP Protocol)       │
+│                         │   │                       │
+│  - Port 8887            │   │  - Port 8888          │
+│  - HTTP REST endpoints  │   │  - JSON-RPC 2.0       │
+│  - OpenAPI docs         │   │  - WebSocket/HTTP     │
+│  - /health, /docs       │   │  - tools/list/call    │
+│                         │   │  - prompts/resources  │
+└─────────────────────────┘   └───────────────────────┘
+```
+
+### Server Files Analysis
+
+All 4 server-related files are needed:
+
+1. **`easy-mcp-server.js`** (CLI Entry Point)
+   - **Purpose**: npm CLI entry point
+   - **Responsibilities**: `init` command, auto-detection, .env loading, dependency installation
+   - **Needed?**: ✅ **YES** - This is the npm package entry point
+
+2. **`orchestrator.js`** (Server Orchestrator)
+   - **Purpose**: Full-featured application server
+   - **Responsibilities**: Orchestrates REST + MCP, MCP-specific endpoints, hot reloaders
+   - **Needed?**: ✅ **YES** - Coordinates both servers
+
+3. **`api-server.js`** (REST API Server Class)
+   - **Purpose**: Class-based REST API server
+   - **Responsibilities**: Express wrapper, middleware, API loading, OpenAPI
+   - **Needed?**: ✅ **YES** - Used by `orchestrator.js` and programmatically
+
+4. **`mcp-server.js`** (MCP Protocol Server)
+   - **Purpose**: Model Context Protocol server (different protocol)
+   - **Responsibilities**: JSON-RPC 2.0, WebSocket, tools, prompts, resources
+   - **Needed?**: ✅ **YES** - Different protocol, different purpose
+
+**Conclusion**: All 4 are needed - each serves a distinct purpose with clear separation of concerns.
+
+---
+
+## **Source Code Structure**
+
+### Directory Organization
+
+```
+src/
+├── orchestrator.js        # Server orchestrator (coordinates API + MCP)
+├── easy-mcp-server.js     # CLI entry point
+├── index.js               # Module exports
+│
+├── api/                   # API core functionality
+│   ├── api-server.js      # API server class
+│   ├── base/              # Base API classes
+│   │   ├── base-api.js
+│   │   └── base-api-enhanced.js
+│   ├── openapi/           # OpenAPI generation
+│   │   ├── openapi-generator.js
+│   │   └── openapi-helper.js
+│   └── utils/             # API utilities
+│       └── api-response-utils.js
+│
+├── mcp/                   # MCP Server implementation
+│   ├── mcp-server.js      # Main MCP server class
+│   ├── index.js           # MCP module entry point
+│   ├── handlers/          # Request handlers
+│   │   ├── transport/     # Transport protocol handlers
+│   │   │   ├── http-handler.js
+│   │   │   └── websocket-handler.js
+│   │   └── content/       # Content management handlers
+│   │       ├── prompt-handler.js
+│   │       └── resource-handler.js
+│   ├── processors/        # Request processors
+│   │   ├── mcp-request-processor.js  # Main router
+│   │   └── domains/       # Domain-specific processors
+│   │       ├── tool-processor.js
+│   │       ├── prompt-processor.js
+│   │       ├── resource-processor.js
+│   │       └── system-processor.js
+│   ├── builders/          # Builders
+│   │   └── tool-builder.js
+│   ├── executors/         # Executors
+│   │   └── tool-executor.js
+│   └── utils/             # MCP utilities
+│       ├── mcp-bridge.js
+│       ├── mcp-cache-manager.js
+│       ├── mcp-schema-adapter.js
+│       └── schema-normalizer.js
+│
+├── utils/                 # Utility modules
+│   ├── llm/               # LLM utilities
+│   │   └── llm-service.js
+│   ├── loaders/           # Loader utilities
+│   │   ├── api-loader.js
+│   │   ├── env-hot-reloader.js
+│   │   ├── hot-reloader.js
+│   │   ├── mcp-bridge-reloader.js
+│   │   └── resource-loader.js
+│   ├── parsers/           # Parser utilities
+│   │   ├── annotation-parser.js
+│   │   └── parameter-template-parser.js
+│   ├── dev/               # Development utilities
+│   │   ├── package-detector.js
+│   │   └── package-installer.js
+│   ├── logger.js
+│   └── test-utils.js
+│
+└── templates/             # HTML templates
+    └── public-index.html
+```
+
+### Module Categories
+
+#### Server Orchestrator (`orchestrator.js`)
+- Main server orchestrator that coordinates REST API and MCP server
+
+#### API Core Layer (`api/`)
+- **`api-server.js`**: Class-based REST API server
+- **`base/`**: Base API classes for endpoints
+- **`openapi/`**: OpenAPI specification generation
+- **`utils/`**: API response utilities
+
+#### MCP Server (`mcp/`)
+- **`mcp-server.js`**: Main MCP server class
+- **`handlers/`**: Request handlers (transport and content)
+- **`processors/`**: Request processors (domain-specific)
+- **`builders/`**: Tool builders
+- **`executors/`**: Tool executors
+- **`utils/`**: MCP-specific utilities
+
+#### Utilities (`utils/`)
+- **`llm/`**: LLM service abstractions
+- **`loaders/`**: Dynamic loading utilities
+- **`parsers/`**: Parsing utilities (JSDoc, templates)
+- **`dev/`**: Development utilities
+
+### Module Dependencies
+
+```
+orchestrator.js
+  ├── api/api-server.js
+  ├── mcp/ (via index.js)
+  └── utils/loaders/*
+
+api/api-server.js
+  ├── utils/loaders/api-loader.js
+  └── api/openapi/openapi-generator.js
+
+api/base/base-api-enhanced.js
+  ├── api/base/base-api.js
+  ├── api/utils/api-response-utils.js
+  ├── utils/llm/llm-service.js
+  └── utils/loaders/resource-loader.js
+
+mcp/mcp-server.js
+  ├── mcp/handlers/* (transport and content)
+  ├── mcp/processors/*
+  ├── mcp/builders/*
+  ├── mcp/executors/*
+  └── mcp/utils/*
+```
+
+### Import Path Conventions
+
+1. **From `orchestrator.js`**: Use `./api/`, `./mcp/`, `./utils/`
+2. **From `api/`**: Use `../utils/` for utilities
+3. **From `mcp/`**: Use `./handlers/`, `./processors/`, `./utils/` for internal modules
+4. **From `utils/`**: Use `../api/` for API core, `../mcp/` for MCP modules
+
+---
+
+## **MCP Module Architecture**
+
+### Overview
+
+The MCP (Model Context Protocol) module follows a layered architecture:
+
+```
+Request → Handler → Processor → Executor
+          ↓           ↓          ↓
+      Transport   Protocol    Execution
+      (I/O)       (Business)   (Work)
+```
+
+### Component Roles
+
+#### 1. Handlers (Transport & Content Layer)
+
+**Transport Handlers** (`handlers/transport/`):
+- **`http-handler.js`**: Handles HTTP-based MCP requests (SSE, HTTP MCP, StreamableHttp)
+- **`websocket-handler.js`**: Manages WebSocket connections and message routing
+
+**Content Handlers** (`handlers/content/`):
+- **`prompt-handler.js`**: Loads and manages MCP prompts from filesystem
+- **`resource-handler.js`**: Loads and manages MCP resources from filesystem
+
+**Key Responsibilities:**
+- ✅ Protocol-level communication (HTTP, WebSocket)
+- ✅ Content management (filesystem operations, file watching)
+- ✅ Format conversion (WebSocket ↔ JSON-RPC)
+- ✅ Delegation to processors
+
+#### 2. Processors (Business Logic Layer)
+
+**Main Router** (`processors/mcp-request-processor.js`):
+- Routes MCP protocol requests to domain-specific processors
+
+**Domain Processors** (`processors/domains/`):
+- **`tool-processor.js`**: Handles tool-related requests (`tools/list`, `tools/call`)
+- **`prompt-processor.js`**: Handles prompt-related requests (`prompts/list`, `prompts/get`)
+- **`resource-processor.js`**: Handles resource-related requests (`resources/list`, `resources/read`, `resources/templates/list`)
+- **`system-processor.js`**: Handles system-related requests (`cache/stats`, `cache/clear`, `health`, `metrics`, `ping`)
+
+**Key Responsibilities:**
+- ✅ MCP protocol request processing
+- ✅ JSON-RPC response formatting
+- ✅ Error handling
+- ✅ Coordination between handlers, builders, and executors
+
+#### 3. Executors (Execution Layer)
+
+**`executors/tool-executor.js`**:
+- **Purpose**: Execute actual work - runs API endpoints and bridge tools
+- **Responsibilities**:
+  - ✅ Argument mapping (flat → nested structure)
+  - ✅ Create mock request/response objects
+  - ✅ Call actual API processor to execute code
+  - ✅ Handle bridge tool execution
+  - ✅ Format execution results
+
+**Key Methods:**
+- `executeAPIEndpoint()` - Executes an API route
+- `executeTool()` - Finds and executes a tool (API or bridge)
+
+#### 4. Builders
+
+**`builders/tool-builder.js`**:
+- **Purpose**: Construct MCP tool definitions from API routes
+- **Responsibilities**:
+  - ✅ Schema normalization
+  - ✅ Tool definition building
+  - ✅ Merges bridge tools
+
+#### 5. Utils
+
+**`utils/schema-normalizer.js`**:
+- Normalizes OpenAPI schemas for MCP compatibility
+- Handles nested schema flattening
+
+**`utils/mcp-cache-manager.js`**:
+- Manages MCP cache with hot reloading
+- Handles prompts and resources caching
+
+**`utils/mcp-bridge.js`**:
+- MCP bridge client for external MCP servers
+- Handles RPC communication with bridge servers
+
+**`utils/mcp-schema-adapter.js`**:
+- MCP schema adapter for tool parameter translation
+
+### Key Differences
+
+#### Handlers vs Processors vs Executors
+
+| Component | Layer | Purpose | Responsibility |
+|-----------|-------|---------|----------------|
+| **Handlers** | Transport/Content | Protocol I/O & Content Management | Receive requests, convert formats, manage filesystem |
+| **Processors** | Business Logic | Protocol Processing | Format responses, coordinate logic, error handling |
+| **Executors** | Execution | Actual Work | Execute tools, map arguments, format results |
+
+**Example Flow: `tools/call`**
+
+```
+1. HTTPHandler receives request
+   └─ Converts HTTP to JSON-RPC format
+
+2. MCPRequestProcessor routes to ToolProcessor
+   └─ ToolProcessor.processCallTool()
+
+3. ToolProcessor coordinates
+   ├─ ToolBuilder builds tool definition
+   └─ ToolExecutor executes the tool
+
+4. ToolExecutor runs code
+   └─ Calls route.processorInstance.process()
+
+5. Response flows back through layers
+   └─ Formatted as JSON-RPC response
+```
+
+### Architecture Best Practices
+
+1. **Handlers should only handle transport/content concerns**:
+   - Protocol parsing
+   - Format conversion
+   - Filesystem operations
+   - Delegation to processors
+
+2. **Processors should contain all business logic**:
+   - Request routing
+   - Domain-specific processing
+   - Error handling
+   - Response formatting
+
+3. **Executors should only execute**:
+   - Tool execution
+   - Argument transformation
+   - Result formatting
+
+4. **Avoid duplication**:
+   - If multiple transports need the same logic, it belongs in processors
+   - If multiple processors need the same logic, it belongs in executors or utils
+
+---
+
 ## **Production Deployment**
 
 ### Production Features
+
 | Feature | Description |
 |---------|-------------|
 | **Auto Discovery** | Automatic loading of APIs and resources |
@@ -861,6 +973,7 @@ echo '<h1>Hello World!</h1>' > public/index.html
 | **Error Recovery** | Automatic retry mechanism for failed initializations |
 
 ### Deployment Configuration
+
 ```bash
 # Production environment variables
 EASY_MCP_SERVER_PRODUCTION_MODE=true
@@ -869,6 +982,7 @@ EASY_MCP_SERVER_QUIET=false
 ```
 
 ### Health Monitoring
+
 - ✅ **Server stays running** even if some APIs fail to initialize
 - ✅ **Failed APIs return 503** with helpful error messages
 - ✅ **Automatic retry mechanism** for failed initializations

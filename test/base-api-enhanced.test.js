@@ -2,15 +2,15 @@
  * Tests for BaseAPIEnhanced
  */
 
-const BaseAPIEnhanced = require('../src/lib/api/base-api-enhanced');
+const BaseAPIEnhanced = require('../src/api/base/base-api-enhanced');
 
 // Mock dependencies
 jest.mock('../src/utils/logger');
-jest.mock('../src/lib/llm/llm-service');
-jest.mock('../src/utils/resource-loader');
+jest.mock('../src/utils/llm/llm-service');
+jest.mock('../src/utils/mcp/resource-loader');
 
 // Mock LLM service
-const { createLLMService } = require('../src/lib/llm/llm-service');
+const { createLLMService } = require('../src/utils/llm/llm-service');
 createLLMService.mockImplementation(() => ({
   initialize: jest.fn().mockResolvedValue(),
   generate: jest.fn().mockResolvedValue('Mock response'),

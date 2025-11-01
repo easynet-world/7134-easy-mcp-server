@@ -7,7 +7,7 @@ describe('Chrome DevTools MCP bridge - full tool coverage (mocked)', () => {
     jest.resetModules();
 
     // Mock the chrome bridge to expose a comprehensive toolset
-    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge.js');
+    const bridgeModulePath = require('path').resolve(__dirname, '../src/mcp/utils/mcp-bridge.js');
     jest.doMock(bridgeModulePath, () => {
       const toolList = [
         { name: 'navigate', inputSchema: { type: 'object', properties: { url: { type: 'string' } } } },
@@ -41,9 +41,9 @@ describe('Chrome DevTools MCP bridge - full tool coverage (mocked)', () => {
       };
     });
 
-    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge-reloader.js');
+    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/loaders/mcp-bridge-reloader.js');
     jest.doMock(reloaderModulePath, () => {
-      const MockBridge = require(require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge.js'));
+      const MockBridge = require(require('path').resolve(__dirname, '../src/mcp/utils/mcp-bridge.js'));
       return class MockReloader {
         ensureBridges() {
           return new Map([
@@ -54,7 +54,7 @@ describe('Chrome DevTools MCP bridge - full tool coverage (mocked)', () => {
     });
 
     DynamicAPIMCPServer = require('../src/mcp');
-    BridgeReloader = require('../src/utils/mcp/mcp-bridge-reloader');
+    BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
   });
 
   beforeEach(() => {

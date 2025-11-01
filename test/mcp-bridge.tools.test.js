@@ -12,7 +12,7 @@ describe('MCP Bridge tools exposure', () => {
     process.env.EASY_MCP_SERVER_BRIDGE_ENABLED = 'true';
 
     // Mock MCPBridge to return a list_tools result immediately
-    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge.js');
+    const bridgeModulePath = require('path').resolve(__dirname, '../src/mcp/utils/mcp-bridge.js');
     jest.doMock(bridgeModulePath, () => {
       return function MockBridge() {
         return {
@@ -34,7 +34,7 @@ describe('MCP Bridge tools exposure', () => {
     });
 
     // Mock MCPBridgeReloader to bypass NODE_ENV === 'test' stub and return our mock bridge
-    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge-reloader.js');
+    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/loaders/mcp-bridge-reloader.js');
     jest.doMock(reloaderModulePath, () => {
       const MockBridge = require(bridgeModulePath);
       return class MockReloader {
@@ -50,7 +50,7 @@ describe('MCP Bridge tools exposure', () => {
       };
     });
 
-    serverModule = require('../src/app/server');
+    serverModule = require('../src/orchestrator');
     app = serverModule.app;
   });
 

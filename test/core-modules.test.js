@@ -11,18 +11,18 @@ describe('Core Modules Integration', () => {
   describe('Module Loading', () => {
     test('should load all core modules without errors', () => {
       expect(() => {
-        require('../src/core/api-loader');
-        require('../src/core/openapi-generator');
-        require('../src/core/base-api');
-        require('../src/utils/hot-reloader');
-        require('../src/utils/annotation-parser');
+        require('../src/utils/loaders/api-loader');
+        require('../src/api/openapi/openapi-generator');
+        require('../src/api/base/base-api');
+        require('../src/utils/loaders/hot-reloader');
+        require('../src/utils/parsers/annotation-parser');
       }).not.toThrow();
     });
 
     test('should have consistent module structure', () => {
-      const APILoader = require('../src/core/api-loader');
-      const OpenAPIGenerator = require('../src/core/openapi-generator');
-      const BaseAPI = require('../src/core/base-api');
+      const APILoader = require('../src/utils/loaders/api-loader');
+      const OpenAPIGenerator = require('../src/api/openapi/openapi-generator');
+      const BaseAPI = require('../src/api/base/base-api');
       
       expect(typeof APILoader).toBe('function');
       expect(typeof OpenAPIGenerator).toBe('function');
@@ -34,8 +34,8 @@ describe('Core Modules Integration', () => {
     test('should handle circular dependencies gracefully', () => {
       // Test that modules can be required multiple times without issues
       expect(() => {
-        const loader1 = require('../src/core/api-loader');
-        const loader2 = require('../src/core/api-loader');
+        const loader1 = require('../src/utils/loaders/api-loader');
+        const loader2 = require('../src/utils/loaders/api-loader');
         expect(loader1).toBe(loader2); // Should be the same module instance
       }).not.toThrow();
     });

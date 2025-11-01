@@ -667,146 +667,30 @@ Creates new example data.
   const publicDir = path.join(projectDir, 'public');
   fs.mkdirSync(publicDir, { recursive: true });
   
-  const indexHtml = `<!DOCTYPE html>
+  // Read the HTML template from templates directory
+  const templatePath = path.join(__dirname, 'templates', 'public-index.html');
+  let indexHtml;
+  
+  if (fs.existsSync(templatePath)) {
+    // Read template and replace placeholders
+    indexHtml = fs.readFileSync(templatePath, 'utf8');
+    indexHtml = indexHtml.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
+  } else {
+    // Fallback: simple HTML if template not found
+    indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${projectName} - Easy MCP Server</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 800px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-    
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
-      font-size: 2.5em;
-    }
-    
-    .subtitle {
-      color: #666;
-      margin-bottom: 30px;
-      font-size: 1.2em;
-    }
-    
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .feature {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-    }
-    
-    .feature h3 {
-      color: #667eea;
-      margin-bottom: 10px;
-    }
-    
-    .links {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    
-    .link {
-      display: inline-block;
-      padding: 12px 24px;
-      background: #667eea;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
-    
-    .link:hover {
-      background: #764ba2;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    .status {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚀 ${projectName}</h1>
-    <p class="subtitle">Powered by Easy MCP Server</p>
-    
-    <div class="features">
-      <div class="feature">
-        <h3>📡 REST API</h3>
-        <p>File-based routing with automatic endpoint discovery</p>
-      </div>
-      
-      <div class="feature">
-        <h3>🤖 MCP Integration</h3>
-        <p>Native AI agent support with Model Context Protocol</p>
-      </div>
-      
-      <div class="feature">
-        <h3>🔄 Hot Reload</h3>
-        <p>Real-time updates during development</p>
-      </div>
-      
-      <div class="feature">
-        <h3>📚 Auto Documentation</h3>
-        <p>OpenAPI spec and Swagger UI automatically generated</p>
-      </div>
-    </div>
-    
-    <div class="links">
-      <a href="/docs" class="link">📖 API Documentation</a>
-      <a href="/openapi.json" class="link">📄 OpenAPI Spec</a>
-      <a href="/health" class="link">❤️ Health Check</a>
-      <a href="/example" class="link">🧪 Example API</a>
-    </div>
-    
-    <div class="status">
-      <strong>✅ Server Status:</strong> Running
-      <br>
-      <strong>🔌 MCP Server:</strong> Enabled
-      <br>
-      <strong>⚡ Hot Reload:</strong> Active
-    </div>
-  </div>
+  <h1>${projectName}</h1>
+  <p>Powered by Easy MCP Server</p>
+  <p><a href="/docs">API Documentation</a></p>
 </body>
-</html>
-`;
+</html>`;
+  }
   
   fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtml);
   
@@ -932,7 +816,7 @@ let envHotReloader = null;
 // Initialize env hot reloader
 function initializeEnvHotReloader() {
   try {
-    const EnvHotReloader = require('./utils/env-hot-reloader');
+    const EnvHotReloader = require('./utils/loaders/env-hot-reloader');
     envHotReloader = new EnvHotReloader({
       debounceDelay: 1000,
       onReload: () => {
@@ -1061,7 +945,7 @@ async function startServer() {
       // process.chdir(mainProjectPath);
       
       // Import and start the server directly
-      const serverPath = path.join(mainProjectPath, 'src', 'app', 'server.js');
+      const serverPath = path.join(mainProjectPath, 'src', 'orchestrator.js');
       const serverModule = require(serverPath);
       
       // Manually start the server since we're requiring it, not running it directly

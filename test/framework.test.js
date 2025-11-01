@@ -38,15 +38,15 @@ describe('Framework Functionality', () => {
   describe('Framework Initialization', () => {
     test('should initialize without errors', () => {
       expect(() => {
-        require('../src/core/api-loader');
-        require('../src/core/openapi-generator');
-        require('../src/utils/hot-reloader');
+        require('../src/utils/loaders/api-loader');
+        require('../src/api/openapi/openapi-generator');
+        require('../src/utils/loaders/hot-reloader');
       }).not.toThrow();
     });
 
     test('should export expected modules', () => {
-      const APILoader = require('../src/core/api-loader');
-      const OpenAPIGenerator = require('../src/core/openapi-generator');
+      const APILoader = require('../src/utils/loaders/api-loader');
+      const OpenAPIGenerator = require('../src/api/openapi/openapi-generator');
       
       expect(typeof APILoader).toBe('function');
       expect(typeof OpenAPIGenerator).toBe('function');

@@ -17,8 +17,8 @@
     "./utils/openapi-helper": "./src/utils/api/openapi-helper.js"
   },
   "scripts": {
-    "start": "node src/app/server.js",
-    "dev": "nodemon src/app/server.js",
+    "start": "node src/orchestrator.js",
+    "dev": "nodemon src/orchestrator.js",
     "test": "jest",
     "mcp:list": "node scripts/list-mcp-info.js",
     "lint": "eslint . --ext .js",

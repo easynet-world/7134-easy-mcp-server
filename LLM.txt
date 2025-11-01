@@ -188,7 +188,7 @@ module.exports = CreateUser;
 
 ### BaseAPIEnhanced with LLM Services
 ```javascript
-const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+const { BaseAPIEnhanced } = require('easy-mcp-server/api/base-api-enhanced');
 
 class AIEnhancedAPI extends BaseAPIEnhanced {
   constructor() {
