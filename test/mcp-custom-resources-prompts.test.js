@@ -110,19 +110,22 @@ paths:
       expect(configResource).toBeDefined();
       expect(configResource.name).toBe('Custom API Configuration');
       expect(configResource.description).toBe('User-defined API configuration settings');
-      expect(configResource.mimeType).toBe('application/json');
+      // MIME type may include charset parameter
+      expect(configResource.mimeType).toMatch(/^application\/json(;|$)/);
 
       // Check user-guide.md
       const guideResource = resources.find(r => r.uri === 'resource://user-guide.md');
       expect(guideResource).toBeDefined();
       expect(guideResource.name).toBe('user-guide');
-      expect(guideResource.mimeType).toBe('text/markdown');
+      // MIME type may include charset parameter
+      expect(guideResource.mimeType).toMatch(/^text\/markdown(;|$)/);
 
       // Check api-schema.yaml
       const schemaResource = resources.find(r => r.uri === 'resource://api-schema.yaml');
       expect(schemaResource).toBeDefined();
       expect(schemaResource.name).toBe('Custom API Schema');
-      expect(schemaResource.mimeType).toBe('application/x-yaml');
+      // MIME type may include charset parameter
+      expect(schemaResource.mimeType).toMatch(/^application\/x-yaml(;|$)/);
     });
 
     test('should display custom resources with template parameters', async () => {
@@ -179,7 +182,8 @@ paths:
       
       const content = readResponse.result.contents[0];
       expect(content.uri).toBe('resource://template-config.json');
-      expect(content.mimeType).toBe('application/json');
+      // MIME type may include charset parameter
+      expect(content.mimeType).toMatch(/^application\/json(;|$)/);
       
       // Parse the processed content to verify template substitution
       const processedData = JSON.parse(content.text);
