@@ -9,7 +9,12 @@ const path = require('path');
 try { 
   require('ts-node').register({ 
     transpileOnly: true,
-    project: path.join(__dirname, '..', 'tsconfig.json')
+    project: path.join(__dirname, '..', 'tsconfig.json'),
+    ignore: ['(?:^|/)test/'],
+    compilerOptions: {
+      skipLibCheck: true,
+      skipDefaultLibCheck: true
+    }
   }); 
 } catch (_) { /* optional at runtime/tests */ }
 const { apiSpecTs } = require('../utils/api/openapi-helper');
