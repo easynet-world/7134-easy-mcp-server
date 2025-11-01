@@ -8,7 +8,7 @@
   },
   "exports": {
     ".": "./index.js",
-    "./base-api": "./src/core/base-api.js",
+    "./base-api": "./src/api/base/base-api.js",
     "./lib/api-response-utils": "./src/lib/api/api-response-utils.js",
     "./lib/base-api-enhanced": "./src/lib/api/base-api-enhanced.js",
     "./lib/llm-service": "./src/lib/llm/llm-service.js",

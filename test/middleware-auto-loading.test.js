@@ -107,7 +107,7 @@ const BaseAPI = require('easy-mcp-server/base-api');
 
 class TestAPI extends BaseAPI {
   process(req, res) {
-    res.json({ 
+    res.json({
       message: 'Hello World',
       timestamp: req.timestamp,
       user: req.user || null
@@ -153,7 +153,7 @@ module.exports = TestAPI;
       // Create API files for testing
       fs.mkdirSync(path.join(tempDir, 'api', 'users'), { recursive: true });
       fs.mkdirSync(path.join(tempDir, 'api', 'admin'), { recursive: true });
-      
+
       // Create root API
       const rootAPI = `
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -164,7 +164,7 @@ class RootAPI extends BaseAPI {
 }
 module.exports = RootAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
-      
+
       // Create users API
       const usersAPI = `
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -175,7 +175,7 @@ class UsersAPI extends BaseAPI {
 }
 module.exports = UsersAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
-      
+
       // Create admin API
       const adminAPI = `
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -186,10 +186,10 @@ class AdminAPI extends BaseAPI {
 }
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
-      
+
       // Use the existing APILoader instance and reload APIs
       apiLoader.loadAPIs();
-      
+
       const routes = apiLoader.getRoutes();
       expect(routes).toHaveLength(3);
       expect(routes.find(r => r.path === '/')).toBeDefined();
@@ -218,7 +218,7 @@ module.exports = "invalid middleware";
       // Create API files for testing
       fs.mkdirSync(path.join(tempDir, 'api', 'users'), { recursive: true });
       fs.mkdirSync(path.join(tempDir, 'api', 'admin'), { recursive: true });
-      
+
       // Create root API
       const rootAPI = `
 const BaseAPI = require('easy-mcp-server/base-api');
@@ -229,14 +229,14 @@ class RootAPI extends BaseAPI {
 }
 module.exports = RootAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), rootAPI);
-      
+
       // Use the existing APILoader instance and reload APIs
       apiLoader.loadAPIs();
-      
+
       const response = await request(app)
         .get('/')
         .expect(200);
-      
+
       expect(response.body.timestamp).toBeDefined();
     });
 
@@ -251,21 +251,21 @@ class UsersAPI extends BaseAPI {
 }
 module.exports = UsersAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'users', 'get.js'), usersAPI);
-      
+
       // Use the existing APILoader instance and reload APIs
       apiLoader.loadAPIs();
-      
+
       // Should fail without authentication
       await request(app)
         .get('/users')
         .expect(401);
-      
+
       // Should succeed with authentication
       const response = await request(app)
         .get('/users')
         .set('Authorization', 'Bearer valid-token')
         .expect(200);
-      
+
       expect(response.body.user).toBeDefined();
       expect(response.body.user.id).toBe(1);
     });
@@ -281,15 +281,15 @@ class AdminAPI extends BaseAPI {
 }
 module.exports = AdminAPI;`;
       fs.writeFileSync(path.join(tempDir, 'api', 'admin', 'get.js'), adminAPI);
-      
+
       // Use the existing APILoader instance and reload APIs
       apiLoader.loadAPIs();
-      
+
       // Should fail without authentication (admin middleware returns 403)
       await request(app)
         .get('/admin')
         .expect(403);
-      
+
       // Should fail with user authentication (not admin)
       await request(app)
         .get('/admin')
@@ -304,7 +304,7 @@ const BaseAPI = require('easy-mcp-server/base-api');
 
 class TestAPI extends BaseAPI {
   process(req, res) {
-    res.json({ 
+    res.json({
       message: 'Hello World',
       timestamp: req.timestamp,
       user: req.user || null
@@ -315,15 +315,15 @@ class TestAPI extends BaseAPI {
 module.exports = TestAPI;
 `;
       fs.writeFileSync(path.join(tempDir, 'api', 'get.js'), testAPI);
-      
+
       // Use the existing APILoader instance and reload APIs
       apiLoader.loadAPIs();
-      
+
       // Global middleware should add timestamp
       const response = await request(app)
         .get('/')
         .expect(200);
-      
+
       expect(response.body.timestamp).toBeDefined();
       expect(response.body.user).toBeNull(); // No user middleware on root
     });
@@ -391,7 +391,7 @@ module.exports = TestAPI;
       // Create API directory without middleware
       const noMiddlewareDir = path.join(tempDir, 'no-middleware');
       fs.mkdirSync(noMiddlewareDir, { recursive: true });
-      
+
       const testAPI = `
 const BaseAPI = require('easy-mcp-server/base-api');
 class TestAPI extends BaseAPI {
@@ -400,11 +400,11 @@ class TestAPI extends BaseAPI {
 module.exports = TestAPI;
 `;
       fs.writeFileSync(path.join(noMiddlewareDir, 'get.js'), testAPI);
-      
+
       const testApp = express();
       const testLoader = new APILoader(testApp, noMiddlewareDir);
       const routes = testLoader.loadAPIs();
-      
+
       expect(routes).toHaveLength(1);
       expect(testLoader.getMiddleware()).toHaveLength(0);
     });
