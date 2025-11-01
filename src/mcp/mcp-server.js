@@ -913,10 +913,10 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processListTools() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processListTools(data) {
-    return this.mcpRequestProcessor.processListTools(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'tools/list' });
   }
 
   /**
@@ -1337,7 +1337,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processListPrompts() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processListPrompts(data) {
     if (!this.mcpRequestProcessor) {
@@ -1352,7 +1352,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processListPrompts(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'prompts/list' });
   }
   
   /**
@@ -1398,7 +1398,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processGetPrompt() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processGetPrompt(data) {
     if (!this.mcpRequestProcessor) {
@@ -1413,7 +1413,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processGetPrompt(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'prompts/get' });
   }
   
   /**
@@ -1480,7 +1480,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processListResources() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processListResources(data) {
     if (!this.mcpRequestProcessor) {
@@ -1495,7 +1495,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processListResources(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'resources/list' });
   }
   
   /**
@@ -1642,10 +1642,10 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processListResourceTemplates() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processListResourceTemplates(data) {
-    return this.mcpRequestProcessor.processListResourceTemplates(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'resources/templates/list' });
   }
   
   /**
@@ -1687,7 +1687,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processReadResource() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processReadResource(data) {
     if (!this.mcpRequestProcessor) {
@@ -1702,7 +1702,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processReadResource(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'resources/read' });
   }
   
   /**
@@ -1964,10 +1964,10 @@ class DynamicAPIMCPServer {
    * Process cache/stats request
    */
   /**
-   * @deprecated Use this.mcpRequestProcessor.processCacheStats() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processCacheStats(data) {
-    return this.mcpRequestProcessor.processCacheStats(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'cache/stats' });
   }
   
   /**
@@ -2002,10 +2002,10 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processCacheClear() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processCacheClear(data) {
-    return this.mcpRequestProcessor.processCacheClear(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'cache/clear' });
   }
   
   /**
@@ -2039,7 +2039,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processHealth() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processHealth(data) {
     if (!this.mcpRequestProcessor) {
@@ -2054,7 +2054,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processHealth(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'health' });
   }
   
   /**
@@ -2105,7 +2105,7 @@ class DynamicAPIMCPServer {
   }
 
   /**
-   * @deprecated Use this.mcpRequestProcessor.processMetrics() instead
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
    */
   async processMetrics(data) {
     if (!this.mcpRequestProcessor) {
@@ -2120,7 +2120,7 @@ class DynamicAPIMCPServer {
         handleError: this.handleError.bind(this)
       });
     }
-    return this.mcpRequestProcessor.processMetrics(data);
+    return this.mcpRequestProcessor.processMCPRequest({ ...data, method: 'metrics' });
   }
   
   /**
