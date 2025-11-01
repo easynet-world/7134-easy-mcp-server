@@ -2,7 +2,12 @@ require('dotenv').config();
 // Enable TypeScript API loading (compile TS only, ignore JS)
 const path = require('path');
 try {
-  const runtimeConfigPath = path.join(__dirname, '..', 'tsconfig.runtime.json');
+  const runtimeConfigPath = path.resolve(__dirname, '..', 'tsconfig.runtime.json');
+  // Verify config file exists
+  const fs = require('fs');
+  if (!fs.existsSync(runtimeConfigPath)) {
+    console.warn(`⚠️  tsconfig.runtime.json not found at ${runtimeConfigPath}`);
+  }
   require('ts-node').register({ 
     transpileOnly: true, 
     project: runtimeConfigPath,
@@ -14,9 +19,14 @@ try {
       skipDefaultLibCheck: true,
       typeRoots: [],
       types: []
-    } 
+    }
   });
-} catch (_) { /* optional */ }
+} catch (err) { 
+  // Log the error for debugging but don't fail
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn('⚠️  ts-node registration failed:', err.message);
+  }
+}
 const express = require('express');
 const cors = require('cors');
 
