@@ -112,7 +112,6 @@
     "src/",
     "scripts/",
     "README.md",
-    "CHANGELOG.md",
     "types/"
   ],
   "publishConfig": {
