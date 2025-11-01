@@ -328,8 +328,10 @@ class OpenAPIGenerator {
    */
   generateServers() {
     const port = process.env.EASY_MCP_SERVER_PORT || 8887;
-    const host = process.env.EASY_MCP_SERVER_HOST || 'localhost';
-    
+    // Always use localhost for OpenAPI spec, even if server binds to 0.0.0.0
+    // This is the URL clients will use to access the API
+    const host = 'localhost';
+
     return [
       {
         url: `http://${host}:${port}`,

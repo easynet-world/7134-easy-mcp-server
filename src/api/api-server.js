@@ -55,6 +55,7 @@ class DynamicAPIServer {
     this.llmContextFiles = options.llmContextFiles !== false;
     this.adminEndpoints = options.adminEndpoints !== false;
     this.docsConfig = options.docsConfig || {};
+    this.apisLoaded = false;
     
     // Create Express app
     this.app = express();
@@ -74,13 +75,17 @@ class DynamicAPIServer {
     this.apiLoader = new APILoader(this.app, this.apiPath);
     this.openapiGenerator = new OpenAPIGenerator(this.apiLoader);
     
+    // Ensure APIs load immediately so metadata endpoints have data before start()
+    this.ensureApisLoaded();
+    
     // Setup routes
     this._setupRoutes();
     
     // Initialize hot reloader if enabled
     if (this.hotReload && this.apiPath) {
       this.hotReloader = new HotReloader(this.apiPath, () => {
-        this.apiLoader.reload();
+        this.apiLoader.reloadAPIs();
+        this.apisLoaded = true;
       });
     }
     
@@ -365,8 +370,8 @@ class DynamicAPIServer {
   async start() {
     return new Promise((resolve, reject) => {
       try {
-        // Load APIs before starting the server
-        this.apiLoader.loadAPIs();
+        // Ensure APIs are loaded before starting the server
+        this.ensureApisLoaded();
         
         this.server = this.app.listen(this.port, this.host, { family: 4 }, () => {
           console.log(`🚀 Easy MCP Server running on ${this.host}:${this.port}`);
@@ -405,7 +410,8 @@ class DynamicAPIServer {
   // Method to reload APIs
   reload() {
     if (this.apiLoader) {
-      this.apiLoader.reload();
+      this.apiLoader.reloadAPIs();
+      this.apisLoaded = true;
     }
   }
   
@@ -417,6 +423,14 @@ class DynamicAPIServer {
   // Get OpenAPI generator for external access
   getOpenAPIGenerator() {
     return this.openapiGenerator;
+  }
+  
+  // Ensure APIs have been loaded at least once (helps tests/metadata endpoints)
+  ensureApisLoaded() {
+    if (this.apiLoader && !this.apisLoaded) {
+      this.apiLoader.loadAPIs();
+      this.apisLoaded = true;
+    }
   }
   
   // Add custom route (for extensions)
