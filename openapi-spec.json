@@ -1,0 +1,108 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Easy MCP Server API",
+    "version": "1.0.111",
+    "description": "A dynamic API framework with easy MCP (Model Context Protocol) integration for AI models. Includes LLM.txt support for AI model context.",
+    "contact": {
+      "name": "API Support",
+      "url": "https://github.com/easynet-world/easy-mcp-server"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "externalDocs": {
+      "description": "LLM.txt - AI Model Context",
+      "url": "/LLM.txt"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8887",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "success",
+          "error",
+          "timestamp"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false,
+            "description": "Operation success status"
+          },
+          "error": {
+            "type": "string",
+            "example": "Error message",
+            "description": "Error description"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Error timestamp"
+          }
+        }
+      },
+      "Success": {
+        "type": "object",
+        "required": [
+          "success",
+          "timestamp"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true,
+            "description": "Operation success status"
+          },
+          "data": {
+            "type": "object",
+            "description": "Response data"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Response timestamp"
+          }
+        }
+      },
+      "APIResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Operation success status"
+          },
+          "data": {
+            "type": "object",
+            "description": "Response data"
+          },
+          "message": {
+            "type": "string",
+            "description": "Response message"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Response timestamp"
+          }
+        }
+      }
+    },
+    "securitySchemes": {}
+  },
+  "tags": [
+    {
+      "name": "api",
+      "description": "Dynamic API endpoints"
+    }
+  ]
+}

@@ -20,6 +20,11 @@
     "start": "node src/orchestrator.js",
     "dev": "nodemon src/orchestrator.js",
     "test": "jest",
+    "test:validation": "jest --testPathPattern=validation",
+    "test:validation:openapi": "jest test/validation-openapi-compliance.test.js",
+    "test:validation:mcp": "jest test/validation-mcp-static.test.js test/validation-mcp-runtime.test.js",
+    "test:validation:mcp:static": "jest test/validation-mcp-static.test.js",
+    "test:validation:mcp:runtime": "jest test/validation-mcp-runtime.test.js",
     "mcp:list": "node scripts/list-mcp-info.js",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
@@ -30,7 +35,12 @@
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run",
     "release:check": "semantic-release --dry-run --no-ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:openapi": "node scripts/validate-openapi.js",
+    "validate:mcp": "node scripts/validate-mcp.js",
+    "validate:mcp:static": "node scripts/validate-mcp-static.js",
+    "validate:all": "npm run validate:openapi && npm run validate:mcp:static",
+    "validate": "npm run validate:all"
   },
   "dependencies": {
     "chokidar": "^3.5.3",

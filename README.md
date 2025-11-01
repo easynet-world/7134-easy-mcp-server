@@ -1353,6 +1353,103 @@ node scripts/list-mcp-info.js --transport ws
 
 ---
 
+### Validation Tools
+
+easy-mcp-server includes comprehensive validation tools to ensure compliance with OpenAPI 3.0 and MCP 2024-11-05 specifications.
+
+#### Quick Validation
+
+```bash
+# Validate everything (recommended)
+npm run validate
+
+# Validate OpenAPI specification
+npm run validate:openapi
+
+# Validate MCP implementation (static analysis)
+npm run validate:mcp:static
+
+# Validate MCP implementation (runtime, requires running server)
+npm run validate:mcp
+```
+
+#### OpenAPI Validator
+
+Validates that generated API specifications comply with OpenAPI 3.0.0 standards.
+
+```bash
+# Validate default API path
+npm run validate:openapi
+
+# Validate custom API path
+node scripts/validate-openapi.js /path/to/api
+```
+
+**What it validates:**
+- ✅ Required fields (openapi, info, paths)
+- ✅ OpenAPI version compliance
+- ✅ Path parameter consistency
+- ✅ Response object structure
+- ✅ Schema definitions
+- ✅ Operation uniqueness
+
+**Output:**
+```
+✅ Perfect! OpenAPI specification is fully compliant with OpenAPI 3.0 standards.
+
+Specification saved to: openapi-spec.json
+```
+
+#### MCP Validator (Static)
+
+Analyzes code structure to verify MCP protocol compliance (no server required).
+
+```bash
+npm run validate:mcp:static
+```
+
+**What it validates:**
+- ✅ JSON-RPC 2.0 protocol usage
+- ✅ Required MCP methods (tools, prompts, resources)
+- ✅ Error code standards
+- ✅ Response format compliance
+- ✅ Domain processor architecture
+- ✅ Notification support
+
+**Result:** 100% MCP 2024-11-05 Specification Compliance
+
+#### MCP Validator (Runtime)
+
+Tests actual MCP requests and responses (requires running server).
+
+```bash
+# Start server first
+cd example-project && ./start.sh
+
+# Then validate
+npm run validate:mcp
+```
+
+**What it tests:**
+- ✅ tools/list, tools/call
+- ✅ prompts/list, prompts/get
+- ✅ resources/list, resources/read
+- ✅ Error handling
+- ✅ JSON-RPC 2.0 compliance
+
+#### Detailed Documentation
+
+For complete validation documentation, see [docs/VALIDATION.md](docs/VALIDATION.md)
+
+**Topics covered:**
+- Validation tool usage
+- CI/CD integration
+- Troubleshooting guide
+- Best practices
+- Compliance reports
+
+---
+
 ## **Changelog**
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
