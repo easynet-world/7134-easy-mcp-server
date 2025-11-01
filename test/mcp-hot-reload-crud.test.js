@@ -234,7 +234,8 @@ This is a test resource with some content.
       expect(resource.name).toBe('test-resource');
       expect(resource.uri).toBe('resource://test-resource.md');
       expect(resource.content).toContain('Test Resource');
-      expect(resource.mimeType).toBe('text/markdown');
+      // MIME type may include charset parameter
+      expect(resource.mimeType).toMatch(/^text\/markdown(;|$)/);
     });
 
     test('should UPDATE existing resource file and reload it via hot reload', async () => {
