@@ -4,14 +4,7 @@ const path = require('path');
 try {
   require('ts-node').register({ 
     transpileOnly: true, 
-    project: path.join(__dirname, '..', 'tsconfig.json'),
-    skipIgnore: false,
-    ignore: [
-      /.*\/test\/.*/,
-      /.*\/__tests__\/.*/,
-      /.*\.test\.ts$/,
-      /.*\.spec\.ts$/
-    ],
+    project: path.join(__dirname, '..', 'tsconfig.runtime.json'),
     compilerOptions: { 
       allowJs: false, 
       module: 'commonjs', 
