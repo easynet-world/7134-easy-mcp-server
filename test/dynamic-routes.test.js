@@ -100,7 +100,7 @@ describe('Dynamic Routes', () => {
     fs.mkdirSync(testPath, { recursive: true });
 
     // Create a test API file using absolute path for BaseAPI
-    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'base-api-enhanced.js');
+    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'api', 'base-api-enhanced.js');
     const apiContent = `
 const BaseAPI = require('${baseApiPath.replace(/\\/g, '\\\\')}');
 
@@ -136,7 +136,7 @@ module.exports = TestAPI;
     fs.mkdirSync(testPath, { recursive: true });
 
     // Create a test API file using absolute path for BaseAPI
-    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'base-api-enhanced.js');
+    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'api', 'base-api-enhanced.js');
     const apiContent = `
 const BaseAPI = require('${baseApiPath.replace(/\\/g, '\\\\')}');
 
@@ -241,7 +241,7 @@ module.exports = TestAPI;
     fs.mkdirSync(testPath, { recursive: true });
 
     // Create a test API file using absolute path for BaseAPI
-    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'base-api-enhanced.js');
+    const baseApiPath = path.join(__dirname, '..', 'src', 'lib', 'api', 'base-api-enhanced.js');
     const apiContent = `
 const BaseAPI = require('${baseApiPath.replace(/\\/g, '\\\\')}');
 
