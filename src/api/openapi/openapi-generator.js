@@ -288,11 +288,17 @@ class OpenAPIGenerator {
     const fs = require('fs');
 
     // Resolve package.json from the root of the project
+    // Try multiple paths to ensure it works in different environments
     let packageJson = { version: '1.0.0' }; // Default fallback
     try {
-      const packagePath = path.resolve(__dirname, '../../package.json');
+      // Try relative path from this file
+      let packagePath = path.resolve(__dirname, '../../package.json');
+      if (!fs.existsSync(packagePath)) {
+        // Try from process.cwd() for test environments
+        packagePath = path.join(process.cwd(), 'package.json');
+      }
       if (fs.existsSync(packagePath)) {
-        packageJson = require(packagePath);
+        packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
       }
     } catch (error) {
       // Use fallback version if package.json cannot be loaded

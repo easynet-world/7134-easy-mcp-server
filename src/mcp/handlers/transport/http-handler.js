@@ -31,11 +31,17 @@ class HTTPHandler {
     this.processMCPRequest = processMCPRequest;
 
     // Load package.json version
+    // Try multiple paths to ensure it works in different environments
     this.version = '1.0.0'; // Default fallback
     try {
-      const packagePath = path.resolve(__dirname, '../../../package.json');
+      // Try relative path from this file
+      let packagePath = path.resolve(__dirname, '../../../package.json');
+      if (!fs.existsSync(packagePath)) {
+        // Try from process.cwd() for test environments
+        packagePath = path.join(process.cwd(), 'package.json');
+      }
       if (fs.existsSync(packagePath)) {
-        this.version = require(packagePath).version;
+        this.version = JSON.parse(fs.readFileSync(packagePath, 'utf8')).version;
       }
     } catch (error) {
       // Use fallback version if package.json cannot be loaded
