@@ -284,7 +284,20 @@ class OpenAPIGenerator {
    * Generate API info
    */
   generateInfo() {
-    const packageJson = require('../../package.json');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Resolve package.json from the root of the project
+    let packageJson = { version: '1.0.0' }; // Default fallback
+    try {
+      const packagePath = path.resolve(__dirname, '../../package.json');
+      if (fs.existsSync(packagePath)) {
+        packageJson = require(packagePath);
+      }
+    } catch (error) {
+      // Use fallback version if package.json cannot be loaded
+    }
+
     return {
       title: 'Easy MCP Server API',
       version: packageJson.version,
