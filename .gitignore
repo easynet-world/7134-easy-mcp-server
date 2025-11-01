@@ -11,6 +11,8 @@ coverage/
 *.lcov
 .nyc_output
 test-output.log
+test-results.json
+tmp-jest*.json
 
 # Build outputs
 dist/

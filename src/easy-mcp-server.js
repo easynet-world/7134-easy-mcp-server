@@ -667,8 +667,8 @@ Creates new example data.
   const publicDir = path.join(projectDir, 'public');
   fs.mkdirSync(publicDir, { recursive: true });
   
-  // Read the HTML template from templates directory
-  const templatePath = path.join(__dirname, 'templates', 'public-index.html');
+  // Read the HTML template from api/templates directory
+  const templatePath = path.join(__dirname, 'api', 'templates', 'public-index.html');
   let indexHtml;
   
   if (fs.existsSync(templatePath)) {
