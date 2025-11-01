@@ -24,8 +24,8 @@
 const fs = require('fs');
 const path = require('path');
 // Ensure TypeScript files can be required when present
-try { 
-  const runtimeConfigPath = path.resolve(__dirname, '..', '..', 'tsconfig.runtime.json');
+try {
+  const runtimeConfigPath = path.resolve(__dirname, '..', '..', '..', 'tsconfig.runtime.json');
   // Verify config file exists
   if (!fs.existsSync(runtimeConfigPath)) {
     console.warn(`⚠️  tsconfig.runtime.json not found at ${runtimeConfigPath}`);
