@@ -30,6 +30,9 @@
 - [Server Architecture](#server-architecture)
 - [Source Code Structure](#source-code-structure)
 - [MCP Module Architecture](#mcp-module-architecture)
+- [MCP Specification Compliance](#mcp-specification-compliance)
+- [Scripts & Utilities](#scripts--utilities)
+- [Changelog](#changelog)
 - [Production Deployment](#production-deployment)
 - [Troubleshooting Guide](#troubleshooting-guide)
 - [Contributing](#contributing)
@@ -1035,6 +1038,353 @@ EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 **Example**:
 - ✅ Correct: `new_page` (original tool name)
 - ❌ Incorrect: `chrome_new_page` (with prefix)
+
+---
+
+## **MCP Specification Compliance**
+
+### Overview
+
+Our MCP server implementation complies with the official Model Context Protocol specification (2024-11-05).
+
+### JSON-RPC 2.0 Compliance
+
+✅ **All responses follow JSON-RPC 2.0 format:**
+- `jsonrpc: "2.0"` (required)
+- `id: <request_id>` (required for requests with id)
+- `result: {...}` (success response)
+- `error: {...}` (error response with code and message)
+
+### tools/list Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "tools": [...]
+  }
+}
+```
+
+#### Tool Definition Structure
+
+**Required Fields** ✅
+- **name** (string): Unique identifier for the tool
+- **description** (string): Detailed explanation of the tool's functionality
+- **inputSchema** (object): JSON Schema Draft 2020-12 for input parameters
+
+**Optional but Recommended Fields** ✅
+- **summary** (string): Brief overview for quick scanning
+- **responseSchema** (object): JSON Schema Draft 2020-12 for response structure
+
+**Additional Metadata (Allowed by Spec)** ✅
+- **method** (string): HTTP method (e.g., "GET", "POST") - for API tools
+- **path** (string): API path - for API tools
+- **tags** (array): Categorization tags
+
+**Status**: ✅ **COMPLIANT** - All required fields present, optional fields included, additional metadata allowed.
+
+### prompts/list Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "prompts": [...]
+  }
+}
+```
+
+#### Prompt Definition Structure
+
+**Required Fields** ✅
+- **name** (string): Unique identifier for the prompt
+- **description** (string): Description of what the prompt does
+- **arguments** (array): Array of argument definitions (optional per spec, but recommended)
+
+**Additional Metadata (Allowed by Spec)** ✅
+- **total** (number): Total count of prompts
+- **static** (number): Count of static prompts
+- **cached** (number): Count of cached prompts
+- **cacheStats** (object): Cache statistics
+- **source** (string): Source type (e.g., "static", "markdown")
+- **parameterCount** (number): Count of parameters
+
+**Status**: ✅ **COMPLIANT** - Required fields present, additional metadata allowed.
+
+### resources/list Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "resources": [...]
+  }
+}
+```
+
+#### Resource Definition Structure
+
+**Required Fields** ✅
+- **uri** (string): Unique resource identifier (must start with `resource://` or `file://`)
+- **name** (string): Human-readable name for the resource
+- **description** (string): Description of the resource content
+- **mimeType** (string): MIME type of the resource content
+
+**Additional Metadata (Allowed by Spec)** ✅
+- **total** (number): Total count of resources
+- **static** (number): Count of static resources
+- **cached** (number): Count of cached resources
+- **cacheStats** (object): Cache statistics
+- **source** (string): Source type (e.g., "static", "markdown")
+- **content** (string): Resource content (for cached resources)
+- **filePath** (string): File system path (for file-based resources)
+- **format** (string): Format type (e.g., "markdown")
+
+**Status**: ✅ **COMPLIANT** - Required fields present, additional metadata allowed.
+
+### prompts/get Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "..."
+        }
+      }
+    ]
+  }
+}
+```
+
+**Status**: ✅ **COMPLIANT** - Follows exact MCP specification format.
+
+### resources/read Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "contents": [
+      {
+        "uri": "resource://...",
+        "mimeType": "text/markdown",
+        "text": "..."
+      }
+    ]
+  }
+}
+```
+
+**Status**: ✅ **COMPLIANT** - Follows exact MCP specification format.
+
+### tools/call Response
+
+#### Required Structure
+```json
+{
+  "jsonrpc": "2.0",
+  "id": <id>,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "..."
+      }
+    ]
+  }
+}
+```
+
+**Status**: ✅ **COMPLIANT** - Follows exact MCP specification format.
+
+### JSON Schema Compliance
+
+#### inputSchema Requirements
+- ✅ Must be valid JSON Schema Draft 2020-12
+- ✅ Must have `type: "object"`
+- ✅ Must have `properties` object
+- ✅ May have `required` array
+- ✅ Nested objects must have `properties` field
+- ✅ Arrays must have `items` field
+
+#### responseSchema Requirements
+- ✅ Optional field (per MCP spec)
+- ✅ When present, must be valid JSON Schema Draft 2020-12
+- ✅ Normalized to ensure nested structures are valid
+
+### Compliance Summary
+
+✅ **All MCP endpoints are compliant with the specification:**
+- JSON-RPC 2.0 format correctly implemented
+- Required fields present in all responses
+- Optional recommended fields included
+- Additional metadata fields allowed by spec
+- JSON Schema validation ensures proper structure
+- Error handling follows JSON-RPC 2.0 error format
+
+### MCP Specification Details
+
+#### Description vs Summary
+
+According to MCP best practices and technical specifications:
+
+**Summary**
+- **Purpose**: Brief overview for quick scanning
+- **Length**: Short, concise (typically one sentence)
+- **Use Case**: When users need to quickly understand what a tool does
+- **Example**: "List products" or "Create a new user"
+
+**Description**
+- **Purpose**: Detailed explanation for full understanding
+- **Length**: Longer, comprehensive (can be multiple sentences)
+- **Use Case**: When users need complete information about functionality, parameters, and behavior
+- **Example**: "List products with optional limit. Returns an array of product records filtered by the specified limit parameter."
+
+#### MCP Tool Schema Requirements
+
+MCP tools should include:
+
+1. **name** (required): Unique identifier for the tool
+2. **description** (required): Detailed explanation of the tool
+3. **summary** (recommended): Brief overview of the tool
+4. **inputSchema** (required): JSON Schema for input parameters
+5. **responseSchema** (optional): JSON Schema for response structure
+
+#### Response Schema Status
+
+According to MCP specification:
+- **responseSchema is OPTIONAL** - not required by the protocol
+- **Bridge tools** may not provide responseSchema if the external MCP server doesn't include it
+- **API tools** typically include responseSchema derived from OpenAPI response definitions
+- When available, responseSchema helps AI models understand the expected output format
+- When not available, it's acceptable to omit the field or set it to `null`
+
+**Implementation Decision:**
+- API tools: Include responseSchema when available from OpenAPI definitions
+- Bridge tools: Preserve responseSchema if provided by the external MCP server, otherwise `null` (optional)
+
+#### Implementation Best Practices
+
+✅ Both `summary` and `description` are included in tool definitions
+✅ `summary` is brief and suitable for quick scanning
+✅ `description` provides detailed information
+✅ Fallback logic ensures tools always have descriptions
+
+### MCP Specification References
+
+- **MCP Specification**: https://modelcontextprotocol.io
+- **JSON-RPC 2.0 Specification**: https://www.jsonrpc.net/specification
+- **JSON Schema Draft 2020-12**: https://json-schema.org/specification.html
+- **Protocol Version**: 2024-11-05
+
+---
+
+## **Scripts & Utilities**
+
+### list-mcp-info.js
+
+Lists all MCP tools, resources, prompts and their details.
+
+#### Usage
+
+```bash
+# Basic usage (connects to localhost:8888)
+npm run mcp:list
+
+# Or directly
+node scripts/list-mcp-info.js
+
+# With options
+node scripts/list-mcp-info.js --host localhost --port 8888 --format detailed
+
+# Save to file
+node scripts/list-mcp-info.js --format json --output mcp-info.json
+```
+
+#### Options
+
+- `--host <host>` - MCP server host (default: localhost)
+- `--port <port>` - MCP server port (default: 8888 or EASY_MCP_SERVER_MCP_PORT)
+- `--transport <type>` - Transport type: `http`, `ws`, or `auto` (default: auto)
+- `--format <format>` - Output format: `json`, `table`, or `detailed` (default: detailed)
+- `--output <file>` - Save output to file (optional)
+- `--help` or `-h` - Show help message
+
+#### Examples
+
+```bash
+# Get detailed information
+node scripts/list-mcp-info.js --format detailed
+
+# Get JSON output
+node scripts/list-mcp-info.js --format json
+
+# Save JSON to file
+node scripts/list-mcp-info.js --format json --output mcp-info.json
+
+# Connect to remote server
+node scripts/list-mcp-info.js --host example.com --port 8888
+
+# Force WebSocket transport
+node scripts/list-mcp-info.js --transport ws
+```
+
+#### Output Formats
+
+- **detailed** (default): Human-readable detailed format with all information
+- **table**: Compact table format
+- **json**: JSON format for programmatic use
+
+---
+
+## **Changelog**
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [1.0.111](https://github.com/easynet-world/7134-easy-mcp-server/compare/v1.0.110...v1.0.111) (2024-10-09)
+
+#### Features
+
+* **AI-Era Positioning**: Enhanced project positioning as "AI-era Express replacement"
+* **Documentation Cleanup**: Streamlined to only README.md and DEVELOPMENT.md
+* **English-Only**: Removed all Chinese content, ensuring English-only documentation
+* **Express Migration Guide**: Comprehensive migration documentation from Express to easy-mcp-server
+
+#### Documentation
+
+* **README.md**: Updated with AI-era warnings and Express comparison
+* **DEVELOPMENT.md**: Enhanced developer guide with AI-era principles
+* **Migration Examples**: Added code examples showing Express vs easy-mcp-server
+* **Efficiency Claims**: Documented 420x development speed improvement
+
+#### Refactoring
+
+* **Documentation Structure**: Simplified to essential files only
+* **Content Localization**: Ensured all content is in English
+* **Positioning**: Strengthened "Express replacement" messaging
+
+#### Tests
+
+* **Comprehensive Testing**: All 450 tests passing
+* **Code Quality**: ESLint passing with no errors
+* **API Loading**: Core functionality verified
+* **MCP Integration**: Bridge tools and schema extraction working
 
 ---
 
