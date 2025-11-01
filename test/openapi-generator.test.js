@@ -1,4 +1,4 @@
-const OpenAPIGenerator = require('../src/core/openapi-generator');
+const OpenAPIGenerator = require('../src/api/openapi/openapi-generator');
 
 describe('OpenAPIGenerator', () => {
   let openapiGenerator;

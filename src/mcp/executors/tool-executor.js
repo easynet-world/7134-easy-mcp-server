@@ -1,6 +1,25 @@
 /**
  * Tool Executor
- * Handles executing MCP tools (API endpoints and bridge tools)
+ * 
+ * Executes MCP tools by running API endpoints and bridge tools.
+ * Handles argument mapping from flat MCP format to nested Express
+ * request structure, and creates mock request/response objects.
+ * 
+ * Features:
+ * - API endpoint execution (via Express route processors)
+ * - Bridge tool execution (external MCP servers)
+ * - Argument mapping (flat → nested: body, query, headers, params)
+ * - Mock request/response object creation
+ * - Error handling and result formatting
+ * - Schema-aware parameter mapping
+ * 
+ * Execution Flow:
+ * 1. Map flat MCP arguments to Express structure
+ * 2. Create mock req/res objects
+ * 3. Execute route.processorInstance.process(req, res)
+ * 4. Extract and return result
+ * 
+ * @class ToolExecutor
  */
 
 class ToolExecutor {

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const MCPBridgeReloader = require('../src/utils/mcp/mcp-bridge-reloader');
+const MCPBridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
 
 describe('EASY_MCP_SERVER_BRIDGE_CONFIG_PATH Environment Variable', () => {
   const testConfigPath = path.join(__dirname, '..', 'test-bridge-config.json');

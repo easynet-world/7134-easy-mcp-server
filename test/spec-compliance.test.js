@@ -3,7 +3,7 @@
  * Validates both MCP (Model Context Protocol) and OpenAPI 3.0 specification compliance
  */
 
-const OpenAPIGenerator = require('../src/core/openapi-generator');
+const OpenAPIGenerator = require('../src/api/openapi/openapi-generator');
 const ToolBuilder = require('../src/mcp/builders/tool-builder');
 const SchemaNormalizer = require('../src/mcp/utils/schema-normalizer');
 

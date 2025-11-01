@@ -34,7 +34,7 @@ describe('CLI Static File Serving', () => {
     fs.mkdirSync(publicDir, { recursive: true });
     fs.writeFileSync(path.join(publicDir, 'hello.txt'), 'hello-from-cli-public');
 
-    // Act: start CLI which should forward user's public dir to src/server.js
+    // Act: start CLI which should forward user's public dir to orchestrator
     const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
       stdio: 'pipe',
       cwd: tempDir,

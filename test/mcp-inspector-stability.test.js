@@ -6,7 +6,7 @@ const request = require('supertest');
 const http = require('http');
 
 // Boot the server app (Express server)
-const { app, apiLoader } = require('../src/app/server');
+const { app, apiLoader } = require('../src/orchestrator');
 
 // Import MCP server
 const DynamicAPIMCPServer = require('../src/mcp');

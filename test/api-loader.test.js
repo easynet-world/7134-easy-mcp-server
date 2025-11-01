@@ -1,4 +1,4 @@
-const APILoader = require('../src/core/api-loader');
+const APILoader = require('../src/utils/loaders/api-loader');
 const fs = require('fs');
 const { 
   createMockApp, 

@@ -6,7 +6,7 @@ const request = require('supertest');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const APILoader = require('../src/core/api-loader');
+const APILoader = require('../src/utils/loaders/api-loader');
 
 describe('Middleware Auto-Loading', () => {
   let app;

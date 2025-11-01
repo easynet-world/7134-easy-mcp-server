@@ -1,6 +1,6 @@
 const request = require('supertest');
 const express = require('express');
-const APILoader = require('../src/core/api-loader');
+const APILoader = require('../src/utils/loaders/api-loader');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');

@@ -40,7 +40,7 @@ if (!fs.existsSync(indexPath)) {
 }
 
 // Import server after files and env vars are set
-const { app } = require('../src/app/server');
+const { app } = require('../src/orchestrator');
 
 // Debug: Check if static file serving middleware is applied
 console.log('🔍 Debug: Checking static file serving middleware...');

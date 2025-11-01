@@ -1,6 +1,24 @@
 /**
  * Schema Normalization Utilities
- * Handles normalization and flattening of OpenAPI schemas for MCP tool definitions
+ * 
+ * Handles normalization and flattening of OpenAPI schemas for MCP tool definitions.
+ * Ensures consistent schema format and prevents errors from undefined properties.
+ * 
+ * Features:
+ * - Nested schema flattening (objects → flat properties)
+ * - Safe parameter schema extraction
+ * - Schema type normalization
+ * - Required field tracking
+ * - Prevents undefined property access errors
+ * - Handles complex nested structures
+ * 
+ * Normalization Process:
+ * - Extracts parameter schemas safely
+ * - Flattens nested object properties
+ * - Normalizes schema types (string, number, boolean, etc.)
+ * - Ensures all properties have valid types
+ * 
+ * @class SchemaNormalizer
  */
 
 class SchemaNormalizer {

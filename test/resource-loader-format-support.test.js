@@ -5,7 +5,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
-const MCPResourceLoader = require('../src/utils/resource-loader');
+const MCPResourceLoader = require('../src/utils/loaders/resource-loader');
 
 describe('MCPResourceLoader File Format Support', () => {
   let loader;

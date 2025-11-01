@@ -4,8 +4,8 @@
  */
 
 const fs = require('fs');
-const AnnotationParser = require('../src/utils/annotation-parser');
-const OpenAPIGenerator = require('../src/core/openapi-generator');
+const AnnotationParser = require('../src/utils/parsers/annotation-parser');
+const OpenAPIGenerator = require('../src/api/openapi/openapi-generator');
 
 describe('@responseSchema Integration Tests', () => {
   let mockApiLoader;

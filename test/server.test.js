@@ -1,7 +1,7 @@
 const request = require('supertest');
 
 // Mock the server without actually starting it
-jest.mock('../src/app/server', () => {
+jest.mock('../src/orchestrator', () => {
   const express = require('express');
   const app = express();
   
@@ -46,7 +46,7 @@ describe('Server Basic Functionality', () => {
   let app;
   
   beforeAll(() => {
-    app = require('../src/app/server');
+    app = require('../src/orchestrator');
   });
   
   test('health endpoint should return OK status', async () => {

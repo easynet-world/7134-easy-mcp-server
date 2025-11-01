@@ -5,7 +5,7 @@ process.env.EASY_MCP_SERVER_API_PATH = require('path').join(__dirname, '..', 'ex
 jest.resetModules();
 
 // Use the express app initialized with example APIs
-const { app } = require('../src/app/server');
+const { app } = require('../src/orchestrator');
 
 describe('OpenAPI, MCP, and Swagger details', () => {
   describe('OpenAPI details', () => {

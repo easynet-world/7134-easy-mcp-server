@@ -2,7 +2,7 @@
  * Tests for SimpleParameterParser - Format-agnostic parameter extraction
  */
 
-const SimpleParameterParser = require('../src/utils/parameter-template-parser');
+const SimpleParameterParser = require('../src/utils/parsers/parameter-template-parser');
 
 describe('SimpleParameterParser', () => {
   describe('extractParameters', () => {
