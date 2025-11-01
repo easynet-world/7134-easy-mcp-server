@@ -27,6 +27,41 @@ echo "✅ Node.js version: $(node --version)"
 echo "✅ Starting AI-era Express Server..."
 echo ""
 
+# Check for and kill existing processes first
+echo "🔍 Checking for existing easy-mcp-server processes..."
+PIDS=$(pgrep -f "easy-mcp-server" 2>/dev/null || true)
+
+if [ ! -z "$PIDS" ]; then
+    echo "🛑 Found existing easy-mcp-server processes: $PIDS"
+    echo "   Stopping existing processes..."
+    
+    for PID in $PIDS; do
+        echo "   Killing process $PID"
+        kill -TERM $PID 2>/dev/null || true
+    done
+    
+    # Wait a moment for graceful shutdown
+    sleep 2
+    
+    # Force kill if still running
+    REMAINING=$(pgrep -f "easy-mcp-server" 2>/dev/null || true)
+    if [ ! -z "$REMAINING" ]; then
+        echo "⚠️  Force killing remaining processes..."
+        for PID in $REMAINING; do
+            kill -KILL $PID 2>/dev/null || true
+        done
+        sleep 1
+    fi
+    
+    echo "✅ Existing processes stopped"
+else
+    echo "ℹ️  No existing processes found"
+fi
+
+# Also check for processes using the ports (in case port env vars are set)
+# We'll check ports after loading .env to use the correct port numbers
+echo ""
+
 # Load environment variables from .env file
 if [ -f .env ]; then
     echo "📄 Loading configuration from .env file..."
@@ -42,6 +77,33 @@ echo "   🌐 REST API: http://localhost:${EASY_MCP_SERVER_PORT:-8887}"
 echo "   🤖 AI Server: http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}"
 echo "   📚 API Docs: http://localhost:${EASY_MCP_SERVER_PORT:-8887}/docs"
 echo ""
+
+# Check for processes using the configured ports and kill them
+REST_PORT=${EASY_MCP_SERVER_PORT:-8887}
+MCP_PORT=${EASY_MCP_SERVER_MCP_PORT:-8888}
+
+PORT_PIDS=$(lsof -ti :$REST_PORT -ti :$MCP_PORT 2>/dev/null || true)
+if [ ! -z "$PORT_PIDS" ]; then
+    echo "🔍 Found processes using ports $REST_PORT/$MCP_PORT: $PORT_PIDS"
+    echo "   Stopping processes using these ports..."
+    for PID in $PORT_PIDS; do
+        echo "   Killing process $PID using port"
+        kill -TERM $PID 2>/dev/null || true
+    done
+    sleep 1
+    
+    # Force kill if still running
+    REMAINING_PORTS=$(lsof -ti :$REST_PORT -ti :$MCP_PORT 2>/dev/null || true)
+    if [ ! -z "$REMAINING_PORTS" ]; then
+        echo "⚠️  Force killing remaining processes on ports..."
+        for PID in $REMAINING_PORTS; do
+            kill -KILL $PID 2>/dev/null || true
+        done
+        sleep 1
+    fi
+    echo "✅ Port processes cleared"
+    echo ""
+fi
 
 # Start the server in background with output redirected
 echo "🚀 Starting with: $NPX_PATH easy-mcp-server"

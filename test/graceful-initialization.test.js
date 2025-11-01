@@ -210,7 +210,7 @@ describe('Graceful API Initialization', () => {
       const path = require('path');
       
       const failingApiCode = `
-const BaseAPIEnhanced = require('../../src/lib/base-api-enhanced');
+const BaseAPIEnhanced = require('../../src/lib/api/base-api-enhanced');
 
 class FailingTestAPI extends BaseAPIEnhanced {
   async _initializeLLM() {

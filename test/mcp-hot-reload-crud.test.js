@@ -8,7 +8,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('MCP Server Hot Reload CRUD Operations', () => {
   // Increase timeout for CI environments

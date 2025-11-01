@@ -2,7 +2,7 @@
  * Test enhanced monitoring and performance features in MCP server
  */
 
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');

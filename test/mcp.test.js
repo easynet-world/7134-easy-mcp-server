@@ -3,13 +3,13 @@ const fs = require('fs');
 
 describe('MCP (Model Context Protocol) Support', () => {
   test('MCP server file exists in src directory', () => {
-    const mcpServerPath = path.join(__dirname, '..', 'src', 'mcp', 'mcp-server.js');
+    const mcpServerPath = path.join(__dirname, '..', 'src', 'mcp', 'core', 'mcp-server.js');
     expect(fs.existsSync(mcpServerPath)).toBe(true);
   });
 
   test('MCP server can be required without errors', () => {
     expect(() => {
-      require('../src/mcp/mcp-server');
+      require('../src/mcp');
     }).not.toThrow();
   });
 
@@ -19,7 +19,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server class has required methods', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     expect(typeof mcpServer.run).toBe('function');
@@ -29,7 +29,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server supports multiple transport types', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Check if transport methods exist
@@ -39,7 +39,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server can process tools/list request', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Mock routes
@@ -59,7 +59,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server can process tools/call request', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Mock routes
@@ -83,7 +83,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server executeAPIEndpoint supports res.status method', async () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Create a mock API processor that uses res.status
@@ -108,7 +108,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server executeAPIEndpoint supports chaining res.status().json()', async () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Create a mock API processor that chains res.status().json()
@@ -133,7 +133,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server executeAPIEndpoint handles multiple status codes correctly', async () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Test different status codes
@@ -166,7 +166,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server binds to all interfaces by default for Kubernetes compatibility', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     
     // Test default constructor binds to 0.0.0.0
     const mcpServerDefault = new DynamicAPIMCPServer();
@@ -186,7 +186,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server uses default MCP directory when no custom path is provided', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const mcpServer = new DynamicAPIMCPServer();
     
     // Should use default './mcp' path
@@ -196,7 +196,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server respects custom MCP base path configuration', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const customOptions = {
       mcp: {
         basePath: './custom-mcp'
@@ -212,7 +212,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server respects custom prompts and resources directory configuration', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const customOptions = {
       mcp: {
         basePath: './custom-mcp'
@@ -234,7 +234,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server cache manager uses configured base path', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const customOptions = {
       mcp: {
         basePath: './custom-mcp'
@@ -248,7 +248,7 @@ describe('MCP (Model Context Protocol) Support', () => {
   });
 
   test('MCP server falls back to default paths when custom paths are not provided', () => {
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const customOptions = {
       mcp: {
         basePath: './custom-mcp'

@@ -3,7 +3,7 @@
  * Ensures user-added resources and prompts are properly shown in MCP interface
  */
 
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');

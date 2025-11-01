@@ -5,7 +5,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('Custom Content Troubleshooting', () => {
   let server;

@@ -226,10 +226,14 @@ class Logger extends EventEmitter {
    * @param {Object} meta - Additional metadata
    */
   logRequest(req, meta = {}) {
+    const userAgent = typeof req.get === 'function'
+      ? req.get('User-Agent')
+      : (req.headers && (req.headers['user-agent'] || req.headers['User-Agent'])) || undefined;
+
     const requestMeta = {
       method: req.method,
       url: req.url,
-      userAgent: req.get('User-Agent'),
+      userAgent,
       ip: req.ip || req.connection.remoteAddress,
       ...meta
     };

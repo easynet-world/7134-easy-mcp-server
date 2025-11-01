@@ -4,7 +4,7 @@ const path = require('path');
 const os = require('os');
 
 // Import the MCP server
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('MCP Root Static Serving', () => {
   let mcpServer;
@@ -16,7 +16,8 @@ describe('MCP Root Static Serving', () => {
     // Create a temporary directory for testing
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-info-test-'));
     customHtmlPath = path.join(tempDir, 'custom-mcp-info.html');
-    
+    // Ensure MCP HTTP static directory points to project public
+    process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = path.resolve('./public');
     // Start MCP server on a random port
     serverPort = 3001 + Math.floor(Math.random() * 1000);
     mcpServer = new DynamicAPIMCPServer('127.0.0.1', serverPort);

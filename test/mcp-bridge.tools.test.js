@@ -12,7 +12,7 @@ describe('MCP Bridge tools exposure', () => {
     process.env.EASY_MCP_SERVER_BRIDGE_ENABLED = 'true';
 
     // Mock MCPBridge to return a list_tools result immediately
-    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp-bridge.js');
+    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge.js');
     jest.doMock(bridgeModulePath, () => {
       return function MockBridge() {
         return {
@@ -50,7 +50,7 @@ describe('MCP Bridge tools exposure', () => {
       };
     });
 
-    serverModule = require('../src/server');
+    serverModule = require('../src/app/server');
     app = serverModule.app;
   });
 

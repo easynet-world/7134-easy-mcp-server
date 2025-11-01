@@ -5,8 +5,8 @@
 
 const chokidar = require('chokidar');
 const path = require('path');
-const PackageInstaller = require('./package-installer');
-const PackageDetector = require('./package-detector');
+const PackageInstaller = require('./dev/package-installer');
+const PackageDetector = require('./dev/package-detector');
 
 class HotReloader {
   constructor(apiLoader, mcpServer, options = {}) {

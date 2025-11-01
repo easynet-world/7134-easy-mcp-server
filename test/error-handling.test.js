@@ -221,7 +221,7 @@ describe('Error Handling Improvements', () => {
 
       // Test that server can start with mixed success/failure
       const { spawn } = require('child_process');
-      const serverProcess = spawn('node', ['src/server.js'], {
+      const serverProcess = spawn('node', ['src/app/server.js'], {
         cwd: path.join(__dirname, '..'),
         env: { 
           ...process.env, 
