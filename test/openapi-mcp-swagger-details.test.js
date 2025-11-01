@@ -51,7 +51,8 @@ describe('OpenAPI, MCP, and Swagger details', () => {
     });
 
     test('GET /products/:id returns Product object', () => {
-      const product = spec.paths['/products/:id'].get.responses['200'].content['application/json'].schema.properties.product;
+      // OpenAPI generator converts Express paths (:id) to OpenAPI format ({id})
+      const product = spec.paths['/products/{id}'].get.responses['200'].content['application/json'].schema.properties.product;
       expect(product).toBeDefined();
       expect(product.properties.id).toBeDefined();
       expect(product.properties.name).toBeDefined();
