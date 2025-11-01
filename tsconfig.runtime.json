@@ -12,7 +12,9 @@
     "checkJs": false,
     "resolveJsonModule": true,
     "noEmit": true,
-    "types": ["node"]
+    "noResolve": false,
+    "typeRoots": [],
+    "types": []
   },
   "include": [
     "src/**/*",
@@ -30,7 +32,8 @@
     "**/*.spec.ts",
     "**/*.spec.js",
     "**/__tests__/**/*",
-    "**/__test__/**/*"
+    "**/__test__/**/*",
+    "**/.*"
   ]
 }
 
