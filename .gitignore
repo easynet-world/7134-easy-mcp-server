@@ -28,10 +28,11 @@ build/Release
 .rts2_cache_umd/
 
 # Environment variables
-.env
+# .env is now tracked in repository (contains default configuration without sensitive data)
 .env.test
 .env.local
 .env.production
+.env.development
 # Exception: Allow .env in example-project for demonstration
 !example-project/.env
 
