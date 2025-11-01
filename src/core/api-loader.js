@@ -5,6 +5,10 @@
 
 const fs = require('fs');
 const path = require('path');
+// Ensure TypeScript files can be required when present
+try { require('ts-node/register/transpile-only'); } catch (_) { /* optional at runtime/tests */ }
+const { apiSpecTs } = require('../utils/api/openapi-helper');
+const { apiSpec, queryParam, tsSchema } = require('../utils/api/openapi-helper');
 
 class APILoader {
   constructor(app, apiPath = null) {
@@ -158,7 +162,15 @@ class APILoader {
         if (stat.isDirectory()) {
           // Recursively scan subdirectories
           this.scanDirectory(fullPath, path.join(basePath, item));
-        } else if (stat.isFile() && item.endsWith('.js') && item !== 'middleware.js') {
+        } else if (stat.isFile()) {
+          // Support both .ts and .js (prefer .ts if both exist). Ignore .d.ts
+          if (item === 'middleware.js' || item.endsWith('.d.ts')) return;
+          if (!(item.endsWith('.js') || item.endsWith('.ts'))) return;
+          // If corresponding .ts exists, skip .js to avoid duplicate
+          if (item.endsWith('.js')) {
+            const tsCandidate = fullPath.replace(/\.js$/, '.ts');
+            if (fs.existsSync(tsCandidate)) return;
+          }
           // Found an API file (exclude middleware.js)
           this.loadAPIFile(fullPath, basePath, item);
         }
@@ -172,7 +184,7 @@ class APILoader {
    * Load a single API file and register the route with graceful initialization
    */
   loadAPIFile(filePath, basePath, fileName) {
-    const httpMethod = path.basename(fileName, '.js').toUpperCase();
+    const httpMethod = path.parse(fileName).name.toUpperCase();
     const dirName = path.dirname(fileName);
     const routePath = dirName === '.' ? basePath : path.join(basePath, dirName);
     
@@ -187,21 +199,13 @@ class APILoader {
     }
     
     try {
-      const ProcessorClass = require(path.resolve(filePath));
-      
-      // Validate the class
-      if (typeof ProcessorClass !== 'function') {
-        this.errors.push(`Invalid processor class in ${filePath}: must be a class`);
-        return;
-      }
-      
-      const processor = new ProcessorClass();
-      
-      if (typeof processor.process === 'function') {
-        // Register the route dynamically with graceful error handling
+      const exportedModule = require(path.resolve(filePath));
+
+      // Helper to register a handler function
+      const registerHandler = (handlerFn, processorLabel = 'function', processorInstance = null, metaSource = null) => {
         this.app[httpMethod.toLowerCase()](normalizedPath, async (req, res) => {
           try {
-            await processor.process(req, res);
+            await Promise.resolve(handlerFn(req, res));
           } catch (error) {
             console.error(`Error processing request to ${httpMethod} ${normalizedPath}:`, error.message);
             if (!res.headersSent) {
@@ -214,23 +218,130 @@ class APILoader {
             }
           }
         });
-        
+
+        const instanceForRoute = processorInstance || { process: handlerFn };
+        // If metaSource (function export) has docs/meta, expose them for OpenAPI/MCP
+        if (metaSource) {
+          // Static description/summary/tags
+          if (typeof metaSource.description === 'string') instanceForRoute.description = metaSource.description;
+          if (typeof metaSource.summary === 'string') instanceForRoute.summary = metaSource.summary;
+          if (Array.isArray(metaSource.tags)) instanceForRoute.tags = metaSource.tags;
+          if (typeof metaSource.mcpDescription === 'string') instanceForRoute.mcpDescription = metaSource.mcpDescription;
+
+          // Support openApi as object or function returning object
+          if (metaSource.openApi && typeof metaSource.openApi === 'object') {
+            instanceForRoute.openApi = metaSource.openApi;
+          } else if (typeof metaSource.openApi === 'function') {
+            Object.defineProperty(instanceForRoute, 'openApi', {
+              get() {
+                try { return metaSource.openApi(); } catch (_) { return undefined; }
+              }
+            });
+          } else if (typeof metaSource.getOpenApi === 'function') {
+            Object.defineProperty(instanceForRoute, 'openApi', {
+              get() {
+                try { return metaSource.getOpenApi(); } catch (_) { return undefined; }
+              }
+            });
+          }
+        }
+
+        // Auto-attach OpenAPI from colocated TS classes if not provided
+        try {
+          if (!instanceForRoute.openApi && routePath && filePath) {
+            // For GET/DELETE, derive query parameters from Request class; otherwise use requestBody
+            if (httpMethod === 'GET' || httpMethod === 'DELETE') {
+              try {
+                const reqSchema = tsSchema(filePath, 'Request');
+                const resSchema = tsSchema(filePath, 'Response');
+                const params = [];
+                // Collect path parameter names from normalized path (e.g., /products/:id)
+                const pathParamNames = new Set((normalizedPath.match(/:([A-Za-z0-9_]+)/g) || []).map(s => s.slice(1)));
+                if (reqSchema && reqSchema.properties) {
+                  const required = Array.isArray(reqSchema.required) ? new Set(reqSchema.required) : new Set();
+                  for (const [name, propSchema] of Object.entries(reqSchema.properties)) {
+                    // Skip fields that are already defined as path params
+                    if (pathParamNames.has(name)) continue;
+                    params.push(queryParam(name, propSchema, propSchema.description, required.has(name)));
+                  }
+                }
+                instanceForRoute.openApi = apiSpec({ query: params, response: resSchema });
+              } catch (_) {
+                instanceForRoute.openApi = apiSpecTs(filePath);
+              }
+            } else {
+              instanceForRoute.openApi = apiSpecTs(filePath);
+            }
+          }
+        } catch (_) {
+          // non-fatal
+        }
+
+        // Merge annotation-based metadata into OpenAPI (summary, description, tags)
+        try {
+          const src = fs.readFileSync(filePath, 'utf8');
+          const descMatch = src.match(/@description\(\s*['"`]([\s\S]*?)['"`]\s*\)/);
+          const sumMatch = src.match(/@summary\(\s*['"`]([\s\S]*?)['"`]\s*\)/);
+          const tagsMatch = src.match(/@tags\(\s*['"`]([\s\S]*?)['"`]\s*\)/);
+          if (descMatch || sumMatch || tagsMatch) {
+            instanceForRoute.openApi = instanceForRoute.openApi || {};
+            if (descMatch) instanceForRoute.openApi.description = descMatch[1].trim();
+            if (sumMatch) instanceForRoute.openApi.summary = sumMatch[1].trim();
+            if (tagsMatch) {
+              const raw = tagsMatch[1];
+              const list = raw.split(',').map(s => s.trim()).filter(Boolean);
+              if (list.length) instanceForRoute.openApi.tags = list;
+            }
+          }
+        } catch (_) { /* ignore annotation parsing errors */ }
+
         this.routes.push({
           method: httpMethod,
           path: normalizedPath,
-          processor: processor.constructor.name,
+          processor: processorLabel,
           filePath: filePath,
-          processorInstance: processor
+          processorInstance: instanceForRoute
         });
-        
-        // Store processor instance for OpenAPI generation
+
         const key = `${httpMethod.toLowerCase()}:${normalizedPath}`;
-        this.processors.set(key, processor);
-        
+        this.processors.set(key, instanceForRoute);
+
         console.log(`✅ Loaded API: ${httpMethod} ${normalizedPath}`);
-      } else {
-        this.errors.push(`Processor class in ${filePath} must have a 'process' method`);
+      };
+
+      // Case 1: Object export with a process method
+      if (exportedModule && typeof exportedModule === 'object' && typeof exportedModule.process === 'function') {
+        // Attach file path if possible
+        exportedModule._filePath = path.resolve(filePath);
+        registerHandler(exportedModule.process.bind(exportedModule), 'object', exportedModule);
+        return;
       }
+
+      // Case 2: Function export - detect if class constructor or plain handler
+      if (typeof exportedModule === 'function') {
+        const asString = Function.prototype.toString.call(exportedModule);
+        const looksLikeClass = asString.startsWith('class ')
+          || (exportedModule.prototype && Object.getOwnPropertyNames(exportedModule.prototype).filter(n => n !== 'constructor').length > 0);
+
+        if (looksLikeClass) {
+          // Treat as class and instantiate
+          const processor = new exportedModule();
+          if (typeof processor.process === 'function') {
+            processor._filePath = path.resolve(filePath);
+            registerHandler(processor.process.bind(processor), processor.constructor.name, processor);
+            return;
+          }
+          this.errors.push(`Processor class in ${filePath} must have a 'process' method`);
+          return;
+        }
+
+        // Plain function handler
+        registerHandler(exportedModule, 'function', null, exportedModule);
+        return;
+      }
+
+      // Fallback: unsupported export type
+      this.errors.push(`Invalid API export in ${filePath}: must export a class with process(req,res), an object with process, or a function (req,res)`);
     } catch (error) {
       // Enhanced error handling for different types of errors
       let errorMessage = error.message;

@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('MCP Custom Directory Loading', () => {
   let tempDir;

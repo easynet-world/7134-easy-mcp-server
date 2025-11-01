@@ -796,7 +796,7 @@ let envHotReloader = null;
 // Initialize env hot reloader
 function initializeEnvHotReloader() {
   try {
-    const EnvHotReloader = require('../src/utils/env-hot-reloader');
+    const EnvHotReloader = require('./utils/env-hot-reloader');
     envHotReloader = new EnvHotReloader({
       debounceDelay: 1000,
       onReload: () => {
@@ -925,17 +925,17 @@ async function startServer() {
       // process.chdir(mainProjectPath);
       
       // Import and start the server directly
-      const serverPath = path.join(mainProjectPath, 'src', 'server.js');
+      const serverPath = path.join(mainProjectPath, 'src', 'app', 'server.js');
       const serverModule = require(serverPath);
       
       // Manually start the server since we're requiring it, not running it directly
-      const { startServer } = require(path.join(mainProjectPath, 'src', 'server.js'));
-      if (typeof startServer === 'function') {
-        startServer();
+      // The server only auto-starts when run directly (require.main === module)
+      if (serverModule && typeof serverModule.startServer === 'function') {
+        serverModule.startServer();
       } else {
-        // Fallback: if startServer is not exported, we need to trigger it manually
+        // Fallback: if startServer is not exported, log and continue
+        // The server might start automatically when required
         console.log('🚀 Starting server...');
-        // The server should start automatically when required
       }
       
     } catch (error) {

@@ -62,19 +62,36 @@ class AnnotationParser {
           annotations.tags = tagsValue ? tagsValue.split(',').map(t => t.trim()) : [];
           break;
         }
+        case 'body':
         case 'requestBody': {
-          const parsedRequestBody = this.parseJsonAnnotation(tag);
+          // Accept either @body or @requestBody
+          const parsedRequestBody = this.parseJsonAnnotation(tag) || this.parseSimpleJsonAnnotation(tag);
           annotations.requestBody = parsedRequestBody; // Will be null if parsing failed
           break;
         }
+        case 'response':
         case 'responseSchema': {
-          const parsedResponseSchema = this.parseJsonAnnotation(tag);
+          // Accept either @response or @responseSchema
+          const parsedResponseSchema = this.parseJsonAnnotation(tag) || this.parseSimpleJsonAnnotation(tag);
           annotations.responseSchema = parsedResponseSchema; // Will be null if parsing failed
           break;
         }
         case 'errorResponses': {
           const parsedErrorResponses = this.parseJsonAnnotation(tag);
           annotations.errorResponses = parsedErrorResponses; // Will be null if parsing failed
+          break;
+        }
+        case 'query':
+        case 'queryParameters': {
+          // For query parameters we normalize to JSON Schema with type/object/properties
+          const parsedQueryParameters = this.parseSimpleJsonAnnotation(tag);
+          annotations.queryParameters = parsedQueryParameters; // Will be null if parsing failed
+          break;
+        }
+        case 'param':
+        case 'pathParameters': {
+          const parsedPathParameters = this.parseJsonAnnotation(tag) || this.parseSimpleJsonAnnotation(tag);
+          annotations.pathParameters = parsedPathParameters; // Will be null if parsing failed
           break;
         }
         default: {
@@ -101,6 +118,79 @@ class AnnotationParser {
       annotations.tags = annotations.tags || [];
 
       return annotations;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Parse a simple JSON annotation with type-description format
+   * @param {Object} tag - The JSDoc tag
+   * @returns {Object|null} Parsed JSON schema or null if invalid
+   */
+  static parseSimpleJsonAnnotation(tag) {
+    try {
+      let jsonText = '';
+      
+      // Check type field first (where comment-parser puts JSON content)
+      if (tag.type && tag.type.trim()) {
+        jsonText = tag.type.trim();
+      } else if (tag.description) {
+        jsonText = tag.description;
+      } else if (tag.name) {
+        jsonText = tag.name;
+      }
+      
+      if (jsonText) {
+        // Clean up the JSON text and extract content between braces
+        let jsonString = jsonText.trim();
+        
+        // If the JSON doesn't start with {, wrap it
+        if (!jsonString.startsWith('{')) {
+          jsonString = '{' + jsonString + '}';
+        }
+        
+        // Unescape quotes in the JSON string
+        jsonString = jsonString.replace(/\\\"/g, '"');
+        const simpleJson = JSON.parse(jsonString);
+        
+        // Convert simple format to JSON Schema format
+        const schema = {
+          type: 'object',
+          properties: {}
+        };
+        
+          Object.entries(simpleJson).forEach(([key, value]) => {
+            if (typeof value === 'object' && value !== null) {
+              // Direct object format: { "type": "string", "description": "...", "required": true, ... }
+              const property = {
+                type: value.type,
+                description: value.description || ''
+              };
+              
+              // Add additional properties if they exist
+              if (value.required === false) {
+                property.required = false;
+              }
+              
+              schema.properties[key] = property;
+            } else if (typeof value === 'string') {
+              // Parse "type - description" format
+              const parts = value.split(' - ');
+              const type = parts[0].trim();
+              const description = parts[1] ? parts[1].trim() : '';
+              
+              schema.properties[key] = {
+                type: type,
+                description: description
+              };
+            }
+          });
+        
+        return schema;
+      }
+      
+      return null;
     } catch (error) {
       return null;
     }

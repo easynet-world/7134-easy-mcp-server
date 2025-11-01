@@ -24,5 +24,12 @@ module.exports = {
   resetModules: false,
   
   // Verbose output for debugging
-  verbose: true
+  verbose: true,
+  moduleFileExtensions: ['js', 'ts', 'json'],
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest'
+  },
+  transformIgnorePatterns: [
+    '/node_modules/'
+  ]
 };

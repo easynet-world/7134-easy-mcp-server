@@ -4,6 +4,9 @@
  */
 
 const fs = require('fs');
+// Ensure fs methods are mockable in this suite
+fs.existsSync = fs.existsSync && fs.existsSync.mockReturnValue ? fs.existsSync : jest.fn();
+fs.readFileSync = fs.readFileSync && fs.readFileSync.mockReturnValue ? fs.readFileSync : jest.fn();
 const AnnotationParser = require('../src/utils/annotation-parser');
 const OpenAPIGenerator = require('../src/core/openapi-generator');
 

@@ -3,7 +3,7 @@ describe('MCP tools/list merges bridge tools (HTTP MCP)', () => {
     jest.resetModules();
 
     // Mock bridge to return tools
-    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp-bridge.js');
+    const bridgeModulePath = require('path').resolve(__dirname, '../src/utils/mcp/mcp-bridge.js');
     jest.doMock(bridgeModulePath, () => {
       return function MockBridge() {
         return {
@@ -29,7 +29,7 @@ describe('MCP tools/list merges bridge tools (HTTP MCP)', () => {
       };
     });
 
-    const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+    const DynamicAPIMCPServer = require('../src/mcp');
     const BridgeReloader = require('../src/utils/mcp-bridge-reloader');
     const reloader = new BridgeReloader();
     const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, { bridgeReloader: reloader });

@@ -4,7 +4,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('MCP Auto-Discovery and Hot Reloading', () => {
   let mcpServer;

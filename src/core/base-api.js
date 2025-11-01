@@ -1,8 +1,16 @@
-const AnnotationParser = require('../utils/annotation-parser');
-
 /**
  * Base API Class
  * Provides common OpenAPI structure and MCP integration for all API endpoints
+ * 
+ * Subclasses should define the following properties:
+ * - description: string - Description of the API endpoint
+ * - summary: string - Brief summary of the API endpoint
+ * - tags: array - Tags for grouping endpoints
+ * - requestBodySchema: object - JSON schema for request body
+ * - responseSchema: object - JSON schema for response
+ * - errorResponses: object - Error response schemas
+ * - pathParametersSchema: object - Path parameters schema
+ * - queryParametersSchema: object - Query parameters schema
  */
 
 class BaseAPI {
@@ -18,7 +26,7 @@ class BaseAPI {
 
   /**
    * Get OpenAPI specification
-   * Auto-generates response schema from runtime analysis and annotations
+   * Auto-generates response schema from subclass properties
    * @returns {Object} OpenAPI specification
    */
   get openApi() {
@@ -26,7 +34,6 @@ class BaseAPI {
       summary: this.summary || 'API endpoint summary',
       description: this.description || 'API endpoint description',
       tags: this.tags || ['api'],
-      // Response schema auto-generated from runtime analysis and annotations!
     };
 
     // Add request body schema if available
@@ -40,6 +47,24 @@ class BaseAPI {
           }
         }
       };
+    }
+
+    // Add path parameters if available
+    const pathParameters = this.pathParametersSchema;
+    const queryParameters = this.queryParametersSchema;
+    
+    let allParameters = [];
+    
+    if (pathParameters) {
+      allParameters = allParameters.concat(this.formatPathParameters(pathParameters));
+    }
+    
+    if (queryParameters) {
+      allParameters = allParameters.concat(this.formatQueryParameters(queryParameters));
+    }
+    
+    if (allParameters.length > 0) {
+      baseSpec.parameters = allParameters;
     }
 
     // Add response schemas if available
@@ -71,79 +96,236 @@ class BaseAPI {
   }
 
   /**
-   * Get description from JSDoc annotations or fallback to default
-   * @returns {string} Description from @description annotation or default
+   * Get description from subclass property or fallback to default
+   * @returns {string} Description from subclass property or default
    */
   get description() {
-    return this._getAnnotationValue('description') || 'API endpoint description';
+    return this._description || 'API endpoint description';
   }
 
   /**
-   * Get summary from JSDoc annotations or fallback to default
-   * @returns {string} Summary from @summary annotation or default
+   * Set description from subclass via super.description = '...'
+   */
+  set description(value) {
+    this._description = value;
+  }
+
+  /**
+   * Get summary from subclass property or fallback to default
+   * @returns {string} Summary from subclass property or default
    */
   get summary() {
-    return this._getAnnotationValue('summary') || 'API endpoint summary';
+    return this._summary || 'API endpoint summary';
   }
 
   /**
-   * Get tags from JSDoc annotations or fallback to default
-   * @returns {Array} Tags from @tags annotation or default
+   * Set summary from subclass via super.summary = '...'
+   */
+  set summary(value) {
+    this._summary = value;
+  }
+
+  /**
+   * Get tags from subclass property or fallback to default
+   * @returns {Array} Tags from subclass property or default
    */
   get tags() {
-    const tagsValue = this._getAnnotationValue('tags');
-    if (tagsValue && Array.isArray(tagsValue)) {
-      return tagsValue;
-    }
-    return ['api'];
+    return this._tags || ['api'];
   }
 
   /**
-   * Get request body schema from JSDoc annotations
+   * Set tags from subclass via super.tags = ['a', 'b']
+   */
+  set tags(value) {
+    this._tags = Array.isArray(value) ? value : ['api'];
+  }
+
+  /**
+   * Get request body schema from subclass property
    * @returns {Object|null} Request body schema or null if not specified
    */
   get requestBodySchema() {
-    return this._getAnnotationValue('requestBody');
+    return this._requestBodySchema || null;
   }
 
   /**
-   * Get response schema from JSDoc annotations
+   * Unified input setter/getter
+   * Set via: super.input = { body, query, path }
+   */
+  set input(value) {
+    if (!value || typeof value !== 'object') return;
+    if (value.body) this._requestBodySchema = value.body;
+    if (value.query) this._queryParametersSchema = value.query;
+    if (value.path) this._pathParametersSchema = value.path;
+  }
+
+  get input() {
+    return {
+      body: this.requestBodySchema,
+      query: this.queryParametersSchema,
+      path: this.pathParametersSchema
+    };
+  }
+
+  /**
+   * Get response schema from subclass property
    * @returns {Object|null} Response schema or null if not specified
    */
   get responseSchema() {
-    return this._getAnnotationValue('responseSchema');
+    if (this._responseSchema) {
+      return this._responseSchema;
+    }
+
+    // If a model class is provided, derive schema automatically
+    const ctor = this.constructor;
+    const explicitModel = this._modelClass || ctor.model;
+    if (explicitModel) {
+      const baseSchema = BaseAPI.jsonSchemaFromClass(explicitModel);
+      if (!baseSchema) return null;
+
+      // Infer container shape from API class name if not explicitly set
+      const rootKey = this._responseRootKey || BaseAPI.inferResourceKeyFromApiClass(ctor.name);
+      const isArray = this._responseItemsClass || BaseAPI.inferIsArrayFromApiClass(ctor.name);
+
+      if (isArray) {
+        return {
+          type: 'object',
+          properties: {
+            [rootKey]: {
+              type: 'array',
+              items: baseSchema
+            }
+          },
+          required: [rootKey]
+        };
+      }
+
+      // Single object response
+      return baseSchema;
+    }
+
+    // If array items class and a root key are provided, build object schema
+    if (this._responseItemsClass && this._responseRootKey) {
+      const itemsSchema = BaseAPI.jsonSchemaFromClass(this._responseItemsClass);
+      if (itemsSchema) {
+        return {
+          type: 'object',
+          properties: {
+            [this._responseRootKey]: {
+              type: 'array',
+              items: itemsSchema
+            }
+          },
+          required: [this._responseRootKey]
+        };
+      }
+    }
+
+    return null;
   }
 
   /**
-   * Get error responses from JSDoc annotations
+   * Get error responses from subclass property
    * @returns {Object|null} Error responses or null if not specified
    */
   get errorResponses() {
-    const responsesValue = this._getAnnotationValue('errorResponses');
-    if (responsesValue) {
-      const formattedResponses = {};
-      
-      // Format error responses for OpenAPI
-      Object.entries(responsesValue).forEach(([statusCode, response]) => {
-        formattedResponses[statusCode] = {
-          description: response.description || `Error ${statusCode}`,
-          content: {
-            'application/json': {
-              schema: response.schema || {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean', example: false },
-                  error: { type: 'string' }
-                }
-              }
-            }
-          }
-        };
-      });
-      
-      return formattedResponses;
+    return this._errorResponses || null;
+  }
+
+  /**
+   * Get path parameters schema from subclass property
+   * @returns {Object|null} Path parameters schema or null if not specified
+   */
+  get pathParametersSchema() {
+    return this._pathParametersSchema || null;
+  }
+
+  /**
+   * Format path parameters schema for OpenAPI
+   * @param {Object} pathSchema - Path parameters schema
+   * @returns {Array} Formatted parameters array for OpenAPI
+   */
+  formatPathParameters(pathSchema) {
+    if (!pathSchema || !pathSchema.properties) {
+      return [];
+    }
+
+    const parameters = [];
+
+    Object.entries(pathSchema.properties).forEach(([name, schema]) => {
+      const parameter = {
+        name: name,
+        in: 'path',
+        required: true, // Path parameters are always required
+        schema: {
+          type: schema.type,
+          description: schema.description
+        }
+      };
+
+      // Add description if available
+      if (schema.description) {
+        parameter.description = schema.description;
+      }
+
+      parameters.push(parameter);
+    });
+
+    return parameters;
+  }
+
+  /**
+   * Get query parameters schema from subclass property
+   * @returns {Object|null} Query parameters schema or null if not specified
+   */
+  get queryParametersSchema() {
+    if (this._queryParametersSchema) {
+      return this._queryParametersSchema;
+    }
+    // Fallback: if model class exposes a static querySchema, use it
+    const ctor = this.constructor;
+    const explicitModel = this._modelClass || ctor.model;
+    if (explicitModel && typeof explicitModel.querySchema === 'object') {
+      return explicitModel.querySchema;
     }
     return null;
+  }
+
+  /**
+   * Format query parameters schema for OpenAPI
+   * @param {Object} querySchema - Query parameters schema
+   * @returns {Array} Formatted parameters array for OpenAPI
+   */
+  formatQueryParameters(querySchema) {
+    if (!querySchema || !querySchema.properties) {
+      return [];
+    }
+
+    const parameters = [];
+    const required = querySchema.required || [];
+
+    Object.entries(querySchema.properties).forEach(([name, schema]) => {
+      const parameter = {
+        name: name,
+        in: 'query',
+        schema: schema,
+        required: required.includes(name)
+      };
+
+      // Add description if available
+      if (schema.description) {
+        parameter.description = schema.description;
+      }
+
+      // Add example if available
+      if (schema.example !== undefined) {
+        parameter.example = schema.example;
+      }
+
+      parameters.push(parameter);
+    });
+
+    return parameters;
   }
 
   /**
@@ -155,54 +337,81 @@ class BaseAPI {
   }
 
   /**
-   * Extract value from JSDoc annotation using AnnotationParser
-   * @param {string} annotationName - Name of the annotation (e.g., 'description', 'summary')
-   * @returns {any} Value of the annotation or null if not found
-   * @private
+   * Output schema convenience accessor
+   * Set via: super.output = schema
    */
-  _getAnnotationValue(annotationName) {
+  set output(schema) {
+    this._responseSchema = schema;
+  }
+
+  get output() {
+    return this.responseSchema;
+  }
+
+  /**
+   * Convert a simple class into a JSON Schema by introspecting a default instance
+   * Only supports primitive fields (string, number, boolean) and ignores functions/undefined
+   * @param {Function} ClassRef - Constructor function for the model
+   * @returns {Object|null} JSON Schema object or null if derivation failed
+   */
+  static jsonSchemaFromClass(ClassRef) {
     try {
-      // Get the constructor function
-      const constructor = this.constructor;
-      
-      // Find the module that contains this class
-      let modulePath = null;
-      for (const key in require.cache) {
-        const module = require.cache[key];
-        if (module && module.exports && module.exports === constructor) {
-          modulePath = key;
-          break;
+      const instance = new ClassRef();
+      if (!instance || typeof instance !== 'object') {
+        return null;
+      }
+
+      const properties = {};
+      const required = [];
+
+      Object.keys(instance).forEach((key) => {
+        const value = instance[key];
+        if (value === undefined || typeof value === 'function') {
+          return;
         }
-      }
-      
-      // If not found in require.cache, try to find it in the current module
-      if (!modulePath) {
-        const stackTrace = new Error().stack;
-        const stackLines = stackTrace.split('\n');
-        
-        // Find the first line that's not from BaseAPI
-        for (const line of stackLines) {
-          if (!line.includes('base-api.js') && line.includes('(')) {
-            const fileMatch = line.match(/\((.+):\d+:\d+\)/);
-            if (fileMatch) {
-              modulePath = fileMatch[1];
-              break;
-            }
-          }
+        const typeOf = typeof value;
+        let jsonType = null;
+        if (typeOf === 'string') jsonType = 'string';
+        else if (typeOf === 'number') jsonType = Number.isInteger(value) ? 'integer' : 'number';
+        else if (typeOf === 'boolean') jsonType = 'boolean';
+        else if (Array.isArray(value)) jsonType = 'array';
+        else if (typeOf === 'object') jsonType = 'object';
+
+        if (jsonType) {
+          properties[key] = { type: jsonType };
+          required.push(key);
         }
-      }
-      
-      if (modulePath) {
-        const className = constructor.name;
-        return AnnotationParser.getAnnotationValue(className, annotationName, modulePath);
-      }
-      
-      return null;
-    } catch (error) {
-      // If anything goes wrong, return null
+      });
+
+      return {
+        type: 'object',
+        properties,
+        required
+      };
+    } catch (_e) {
       return null;
     }
+  }
+
+  /**
+   * Infer response root key from API class name (e.g., GetUsers -> 'users')
+   */
+  static inferResourceKeyFromApiClass(apiClassName) {
+    if (!apiClassName || typeof apiClassName !== 'string') return 'items';
+    const name = apiClassName.replace(/^(Get|Post|Put|Patch|Delete)/, '');
+    const lower = name.charAt(0).toLowerCase() + name.slice(1);
+    return lower || 'items';
+  }
+
+  /**
+   * Infer if response should be an array from API class name ("...s" -> array)
+   */
+  static inferIsArrayFromApiClass(apiClassName) {
+    if (!apiClassName || typeof apiClassName !== 'string') return false;
+    const name = apiClassName.replace(/^(Get|Post|Put|Patch|Delete)/, '');
+    return /s$/.test(name);
   }
 }
 
 module.exports = BaseAPI;
+

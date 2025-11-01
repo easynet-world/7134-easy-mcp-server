@@ -7,7 +7,7 @@ describe('MCP Bridge endpoints', () => {
   beforeAll(() => {
     jest.resetModules();
     process.env.EASY_MCP_SERVER_MCP_ENABLED = 'false'; // avoid starting internal MCP ws server
-    serverModule = require('../src/server');
+    serverModule = require('../src/app/server');
     app = serverModule.app;
   });
 

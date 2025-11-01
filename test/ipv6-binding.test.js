@@ -1,5 +1,5 @@
 const net = require('net');
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 
 describe('IPv6 Binding Fix for Kubernetes Compatibility', () => {
   let mcpServer;

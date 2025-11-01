@@ -18,7 +18,6 @@
   "author": "easynet.world",
   "license": "MIT",
   "dependencies": {
-    "easy-mcp-server": "^1.0.0"
+    "easy-mcp-server": "file:.."
   }
 }
-

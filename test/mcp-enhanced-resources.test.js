@@ -3,7 +3,7 @@
  * Tests support for any file format and automatic {{params}} template support
  */
 
-const DynamicAPIMCPServer = require('../src/mcp/mcp-server');
+const DynamicAPIMCPServer = require('../src/mcp');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');

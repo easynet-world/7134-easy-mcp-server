@@ -291,12 +291,321 @@ class GetUser extends BaseAPI {
 ```
 
 **Supported JSDoc Annotations:**
-- `@description` - API endpoint description
-- `@summary` - Brief summary for documentation  
-- `@tags` - Categorization tags (comma-separated)
-- `@requestBody` - JSON schema for request body validation
-- `@responseSchema` - JSON schema for response structure
-- `@errorResponses` - Error response definitions
+
+| Annotation | Purpose | Example |
+|------------|---------|---------|
+| `@description` | API endpoint description | `@description Get user information with optional filtering` |
+| `@summary` | Brief summary for documentation | `@summary Retrieve user details` |
+| `@param` | Path parameters (JSON format) | `@param { "id": { "type": "string", "description": "Product ID" } }` |
+| `@body` | Request body JSON schema | `@body { "name": { "type": "string", "description": "Product name" } }` |
+| `@query` | Query parameters (JSON format) | `@query { "limit": { "type": "integer", "description": "Number of items" } }` |
+| `@response` | Response schema (JSON format) | `@response { "data": { "type": "array", "description": "List of items" } }` |
+| `@errorResponses` | Error response definitions | `@errorResponses { "400": { "description": "Bad request" } }` |
+
+**Supported Data Types:**
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `string` | Text data | `"name": { "type": "string", "description": "User name" }` |
+| `integer` | Whole numbers | `"age": { "type": "integer", "description": "User age" }` |
+| `number` | Decimal numbers | `"price": { "type": "number", "description": "Product price" }` |
+| `boolean` | True/false values | `"active": { "type": "boolean", "description": "Active status" }` |
+| `array` | List of items | `"items": { "type": "array", "description": "List of products" }` |
+| `object` | Complex data structure | `"user": { "type": "object", "description": "User object" }` |
+
+**Supported Properties:**
+
+| Property | Purpose | Usage | Example |
+|----------|---------|-------|---------|
+| `type` | Data type (required) | Always specify | `"type": "string"` |
+| `description` | Human-readable description | Always recommended | `"description": "Product name"` |
+| `required` | Field requirement | Only set when `false` | `"required": false` |
+
+**Required Property Logic:**
+
+- ✅ **Default**: All fields are `required: true` by default
+- ✅ **Explicit False**: Only specify `"required": false` when field is optional
+- ✅ **Never Specify True**: Don't write `"required": true` (it's redundant)
+
+**Complete Example:**
+
+```javascript
+/**
+ * @description Get users with optional filtering
+ * @summary Retrieve user list
+ * @query {
+ *   "active": {
+ *     "type": "boolean",
+ *     "description": "Filter by active status",
+ *     "required": false
+ *   },
+ *   "role": {
+ *     "type": "string",
+ *     "description": "Filter by user role",
+ *     "enum": ["admin", "user"],
+ *     "required": false
+ *   }
+ * }
+ * @response {
+ *   "users": {
+ *     "type": "array",
+ *     "description": "List of users"
+ *   },
+ *   "total": {
+ *     "type": "integer",
+ *     "description": "Total count"
+ *   }
+ * }
+ */
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    const { active, role } = req.query;
+    // Implementation...
+  }
+}
+```
+
+---
+
+## **Framework Architecture**
+
+### Core Principles
+
+| Principle | Implementation | Result |
+|-----------|----------------|--------|
+| **Convention over Configuration** | `api/users/profile/get.js` | `GET /users/profile` |
+| **HTTP Method Mapping** | `post.js` | `POST` method |
+| **Dynamic Routes** | `api/users/[id]/get.js` | `GET /users/:id` |
+| **Single Responsibility** | `process(req, res)` | Complete API ecosystem |
+
+### File Structure Mapping
+
+```
+api/                    # API endpoints
+├── users/
+│   ├── get.js         # GET /users
+│   └── post.js        # POST /users
+└── products/
+    ├── get.js         # GET /products
+    ├── post.js        # POST /products
+    └── [id]/          # Dynamic route
+        └── get.js     # GET /products/:id
+```
+
+### Endpoint Export Options
+
+You can define endpoints in three ways:
+
+1) Extend the `BaseAPI` class (recommended for OpenAPI and schema features):
+
+```javascript
+const BaseAPI = require('easy-mcp-server/base-api');
+
+class GetUsers extends BaseAPI {
+  process(req, res) {
+    // Your business logic here
+    res.json({ users: [] });
+  }
+}
+
+module.exports = GetUsers;
+```
+
+2) Export a plain handler function:
+
+```javascript
+// api/users/get.js
+module.exports = (req, res) => {
+  res.json({ users: [] });
+};
+```
+
+3) Export an object with a `process(req, res)` method:
+
+```javascript
+// api/users/get.js
+module.exports = {
+  process(req, res) {
+    res.json({ users: [] });
+  }
+};
+```
+
+Notes:
+- BaseAPI provides OpenAPI generation and annotation parsing; plain functions/objects will not auto-generate specs.
+- All forms are supported by the loader and mapped by file path and method name.
+
+### Enhanced API with AI Integration
+
+```javascript
+const { BaseAPIEnhanced } = require('easy-mcp-server/lib/base-api-enhanced');
+
+class MyEnhancedAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('my-service', {
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
+    });
+  }
+
+  async process(req, res) {
+    // AI and utility services available
+    this.responseUtils.sendSuccessResponse(res, { data: 'Hello World' });
+  }
+}
+```
+
+---
+
+## **Development Workflow**
+
+### Real-time Development Features
+
+- ✅ **API Files**: Instant detection of `api/**/*.js` file modifications
+- ✅ **Middleware**: Immediate application of `middleware.js` changes
+- ✅ **Prompts**: Real-time updates for `mcp/prompts/` file changes
+- ✅ **Resources**: Automatic reload of `mcp/resources/` modifications
+- ✅ **Environment**: Seamless `.env` file change detection
+- ✅ **MCP Bridge**: Automatic bridge restart on configuration changes
+
+### Development Benefits
+
+- 🔄 **Zero Restart**: Immediate change application
+- 📦 **Dependency Management**: Automatic installation of missing packages
+- 🚀 **Rapid Development**: Instant feedback loop
+- 🛡️ **Error Handling**: Graceful management of invalid configurations
+- 🧹 **Resource Management**: Automatic cleanup of deprecated middleware
+
+### Middleware Management
+
+```javascript
+// api/middleware.js - Global middleware
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+};
+
+module.exports = [authenticate];
+```
+
+---
+
+## **AI Agent Integration**
+
+### Model Context Protocol (MCP) Integration
+
+easy-mcp-server provides native AI agent integration through the Model Context Protocol (MCP) 2024-11-05 standard. Every API endpoint automatically becomes an AI-callable tool.
+
+### Connection Setup
+
+**WebSocket Connection:**
+```
+ws://localhost:8888
+```
+
+**HTTP Connection:**
+```
+POST http://localhost:8888/mcp
+Content-Type: application/json
+```
+
+### Initialize Connection
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": {}
+    },
+    "clientInfo": {
+      "name": "my-ai-agent",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+### List Available Tools
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list"
+}
+```
+
+### Call API Tools
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_users",
+    "arguments": {
+      "active": true
+    }
+  }
+}
+```
+
+### AI Resource Configuration
+
+```bash
+# Configure AI prompt templates
+mkdir -p mcp/prompts
+echo 'Analyze {{data}} and generate {{report_type}} report' > mcp/prompts/analysis.md
+
+# Setup AI resource documentation
+mkdir -p mcp/resources
+echo '# API Guide\n\nThis API helps you manage users and products.' > mcp/resources/guide.md
+```
+
+**Outcome**: AI models gain access to your prompts and documentation resources.
+
+---
+
+## **Production Deployment**
+
+### Production Features
+
+| Feature | Description |
+|---------|-------------|
+| **Auto Discovery** | Automatic loading of APIs and resources |
+| **AI Integration** | Complete AI model integration |
+| **Health Checks** | Built-in health monitoring |
+| **Graceful Degradation** | Server continues running even if some APIs fail |
+| **Error Recovery** | Automatic retry mechanism for failed initializations |
+
+### Deployment Configuration
+
+```bash
+# Production environment variables
+EASY_MCP_SERVER_PRODUCTION_MODE=true
+EASY_MCP_SERVER_LOG_LEVEL=info
+EASY_MCP_SERVER_QUIET=false
+```
+
+### Health Monitoring
+
+- ✅ **Server stays running** even if some APIs fail to initialize
+- ✅ **Failed APIs return 503** with helpful error messages
+- ✅ **Automatic retry mechanism** for failed initializations
+- ✅ **Enhanced health checks** showing API status
+
+### Static File Serving
+
+```bash
+# Create static files directory
+mkdir public
+echo '<h1>Hello World!</h1>' > public/index.html
+```
 
 ---
 
@@ -567,25 +876,17 @@ EASY_MCP_SERVER_QUIET=false
 
 ---
 
-## **Documentation Resources**
-
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| **[Development Guide](DEVELOPMENT.md)** | Comprehensive development documentation with Express migration guide, middleware patterns, and advanced features | Deep development, enterprise migration, production deployment |
-| **[LLM Context](LLM.txt)** | LLM-specific information and context for AI model integration | AI model integration |
-| **[Example Project](example-project/)** | Complete working example with users/products APIs, AI integration, and JSDoc annotations | Learning by example, best practices reference |
-
----
-
 ## **Troubleshooting Guide**
 
 ### Common Issues
+
 1. **Port conflicts**: Use `EASY_MCP_SERVER_PORT=8888` to set different port
 2. **APIs not working**: Check file paths and HTTP method naming
 3. **AI features not showing**: Ensure files are in `mcp/prompts/` and `mcp/resources/` directories
 4. **Hot reload not working**: Hot reload is enabled by default in development. It's only disabled when `EASY_MCP_SERVER_PRODUCTION_MODE=true`
 
 ### Quick Test
+
 ```bash
 # Test server health
 curl http://localhost:8887/health
@@ -601,9 +902,34 @@ echo 'console.log("Hot reload test");' >> api/test.js
 ```
 
 ### Debug Mode
+
 ```bash
 EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 ```
+
+### MCP Bridge Tool Issues
+
+**Problem**: Bridge MCP servers returning "Tool not found" errors
+```
+-32602 error, Tool not found: chrome_new_page
+```
+
+**Root Cause**: Tool name prefix conflicts between easy-mcp-server and bridge servers
+
+**Solution**: Use original tool names from bridge MCP servers without prefixes
+
+**Example**:
+- ✅ Correct: `new_page` (original tool name)
+- ❌ Incorrect: `chrome_new_page` (with prefix)
+
+---
+
+## **Documentation Resources**
+
+| Document | Purpose | Best For |
+|----------|---------|----------|
+| **[Example Project](example-project/)** | Complete working example with users/products APIs, AI integration, and JSDoc annotations | Learning by example, best practices reference |
+| **[LLM Context](LLM.txt)** | LLM-specific information and context for AI model integration | AI model integration |
 
 ---
 
@@ -620,7 +946,6 @@ EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
 ## **Support & Resources**
 
 - **Issues**: [GitHub Issues](https://github.com/easynet-world/7134-easy-mcp-server/issues)
-- **Documentation**: [Development Guide](DEVELOPMENT.md) - Comprehensive development documentation with Express migration guide
 - **Example Project**: Complete working example in `example-project/` directory with users/products APIs, dynamic routes, AI integration, and JSDoc annotations
 
 ---

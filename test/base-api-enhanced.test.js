@@ -176,8 +176,11 @@ describe('BaseAPIEnhanced', () => {
       const prompt = 'Test prompt';
       const options = { maxTokens: 100 };
       const generatedText = 'Generated response';
-
-      api.llm.generate.mockResolvedValue(generatedText);
+      if (api.llm && typeof api.llm.generate === 'function' && api.llm.generate._isMockFunction) {
+        api.llm.generate.mockResolvedValue(generatedText);
+      } else {
+        api.llm.generate = jest.fn().mockResolvedValue(generatedText);
+      }
 
       const result = await api.generateText(prompt, options);
 
@@ -195,6 +198,9 @@ describe('BaseAPIEnhanced', () => {
       const prompt = 'Test prompt';
       const chunks = ['Hello', ' ', 'World'];
       
+      if (!api.llm || !api.llm.generateStream || !api.llm.generateStream._isMockFunction) {
+        api.llm.generateStream = jest.fn();
+      }
       api.llm.generateStream.mockImplementation(async function* () {
         for (const chunk of chunks) {
           yield chunk;
@@ -220,6 +226,9 @@ describe('BaseAPIEnhanced', () => {
       const uri = 'resource://test';
       const resource = { uri, name: 'Test Resource' };
 
+      if (!api.resourceLoader || !api.resourceLoader.getResource || !api.resourceLoader.getResource._isMockFunction) {
+        api.resourceLoader.getResource = jest.fn();
+      }
       api.resourceLoader.getResource.mockReturnValue(resource);
 
       const result = api.getMCPResource(uri);
@@ -232,6 +241,9 @@ describe('BaseAPIEnhanced', () => {
       const name = 'test-prompt';
       const prompt = { name, description: 'Test prompt' };
 
+      if (!api.resourceLoader || !api.resourceLoader.getPrompt || !api.resourceLoader.getPrompt._isMockFunction) {
+        api.resourceLoader.getPrompt = jest.fn();
+      }
       api.resourceLoader.getPrompt.mockReturnValue(prompt);
 
       const result = api.getMCPPrompt(name);
@@ -247,6 +259,9 @@ describe('BaseAPIEnhanced', () => {
       const content = '# Test Content';
       const resource = { uri, name, description, content };
 
+      if (!api.resourceLoader || !api.resourceLoader.createMarkdownResource || !api.resourceLoader.createMarkdownResource._isMockFunction) {
+        api.resourceLoader.createMarkdownResource = jest.fn();
+      }
       api.resourceLoader.createMarkdownResource.mockReturnValue(resource);
 
       const result = api.createMarkdownResource(uri, name, description, content);

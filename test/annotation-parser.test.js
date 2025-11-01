@@ -702,6 +702,134 @@ describe('AnnotationParser', () => {
     });
   });
 
+  describe('@queryParameters Annotation Parsing', () => {
+    test('should parse @queryParameters with simple parameters', () => {
+      const sourceCode = `
+        /**
+         * @query { "limit": { "type": "integer", "description": "Number of items to return" }, "offset": { "type": "integer", "description": "Number of items to skip" } }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('queryParameters');
+      
+      const queryParams = result.queryParameters;
+      expect(queryParams.type).toBe('object');
+      expect(queryParams.properties.limit).toBeDefined();
+      expect(queryParams.properties.limit.type).toBe('integer');
+      expect(queryParams.properties.limit.description).toBe('Number of items to return');
+      expect(queryParams.properties.offset).toBeDefined();
+      expect(queryParams.properties.offset.type).toBe('integer');
+    });
+
+    test('should parse @queryParameters with required fields', () => {
+      const sourceCode = `
+        /**
+         * @query { "id": { "type": "string", "description": "Resource ID" }, "include": { "type": "string", "description": "Additional data to include" } }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('queryParameters');
+      
+      const queryParams = result.queryParameters;
+      expect(queryParams.properties.id).toBeDefined();
+      expect(queryParams.properties.id.type).toBe('string');
+      expect(queryParams.properties.id.description).toBe('Resource ID');
+      expect(queryParams.properties.include).toBeDefined();
+      expect(queryParams.properties.include.type).toBe('string');
+    });
+
+    test('should parse @queryParameters with complex types', () => {
+      const sourceCode = `
+        /**
+         * @query { "filters": { "type": "string", "description": "Filter criteria" }, "sort": { "type": "string", "description": "Sort field" } }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('queryParameters');
+      
+      const queryParams = result.queryParameters;
+      expect(queryParams.properties.filters.type).toBe('string');
+      expect(queryParams.properties.filters.description).toBe('Filter criteria');
+      expect(queryParams.properties.sort.type).toBe('string');
+      expect(queryParams.properties.sort.description).toBe('Sort field');
+    });
+
+    test('should handle malformed @queryParameters gracefully', () => {
+      const sourceCode = `
+        /**
+         * @query {
+         *   "type": "object",
+         *   "properties": {
+         *     "invalid": { "type": "string"
+         *   }
+         * }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      // Should handle gracefully and return null for malformed JSON
+      expect(result).toBeDefined();
+      expect(result.queryParameters).toBeNull();
+    });
+
+    test('should parse @queryParameters with single-line JSON', () => {
+      const sourceCode = `
+        /**
+         * @query { "page": { "type": "integer", "description": "Page number" } }
+         */
+        class TestAPI {
+          // class implementation
+        }
+      `;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(sourceCode);
+
+      const result = AnnotationParser.parseClassAnnotations('TestAPI', '/test/path.js');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('queryParameters');
+      
+      const queryParams = result.queryParameters;
+      expect(queryParams.properties.page.type).toBe('integer');
+      expect(queryParams.properties.page.description).toBe('Page number');
+    });
+  });
+
   describe('Performance and Memory', () => {
     test('should handle large files efficiently', () => {
       const largeContent = '// Large file content\n'.repeat(10000) + `
