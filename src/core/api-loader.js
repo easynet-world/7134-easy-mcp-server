@@ -197,14 +197,18 @@ class APILoader {
    * Load a single API file and register the route with graceful initialization
    */
   loadAPIFile(filePath, basePath, fileName) {
-    // Skip files in test directories entirely
+    // Skip actual test files (files ending in .test.ts, .test.js, etc.) but allow
+    // API files in test directories (like test/temp-fn-api/get.js used by tests)
     const normalizedFilePath = path.resolve(filePath).replace(/\\/g, '/');
-    if (normalizedFilePath.includes('/test/') || 
-        normalizedFilePath.includes('/__tests__/') ||
-        normalizedFilePath.includes('/__test__/') ||
-        normalizedFilePath.match(/\.test\.(ts|js)$/) ||
-        normalizedFilePath.match(/\.spec\.(ts|js)$/)) {
-      return; // Skip test files entirely
+    const normalizedFileName = path.basename(filePath);
+    
+    // Only skip files that are clearly test files (end with .test. or .spec.)
+    // Don't skip files just because they're in a directory with "test" in the name
+    if (normalizedFileName.match(/\.test\.(ts|js)$/i) ||
+        normalizedFileName.match(/\.spec\.(ts|js)$/i) ||
+        normalizedFilePath.match(/\/__tests__\/.*\.(ts|js)$/i) ||
+        normalizedFilePath.match(/\/__test__\/.*\.(ts|js)$/i)) {
+      return; // Skip actual test files
     }
     
     const httpMethod = path.parse(fileName).name.toUpperCase();
