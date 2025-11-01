@@ -7,19 +7,37 @@ const fs = require('fs');
 const path = require('path');
 // Ensure TypeScript files can be required when present
 try { 
-  const runtimeConfigPath = path.join(__dirname, '..', 'tsconfig.runtime.json');
+  const runtimeConfigPath = path.resolve(__dirname, '..', 'tsconfig.runtime.json');
+  // Verify config file exists
+  if (!fs.existsSync(runtimeConfigPath)) {
+    console.warn(`⚠️  tsconfig.runtime.json not found at ${runtimeConfigPath}`);
+  }
   require('ts-node').register({ 
     transpileOnly: true,
     project: runtimeConfigPath,
+    // Most aggressive settings to prevent type checking
     compilerOptions: {
       skipLibCheck: true,
       skipDefaultLibCheck: true,
       noResolve: false,
       typeRoots: [],
-      types: []
-    }
+      types: [],
+      // Disable type checking entirely
+      checkJs: false,
+      noImplicitAny: false,
+      strict: false,
+      // Prevent TypeScript from resolving types across files
+      isolatedModules: true
+    },
+    // Don't search for tsconfig files automatically - use only what we specify
+    skipProject: false
   }); 
-} catch (_) { /* optional at runtime/tests */ }
+} catch (err) { 
+  // Log the error for debugging but don't fail
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn('⚠️  ts-node registration failed:', err.message);
+  }
+}
 const { apiSpecTs } = require('../utils/api/openapi-helper');
 const { apiSpec, queryParam, tsSchema } = require('../utils/api/openapi-helper');
 

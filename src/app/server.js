@@ -11,6 +11,7 @@ try {
   require('ts-node').register({ 
     transpileOnly: true, 
     project: runtimeConfigPath,
+    // Most aggressive settings to prevent type checking
     compilerOptions: { 
       allowJs: false, 
       module: 'commonjs', 
@@ -18,8 +19,16 @@ try {
       skipLibCheck: true,
       skipDefaultLibCheck: true,
       typeRoots: [],
-      types: []
-    }
+      types: [],
+      // Disable type checking entirely
+      checkJs: false,
+      noImplicitAny: false,
+      strict: false,
+      // Prevent TypeScript from resolving types across files
+      isolatedModules: true
+    },
+    // Don't search for tsconfig files automatically - use only what we specify
+    skipProject: false
   });
 } catch (err) { 
   // Log the error for debugging but don't fail
