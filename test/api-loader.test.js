@@ -6,12 +6,12 @@ const {
   setupTestEnvironment
 } = require('../src/utils/test-utils');
 
-// Mock fs module
-jest.mock('fs');
-
 describe('APILoader', () => {
   let apiLoader;
   let mockApp;
+  let existsSpy;
+  let readdirSpy;
+  let statSpy;
 
   setupTestEnvironment();
 
@@ -24,10 +24,18 @@ describe('APILoader', () => {
     // Reset all mocks
     jest.clearAllMocks();
     
-    // Set up fs mock
-    fs.existsSync = jest.fn();
-    fs.readdirSync = jest.fn();
-    fs.statSync = jest.fn();
+    // Set up fs spies so we can control behaviour without affecting other tests
+    existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    readdirSpy = jest.spyOn(fs, 'readdirSync').mockImplementation(() => []);
+    statSpy = jest.spyOn(fs, 'statSync').mockImplementation(() => ({
+      isDirectory: () => false
+    }));
+  });
+
+  afterEach(() => {
+    existsSpy.mockRestore();
+    readdirSpy.mockRestore();
+    statSpy.mockRestore();
   });
 
   describe('Constructor and Initialization', () => {
