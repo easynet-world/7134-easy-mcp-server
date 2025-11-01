@@ -16,14 +16,10 @@ describe('Function-exported API handlers', () => {
     // Clean up any existing temp directory first
     if (fs.existsSync(tempDir)) {
       try {
-        const files = fs.readdirSync(tempDir);
-        for (const f of files) {
-          fs.unlinkSync(path.join(tempDir, f));
-        }
-        fs.rmdirSync(tempDir);
+        fs.rmSync(tempDir, { recursive: true, force: true });
       } catch (_) {}
     }
-    fs.mkdirSync(tempDir);
+    fs.mkdirSync(tempDir, { recursive: true });
     apiLoader = new APILoader(app, tempDir);
   });
 

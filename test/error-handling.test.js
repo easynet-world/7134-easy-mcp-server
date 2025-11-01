@@ -18,9 +18,11 @@ describe('Error Handling Improvements', () => {
     
     // Create temporary API directory for testing
     tempApiDir = path.join(__dirname, 'temp-api');
-    if (!fs.existsSync(tempApiDir)) {
-      fs.mkdirSync(tempApiDir, { recursive: true });
+    // Always ensure directory exists (in case previous test failed)
+    if (fs.existsSync(tempApiDir)) {
+      fs.rmSync(tempApiDir, { recursive: true, force: true });
     }
+    fs.mkdirSync(tempApiDir, { recursive: true });
   });
 
   afterEach(() => {
