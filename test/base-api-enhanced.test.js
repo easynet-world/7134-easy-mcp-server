@@ -7,7 +7,7 @@ const BaseAPIEnhanced = require('../src/api/base/base-api-enhanced');
 // Mock dependencies
 jest.mock('../src/utils/logger');
 jest.mock('../src/utils/llm/llm-service');
-jest.mock('../src/utils/mcp/resource-loader');
+jest.mock('../src/utils/loaders/resource-loader');
 
 // Mock LLM service
 const { createLLMService } = require('../src/utils/llm/llm-service');
