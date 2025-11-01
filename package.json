@@ -107,6 +107,14 @@
   "engines": {
     "node": ">=16.0.0"
   },
+  "files": [
+    "index.js",
+    "src/",
+    "scripts/",
+    "README.md",
+    "CHANGELOG.md",
+    "types/"
+  ],
   "publishConfig": {
     "access": "public"
   }
