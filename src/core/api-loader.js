@@ -7,12 +7,16 @@ const fs = require('fs');
 const path = require('path');
 // Ensure TypeScript files can be required when present
 try { 
+  const runtimeConfigPath = path.join(__dirname, '..', 'tsconfig.runtime.json');
   require('ts-node').register({ 
     transpileOnly: true,
-    project: path.join(__dirname, '..', 'tsconfig.runtime.json'),
+    project: runtimeConfigPath,
     compilerOptions: {
       skipLibCheck: true,
-      skipDefaultLibCheck: true
+      skipDefaultLibCheck: true,
+      noResolve: false,
+      typeRoots: [],
+      types: []
     }
   }); 
 } catch (_) { /* optional at runtime/tests */ }

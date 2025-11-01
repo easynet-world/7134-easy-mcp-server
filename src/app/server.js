@@ -2,15 +2,18 @@ require('dotenv').config();
 // Enable TypeScript API loading (compile TS only, ignore JS)
 const path = require('path');
 try {
+  const runtimeConfigPath = path.join(__dirname, '..', 'tsconfig.runtime.json');
   require('ts-node').register({ 
     transpileOnly: true, 
-    project: path.join(__dirname, '..', 'tsconfig.runtime.json'),
+    project: runtimeConfigPath,
     compilerOptions: { 
       allowJs: false, 
       module: 'commonjs', 
       target: 'ES2020',
       skipLibCheck: true,
-      skipDefaultLibCheck: true
+      skipDefaultLibCheck: true,
+      typeRoots: [],
+      types: []
     } 
   });
 } catch (_) { /* optional */ }
