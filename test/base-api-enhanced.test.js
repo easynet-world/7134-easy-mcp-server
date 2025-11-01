@@ -6,11 +6,11 @@ const BaseAPIEnhanced = require('../src/lib/api/base-api-enhanced');
 
 // Mock dependencies
 jest.mock('../src/utils/logger');
-jest.mock('../src/lib/llm-service');
+jest.mock('../src/lib/llm/llm-service');
 jest.mock('../src/utils/resource-loader');
 
 // Mock LLM service
-const { createLLMService } = require('../src/lib/llm-service');
+const { createLLMService } = require('../src/lib/llm/llm-service');
 createLLMService.mockImplementation(() => ({
   initialize: jest.fn().mockResolvedValue(),
   generate: jest.fn().mockResolvedValue('Mock response'),
