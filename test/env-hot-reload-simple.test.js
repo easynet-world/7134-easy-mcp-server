@@ -27,7 +27,7 @@ describe('Environment Hot Reload - Simple', () => {
   });
 
   test('should detect .env file changes and reload environment variables', (done) => {
-    const EnvHotReloader = require('../src/utils/env-hot-reloader');
+    const EnvHotReloader = require('../src/utils/loaders/env-hot-reloader');
     
     // Create initial .env file
     const envFile = path.join(tempDir, '.env');

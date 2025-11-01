@@ -3,7 +3,7 @@ const fs = require('fs');
 
 describe('MCP (Model Context Protocol) Support', () => {
   test('MCP server file exists in src directory', () => {
-    const mcpServerPath = path.join(__dirname, '..', 'src', 'mcp', 'core', 'mcp-server.js');
+    const mcpServerPath = path.join(__dirname, '..', 'src', 'mcp', 'mcp-server.js');
     expect(fs.existsSync(mcpServerPath)).toBe(true);
   });
 
