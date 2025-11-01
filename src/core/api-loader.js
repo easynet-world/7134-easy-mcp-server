@@ -253,22 +253,47 @@ class APILoader {
         const errorMsg = String(requireError.message || requireError);
         const isTestFileRelated = errorMsg.includes('TestMixedAPI') ||
                                  errorMsg.includes('tsconfig.json:19:9') ||
-                                 errorMsg.includes('TS1005');
+                                 errorMsg.includes('TS1005') ||
+                                 errorMsg.includes('tsconfig.json');
         const isCurrentFileTestFile = filePath.match(/\.test\.(ts|js)$/i) ||
                                      filePath.match(/\.spec\.(ts|js)$/i);
         
         // If it's a TypeScript error about test files but we're loading a legitimate API file,
-        // try compiling with transpileOnly to skip type checking
+        // try to compile it directly using ts-node's compiler, bypassing type checking
         if (isTestFileRelated && !isCurrentFileTestFile && filePath.endsWith('.ts')) {
           try {
-            // Clear require cache
-            delete require.cache[path.resolve(filePath)];
-            // Try with a fresh ts-node compilation
-            // The error might be from type checking, not actual compilation
-            exportedModule = require(path.resolve(filePath));
-          } catch (retryError) {
-            // If retry still fails, throw the original error to be handled below
-            throw requireError;
+            // Use ts-node's compiler directly to transpile without type checking
+            const tsNode = require('ts-node');
+            const compiler = tsNode.create({
+              transpileOnly: true,
+              compilerOptions: {
+                isolatedModules: true,
+                skipLibCheck: true,
+                noEmit: false
+              }
+            });
+            
+            // Read and compile the file directly
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const compiled = compiler.compile(fileContent, filePath);
+            
+            // Evaluate the compiled code
+            const Module = require('module');
+            const m = new Module(filePath);
+            m._compile(compiled, filePath);
+            exportedModule = m.exports;
+            
+            // Cache it
+            require.cache[path.resolve(filePath)] = m;
+          } catch (compileError) {
+            // If direct compilation also fails, try one more time with fresh require
+            try {
+              delete require.cache[path.resolve(filePath)];
+              exportedModule = require(path.resolve(filePath));
+            } catch (finalError) {
+              // If all attempts fail, throw the original error to be handled below
+              throw requireError;
+            }
           }
         } else {
           throw requireError;
