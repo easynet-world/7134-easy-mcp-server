@@ -5,7 +5,13 @@ try {
   require('ts-node').register({ 
     transpileOnly: true, 
     project: path.join(__dirname, '..', 'tsconfig.json'),
-    ignore: ['(?:^|/)test/'],
+    skipIgnore: false,
+    ignore: [
+      /.*\/test\/.*/,
+      /.*\/__tests__\/.*/,
+      /.*\.test\.ts$/,
+      /.*\.spec\.ts$/
+    ],
     compilerOptions: { 
       allowJs: false, 
       module: 'commonjs', 
