@@ -6,7 +6,12 @@
 const fs = require('fs');
 const path = require('path');
 // Ensure TypeScript files can be required when present
-try { require('ts-node/register/transpile-only'); } catch (_) { /* optional at runtime/tests */ }
+try { 
+  require('ts-node').register({ 
+    transpileOnly: true,
+    project: path.join(__dirname, '..', 'tsconfig.json')
+  }); 
+} catch (_) { /* optional at runtime/tests */ }
 const { apiSpecTs } = require('../utils/api/openapi-helper');
 const { apiSpec, queryParam, tsSchema } = require('../utils/api/openapi-helper');
 
