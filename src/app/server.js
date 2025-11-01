@@ -1,13 +1,17 @@
 require('dotenv').config();
 // Enable TypeScript API loading (compile TS only, ignore JS)
+const path = require('path');
 try {
-  require('ts-node').register({ transpileOnly: true, compilerOptions: { allowJs: false, module: 'commonjs', target: 'ES2020' } });
+  require('ts-node').register({ 
+    transpileOnly: true, 
+    project: path.join(__dirname, '..', 'tsconfig.json'),
+    compilerOptions: { allowJs: false, module: 'commonjs', target: 'ES2020' } 
+  });
 } catch (_) { /* optional */ }
 const express = require('express');
 const cors = require('cors');
 
 // Import core modules
-const path = require('path');
 const APILoader = require(path.join(__dirname, '..', 'core', 'api-loader'));
 const OpenAPIGenerator = require(path.join(__dirname, '..', 'core', 'openapi-generator'));
 const DynamicAPIMCPServer = require(path.join(__dirname, '..', 'mcp'));
