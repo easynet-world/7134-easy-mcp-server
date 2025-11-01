@@ -1,4 +1,4 @@
-const HotReloader = require('../src/utils/hot-reloader');
+const HotReloader = require('../src/utils/loaders/hot-reloader');
 const chokidar = require('chokidar');
 const { 
   createMockApiLoader, 
