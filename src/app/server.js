@@ -5,7 +5,14 @@ try {
   require('ts-node').register({ 
     transpileOnly: true, 
     project: path.join(__dirname, '..', 'tsconfig.json'),
-    compilerOptions: { allowJs: false, module: 'commonjs', target: 'ES2020' } 
+    ignore: ['(?:^|/)test/'],
+    compilerOptions: { 
+      allowJs: false, 
+      module: 'commonjs', 
+      target: 'ES2020',
+      skipLibCheck: true,
+      skipDefaultLibCheck: true
+    } 
   });
 } catch (_) { /* optional */ }
 const express = require('express');
