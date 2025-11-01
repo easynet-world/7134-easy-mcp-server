@@ -13,6 +13,9 @@ describe('MCP Bridge Configuration Priority', () => {
   let packageDir;
 
   beforeEach(() => {
+    // Clean up any existing environment variables that might affect tests
+    delete process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+    
     // Create temporary directory structure
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-bridge-test-'));
     projectDir = path.join(tempDir, 'my-project');
@@ -42,7 +45,12 @@ describe('MCP Bridge Configuration Priority', () => {
 
   afterEach(() => {
     // Clean up temp directory
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    if (tempDir && fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+    
+    // Clean up environment variables
+    delete process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
   });
 
   describe('Configuration File Resolution', () => {

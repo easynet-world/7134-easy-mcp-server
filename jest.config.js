@@ -31,5 +31,11 @@ module.exports = {
   },
   transformIgnorePatterns: [
     '/node_modules/'
+  ],
+  
+  // Ignore test files in init-test-projects directory (these are generated projects, not tests)
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/test/init-test-projects/'
   ]
 };
