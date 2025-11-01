@@ -259,28 +259,31 @@ class APILoader {
                                      filePath.match(/\.spec\.(ts|js)$/i);
         
         // If it's a TypeScript error about test files but we're loading a legitimate API file,
-        // try to compile it directly using ts-node's compiler, bypassing type checking
+        // try to compile it directly using TypeScript compiler, bypassing type checking
         if (isTestFileRelated && !isCurrentFileTestFile && filePath.endsWith('.ts')) {
           try {
-            // Use ts-node's compiler directly to transpile without type checking
-            const tsNode = require('ts-node');
-            const compiler = tsNode.create({
-              transpileOnly: true,
-              compilerOptions: {
-                isolatedModules: true,
-                skipLibCheck: true,
-                noEmit: false
-              }
-            });
-            
-            // Read and compile the file directly
+            // Use TypeScript compiler directly to transpile without type checking
+            const ts = require('typescript');
             const fileContent = fs.readFileSync(filePath, 'utf8');
-            const compiled = compiler.compile(fileContent, filePath);
+            
+            // Transpile with minimal options - no type checking
+            const compiled = ts.transpileModule(fileContent, {
+              compilerOptions: {
+                target: ts.ScriptTarget.ES2020,
+                module: ts.ModuleKind.CommonJS,
+                isolatedModules: true,
+                esModuleInterop: true,
+                skipLibCheck: true,
+                // Don't report diagnostics - just transpile
+                noEmit: false
+              },
+              reportDiagnostics: false
+            });
             
             // Evaluate the compiled code
             const Module = require('module');
             const m = new Module(filePath);
-            m._compile(compiled, filePath);
+            m._compile(compiled.outputText, filePath);
             exportedModule = m.exports;
             
             // Cache it
