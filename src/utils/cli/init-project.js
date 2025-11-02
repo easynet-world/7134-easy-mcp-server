@@ -46,10 +46,17 @@ function createPackageJson(projectDir, projectName) {
     version: '1.0.0',
     description: 'Easy MCP Server project',
     main: 'index.js',
+    bin: {
+      [projectName]: './node_modules/.bin/easy-mcp-server'
+    },
     scripts: {
-      start: 'easy-mcp-server',
+      start: './start.sh',
+      stop: './stop.sh',
+      build: './build.sh',
       dev: 'easy-mcp-server',
-      test: 'jest'
+      test: 'jest',
+      'start:direct': 'easy-mcp-server',
+      'start:npx': 'npx easy-mcp-server'
     },
     dependencies: {
       'easy-mcp-server': '^1.0.93',
@@ -59,12 +66,28 @@ function createPackageJson(projectDir, projectName) {
     },
     devDependencies: {
       'nodemon': '^3.1.10',
-      'jest': '^29.7.0'
+      'jest': '^29.7.0',
+      'supertest': '^7.1.4'
     },
     keywords: ['mcp', 'api', 'framework'],
-    license: 'MIT'
+    license: 'MIT',
+    engines: {
+      node: '>=16.0.0'
+    },
+    files: [
+      'index.js',
+      'api/',
+      'mcp/',
+      'public/',
+      'start.sh',
+      'stop.sh',
+      'build.sh',
+      '.env',
+      'mcp-bridge.json',
+      'README.md'
+    ]
   };
-  
+
   fs.writeFileSync(
     path.join(projectDir, 'package.json'),
     JSON.stringify(packageJson, null, 2)
@@ -368,7 +391,7 @@ function displaySuccessMessage(projectName) {
 🚀 Next steps:
    1. cd ${projectName}
    2. npm install
-   3. ./start.sh           # Or: easy-mcp-server
+   3. ./start.sh           # Or: npm start, npm run dev, or npx easy-mcp-server
 
 📚 Your server will be available at:
   - Server: http://localhost:${'${config.port}'}
