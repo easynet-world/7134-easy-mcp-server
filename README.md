@@ -22,7 +22,12 @@ npm install
 ./start.sh
 ```
 
-**That's it!** Your API is running at **http://localhost:8887** 🎉
+**That's it!** Your **MCP server** is running at **http://localhost:8888** 🤖
+
+Plus, you get:
+- **REST API** at http://localhost:8887
+- **Swagger UI** at http://localhost:8887/docs
+- **OpenAPI spec** at http://localhost:8887/openapi.json
 
 ### 2. Write Your First Endpoint
 
@@ -61,11 +66,11 @@ module.exports = handler;
 ```
 
 **What you get:**
+- ✅ **MCP Server** - Your API endpoints automatically become MCP tools for AI agents 🤖
+- ✅ **MCP Bridge** - Connect to external MCP servers (included by default: Chrome MCP for browser automation & iTerm MCP for system operations)
 - ✅ REST API endpoints (automatic from file structure)
 - ✅ Swagger UI at `/docs` (auto-generated)
 - ✅ OpenAPI spec at `/openapi.json` (auto-generated)
-- ✅ MCP tools for AI agents (automatic)
-- ✅ **MCP Bridge** - Connect to external MCP servers (included by default: Chrome MCP for browser automation & iTerm MCP for system operations)
 - ✅ Hot reload enabled (save and see changes instantly)
 
 
@@ -84,10 +89,10 @@ api/products/[id]/get.js  → GET /products/:id
 - Request/Response classes → Auto-generated schemas
 
 **Result:**
+- 🤖 **MCP Server** - AI agents can use your endpoints as tools
 - 🚀 REST API endpoints
 - 📚 Swagger UI documentation
 - 📄 OpenAPI specification
-- 🤖 MCP tools for AI agents
 
 ---
 
@@ -152,10 +157,10 @@ After starting, access:
 
 | Service | URL |
 |---------|-----|
+| **MCP Server** 🤖 | http://localhost:8888 |
 | **REST API** | http://localhost:8887 |
 | **Swagger UI** | http://localhost:8887/docs |
 | **OpenAPI Spec** | http://localhost:8887/openapi.json |
-| **MCP Server** | http://localhost:8888 |
 
 ---
 
