@@ -102,9 +102,13 @@ describe('easy-mcp-server init command', () => {
     expect(packageJson.version).toBe('1.0.0');
     expect(packageJson.main).toBe('index.js');
     expect(packageJson.scripts).toBeDefined();
-    expect(packageJson.scripts.start).toBe('easy-mcp-server');
+    expect(packageJson.scripts.start).toBe('./start.sh');
     expect(packageJson.scripts.dev).toBe('easy-mcp-server');
     expect(packageJson.scripts.test).toBe('jest');
+    expect(packageJson.scripts.build).toBe('./build.sh');
+    expect(packageJson.scripts.stop).toBe('./stop.sh');
+    expect(packageJson.scripts['start:direct']).toBe('easy-mcp-server');
+    expect(packageJson.scripts['start:npx']).toBe('npx easy-mcp-server');
     expect(packageJson.dependencies).toBeDefined();
     expect(packageJson.dependencies['easy-mcp-server']).toBeDefined();
   });
