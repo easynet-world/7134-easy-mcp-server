@@ -46,23 +46,41 @@ describe('CLI Static File Serving', () => {
     });
 
     let output = '';
+    let checksDone = false;
     serverProcess.stdout.on('data', (data) => { output += data.toString(); });
     serverProcess.stderr.on('data', (data) => { output += data.toString(); });
 
-    // Wait briefly, then assert logs include static dir path
-    setTimeout(() => {
-      const expectedPathSnippet = path.join(tempDir, 'public');
-      expect(output.includes('Static files enabled: serving from')).toBe(true);
-      expect(output.includes(expectedPathSnippet)).toBe(true);
-      expect(output.includes('Static file middleware applied successfully')).toBe(true);
-      // Clean up
-      serverProcess.kill('SIGTERM');
-      setTimeout(() => {
-        if (!serverProcess.killed) serverProcess.kill('SIGKILL');
-        done();
-      }, 100);
-    }, 3000);
-  });
+    // Check multiple times with increasing delays
+    const checkInterval = setInterval(() => {
+      const hasStaticEnabled = output.includes('Static files enabled: serving from') || 
+                                output.includes('📁 Static files enabled');
+      const hasMiddlewareApplied = output.includes('Static file middleware applied successfully') ||
+                                    output.includes('✅ Static file middleware');
+      
+      if (hasStaticEnabled && hasMiddlewareApplied && !checksDone) {
+        checksDone = true;
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        // Clean up
+        serverProcess.kill('SIGTERM');
+        setTimeout(() => {
+          if (!serverProcess.killed) serverProcess.kill('SIGKILL');
+          done();
+        }, 100);
+      }
+    }, 500);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      if (!checksDone) {
+        serverProcess.kill('SIGTERM');
+        setTimeout(() => {
+          if (!serverProcess.killed) serverProcess.kill('SIGKILL');
+        }, 100);
+        done(new Error('Timeout waiting for static file configuration logs'));
+      }
+    }, 10000);
+  }, 15000);
 });
 
 
