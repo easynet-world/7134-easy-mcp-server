@@ -1,6 +1,15 @@
 # easy-mcp-server
 
-> **Write code once → Get REST API + OpenAPI + Swagger + MCP tools automatically**
+<h2>The easiest way to build MCP</h2>
+
+[![npm version](https://img.shields.io/npm/v/easy-mcp-server.svg)](https://www.npmjs.com/package/easy-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
+[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-UI-brightgreen.svg)](https://swagger.io/)
+
+**Write code once → Get REST API + OpenAPI + Swagger + MCP tools automatically**
 
 ## 🚀 Quick Start
 
@@ -88,11 +97,6 @@ module.exports = handler;
 - ✅ **MCP Bridge** - Connect to external MCP servers (included by default: Chrome MCP for browser automation & iTerm MCP for system operations)
 - ✅ Hot reload enabled (save and see changes instantly)
 
-[![npm version](https://img.shields.io/npm/v/easy-mcp-server.svg)](https://www.npmjs.com/package/easy-mcp-server)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
-
----
 
 ## ✨ How It Works
 
