@@ -73,7 +73,7 @@ async function startAutoServer(portConfig) {
     
     // Set up environment variables for the server
     const originalCwd = process.cwd();
-    const mainProjectPath = path.join(__dirname, '..', '..');
+    const mainProjectPath = path.join(__dirname, '..', '..', '..');
     
     // Configure environment variables
     process.env.EASY_MCP_SERVER_API_PATH = path.join(originalCwd, 'api');

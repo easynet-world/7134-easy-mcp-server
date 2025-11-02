@@ -6,9 +6,9 @@
 require('dotenv').config();
 // Enable TypeScript API loading (compile TS only, ignore JS)
 const path = require('path');
+const fs = require('fs');
 try {
   const runtimeConfigPath = path.resolve(__dirname, '..', 'tsconfig.runtime.json');
-  const fs = require('fs');
   const configExists = fs.existsSync(runtimeConfigPath);
   
   // Compiler options to use (either from file or inline)
