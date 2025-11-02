@@ -122,7 +122,8 @@
     "src/",
     "scripts/",
     "README.md",
-    "types/"
+    "types/",
+    "tsconfig.runtime.json"
   ],
   "publishConfig": {
     "access": "public"

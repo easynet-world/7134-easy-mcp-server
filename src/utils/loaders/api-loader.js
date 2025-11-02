@@ -26,30 +26,38 @@ const path = require('path');
 // Ensure TypeScript files can be required when present
 try {
   const runtimeConfigPath = path.resolve(__dirname, '..', '..', '..', 'tsconfig.runtime.json');
-  // Verify config file exists
-  if (!fs.existsSync(runtimeConfigPath)) {
-    console.warn(`⚠️  tsconfig.runtime.json not found at ${runtimeConfigPath}`);
-  }
-  require('ts-node').register({ 
+  const configExists = fs.existsSync(runtimeConfigPath);
+  
+  // Compiler options to use (either from file or inline)
+  const compilerOptions = {
+    skipLibCheck: true,
+    skipDefaultLibCheck: true,
+    noResolve: false,
+    typeRoots: [],
+    types: [],
+    // Disable type checking entirely
+    checkJs: false,
+    noImplicitAny: false,
+    strict: false,
+    // Prevent TypeScript from resolving types across files
+    isolatedModules: true
+  };
+  
+  // Register ts-node with project config if available, otherwise use inline options
+  const tsNodeConfig = {
     transpileOnly: true,
-    project: runtimeConfigPath,
-    // Most aggressive settings to prevent type checking
-    compilerOptions: {
-      skipLibCheck: true,
-      skipDefaultLibCheck: true,
-      noResolve: false,
-      typeRoots: [],
-      types: [],
-      // Disable type checking entirely
-      checkJs: false,
-      noImplicitAny: false,
-      strict: false,
-      // Prevent TypeScript from resolving types across files
-      isolatedModules: true
-    },
-    // Don't search for tsconfig files automatically - use only what we specify
-    skipProject: false
-  }); 
+    compilerOptions: compilerOptions,
+    skipProject: !configExists // Skip project lookup if config file doesn't exist
+  };
+  
+  if (configExists) {
+    tsNodeConfig.project = runtimeConfigPath;
+  } else if (process.env.NODE_ENV !== 'test') {
+    // Only warn in non-test environments
+    console.warn(`⚠️  tsconfig.runtime.json not found at ${runtimeConfigPath}, using inline compiler options`);
+  }
+  
+  require('ts-node').register(tsNodeConfig); 
 } catch (err) { 
   // Log the error for debugging but don't fail
   if (process.env.NODE_ENV !== 'test') {
