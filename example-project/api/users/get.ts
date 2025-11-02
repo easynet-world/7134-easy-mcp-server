@@ -8,10 +8,11 @@ class Request {
 
 import { User } from './models';
 
-// @description ('Response payload')
 class Response {
-  // @description ('Array of user records')
-  users: User[];
+  id: number;
+  name: string;
+  active: boolean = true;
+  email: string = '';
 }
 
 // @description('List users with optional active filter')
@@ -19,21 +20,7 @@ class Response {
 // @tags('users')
 
 function handler(req: any, res: any) {
-  // Build typed request object
-  const input = new Request();
-  if (req.query && req.query.active !== undefined) {
-    input.active = String(req.query.active) === 'true';
-  }
-
-  // Build typed response object
-  const all: User[] = [
-    { id: 1, name: 'John', active: true, email: 'john@example.com' },
-    { id: 2, name: 'Jane', active: false, email: 'jane@example.com' }
-  ];
-  const output = new Response();
-  output.users = input.active !== undefined ? all.filter(u => u.active === input.active) : all;
-
-  res.json(output);
+  res.json({ id: 1, name: 'John', active: true, email: 'john@example.com' });
 }
 
 module.exports = handler;

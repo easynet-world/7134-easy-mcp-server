@@ -30,6 +30,14 @@ class ToolBuilder {
   }
 
   /**
+   * Convert OpenAPI schema to JSON Schema format
+   * This is a helper method that delegates to SchemaNormalizer
+   */
+  convertOpenAPIToJSONSchema(openApiSchema) {
+    return this.schemaNormalizer.normalizeNestedSchema(openApiSchema);
+  }
+
+  /**
    * Build tool definition from a route
    */
   buildToolFromRoute(route, { warn, getLoadedRoutes, bridgeReloader } = {}) {
