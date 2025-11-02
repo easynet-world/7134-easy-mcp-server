@@ -406,7 +406,12 @@ module.exports = PostExample;
 
 # Load environment variables from .env file
 if [ -f .env ]; then
-  export $(cat .env | grep -v '^#' | xargs)
+  # Strip inline comments and empty lines, then export variables
+  # This handles both full-line comments (already skipped) and inline comments
+  # Using process substitution to source the cleaned .env file
+  set -a
+  source <(grep -v '^[[:space:]]*#' .env | grep -v '^[[:space:]]*$' | sed 's/[[:space:]]*#.*$//')
+  set +a
   echo "📄 Loaded environment variables from .env"
 fi
 
