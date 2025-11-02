@@ -123,7 +123,8 @@
     "scripts/",
     "README.md",
     "types/",
-    "tsconfig.runtime.json"
+    "tsconfig.runtime.json",
+    "templates/"
   ],
   "publishConfig": {
     "access": "public"
