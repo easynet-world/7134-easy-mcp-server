@@ -5,9 +5,9 @@
       "preset": "angular",
       "releaseRules": [
         {"type": "major", "release": false},
-        {"type": "minor", "release": false},
+        {"type": "minor", "release": "minor"},
         {"type": "patch", "release": "patch"},
-        {"type": "feat", "release": "patch"},
+        {"type": "feat", "release": "minor"},
         {"type": "fix", "release": "patch"},
         {"type": "docs", "release": "patch"},
         {"type": "style", "release": "patch"},
