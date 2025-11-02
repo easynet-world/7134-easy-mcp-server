@@ -26,35 +26,6 @@ npm install
 
 ### 2. Write Your First Endpoint
 
-**GET Endpoint (Query Parameters):**
-```javascript
-// api/users/get.js
-class Request {
-  // @description('Filter by active status')
-  active: boolean;
-}
-
-class Response {
-  users: Array<{
-    id: number;
-    name: string;
-    email: string;
-  }>;
-}
-
-// @description('Get all users with optional filter')
-// @summary('List users')
-// @tags('users')
-function handler(req: any, res: any) {
-  const { active } = req.query;
-  res.json({ 
-    users: [{ id: 1, name: 'John', email: 'john@example.com' }] 
-  });
-}
-
-module.exports = handler;
-```
-
 **POST Endpoint (Request Body):**
 ```javascript
 // api/users/post.js
