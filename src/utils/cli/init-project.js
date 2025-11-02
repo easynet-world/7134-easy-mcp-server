@@ -27,6 +27,7 @@ function initProject(projectName) {
   // Create all project files
   createPackageJson(projectDir, projectName);
   createConfigFiles(projectDir, projectName);
+  createTypeScriptConfig(projectDir);
   createApiFiles(projectDir);
   createMcpFiles(projectDir);
   createScripts(projectDir);
@@ -65,9 +66,17 @@ function createPackageJson(projectDir, projectName) {
       'dotenv': '^16.3.1'
     },
     devDependencies: {
+      'typescript': '^5.3.3',
+      '@types/express': '^4.17.21',
+      '@types/node': '^20.10.6',
+      '@types/cors': '^2.8.17',
       'nodemon': '^3.1.10',
       'jest': '^29.7.0',
-      'supertest': '^7.1.4'
+      'supertest': '^7.1.4',
+      '@types/jest': '^29.5.11',
+      '@types/supertest': '^6.0.2',
+      'ts-jest': '^29.1.1',
+      'ts-node': '^10.9.2'
     },
     keywords: ['mcp', 'api', 'framework'],
     license: 'MIT',
@@ -156,6 +165,56 @@ EASY_MCP_SERVER_MCP_PORT=8888
 }
 
 /**
+ * Create TypeScript configuration files
+ */
+function createTypeScriptConfig(projectDir) {
+  // Create tsconfig.json
+  const tsConfig = {
+    compilerOptions: {
+      target: 'ES2020',
+      module: 'commonjs',
+      lib: ['ES2020'],
+      outDir: './dist',
+      rootDir: './',
+      strict: true,
+      esModuleInterop: true,
+      skipLibCheck: true,
+      forceConsistentCasingInFileNames: true,
+      resolveJsonModule: true,
+      moduleResolution: 'node',
+      allowSyntheticDefaultImports: true,
+      declaration: true,
+      declarationMap: true,
+      sourceMap: true,
+      types: ['node', 'jest']
+    },
+    include: ['api/**/*', 'test/**/*', 'index.ts'],
+    exclude: ['node_modules', 'dist']
+  };
+
+  fs.writeFileSync(
+    path.join(projectDir, 'tsconfig.json'),
+    JSON.stringify(tsConfig, null, 2)
+  );
+
+  // Create jest.config.js for TypeScript
+  const jestConfig = `module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/test'],
+  testMatch: ['**/*.test.ts'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
+  collectCoverageFrom: [
+    'api/**/*.ts',
+    '!api/**/*.d.ts'
+  ]
+};
+`;
+
+  fs.writeFileSync(path.join(projectDir, 'jest.config.js'), jestConfig);
+}
+
+/**
  * Create API example files
  */
 function createApiFiles(projectDir) {
@@ -166,30 +225,32 @@ function createApiFiles(projectDir) {
   // Create example API files
   let getExampleApi, postExampleApi;
   try {
-    getExampleApi = readTemplate('code/api/example/get.js');
-    postExampleApi = readTemplate('code/api/example/post.js');
+    getExampleApi = readTemplate('code/api/example/get.ts');
+    postExampleApi = readTemplate('code/api/example/post.ts');
   } catch (error) {
     console.warn(`⚠️  Template not found, using fallback: ${error.message}`);
-    getExampleApi = `const BaseAPI = require('easy-mcp-server/base-api');
-class GetExample extends BaseAPI {
-  process(req, res) {
-    res.json({ message: 'Hello' });
-  }
+    getExampleApi = `import { Request, Response } from 'express';
+
+function handler(req: Request, res: Response): void {
+  res.json({ message: 'Hello', timestamp: Date.now() });
 }
-module.exports = GetExample;
+
+module.exports = handler;
+export {};
 `;
-    postExampleApi = `const BaseAPI = require('easy-mcp-server/base-api');
-class PostExample extends BaseAPI {
-  process(req, res) {
-    res.json({ message: 'Created' });
-  }
+    postExampleApi = `import { Request, Response } from 'express';
+
+function handler(req: Request, res: Response): void {
+  res.status(201).json({ message: 'Created', timestamp: Date.now() });
 }
-module.exports = PostExample;
+
+module.exports = handler;
+export {};
 `;
   }
-  
-  fs.writeFileSync(path.join(exampleApiDir, 'get.js'), getExampleApi);
-  fs.writeFileSync(path.join(exampleApiDir, 'post.js'), postExampleApi);
+
+  fs.writeFileSync(path.join(exampleApiDir, 'get.ts'), getExampleApi);
+  fs.writeFileSync(path.join(exampleApiDir, 'post.ts'), postExampleApi);
 }
 
 /**
@@ -327,33 +388,39 @@ function createTestFiles(projectDir) {
   
   let testFile;
   try {
-    testFile = readTemplate('code/test/server.test.js');
+    testFile = readTemplate('code/test/server.test.ts');
   } catch (error) {
     console.warn(`⚠️  Template not found, using fallback: ${error.message}`);
-    testFile = `const request = require('supertest');
-const { DynamicAPIServer } = require('easy-mcp-server');
+    testFile = `import request from 'supertest';
+import { DynamicAPIServer } from 'easy-mcp-server';
 
 describe('Easy MCP Server', () => {
-  let server;
-  
+  let server: DynamicAPIServer;
+
   beforeAll(async () => {
     server = new DynamicAPIServer({ port: 0, cors: { origin: '*' } });
     await server.start();
   });
-  
+
   afterAll(async () => {
     if (server) await server.stop();
   });
-  
+
   test('GET /health should return 200', async () => {
     const response = await request(server.app).get('/health');
     expect(response.status).toBe(200);
   });
+
+  test('GET /example should return example data', async () => {
+    const response = await request(server.app).get('/example');
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('data');
+  });
 });
 `;
   }
-  
-  fs.writeFileSync(path.join(testsDir, 'server.test.js'), testFile);
+
+  fs.writeFileSync(path.join(testsDir, 'server.test.ts'), testFile);
 }
 
 /**
@@ -366,6 +433,8 @@ function displaySuccessMessage(projectName) {
 📁 Project structure:
    ${projectName}/
    ├── package.json
+   ├── tsconfig.json       # 📘 TypeScript configuration
+   ├── jest.config.js      # 🧪 Jest test configuration
    ├── index.js
    ├── .env
    ├── .gitignore
@@ -376,8 +445,8 @@ function displaySuccessMessage(projectName) {
    ├── mcp-bridge.json     # 🔌 MCP bridge configuration
    ├── api/
    │   └── example/
-   │       ├── get.js
-   │       └── post.js
+   │       ├── get.ts      # 📘 TypeScript API endpoints
+   │       └── post.ts
    ├── mcp/                # 🤖 AI integration
    │   ├── prompts/
    │   │   └── example-analysis.md
@@ -386,7 +455,7 @@ function displaySuccessMessage(projectName) {
    ├── public/             # 🌐 Static files
    │   └── index.html
    └── test/
-       └── server.test.js
+       └── server.test.ts  # 📘 TypeScript tests
 
 🚀 Next steps:
    1. cd ${projectName}

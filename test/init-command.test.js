@@ -92,12 +92,12 @@ describe('easy-mcp-server init command', () => {
 
   test('should create package.json with correct structure', async () => {
     await runInitCommand(projectName);
-    
+
     const packageJsonPath = path.join(projectDir, 'package.json');
     expect(fs.existsSync(packageJsonPath)).toBe(true);
-    
+
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    
+
     expect(packageJson.name).toBe(projectName);
     expect(packageJson.version).toBe('1.0.0');
     expect(packageJson.main).toBe('index.js');
@@ -111,6 +111,14 @@ describe('easy-mcp-server init command', () => {
     expect(packageJson.scripts['start:npx']).toBe('npx easy-mcp-server');
     expect(packageJson.dependencies).toBeDefined();
     expect(packageJson.dependencies['easy-mcp-server']).toBeDefined();
+
+    // Check TypeScript dependencies
+    expect(packageJson.devDependencies).toBeDefined();
+    expect(packageJson.devDependencies['typescript']).toBeDefined();
+    expect(packageJson.devDependencies['@types/express']).toBeDefined();
+    expect(packageJson.devDependencies['@types/node']).toBeDefined();
+    expect(packageJson.devDependencies['ts-jest']).toBeDefined();
+    expect(packageJson.devDependencies['ts-node']).toBeDefined();
   });
 
   test('should create index.js file', async () => {
@@ -149,13 +157,42 @@ describe('easy-mcp-server init command', () => {
 
   test('should create README.md file', async () => {
     await runInitCommand(projectName);
-    
+
     const readmePath = path.join(projectDir, 'README.md');
     expect(fs.existsSync(readmePath)).toBe(true);
-    
+
     const content = fs.readFileSync(readmePath, 'utf8');
     expect(content).toContain(projectName);
     expect(content).toContain('Easy MCP Server');
+  });
+
+  test('should create tsconfig.json with correct configuration', async () => {
+    await runInitCommand(projectName);
+
+    const tsconfigPath = path.join(projectDir, 'tsconfig.json');
+    expect(fs.existsSync(tsconfigPath)).toBe(true);
+
+    const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+    expect(tsconfig.compilerOptions).toBeDefined();
+    expect(tsconfig.compilerOptions.target).toBe('ES2020');
+    expect(tsconfig.compilerOptions.module).toBe('commonjs');
+    expect(tsconfig.compilerOptions.strict).toBe(true);
+    expect(tsconfig.compilerOptions.esModuleInterop).toBe(true);
+    expect(tsconfig.include).toContain('api/**/*');
+    expect(tsconfig.include).toContain('test/**/*');
+    expect(tsconfig.exclude).toContain('node_modules');
+  });
+
+  test('should create jest.config.js for TypeScript', async () => {
+    await runInitCommand(projectName);
+
+    const jestConfigPath = path.join(projectDir, 'jest.config.js');
+    expect(fs.existsSync(jestConfigPath)).toBe(true);
+
+    const content = fs.readFileSync(jestConfigPath, 'utf8');
+    expect(content).toContain('ts-jest');
+    expect(content).toContain('testEnvironment');
+    expect(content).toContain('**/*.test.ts');
   });
 
   test('should create build.sh script', async () => {
@@ -220,24 +257,28 @@ describe('easy-mcp-server init command', () => {
 
   test('should create api directory with example files', async () => {
     await runInitCommand(projectName);
-    
+
     const apiDir = path.join(projectDir, 'api');
     expect(fs.existsSync(apiDir)).toBe(true);
-    
+
     const exampleDir = path.join(apiDir, 'example');
     expect(fs.existsSync(exampleDir)).toBe(true);
-    
-    const getFile = path.join(exampleDir, 'get.js');
-    const postFile = path.join(exampleDir, 'post.js');
-    
+
+    const getFile = path.join(exampleDir, 'get.ts');
+    const postFile = path.join(exampleDir, 'post.ts');
+
     expect(fs.existsSync(getFile)).toBe(true);
     expect(fs.existsSync(postFile)).toBe(true);
-    
+
     const getContent = fs.readFileSync(getFile, 'utf8');
     const postContent = fs.readFileSync(postFile, 'utf8');
-    
-    expect(getContent).toContain('BaseAPI');
-    expect(postContent).toContain('BaseAPI');
+
+    expect(getContent).toContain('Request');
+    expect(getContent).toContain('Response');
+    expect(getContent).toContain('handler');
+    expect(postContent).toContain('Request');
+    expect(postContent).toContain('Response');
+    expect(postContent).toContain('handler');
   });
 
   test('should create mcp directory structure', async () => {
@@ -276,16 +317,17 @@ describe('easy-mcp-server init command', () => {
 
   test('should create test directory with test file', async () => {
     await runInitCommand(projectName);
-    
+
     const testDir = path.join(projectDir, 'test');
     expect(fs.existsSync(testDir)).toBe(true);
-    
-    const testFile = path.join(testDir, 'server.test.js');
+
+    const testFile = path.join(testDir, 'server.test.ts');
     expect(fs.existsSync(testFile)).toBe(true);
-    
+
     const content = fs.readFileSync(testFile, 'utf8');
     expect(content).toContain('describe');
     expect(content).toContain('test');
+    expect(content).toContain('import');
   });
 
   test('should fail if project directory already exists', async () => {
