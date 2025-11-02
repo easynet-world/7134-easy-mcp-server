@@ -25,6 +25,7 @@
 - [Project Structure](#project-structure)
 - [Framework Architecture](#framework-architecture)
 - [AI Integration (MCP Protocol)](#ai-integration-mcp-protocol)
+- [LLM Integration Guide](#llm-integration-guide)
 - [Development Features](#development-features)
 - [Configuration Management](#configuration-management)
 - [Server Architecture](#server-architecture)
@@ -422,6 +423,478 @@ Content-Type: application/json
   }
 }
 ```
+
+---
+
+## **LLM Integration Guide**
+
+### Framework Overview for AI Models
+
+easy-mcp-server is an enterprise-grade Node.js framework that automatically generates REST APIs, MCP tools, prompts, and resources from simple JavaScript classes. It provides AI models with comprehensive access to API functionality through the Model Context Protocol (MCP) 2024-11-05 standard, enabling seamless AI integration with convention-based development.
+
+### Quick Start for New Projects
+
+The fastest way to create a production-ready project:
+
+```bash
+npx easy-mcp-server init my-api-project
+cd my-api-project
+npm install
+./start.sh
+```
+
+This creates a complete project with:
+- Working API endpoints (GET & POST examples)
+- MCP integration (prompts, resources, tools)
+- Beautiful landing page
+- Complete documentation
+- Hot reload enabled
+- Server management scripts (start.sh, stop.sh)
+- MCP bridge configuration
+- Test suite template
+- Environment configuration
+
+### Key LLM Integration Features
+
+#### Automatic MCP Tool Generation
+- **API Endpoints → MCP Tools**: Every API endpoint automatically becomes an MCP tool
+- **Schema Generation**: OpenAPI schemas are automatically converted to MCP tool schemas
+- **Parameter Validation**: Request parameters are automatically validated
+- **Response Formatting**: Standardized response formats for consistent AI interactions
+
+#### MCP Server Capabilities
+- **Tools Discovery**: `tools/list` - Discover all available API endpoints as tools
+- **Tool Execution**: `tools/call` - Execute specific API endpoints with parameters
+- **Prompts Management**: `prompts/list` and `prompts/get` - Access template-based prompts
+- **Resources Access**: `resources/list` and `resources/read` - Access documentation and data
+
+#### LLM-Optimized Features
+- **Structured Responses**: All API responses follow consistent JSON schemas
+- **Error Handling**: Standardized error responses with clear error codes
+- **Context Awareness**: Built-in logging and context tracking for AI interactions
+- **Hot Reloading**: Real-time updates to tools and resources without restart
+
+#### Native MCP Bridge Support (Chrome & iTerm2)
+
+**🔌 Built-in Zero-Config Bridge**: `easy-mcp-server` natively supports MCP bridge to external MCP servers. Simply add `mcp-bridge.json` to enable powerful integrations:
+
+**Chrome DevTools Operations** (via `chrome-devtools-mcp`):
+- Browser automation: `new_page`, `navigate_page`, `click`, `fill`, `evaluate_script`
+- Testing & debugging: `take_screenshot`, `take_snapshot`, `list_console_messages`
+- Performance analysis: `emulate_network`, `emulate_cpu`, `list_network_requests`
+- UI inspection: `hover`, `drag`, `handle_dialog`, `upload_file`
+- 20+ additional browser control capabilities
+
+**iTerm2 Terminal Operations** (via `iterm-mcp`):
+- Terminal control: `write_to_terminal`, `read_terminal_output`, `send_control_character`
+- Deployment automation: CI/CD pipelines, server operations
+- System monitoring: Real-time log analysis and diagnostics
+
+**Usage**: The `init` command automatically includes `mcp-bridge.json` with Chrome and iTerm2 pre-configured. Additional MCP servers (GitHub, Slack, PostgreSQL, Filesystem) are included as examples with `"disabled": true`.
+
+### API Development Pattern for LLMs
+
+#### Basic API Class
+
+```javascript
+const BaseAPI = require('easy-mcp-server/base-api');
+
+/**
+ * @description Brief description of what this endpoint does
+ * @summary Short summary for OpenAPI
+ * @tags category1,category2
+ * @responseSchema { "type": "object", "properties": { "message": { "type": "string" } } }
+ */
+class MyAPI extends BaseAPI {
+  process(req, res) {
+    // Handle request and send response
+    res.json({ message: 'Success' });
+  }
+}
+
+module.exports = MyAPI;
+```
+
+#### Advanced API with Annotations
+
+```javascript
+const BaseAPI = require('easy-mcp-server/base-api');
+
+/**
+ * @description Create a new user with validation
+ * @summary Create user endpoint
+ * @tags users,authentication
+ * @requestBody {
+ *   "type": "object",
+ *   "required": ["name", "email"],
+ *   "properties": {
+ *     "name": { "type": "string", "minLength": 2 },
+ *     "email": { "type": "string", "format": "email" }
+ *   }
+ * }
+ * @responseSchema {
+ *   "type": "object",
+ *   "properties": {
+ *     "success": { "type": "boolean" },
+ *     "data": { "type": "object" },
+ *     "message": { "type": "string" }
+ *   }
+ * }
+ */
+class CreateUser extends BaseAPI {
+  process(req, res) {
+    const { name, email } = req.body;
+    
+    // Validation is automatic based on @requestBody annotation
+    // Response schema is automatically documented
+    
+    res.json({
+      success: true,
+      data: { id: 1, name, email },
+      message: 'User created successfully'
+    });
+  }
+}
+
+module.exports = CreateUser;
+```
+
+### MCP Tool Examples
+
+#### Tool Discovery
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list"
+}
+```
+
+#### Tool Execution
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "create_user",
+    "arguments": {
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  }
+}
+```
+
+#### Prompts Access
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "prompts/get",
+  "params": {
+    "name": "api-documentation-generator",
+    "arguments": {
+      "endpointPath": "/users",
+      "httpMethod": "GET",
+      "description": "Get all users"
+    }
+  }
+}
+```
+
+#### Resources Access
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "resources/read",
+  "params": {
+    "uri": "resource://easy-mcp-server-guide"
+  }
+}
+```
+
+### Enhanced Features for AI Integration
+
+#### BaseAPIEnhanced with LLM Services
+
+```javascript
+const { BaseAPIEnhanced } = require('easy-mcp-server/api/base-api-enhanced');
+
+class AIEnhancedAPI extends BaseAPIEnhanced {
+  constructor() {
+    super('ai-service', {
+      llm: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY }
+    });
+  }
+
+  async process(req, res) {
+    // LLM service available via this.llm
+    const response = await this.llm.generateResponse({
+      prompt: 'Analyze this data: ' + JSON.stringify(req.body),
+      model: 'gpt-4'
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { analysis: response });
+  }
+}
+```
+
+#### Structured Logging for AI Context
+
+```javascript
+const Logger = require('easy-mcp-server/utils/logger');
+const logger = new Logger({ service: 'ai-api' });
+
+class LoggedAPI extends BaseAPI {
+  process(req, res) {
+    logger.info('AI request received', { 
+      endpoint: req.path,
+      method: req.method,
+      userAgent: req.get('User-Agent')
+    });
+    
+    // Process request
+    res.json({ result: 'success' });
+    
+    logger.info('AI request completed', { 
+      statusCode: res.statusCode,
+      responseTime: Date.now() - req.startTime
+    });
+  }
+}
+```
+
+### File Structure for LLM Tools
+
+#### Automatic Tool Naming
+
+```
+api/
+├── users/
+│   ├── get.js          → MCP tool: "get_users"
+│   ├── post.js         → MCP tool: "post_users"
+│   └── profile/
+│       ├── get.js      → MCP tool: "get_users_profile"
+│       └── put.js      → MCP tool: "put_users_profile"
+└── products/
+    ├── get.js          → MCP tool: "get_products"
+    └── post.js         → MCP tool: "post_products"
+```
+
+#### Tool Schema Generation
+
+The framework automatically generates MCP tool schemas from:
+- JSDoc annotations (`@description`, `@summary`, `@tags`, `@requestBody`, `@responseSchema`, `@errorResponses`)
+- File structure (path and method)
+- Parameter validation rules
+- Response format standards
+
+### Error Handling for AI Models
+
+#### Standardized Error Responses
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "errorCode": "VALIDATION_ERROR",
+  "details": {
+    "field": "email",
+    "message": "Invalid email format"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### Recommended Error Codes
+
+The framework supports custom error codes through the `errorCode` parameter in error responses. These are **recommended conventions** for consistency, not enforced by the framework:
+
+- `VALIDATION_ERROR` - Request validation failed
+- `NOT_FOUND` - Resource not found
+- `UNAUTHORIZED` - Authentication required
+- `FORBIDDEN` - Access denied
+- `RATE_LIMITED` - Too many requests
+- `INTERNAL_ERROR` - Server error
+
+**Note**: Error codes are optional and can be customized based on your application's needs. The framework provides flexibility while these conventions help maintain consistency across APIs.
+
+### Best Practices for LLM Integration
+
+#### 1. Use Descriptive Annotations
+
+```javascript
+/**
+ * @description Analyze user sentiment from text input
+ * @summary Sentiment analysis endpoint
+ * @tags ai,analysis
+ * @requestBody { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" } } }
+ * @responseSchema { "type": "object", "properties": { "sentiment": { "type": "string" }, "confidence": { "type": "number" } } }
+ */
+```
+
+#### 2. Provide Clear Error Messages
+
+```javascript
+if (!req.body.text) {
+  return res.status(400).json({
+    success: false,
+    error: "Text input is required",
+    errorCode: "MISSING_TEXT"
+  });
+}
+```
+
+#### 3. Use Standardized Response Formats
+
+```javascript
+res.json({
+  success: true,
+  data: { sentiment: 'positive', confidence: 0.95 },
+  message: 'Analysis completed',
+  timestamp: new Date().toISOString()
+});
+```
+
+#### 4. Implement Proper Validation
+
+```javascript
+const { body } = req;
+if (!body.text || typeof body.text !== 'string') {
+  return res.status(400).json({
+    success: false,
+    error: "Invalid text input",
+    errorCode: "INVALID_INPUT"
+  });
+}
+```
+
+### MCP Server Endpoints
+
+#### HTTP Endpoints
+- `POST /mcp` - MCP JSON-RPC requests
+- `GET /sse` - Server-Sent Events for real-time updates
+- `GET /health` - Health check endpoint
+
+#### WebSocket Support
+- `ws://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}` - WebSocket MCP server
+- Real-time tool updates
+- Bidirectional communication
+
+### Configuration for AI Models
+
+#### Environment Variables
+
+```bash
+EASY_MCP_SERVER_MCP_PORT=8888    # MCP server port
+EASY_MCP_SERVER_LOG_LEVEL=info   # Logging level
+OPENAI_API_KEY=your-key-here       # OpenAI API key
+REDIS_URL=redis://localhost:6379 # Redis for caching
+NODE_ENV=production              # Environment
+```
+
+#### MCP Server Options
+
+```javascript
+const mcpServer = new DynamicAPIMCPServer({
+  port: process.env.EASY_MCP_SERVER_MCP_PORT || 8888,
+  host: '0.0.0.0',
+  enableWebSocket: true,
+  enableSSE: true
+});
+```
+
+### Integration Examples
+
+#### OpenAI Integration
+
+```javascript
+class OpenAIAPI extends BaseAPIEnhanced {
+  async process(req, res) {
+    const { prompt } = req.body;
+    
+    const response = await this.llm.generateResponse({
+      prompt,
+      model: 'gpt-4',
+      maxTokens: 1000
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { response });
+  }
+}
+```
+
+#### Anthropic Integration
+
+```javascript
+class AnthropicAPI extends BaseAPIEnhanced {
+  async process(req, res) {
+    const { message } = req.body;
+    
+    const response = await this.llm.generateResponse({
+      prompt: message,
+      model: 'claude-3-sonnet',
+      maxTokens: 1000
+    });
+    
+    this.responseUtils.sendSuccessResponse(res, { response });
+  }
+}
+```
+
+### Troubleshooting for AI Models
+
+#### Common Issues
+
+1. **Tool Not Found**: Check if API file exists in correct path
+2. **Validation Errors**: Verify request body matches schema
+3. **Connection Issues**: Ensure MCP server is running on correct port
+4. **Authentication**: Check API keys and permissions
+
+#### Debug Mode
+
+```bash
+EASY_MCP_SERVER_LOG_LEVEL=debug npx easy-mcp-server
+```
+
+#### Health Check
+
+```bash
+curl http://localhost:${EASY_MCP_SERVER_MCP_PORT:-8888}/health
+```
+
+### Performance Considerations
+
+#### Caching
+- Redis integration for response caching
+- Automatic cache invalidation
+- Configurable TTL settings
+
+#### Rate Limiting
+- Built-in rate limiting per IP
+- Configurable limits
+- Redis-backed rate limiting
+
+#### Monitoring
+- Request/response logging
+- Performance metrics
+- Error tracking
+- Health monitoring
+
+### Supported JSDoc Annotations
+
+The framework supports the following JSDoc annotations for automatic API documentation and MCP tool generation:
+
+- **`@description`**: Detailed description of the API endpoint
+- **`@summary`**: Brief summary for OpenAPI documentation
+- **`@tags`**: Comma-separated tags for categorization
+- **`@requestBody`**: JSON schema for request body validation
+- **`@responseSchema`**: JSON schema for response structure
+- **`@errorResponses`**: JSON schema for error response handling
+
+These annotations enable automatic OpenAPI specification generation, MCP tool creation, and comprehensive API documentation without manual maintenance.
 
 ---
 
@@ -1437,16 +1910,344 @@ npm run validate:mcp
 - ✅ Error handling
 - ✅ JSON-RPC 2.0 compliance
 
-#### Detailed Documentation
+### OpenAPI Validation Details
 
-For complete validation documentation, see [docs/VALIDATION.md](docs/VALIDATION.md)
+#### validate-openapi.js
 
-**Topics covered:**
-- Validation tool usage
-- CI/CD integration
-- Troubleshooting guide
-- Best practices
-- Compliance reports
+**Purpose:** Validates that generated OpenAPI specifications comply with OpenAPI 3.0.0 standards.
+
+**Location:** `scripts/validate-openapi.js`
+
+**Usage:**
+```bash
+# Validate default API path (example-project/api)
+npm run validate:openapi
+
+# Validate custom API path
+node scripts/validate-openapi.js /path/to/api
+```
+
+**What it validates:**
+
+1. **Required Top-Level Fields**
+   - ✅ `openapi` version field
+   - ✅ `info` object
+   - ✅ `paths` object
+
+2. **OpenAPI Version**
+   - ✅ Must be "3.0.0" or "3.0.x"
+
+3. **Info Object**
+   - ✅ `title` (required)
+   - ✅ `version` (required)
+   - ⚠️  `description` (recommended)
+
+4. **Servers Array**
+   - ⚠️  At least one server (recommended)
+   - ✅ Valid URL format
+
+5. **Paths Object**
+   - ✅ Path format (must start with /)
+   - ✅ Valid HTTP methods
+   - ✅ Operation responses
+   - ✅ Path parameter definitions
+   - ✅ Parameter consistency
+
+6. **Path Parameters**
+   - ✅ All `{param}` in path must be defined in `parameters` array
+   - ✅ Path parameters must have `required: true`
+   - ✅ Path parameters must have schema
+
+7. **Operation Object**
+   - ⚠️  `operationId` uniqueness (recommended)
+   - ✅ `responses` object (required)
+   - ✅ Valid parameter definitions
+
+8. **Responses**
+   - ✅ Response must have `description`
+   - ✅ Valid content structure
+   - ✅ Valid schema references
+
+9. **Components**
+   - ✅ Valid schema definitions
+   - ✅ Proper schema structure
+
+10. **Tags**
+    - ⚠️  Tag definitions (recommended)
+
+**Exit Codes:**
+- `0` - Validation passed (with or without warnings)
+- `1` - Validation failed with errors
+
+### MCP Validation Details
+
+#### validate-mcp-static.js (Static Analysis)
+
+**Purpose:** Validates MCP implementation by analyzing code structure (no server required).
+
+**Location:** `scripts/validate-mcp-static.js`
+
+**Usage:**
+```bash
+npm run validate:mcp:static
+```
+
+**What it validates:**
+
+1. **MCP Server Implementation**
+   - ✅ Uses JSON-RPC 2.0 protocol
+   - ✅ Implements all required MCP methods
+
+2. **Required MCP Methods**
+   - ✅ `tools/list`
+   - ✅ `tools/call`
+   - ✅ `prompts/list`
+   - ✅ `prompts/get`
+   - ✅ `resources/list`
+   - ✅ `resources/read`
+   - ⚠️  `resources/templates/list` (optional)
+
+3. **Error Code Standards**
+   - ✅ `-32601` (Method not found)
+   - ✅ `-32602` (Invalid params)
+   - ✅ `-32603` (Internal error)
+
+4. **Domain Processors**
+   - ✅ ToolProcessor
+   - ✅ PromptProcessor
+   - ✅ ResourceProcessor
+   - ✅ SystemProcessor
+
+5. **Tool Builder**
+   - ✅ JSON Schema generation
+   - ✅ OpenAPI to JSON Schema conversion
+
+6. **Response Formats**
+   - ✅ tools/list returns tools array
+   - ✅ tools/call returns content array
+   - ✅ prompts/list returns prompts array
+   - ✅ prompts/get returns prompt content
+   - ✅ resources/list returns resources array
+   - ✅ resources/read returns contents array
+
+7. **Notification Support**
+   - ⚠️  `notifications/toolsChanged` (recommended)
+   - ⚠️  `notifications/promptsChanged` (recommended)
+   - ⚠️  `notifications/resourcesChanged` (recommended)
+
+8. **Transport Support**
+   - ✅ HTTP transport
+   - ⚠️  WebSocket transport (optional)
+
+9. **Schema Normalization**
+   - ✅ Schema normalizer utility
+
+10. **Documentation**
+    - ⚠️  JSDoc comments (recommended)
+    - ⚠️  MCP documentation (recommended)
+
+#### validate-mcp.js (Runtime Testing)
+
+**Purpose:** Validates MCP implementation by testing actual requests/responses.
+
+**Location:** `scripts/validate-mcp.js`
+
+**Prerequisites:**
+- MCP server must be running
+- Default port: 8888
+
+**Usage:**
+```bash
+# Start the server first
+cd example-project
+./start.sh
+
+# In another terminal, run validation
+npm run validate:mcp
+```
+
+**What it tests:**
+
+1. **JSON-RPC 2.0 Compliance**
+   - ✅ Response structure
+   - ✅ `jsonrpc: "2.0"` field
+   - ✅ `id` field presence
+   - ✅ `result` or `error` field (mutually exclusive)
+
+2. **Tools Methods**
+   - ✅ `tools/list` returns tools array
+   - ✅ Tool structure (name, description, inputSchema)
+   - ✅ inputSchema is valid JSON Schema
+
+3. **Prompts Methods**
+   - ✅ `prompts/list` returns prompts array
+   - ✅ Prompt structure (name, description)
+
+4. **Resources Methods**
+   - ✅ `resources/list` returns resources array
+   - ✅ Resource structure (uri, name)
+   - ✅ URI format validation
+
+5. **Error Handling**
+   - ✅ Invalid method returns `-32601`
+   - ✅ Invalid params returns `-32602` or `-32603`
+
+6. **Protocol Version**
+   - ✅ All responses use JSON-RPC 2.0
+
+**Exit Codes:**
+- `0` - All tests passed
+- `1` - Connection error or test failures
+
+### Validation Test Suite
+
+In addition to the standalone validation scripts, easy-mcp-server includes comprehensive test suites that validate compliance as part of the automated testing process.
+
+#### Running Validation Tests
+
+```bash
+# Run all validation tests
+npm run test:validation
+
+# Run OpenAPI compliance tests
+npm run test:validation:openapi
+
+# Run all MCP compliance tests
+npm run test:validation:mcp
+
+# Run only MCP static tests
+npm run test:validation:mcp:static
+
+# Run only MCP runtime tests
+npm run test:validation:mcp:runtime
+```
+
+#### Test Files
+
+| Test File | Purpose | Tests |
+|-----------|---------|-------|
+| `test/validation-openapi-compliance.test.js` | OpenAPI 3.0.0 compliance verification | 20 tests covering all OpenAPI requirements |
+| `test/validation-mcp-static.test.js` | MCP static code analysis | 39 tests checking code structure and patterns |
+| `test/validation-mcp-runtime.test.js` | MCP runtime behavior validation | 25 tests verifying actual request/response behavior |
+
+#### Test Coverage
+
+**OpenAPI Compliance Tests (20 tests):**
+- ✅ Required top-level fields (openapi, info, paths, components)
+- ✅ Path parameter format and definitions
+- ✅ Operation objects structure
+- ✅ Response objects validation
+- ✅ Parameter objects compliance
+- ✅ Request body validation
+- ✅ Component schemas verification
+- ✅ Server and tag objects
+- ✅ Unique operationId validation
+
+**MCP Static Tests (39 tests):**
+- ✅ JSON-RPC 2.0 protocol compliance
+- ✅ All required MCP methods
+- ✅ Domain-specific processors
+- ✅ Tool builder compliance
+- ✅ Response format structure
+- ✅ Notification support
+- ✅ Transport layer implementation
+- ✅ Schema normalization
+- ✅ Error handling patterns
+- ✅ Code architecture validation
+
+**MCP Runtime Tests (25 tests):**
+- ✅ JSON-RPC 2.0 request/response validation
+- ✅ All tools methods (list, call)
+- ✅ All prompts methods (list, get)
+- ✅ All resources methods (list, read)
+- ✅ Error handling and codes
+- ✅ Protocol version consistency
+- ✅ Response content validation
+- ✅ Method implementation completeness
+
+### CI/CD Integration
+
+All validation tests are automatically run as part of the CI/CD pipeline:
+
+```yaml
+# .github/workflows/release.yml
+- name: Run tests
+  run: npm test  # Includes all validation tests
+
+- name: Validate OpenAPI and MCP compliance
+  run: npm run validate:all  # Standalone validators
+```
+
+This ensures that every commit maintains 100% compliance with both OpenAPI 3.0.0 and MCP 2024-11-05 specifications.
+
+### Validation Troubleshooting
+
+#### OpenAPI Validation Issues
+
+**Issue:** "Missing required field: paths"
+- **Cause:** API directory is empty or no valid API files
+- **Solution:** Ensure API directory contains route files (get.js, post.js, etc.)
+
+**Issue:** "Path parameter not defined in parameters array"
+- **Cause:** Path contains `{param}` but parameter not defined
+- **Solution:** OpenAPI generator automatically adds parameters. This error indicates a bug.
+
+**Issue:** "Invalid OpenAPI version"
+- **Cause:** Version field doesn't start with "3.0"
+- **Solution:** Check openapi-generator.js, should always generate "3.0.0"
+
+#### MCP Validation Issues
+
+**Issue:** "Cannot connect to MCP server"
+- **Cause:** MCP server not running
+- **Solution:** Start server with `cd example-project && ./start.sh`
+
+**Issue:** "Invalid method returns wrong error code"
+- **Cause:** Error code doesn't match JSON-RPC standard
+- **Solution:** Check error code mapping in mcp-server.js
+
+**Issue:** "tools/list doesn't return tools array"
+- **Cause:** Response structure mismatch
+- **Solution:** Verify ToolProcessor.processListTools() returns correct format
+
+### Validation Best Practices
+
+1. **Run validations regularly**
+   ```bash
+   npm run validate
+   ```
+
+2. **Validate before commits**
+   - Add to pre-commit hook
+   - Ensures quality before code review
+
+3. **Validate in CI/CD**
+   - Automated checks on every push
+   - Prevents broken specs from merging
+
+4. **Review validation output**
+   - Address all errors immediately
+   - Consider fixing warnings
+
+5. **Keep validators updated**
+   - Update when specs change
+   - Add new checks as needed
+
+### Validation Results
+
+#### OpenAPI Compliance
+- ✅ **100% Compliant** with OpenAPI 3.0.0
+- ✅ All required fields present
+- ✅ All paths properly formatted
+- ✅ All parameters correctly defined
+- ✅ All responses properly structured
+
+#### MCP Compliance
+- ✅ **100% Compliant** with MCP 2024-11-05
+- ✅ All required methods implemented
+- ✅ JSON-RPC 2.0 standard followed
+- ✅ All error codes correct
+- ✅ All response formats correct
 
 ---
 
@@ -1490,7 +2291,6 @@ All notable changes to this project will be documented in this file. See [standa
 | Document | Purpose | Best For |
 |----------|---------|----------|
 | **[Example Project](example-project/)** | Complete working example with users/products APIs, AI integration, and JSDoc annotations | Learning by example, best practices reference |
-| **[LLM Context](LLM.txt)** | LLM-specific information and context for AI model integration | AI model integration |
 
 ---
 

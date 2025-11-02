@@ -29,18 +29,20 @@ class ToolProcessor {
       jsonrpc: '2.0',
       id: data.id,
       result: {
-        tools
+        tools: tools
       }
     };
   }
 
   /**
    * Process tools/call request
+   * Returns result with content array as per MCP specification
    */
   async processCallTool(data) {
     const { name, arguments: args } = data.params || data;
-    
+
     try {
+      // Execute tool and get result with content array
       const result = await this.toolExecutor.executeTool(name, args, {
         getLoadedRoutes: this.getLoadedRoutes,
         bridgeReloader: this.server.bridgeReloader,
@@ -48,11 +50,17 @@ class ToolProcessor {
           schemaNormalizer: this.schemaNormalizer
         })
       });
-      
+
+      // Ensure result has content array (MCP requirement)
+      // MCP spec requires: { content: [...] }
+      if (!result.content || !Array.isArray(result.content)) {
+        throw new Error('Tool execution must return content array');
+      }
+
       return {
         jsonrpc: '2.0',
         id: data.id,
-        result
+        result: result
       };
     } catch (error) {
       return {
