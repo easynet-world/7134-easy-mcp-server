@@ -75,9 +75,7 @@ async function startAutoServer(portConfig) {
     const originalCwd = process.cwd();
     // Resolve paths:
     // - packageRoot: from src/utils/cli/ go up 3 levels to package root
-    // - srcPath: from src/utils/cli/ go up 2 levels to src directory
     const packageRoot = path.join(__dirname, '..', '..', '..');
-    const srcPath = path.join(__dirname, '..', '..');
 
     // Configure environment variables
     process.env.EASY_MCP_SERVER_API_PATH = path.join(originalCwd, 'api');
@@ -100,8 +98,8 @@ async function startAutoServer(portConfig) {
     process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
     process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
 
-    // Import and start the orchestrator (it's in the src directory)
-    const orchestratorPath = path.join(srcPath, 'orchestrator.js');
+    // Import and start the orchestrator (it's in the src directory within the package)
+    const orchestratorPath = path.join(packageRoot, 'src', 'orchestrator.js');
     const orchestrator = require(orchestratorPath);
     
     // The orchestrator should start automatically when required
