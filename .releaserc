@@ -4,10 +4,10 @@
     ["@semantic-release/commit-analyzer", {
       "preset": "angular",
       "releaseRules": [
-        {"type": "major", "release": false},
-        {"type": "minor", "release": "minor"},
+        {"type": "major", "release": "patch"},
+        {"type": "minor", "release": "patch"},
         {"type": "patch", "release": "patch"},
-        {"type": "feat", "release": "minor"},
+        {"type": "feat", "release": "patch"},
         {"type": "fix", "release": "patch"},
         {"type": "docs", "release": "patch"},
         {"type": "style", "release": "patch"},
