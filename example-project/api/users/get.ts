@@ -9,10 +9,8 @@ class Request {
 import { User } from './models';
 
 class Response {
-  id: number;
-  name: string;
-  active: boolean = true;
-  email: string = '';
+  // @description ('List of users')
+  users: User[];
 }
 
 // @description('List users with optional active filter')
@@ -20,7 +18,7 @@ class Response {
 // @tags('users')
 
 function handler(req: any, res: any) {
-  res.json({ id: 1, name: 'John', active: true, email: 'john@example.com' });
+  res.json({ users: [{ id: 1, name: 'John', active: true, email: 'john@example.com' }] });
 }
 
 module.exports = handler;
