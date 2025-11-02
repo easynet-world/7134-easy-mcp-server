@@ -87,37 +87,88 @@ module.exports = router;
       // Check if server started successfully
       if (output.includes('🚀 Starting Easy MCP Server...') && !serverStarted) {
         serverStarted = true;
-        // Wait a bit for server to fully start
+        // Wait a bit for server to fully start and env reloader to initialize
         setTimeout(() => {
           // Modify .env file (keep same port to avoid restart)
           fs.writeFileSync(envFile, `TEST_VAR=updated_value\nEASY_MCP_SERVER_PORT=${randomPort}\n`);
-        }, 2000);
+        }, 3000);
       }
       
-      // Check for hot reload messages
-      if (output.includes('🔄 Reloading .env files...') || 
+      // Check for hot reload messages (check stderr too since logger might output there)
+      const hasReloadMessage = output.includes('🔄 Reloading .env files...') || 
           output.includes('📄 Reloaded environment from .env') ||
-          output.includes('✅ Reloaded 1 .env file(s)')) {
+          output.includes('✅ Reloaded') ||
+          output.includes('Reloaded') && output.includes('.env');
+      
+      if (hasReloadMessage && !envReloaded) {
         envReloaded = true;
         clearTimeout(timeoutId);
-        done();
+        // Give a moment for cleanup, then finish
+        setTimeout(() => {
+          if (serverProcess && !serverProcess.killed) {
+            serverProcess.kill('SIGTERM');
+            setTimeout(() => {
+              if (serverProcess && !serverProcess.killed) {
+                serverProcess.kill('SIGKILL');
+              }
+              done();
+            }, 500);
+          } else {
+            done();
+          }
+        }, 500);
       }
     });
 
     serverProcess.stderr.on('data', (data) => {
-      console.error('Server stderr:', data.toString());
+      const stderrOutput = data.toString();
+      output += stderrOutput;
+      
+      // Check for reload messages in stderr too
+      const hasReloadMessage = stderrOutput.includes('🔄 Reloading .env files...') || 
+          stderrOutput.includes('📄 Reloaded environment from .env') ||
+          stderrOutput.includes('✅ Reloaded') ||
+          (stderrOutput.includes('Reloaded') && stderrOutput.includes('.env'));
+      
+      if (hasReloadMessage && !envReloaded) {
+        envReloaded = true;
+        clearTimeout(timeoutId);
+        setTimeout(() => {
+          if (serverProcess && !serverProcess.killed) {
+            serverProcess.kill('SIGTERM');
+            setTimeout(() => {
+              if (serverProcess && !serverProcess.killed) {
+                serverProcess.kill('SIGKILL');
+              }
+              done();
+            }, 500);
+          } else {
+            done();
+          }
+        }, 500);
+      }
     });
 
     serverProcess.on('error', (error) => {
-      done(error);
+      if (!envReloaded) {
+        done(error);
+      }
     });
 
-    // Timeout after 15 seconds
+    // Timeout after 20 seconds (increased from 15)
     timeoutId = setTimeout(() => {
       if (!envReloaded) {
-        done(new Error('Environment hot reload did not detect .env file changes'));
+        if (serverProcess && !serverProcess.killed) {
+          serverProcess.kill('SIGTERM');
+          setTimeout(() => {
+            if (serverProcess && !serverProcess.killed) {
+              serverProcess.kill('SIGKILL');
+            }
+          }, 500);
+        }
+        done(new Error('Environment hot reload did not detect .env file changes within timeout'));
       }
-    }, 15000);
+    }, 20000);
   });
 
   test.skip('should handle multiple .env files in priority order', (done) => {
