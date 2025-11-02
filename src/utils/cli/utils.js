@@ -38,7 +38,7 @@ let envHotReloader = null;
  */
 function initializeEnvHotReloader() {
   try {
-    const EnvHotReloader = require('../utils/loaders/env-hot-reloader');
+    const EnvHotReloader = require('../loaders/env-hot-reloader');
     envHotReloader = new EnvHotReloader({
       debounceDelay: 1000,
       onReload: () => {
