@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{PROJECT_NAME}} - Enterprise API Platform</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #0f3460;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --bg-light: #f8f9fa;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            border-bottom: 2px solid var(--accent-color);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #ffffff !important;
+            letter-spacing: 0.5px;
+        }
+        
+        .navbar-text {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 0.875rem;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+        
+        .page-header {
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .page-header h1 {
+            font-weight: 600;
+            font-size: 2.25rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-badge i {
+            font-size: 1rem;
+        }
+        
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .feature-card .icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            font-size: 0.9375rem;
+        }
+        
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button:hover {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .action-button.secondary {
+            background-color: #ffffff;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .action-button.secondary:hover {
+            background-color: var(--bg-light);
+            border-color: var(--accent-color);
+        }
+        
+        .info-section {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .info-section h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-item i {
+            color: var(--accent-color);
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .info-item strong {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 140px;
+        }
+        
+        .info-item span {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            border-top: 2px solid var(--accent-color);
+        }
+        
+        footer p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 2rem 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .feature-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-server"></i> {{PROJECT_NAME}}
+            </a>
+            <span class="navbar-text">
+                Enterprise API Platform
+            </span>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>{{PROJECT_NAME}}</h1>
+            <p class="subtitle">Enterprise-grade API platform powered by Easy MCP Server</p>
+            <div class="mt-3">
+                <span class="status-badge success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Server Operational</span>
+                </span>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-router"></i>
+                    </div>
+                    <h3>REST API</h3>
+                    <p>File-based routing with automatic endpoint discovery and OpenAPI 3.0 specification generation.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h3>MCP Integration</h3>
+                    <p>Native AI agent support with Model Context Protocol for intelligent automation and tool execution.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <h3>Hot Reload</h3>
+                    <p>Real-time code updates during development without service interruption or manual restarts.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <h3>Auto Documentation</h3>
+                    <p>Automatically generated OpenAPI specifications and interactive Swagger UI documentation.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-3 mb-5">
+            <a href="/docs" class="action-button">
+                <i class="bi bi-book"></i>
+                API Documentation
+            </a>
+            <a href="/openapi.json" class="action-button secondary">
+                <i class="bi bi-filetype-json"></i>
+                OpenAPI Specification
+            </a>
+            <a href="/health" class="action-button secondary">
+                <i class="bi bi-heart-pulse"></i>
+                Health Check
+            </a>
+            <a href="/api-info" class="action-button secondary">
+                <i class="bi bi-info-circle"></i>
+                System Information
+            </a>
+        </div>
+        
+        <!-- System Information -->
+        <div class="info-section">
+            <h3>System Status</h3>
+            <div class="info-item">
+                <i class="bi bi-server"></i>
+                <strong>Server Status:</strong>
+                <span>Running</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-cpu"></i>
+                <strong>MCP Server:</strong>
+                <span>Enabled</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-lightning"></i>
+                <strong>Hot Reload:</strong>
+                <span>Active</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-shield-check"></i>
+                <strong>Security:</strong>
+                <span>Enterprise-grade</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p>&copy; 2024 {{PROJECT_NAME}}. Built with Easy MCP Server - Enterprise API Framework</p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
+
