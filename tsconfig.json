@@ -23,6 +23,7 @@
     "**/node_modules/**",
     "test/**/*",
     "**/*.test.ts",
-    "**/*.test.js"
+    "**/*.test.js",
+    "templates/**/*"
   ]
 }
