@@ -73,31 +73,32 @@ async function startAutoServer(portConfig) {
     
     // Set up environment variables for the server
     const originalCwd = process.cwd();
-    const mainProjectPath = path.join(__dirname, '..', '..', '..');
-    
+    // Resolve package root: from src/utils/cli/ go up to package root (2 levels up)
+    const mainProjectPath = path.join(__dirname, '..', '..');
+
     // Configure environment variables
     process.env.EASY_MCP_SERVER_API_PATH = path.join(originalCwd, 'api');
     process.env.EASY_MCP_SERVER_MCP_BASE_PATH = path.join(originalCwd, 'mcp');
-    
+
     // Auto-detect MCP bridge config
     const bridgeConfigPath = path.join(originalCwd, 'mcp-bridge.json');
     if (!process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH && fs.existsSync(bridgeConfigPath)) {
       process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = bridgeConfigPath;
       console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
     }
-    
+
     // Configure static directory
     const publicDir = path.join(originalCwd, 'public');
     process.env.EASY_MCP_SERVER_STATIC_DIRECTORY = fs.existsSync(publicDir)
       ? publicDir
       : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(mainProjectPath, 'public'));
-    
+
     // Set ports
     process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
     process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
-    
-    // Import and start the orchestrator
-    const orchestratorPath = path.join(mainProjectPath, 'src', 'orchestrator.js');
+
+    // Import and start the orchestrator (it's in the same src directory)
+    const orchestratorPath = path.join(mainProjectPath, 'orchestrator.js');
     const orchestrator = require(orchestratorPath);
     
     // The orchestrator should start automatically when required
