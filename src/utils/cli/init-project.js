@@ -59,7 +59,7 @@ function createPackageJson(projectDir, projectName) {
       'start:npx': 'npx easy-mcp-server'
     },
     dependencies: {
-      'easy-mcp-server': '^1.0.93',
+      'easy-mcp-server': '^1.1.5',
       'express': '^4.18.2',
       'cors': '^2.8.5',
       'dotenv': '^16.3.1'
