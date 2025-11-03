@@ -10,6 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
+[![MCP Bridge](https://img.shields.io/badge/MCP-Bridge-9cf.svg)](https://modelcontextprotocol.io)
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
 [![Swagger](https://img.shields.io/badge/Swagger-UI-brightgreen.svg)](https://swagger.io/)
 [![n8n](https://img.shields.io/badge/n8n-Nodes-orange.svg)](https://n8n.io/)
@@ -22,7 +23,7 @@
 
 | Feature | Description | Benefit |
 |---------|-------------|---------|
-| **MCP Server** 🤖 | Your API endpoints automatically become MCP tools for AI agents | Connect your APIs to AI models instantly |
+| **MCP Server** | Your API endpoints automatically become MCP tools for AI agents | Connect your APIs to AI models instantly |
 | **n8n Nodes** 🔗 | Auto-generate n8n workflow nodes from your APIs | Integrate with n8n automation platform |
 | **REST API** | Automatic REST endpoints from file structure | No routing configuration needed |
 | **OpenAPI Spec** | Auto-generated OpenAPI 3.0 specification | Standard API documentation format |
