@@ -14,6 +14,7 @@
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
 [![Swagger](https://img.shields.io/badge/Swagger-UI-brightgreen.svg)](https://swagger.io/)
 [![n8n](https://img.shields.io/badge/n8n-Nodes-orange.svg)](https://n8n.io/)
+[![Hot Reload](https://img.shields.io/badge/Hot-Reload-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
 **Write code once → Get REST API + OpenAPI + Swagger + MCP tools + n8n nodes automatically**
 
