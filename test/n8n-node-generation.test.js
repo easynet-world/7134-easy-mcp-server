@@ -84,13 +84,17 @@ describe('n8n Node Generation - Complete Test Suite', () => {
           path.join(usersDir, 'get.js'),
           `
 class Request {
-  // @description('Maximum number of users to return')
-  limit: number = 10;
+  constructor() {
+    // @description('Maximum number of users to return')
+    this.limit = 10;
+  }
 }
 
 class Response {
-  users: Array<Object>;
-  total: number;
+  constructor() {
+    this.users = [];
+    this.total = 0;
+  }
 }
 
 // @description('Get all users from the system')
@@ -109,16 +113,20 @@ module.exports = handler;
           path.join(usersDir, 'post.js'),
           `
 class Request {
-  // @description('User name')
-  name: string;
+  constructor() {
+    // @description('User name')
+    this.name = '';
 
-  // @description('User email')
-  email: string;
+    // @description('User email')
+    this.email = '';
+  }
 }
 
 class Response {
-  success: boolean;
-  id: string;
+  constructor() {
+    this.success = false;
+    this.id = '';
+  }
 }
 
 // @description('Create a new user')
@@ -382,12 +390,16 @@ module.exports = handler;
           path.join(usersDir, 'get.js'),
           `
 class Request {
-  limit: number = 10;
-  offset: number = 0;
+  constructor() {
+    this.limit = 10;
+    this.offset = 0;
+  }
 }
 
 class Response {
-  users: Array<Object>;
+  constructor() {
+    this.users = [];
+  }
 }
 
 // @description('Get all users')
@@ -403,14 +415,18 @@ module.exports = handler;
           path.join(usersDir, 'post.js'),
           `
 class Request {
-  name: string;
-  email: string;
+  constructor() {
+    this.name = '';
+    this.email = '';
+  }
 }
 
 class Response {
-  id: string;
-  name: string;
-  email: string;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+  }
 }
 
 // @description('Create a new user')
@@ -1016,19 +1032,23 @@ module.exports = handler;
         path.join(usersDir, 'get.js'),
         `
 class Request {
-  // @description('Number of users per page')
-  limit: number = 10;
+  constructor() {
+    // @description('Number of users per page')
+    this.limit = 10;
 
-  // @description('Page offset')
-  offset: number = 0;
+    // @description('Page offset')
+    this.offset = 0;
 
-  // @description('Filter by role')
-  role: string;
+    // @description('Filter by role')
+    this.role = '';
+  }
 }
 
 class Response {
-  users: Array<{id: string; name: string; email: string; role: string}>;
-  total: number;
+  constructor() {
+    this.users = [];
+    this.total = 0;
+  }
 }
 
 // @description('Get all users with optional filtering and pagination')
@@ -1047,22 +1067,24 @@ module.exports = handler;
         path.join(usersDir, 'post.js'),
         `
 class Request {
-  // @description('User full name')
-  name: string;
-
-  // @description('User email address')
-  email: string;
-
-  // @description('User role')
-  role: string = 'user';
+  constructor() {
+    // @description('User full name')
+    this.name = '';
+    // @description('User email address')
+    this.email = '';
+    // @description('User role')
+    this.role = 'user';;
+  }
 }
 
 class Response {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+    this.role = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Create a new user in the system')
@@ -1087,15 +1109,19 @@ module.exports = handler;
         path.join(usersIdDir, 'get.js'),
         `
 class Request {
-  // Path parameter automatically inferred
+  constructor() {
+
+  }
 }
 
 class Response {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+    this.role = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Get user details by ID')
@@ -1120,15 +1146,19 @@ module.exports = handler;
         path.join(productsDir, 'get.js'),
         `
 class Request {
-  // @description('Product category')
-  category: string;
-
-  // @description('Minimum price')
-  minPrice: number = 0;
+  constructor() {
+    // @description('Product category')
+    this.category = '';
+    // @description('Minimum price')
+    this.minPrice = 0;;
+  }
 }
 
 class Response {
-  products: Array<{id: string; name: string; price: number; category: string}>;
+  constructor() {
+
+  }
+}>;
 }
 
 // @description('Get products with optional filtering')
@@ -1195,30 +1225,29 @@ module.exports = handler;
         path.join(apiDir, 'complex.js'),
         `
 class Request {
-  // @description('String with pattern validation')
-  email: string;
-
-  // @description('Number with range validation')
-  age: number;
-
-  // @description('Boolean flag')
-  active: boolean;
-
-  // @description('Enum value')
-  status: string; // ['pending', 'approved', 'rejected']
-
-  // @description('Array of tags')
-  tags: Array<string>;
-
-  // @description('Nested object')
-  metadata: {
-    key: string;
-    value: any;
-  };
+  constructor() {
+    // @description('String with pattern validation')
+    this.email = '';
+    // @description('Number with range validation')
+    this.age = '';
+    // @description('Boolean flag')
+    this.active = '';
+    // @description('Enum value')
+    this.status = '';
+    // @description('Array of tags')
+    this.tags = '';
+    // @description('Nested object')
+    this.metadata = '';
+    this.key = '';
+    this.value = '';
+  }
+};
 }
 
 class Response {
-  success: boolean;
+  constructor() {
+    this.success = '';
+  }
 }
 
 // @description('Complex endpoint with various field types')

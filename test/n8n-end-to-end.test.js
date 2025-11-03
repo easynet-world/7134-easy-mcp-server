@@ -632,19 +632,23 @@ function createTestAPI(apiDir) {
     path.join(usersDir, 'get.js'),
     `
 class Request {
-  // @description('Maximum number of users to return')
-  limit = 10;
+  constructor() {
+    // @description('Maximum number of users to return')
+    this.limit = 10;
 
-  // @description('Number of users to skip')
-  offset = 0;
+    // @description('Number of users to skip')
+    this.offset = 0;
 
-  // @description('Filter by role')
-  role;
+    // @description('Filter by role')
+    this.role = undefined;
+  }
 }
 
 class Response {
-  users;
-  total;
+  constructor() {
+    this.users = [];
+    this.total = 0;
+  }
 }
 
 // @description('Get all users with pagination and filtering')
@@ -663,22 +667,26 @@ module.exports = { process };
     path.join(usersDir, 'post.js'),
     `
 class Request {
-  // @description('User full name')
-  name;
+  constructor() {
+    // @description('User full name')
+    this.name = '';
 
-  // @description('User email address')
-  email;
+    // @description('User email address')
+    this.email = '';
 
-  // @description('User role')
-  role = 'user';
+    // @description('User role')
+    this.role = 'user';
+  }
 }
 
 class Response {
-  id;
-  name;
-  email;
-  role;
-  createdAt;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+    this.role = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Create a new user')
@@ -702,14 +710,20 @@ module.exports = { process };
   fs.writeFileSync(
     path.join(usersIdDir, 'get.js'),
     `
-class Request {}
+class Request {
+  constructor() {
+
+  }
+}
 
 class Response {
-  id;
-  name;
-  email;
-  role;
-  createdAt;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+    this.role = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Get user by ID')
@@ -733,17 +747,21 @@ module.exports = { process };
     path.join(usersIdDir, 'put.js'),
     `
 class Request {
-  name;
-  email;
-  role;
+  constructor() {
+    this.name = '';
+    this.email = '';
+    this.role = '';
+  }
 }
 
 class Response {
-  id;
-  name;
-  email;
-  role;
-  updatedAt;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.email = '';
+    this.role = '';
+    this.updatedAt = '';
+  }
 }
 
 // @description('Update user by ID')
@@ -764,11 +782,17 @@ module.exports = { process };
   fs.writeFileSync(
     path.join(usersIdDir, 'delete.js'),
     `
-class Request {}
+class Request {
+  constructor() {
+
+  }
+}
 
 class Response {
-  success;
-  message;
+  constructor() {
+    this.success = '';
+    this.message = '';
+  }
 }
 
 // @description('Delete user by ID')
@@ -790,13 +814,17 @@ module.exports = { process };
     path.join(productsDir, 'get.js'),
     `
 class Request {
-  category;
-  minPrice = 0;
-  maxPrice;
+  constructor() {
+    this.category = '';
+    this.minPrice = 0;
+    this.maxPrice = '';
+  }
 }
 
 class Response {
-  products;
+  constructor() {
+    this.products = '';
+  }
 }
 
 // @description('Get all products')
@@ -814,18 +842,22 @@ module.exports = { process };
     path.join(productsDir, 'post.js'),
     `
 class Request {
-  name;
-  description;
-  price;
-  category;
+  constructor() {
+    this.name = '';
+    this.description = '';
+    this.price = '';
+    this.category = '';
+  }
 }
 
 class Response {
-  id;
-  name;
-  description;
-  price;
-  category;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.description = '';
+    this.price = '';
+    this.category = '';
+  }
 }
 
 // @description('Create a new product')
@@ -845,14 +877,20 @@ module.exports = { process };
   fs.writeFileSync(
     path.join(productsIdDir, 'get.js'),
     `
-class Request {}
+class Request {
+  constructor() {
+
+  }
+}
 
 class Response {
-  id;
-  name;
-  description;
-  price;
-  category;
+  constructor() {
+    this.id = '';
+    this.name = '';
+    this.description = '';
+    this.price = '';
+    this.category = '';
+  }
 }
 
 // @description('Get product by ID')
@@ -877,12 +915,16 @@ module.exports = { process };
     path.join(ordersDir, 'get.js'),
     `
 class Request {
-  status;
-  limit = 10;
+  constructor() {
+    this.status = '';
+    this.limit = 10;
+  }
 }
 
 class Response {
-  orders;
+  constructor() {
+    this.orders = '';
+  }
 }
 
 // @description('Get all orders')
@@ -900,18 +942,22 @@ module.exports = { process };
     path.join(ordersDir, 'post.js'),
     `
 class Request {
-  userId;
-  productIds;
-  totalAmount;
+  constructor() {
+    this.userId = '';
+    this.productIds = '';
+    this.totalAmount = '';
+  }
 }
 
 class Response {
-  id;
-  userId;
-  productIds;
-  totalAmount;
-  status;
-  createdAt;
+  constructor() {
+    this.id = '';
+    this.userId = '';
+    this.productIds = '';
+    this.totalAmount = '';
+    this.status = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Create a new order')
@@ -933,15 +979,21 @@ module.exports = { process };
   fs.writeFileSync(
     path.join(ordersIdDir, 'get.js'),
     `
-class Request {}
+class Request {
+  constructor() {
+
+  }
+}
 
 class Response {
-  id;
-  userId;
-  productIds;
-  totalAmount;
-  status;
-  createdAt;
+  constructor() {
+    this.id = '';
+    this.userId = '';
+    this.productIds = '';
+    this.totalAmount = '';
+    this.status = '';
+    this.createdAt = '';
+  }
 }
 
 // @description('Get order by ID')
