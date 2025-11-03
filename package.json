@@ -26,6 +26,8 @@
     "test:validation:mcp:static": "jest test/validation-mcp-static.test.js",
     "test:validation:mcp:runtime": "jest test/validation-mcp-runtime.test.js",
     "mcp:list": "node scripts/list-mcp-info.js",
+    "n8n:generate": "node src/n8n/n8n-server.js",
+    "n8n:preview": "node src/n8n/n8n-server.js --preview",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "clean": "rm -rf node_modules package-lock.json && npm install",

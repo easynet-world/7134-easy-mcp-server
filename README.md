@@ -13,7 +13,7 @@
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
 [![Swagger](https://img.shields.io/badge/Swagger-UI-brightgreen.svg)](https://swagger.io/)
 
-**Write code once → Get REST API + OpenAPI + Swagger + MCP tools automatically**
+**Write code once → Get REST API + OpenAPI + Swagger + MCP tools + n8n nodes automatically**
 
 ---
 
@@ -22,6 +22,7 @@
 | Feature | Description | Benefit |
 |---------|-------------|---------|
 | **MCP Server** 🤖 | Your API endpoints automatically become MCP tools for AI agents | Connect your APIs to AI models instantly |
+| **n8n Nodes** 🔗 | Auto-generate n8n workflow nodes from your APIs | Integrate with n8n automation platform |
 | **REST API** | Automatic REST endpoints from file structure | No routing configuration needed |
 | **OpenAPI Spec** | Auto-generated OpenAPI 3.0 specification | Standard API documentation format |
 | **Swagger UI** | Interactive API documentation | Test APIs directly in browser |
@@ -90,10 +91,184 @@ module.exports = handler;
 
 **What you get automatically:**
 - ✅ MCP tool for AI agents
+- ✅ n8n workflow node (on demand)
 - ✅ REST endpoint: `POST /users`
 - ✅ Swagger UI documentation
 - ✅ OpenAPI specification
 - ✅ Hot reload (changes apply instantly)
+
+---
+
+## 🔗 n8n Node Generation
+
+Transform your APIs into n8n workflow nodes automatically. Your API endpoints become drag-and-drop nodes in n8n's visual workflow builder.
+
+### Quick Start
+
+```bash
+# Generate n8n node package from your APIs
+npm run n8n:generate
+
+# Preview node definition without generating files
+npm run n8n:preview
+```
+
+### Custom Generation
+
+```bash
+# Generate with custom settings
+node src/n8n/n8n-server.js \
+  --node-name "MyAPI" \
+  --display-name "My API" \
+  --base-url "https://api.example.com" \
+  --output-dir "./my-n8n-nodes" \
+  --require-auth
+```
+
+### CLI Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--api-path <path>` | `./api` | Path to your API directory |
+| `--output-dir <path>` | `./n8n-nodes-output` | Where to generate the node package |
+| `--node-name <name>` | `CustomAPI` | Internal node name (used in code) |
+| `--display-name <name>` | `Custom API` | Display name shown in n8n UI |
+| `--base-url <url>` | `http://localhost:3000` | Your API base URL |
+| `--author <name>` | - | Package author name |
+| `--version <version>` | `1.0.0` | Package version |
+| `--require-auth` | `false` | Enable API authentication |
+| `--preview` | `false` | Preview without generating files |
+
+### What Gets Generated
+
+The generator creates a complete n8n community node package:
+
+```
+n8n-nodes-output/
+├── nodes/
+│   └── YourAPI.node.ts       # Main node implementation
+├── credentials/
+│   └── YourAPI.credentials.ts # (if --require-auth is used)
+├── package.json               # npm package configuration
+├── tsconfig.json              # TypeScript configuration
+├── gulpfile.js                # Build scripts
+├── .gitignore                 # Git ignore rules
+└── README.md                  # Documentation
+```
+
+### Generated Features
+
+| Feature | Description |
+|---------|-------------|
+| **Resource Organization** | APIs grouped by resource (users, products, etc.) |
+| **Operation Mapping** | GET → "Get all/Get one", POST → "Create", PUT/PATCH → "Update", DELETE → "Delete" |
+| **Field Validation** | Automatic validation based on your API schemas |
+| **Request Routing** | Path, query, and body parameters properly routed |
+| **Type Conversion** | JSON Schema types mapped to n8n field types |
+| **Credentials Support** | Optional API key/token authentication |
+
+### Example: From API to n8n Node
+
+**Your API Code:**
+```javascript
+// api/users/get.js
+class Request {
+  // @description('Maximum number of users to return')
+  limit: number;
+}
+
+class Response {
+  users: Array<{ id: string; name: string; email: string }>;
+}
+
+// @description('Get all users from the system')
+// @summary('List users')
+// @tags('users')
+function handler(req, res) {
+  const { limit } = req.query;
+  res.json({ users: [] });
+}
+
+module.exports = handler;
+```
+
+**Generated n8n Node:**
+- Resource: "Users"
+- Operation: "Get all"
+- Field: "Limit" (number input with validation)
+- Routing: Automatically configured to call `GET /users?limit=X`
+
+### Install in n8n
+
+#### Option 1: Local Installation
+```bash
+cd n8n-nodes-output
+npm install
+npm run build
+
+# Copy to your n8n custom nodes directory
+cp -r dist/* ~/.n8n/custom/
+```
+
+#### Option 2: Publish to npm
+```bash
+cd n8n-nodes-output
+npm install
+npm run build
+
+# Publish to npm registry
+npm publish
+
+# Then install in n8n via Community Nodes
+# Settings → Community Nodes → Install: n8n-nodes-yourapi
+```
+
+#### Option 3: Link for Development
+```bash
+cd n8n-nodes-output
+npm install
+npm run build
+npm link
+
+# In your n8n directory
+npm link n8n-nodes-yourapi
+```
+
+### Real-World Example
+
+```bash
+# Generate node for a production API
+node src/n8n/n8n-server.js \
+  --node-name "ShopifyAPI" \
+  --display-name "Shopify Store API" \
+  --base-url "https://mystore.myshopify.com/api/2024-01" \
+  --author "Your Company" \
+  --require-auth \
+  --output-dir "./n8n-nodes-shopify"
+
+# Result: Professional n8n node package ready for:
+# - Internal company use
+# - Publishing to npm
+# - Sharing with n8n community
+```
+
+### Integration Workflow
+
+```
+1. Write your API → Use easy-mcp-server conventions
+2. Generate n8n node → npm run n8n:generate
+3. Build & install → npm install && npm run build
+4. Use in workflows → Drag & drop in n8n
+5. Update API → Regenerate node automatically
+```
+
+### Benefits
+
+- **Zero Manual Work** - No hand-coding n8n nodes
+- **Always in Sync** - Regenerate when APIs change
+- **Type Safety** - TypeScript with full n8n interfaces
+- **Best Practices** - Follows n8n community node standards
+- **Production Ready** - Complete package with all metadata
 
 ---
 
@@ -119,6 +294,7 @@ module.exports = handler;
 
 **Result:**
 - 🤖 **MCP Server** - AI agents can use your endpoints as tools
+- 🔗 **n8n Nodes** - Workflow automation nodes (generated on demand)
 - 🚀 **REST API** - Standard HTTP endpoints
 - 📚 **Swagger UI** - Interactive documentation
 - 📄 **OpenAPI** - Machine-readable specification
@@ -144,7 +320,6 @@ module.exports = handler;
 
 ## 📊 Visual Overview
 
-### From Code to Everything
 
 ![MCP Generation](docs/to-mcp.png)
 *API endpoints automatically become MCP tools*
@@ -159,14 +334,64 @@ module.exports = handler;
 
 ## 🎯 Core Concept
 
-| Your Code | → | Generated Output |
-|-----------|---|------------------|
-| `api/users/get.js` | → | `GET /users` |
-| `@description` annotation | → | API description |
-| `Request` class | → | Request schema |
-| `Response` class | → | Response schema |
+**Write Once, Get Everything:**
 
-**One codebase = Everything you need**
+| Your Code | → | Generated Outputs |
+|-----------|---|-------------------|
+| `api/users/get.js` | → | REST endpoint: `GET /users` |
+| | → | MCP tool: `api_users_get` |
+| | → | n8n node: "Users → Get all" |
+| | → | OpenAPI spec entry |
+| | → | Swagger UI documentation |
+| `@description` annotation | → | Descriptions in all outputs |
+| `Request` class | → | Input schemas everywhere |
+| `Response` class | → | Output schemas everywhere |
+
+**One codebase = Multiple integrations automatically**
+
+---
+
+## 💡 Why easy-mcp-server?
+
+| Traditional Approach | With easy-mcp-server |
+|---------------------|---------------------|
+| Write Express routes manually | File-based routing (zero config) |
+| Write OpenAPI spec by hand | Auto-generated from code |
+| Build MCP tools separately | Automatic MCP integration |
+| Hand-code n8n nodes (200+ lines) | Generate with one command |
+| Maintain 4+ codebases in sync | Single codebase for everything |
+| Update docs manually | Docs update automatically |
+| Hours of setup per integration | 30 seconds to full stack |
+
+**Result:** 10x faster development, zero maintenance overhead, always in sync.
+
+---
+
+## 🎪 Use Cases
+
+### For AI Developers
+Build AI-powered applications with MCP tools:
+- Connect your APIs to Claude, GPT, or any MCP-compatible AI
+- Enable AI agents to interact with your systems
+- Auto-generate tool definitions from your existing APIs
+
+### For Automation Engineers
+Create workflow automation nodes:
+- Generate n8n nodes from your internal APIs
+- Build custom integrations for n8n workflows
+- Share API integrations across your organization
+
+### For API Developers
+Rapid API development with auto-documentation:
+- Build REST APIs with zero boilerplate
+- Get Swagger UI and OpenAPI specs automatically
+- Focus on business logic, not infrastructure
+
+### For Integration Teams
+Single source of truth for multiple platforms:
+- Maintain one codebase for all integrations
+- Generate client libraries automatically
+- Ensure consistency across all platforms
 
 ---
 
@@ -255,6 +480,8 @@ MIT License - see [package.json](package.json) for license details.
 
 | Topic | Documentation |
 |-------|---------------|
+| **n8n Node Generation** | See [n8n Node Generation](#-n8n-node-generation) section above |
+| **MCP Tools** | See [MCP Bridge](#-mcp-bridge-built-in) section above |
 | Architecture & Design | [Development Guide - Architecture](docs/DEVELOPMENT.md#architecture-overview) |
 | JSDoc Annotations | [Development Guide - Annotations](docs/DEVELOPMENT.md#jsdoc-annotations) |
 | MCP Protocol Details | [Development Guide - MCP Module](docs/DEVELOPMENT.md#mcp-module-architecture) |
