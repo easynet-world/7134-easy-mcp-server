@@ -1,7 +1,7 @@
 # easy-mcp-server
 
 <p align="center">
-  <img src="images/easy-mcp-server.jpg" alt="easy-mcp-server logo" width="600">
+  <img src="images/easy-mcp-server.jpg" alt="easy-mcp-server logo" width="100%">
 </p>
 
 <h2>The easiest way to build MCP</h2>
