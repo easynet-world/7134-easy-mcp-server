@@ -107,6 +107,19 @@ Creates a complete n8n community node package ready to publish or install locall
 
 ---
 
+## Visual Overview
+
+![MCP Generation](docs/to-mcp.png)
+*API endpoints automatically become MCP tools*
+
+![OpenAPI Generation](docs/to-openapi.png)
+*Code automatically generates OpenAPI specification*
+
+![Swagger Generation](docs/to-swagger.png)
+*Interactive Swagger UI generated automatically*
+
+---
+
 ## Why Choose easy-mcp-server?
 
 | Traditional Approach | With easy-mcp-server |
