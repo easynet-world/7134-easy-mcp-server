@@ -1150,15 +1150,14 @@ class Request {
     // @description('Product category')
     this.category = '';
     // @description('Minimum price')
-    this.minPrice = 0;;
+    this.minPrice = 0;
   }
 }
 
 class Response {
   constructor() {
-
+    this.products = [];
   }
-}>;
 }
 
 // @description('Get products with optional filtering')
