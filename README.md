@@ -42,6 +42,7 @@ Your services are now running at:
 - MCP Server: http://localhost:8888
 - REST API: http://localhost:8887
 - Swagger UI: http://localhost:8887/docs
+- OpenAPI Spec: http://localhost:8887/openapi.json
 
 ### Write Your First Endpoint
 
