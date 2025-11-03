@@ -1,5 +1,9 @@
 # easy-mcp-server
 
+<p align="center">
+  <img src="images/easy-mcp-server.jpg" alt="easy-mcp-server logo" width="600">
+</p>
+
 <h2>The easiest way to build MCP</h2>
 
 [![npm version](https://img.shields.io/npm/v/easy-mcp-server.svg)](https://www.npmjs.com/package/easy-mcp-server)
