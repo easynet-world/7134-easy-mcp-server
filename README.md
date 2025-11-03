@@ -219,6 +219,14 @@ EASY_MCP_SERVER_LOG_LEVEL=info
 
 ---
 
+## 👤 Maintainer
+
+| Role | Name | Contact |
+|------|------|---------|
+| **Code Owner** | Boqiang Liang | boqiang.liang@easynet.world |
+
+---
+
 ## 🤝 Contributing
 
 | Step | Action |
