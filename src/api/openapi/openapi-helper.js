@@ -400,6 +400,49 @@ function schemaFromTsDeclaration(filePath, className, seen = new Set()) {
         continue;
       }
 
+      // Constructor assignment: this.propertyName = value; (check this BEFORE property match to avoid conflicts)
+      const constructorMatch = raw.match(/^\s*this\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([\s\S]*?);\s*$/);
+      if (constructorMatch) {
+        const name = constructorMatch[1];
+        const defaultValue = constructorMatch[2].trim();
+
+        // Infer type from default value
+        let tsType = 'string';  // default
+        if (defaultValue === 'true' || defaultValue === 'false') {
+          tsType = 'boolean';
+        } else if (/^-?\d+(\.\d+)?$/.test(defaultValue)) {
+          tsType = 'number';
+        } else if (defaultValue === 'undefined' || defaultValue === 'null') {
+          tsType = 'any';
+        } else if (defaultValue.startsWith('[') || defaultValue.startsWith('{')) {
+          // Array or object literal
+          if (defaultValue.startsWith('[')) {
+            tsType = 'array';
+          } else {
+            tsType = 'object';
+          }
+        } else if (defaultValue.startsWith("'") || defaultValue.startsWith('"') || defaultValue.startsWith('`')) {
+          tsType = 'string';
+        }
+
+        const schema = tsTypeToJsonSchema(tsType, filePath, seen);
+        if (pendingDesc) schema.description = pendingDesc.trim();
+
+        // Parse default value
+        const ex = parseTsDefaultLiteral(defaultValue);
+        if (ex !== undefined) schema.example = ex;
+
+        properties[name] = schema;
+
+        // If there's a default value that's not undefined, mark as required
+        const defaultIsUndefined = /(^|\W)undefined(\W|$)/.test(defaultValue);
+        if (!defaultIsUndefined) {
+          required.push(name);
+        }
+        pendingDesc = undefined;
+        continue;
+      }
+
       // Property line: name[!]? : type [= default]; use greedy match up to last semicolon on the line
       const propMatch = raw.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(!)?\s*:?\s*([\s\S]*?);\s*$/);
       if (propMatch) {
@@ -428,6 +471,7 @@ function schemaFromTsDeclaration(filePath, className, seen = new Set()) {
           required.push(name);
         }
         pendingDesc = undefined;
+        continue;
       }
     }
 
