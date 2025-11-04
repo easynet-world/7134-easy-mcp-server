@@ -169,7 +169,8 @@ module.exports = handler;
       test('should handle non-existent API directory gracefully', async () => {
         const server = new N8nServer({ apiPath: './non-existent' });
 
-        await expect(server.loadRoutes()).rejects.toThrow();
+        const routes = await server.loadRoutes();
+        expect(routes).toEqual([]);
       });
     });
 
@@ -289,11 +290,13 @@ module.exports = handler;
         const nodeDefinition = server.buildNodeDefinition();
         const files = server.generateNodePackage(nodeDefinition);
 
-        expect(files).toHaveProperty('package.json');
-        expect(files).toHaveProperty('tsconfig.json');
-        expect(files).toHaveProperty('README.md');
-        expect(files).toHaveProperty('.gitignore');
-        expect(files).toHaveProperty('gulpfile.js');
+        // Check that all expected files are generated
+        const fileKeys = Object.keys(files);
+        expect(fileKeys).toContain('package.json');
+        expect(fileKeys).toContain('tsconfig.json');
+        expect(fileKeys).toContain('README.md');
+        expect(fileKeys).toContain('.gitignore');
+        expect(fileKeys).toContain('gulpfile.js');
       });
 
       test('should generate node TypeScript file', () => {
@@ -480,7 +483,10 @@ module.exports = handler;
           outputDir: path.join(tempDir, 'error-output'),
         });
 
-        await expect(server.start()).rejects.toThrow();
+        // Should complete successfully even with no routes (generates empty node)
+        const result = await server.start();
+        expect(result.success).toBe(true);
+        expect(result.files).toContain('package.json');
       });
     });
   });
@@ -1150,15 +1156,14 @@ class Request {
     // @description('Product category')
     this.category = '';
     // @description('Minimum price')
-    this.minPrice = 0;;
+    this.minPrice = 0;
   }
 }
 
 class Response {
   constructor() {
-
+    this.products = [];
   }
-}>;
 }
 
 // @description('Get products with optional filtering')

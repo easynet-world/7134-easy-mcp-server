@@ -31,7 +31,7 @@
         <mxCell id="SqslbZ9q8wM7eGciWR4W-12" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;strokeWidth=2;" vertex="1" parent="5VvBTK23H_3CmECsxRjJ-4">
           <mxGeometry x="38.75" y="407" width="510" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="5VvBTK23H_3CmECsxRjJ-3" value="&lt;font style=&quot;color: rgb(255, 242, 204);&quot;&gt;&lt;span style=&quot;font-size: 23px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;MCP Inspector&lt;/u&gt;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#004C99;strokeWidth=3;strokeColor=#A9C4EB;shadow=1;" vertex="1" parent="5VvBTK23H_3CmECsxRjJ-4">
+        <mxCell id="5VvBTK23H_3CmECsxRjJ-3" value="&lt;font style=&quot;color: rgb(255, 242, 204);&quot;&gt;&lt;span style=&quot;font-size: 23px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;Swagger UI&lt;/u&gt;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#004C99;strokeWidth=3;strokeColor=#A9C4EB;shadow=1;" vertex="1" parent="5VvBTK23H_3CmECsxRjJ-4">
           <mxGeometry width="587.5" height="40" as="geometry" />
         </mxCell>
         <mxCell id="SqslbZ9q8wM7eGciWR4W-16" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#3333FF;strokeWidth=3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="QW2Gn1gJYX7LJ6TcAM4F-3" target="SqslbZ9q8wM7eGciWR4W-5">
@@ -142,18 +142,15 @@
     </mxGraphModel>
   </diagram>
   <diagram id="r7GdZcwL1tZ0SRmPiQdZ" name="OpenAPI">
-    <mxGraphModel dx="4190" dy="2793" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2587" dy="1280" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="JpuqvMpvU-2lEG_J32M7-1" value="" style="endArrow=none;html=1;rounded=0;dashed=1;dashPattern=8 8;strokeWidth=4;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="824.29" y="1296" as="sourcePoint" />
-            <mxPoint x="824.29" as="targetPoint" />
+            <mxPoint x="824" y="20" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="teNBldhj7HKSf9PNUM2S-25" value="OpenAPI" style="rounded=0;whiteSpace=wrap;html=1;fontSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=5" vertex="1" parent="1">
-          <mxGeometry x="1070" y="-210" width="350" height="60" as="geometry" />
         </mxCell>
         <mxCell id="iR86qB5K7IjApVrKlpF5-1" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#004C99;strokeColor=#6c8ebf;verticalAlign=top;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="-10" y="190" width="625" height="860" as="geometry" />

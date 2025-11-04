@@ -208,9 +208,10 @@ class N8nNodeBuilder {
     const bodySchema = processor.requestBodySchema || processor.input?.body;
 
     // Normalize schemas
-    const normalizedPathSchema = pathSchema ? SchemaNormalizer.normalizeParameterSchema(pathSchema) : null;
-    const normalizedQuerySchema = querySchema ? SchemaNormalizer.normalizeParameterSchema(querySchema) : null;
-    const normalizedBodySchema = bodySchema ? SchemaNormalizer.normalizeParameterSchema(bodySchema) : null;
+    const schemaNormalizer = new SchemaNormalizer();
+    const normalizedPathSchema = pathSchema ? schemaNormalizer.normalizeNestedSchema(pathSchema) : null;
+    const normalizedQuerySchema = querySchema ? schemaNormalizer.normalizeNestedSchema(querySchema) : null;
+    const normalizedBodySchema = bodySchema ? schemaNormalizer.normalizeNestedSchema(bodySchema) : null;
 
     // Build path parameter fields
     if (normalizedPathSchema?.properties) {
