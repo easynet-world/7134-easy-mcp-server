@@ -200,10 +200,12 @@ class N8nNodeBuilder {
     const properties = [];
     const { processor, processorInstance, path, method } = route;
 
-    if (!processorInstance) return properties;
+    // Support both processorInstance (real routes) and processor (mock routes for testing)
+    const proc = processorInstance || processor;
+    if (!proc) return properties;
 
-    // Extract schemas from processorInstance.openApi
-    const openApi = processorInstance.openApi || {};
+    // Extract schemas from processorInstance.openApi or processor directly
+    const openApi = proc.openApi || {};
 
     // Convert OpenAPI parameters array to schema format
     let pathSchema = null;
@@ -238,9 +240,9 @@ class N8nNodeBuilder {
     }
 
     // Fallback to other schema sources
-    pathSchema = pathSchema || processorInstance.pathParametersSchema || processorInstance.input?.path;
-    querySchema = querySchema || processorInstance.queryParametersSchema || processorInstance.input?.query;
-    const bodySchema = openApi.requestBody?.content?.['application/json']?.schema || processorInstance.requestBodySchema || processorInstance.input?.body;
+    pathSchema = pathSchema || proc.pathParametersSchema || proc.input?.path;
+    querySchema = querySchema || proc.queryParametersSchema || proc.input?.query;
+    const bodySchema = openApi.requestBody?.content?.['application/json']?.schema || proc.requestBodySchema || proc.input?.body;
 
     // Normalize schemas
     const schemaNormalizer = new SchemaNormalizer();
