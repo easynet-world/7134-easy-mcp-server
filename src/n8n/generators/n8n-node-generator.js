@@ -358,9 +358,20 @@ exports.default = buildIcons;
    * @returns {string} PascalCase string
    */
   static toClassName(str) {
+    // If input is already proper PascalCase (starts with capital, alternating lowercase),
+    // preserve it
+    if (/^[A-Z][a-z]+([A-Z][a-z]+)*$/.test(str)) {
+      return str;
+    }
+
+    // Split on capital letters, non-alphanumeric, or consecutive caps
     return str
-      .replace(/[^a-zA-Z0-9]/g, ' ')
-      .split(' ')
+      // Insert space before capitals (except at start)
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')  // Handle consecutive caps: "TestAPI" -> "Test API"
+      .replace(/([a-z])([A-Z])/g, '$1 $2')  // Handle camelCase: "testApi" -> "test Api"
+      .replace(/[^a-zA-Z0-9]+/g, ' ')  // Replace non-alphanumeric with space
+      .trim()
+      .split(/\s+/)
       .filter(word => word.length > 0)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join('');
