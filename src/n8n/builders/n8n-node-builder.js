@@ -198,14 +198,49 @@ class N8nNodeBuilder {
    */
   static buildFieldProperties(route, resource, operation) {
     const properties = [];
-    const { processor, path, method } = route;
+    const { processor, processorInstance, path, method } = route;
 
-    if (!processor) return properties;
+    if (!processorInstance) return properties;
 
-    // Extract schemas from processor
-    const pathSchema = processor.pathParametersSchema || processor.input?.path;
-    const querySchema = processor.queryParametersSchema || processor.input?.query;
-    const bodySchema = processor.requestBodySchema || processor.input?.body;
+    // Extract schemas from processorInstance.openApi
+    const openApi = processorInstance.openApi || {};
+
+    // Convert OpenAPI parameters array to schema format
+    let pathSchema = null;
+    let querySchema = null;
+    if (openApi.parameters && Array.isArray(openApi.parameters)) {
+      const pathParams = openApi.parameters.filter(p => p.in === 'path');
+      const queryParams = openApi.parameters.filter(p => p.in === 'query');
+
+      if (pathParams.length > 0) {
+        pathSchema = {
+          type: 'object',
+          properties: {},
+          required: []
+        };
+        pathParams.forEach(p => {
+          pathSchema.properties[p.name] = p.schema;
+          if (p.required) pathSchema.required.push(p.name);
+        });
+      }
+
+      if (queryParams.length > 0) {
+        querySchema = {
+          type: 'object',
+          properties: {},
+          required: []
+        };
+        queryParams.forEach(p => {
+          querySchema.properties[p.name] = p.schema;
+          if (p.required) querySchema.required.push(p.name);
+        });
+      }
+    }
+
+    // Fallback to other schema sources
+    pathSchema = pathSchema || processorInstance.pathParametersSchema || processorInstance.input?.path;
+    querySchema = querySchema || processorInstance.queryParametersSchema || processorInstance.input?.query;
+    const bodySchema = openApi.requestBody?.content?.['application/json']?.schema || processorInstance.requestBodySchema || processorInstance.input?.body;
 
     // Normalize schemas
     const schemaNormalizer = new SchemaNormalizer();
