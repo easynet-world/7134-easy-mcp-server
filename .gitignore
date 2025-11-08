@@ -92,3 +92,4 @@ lib-cov
 .grunt
 .out
 .storybook-out
+test1-*/
