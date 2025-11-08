@@ -46,14 +46,21 @@ class EnvHotReloader {
    */
   startWatching() {
     if (this.watcher) {
-      this.logger.warn('⚠️  Env hot reloader is already watching');
+      const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+      if (!isStdioMode) {
+        this.logger.warn('⚠️  Env hot reloader is already watching');
+      }
       return;
     }
+
+    const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
 
     // Create file patterns to watch (always watch for CRUD of these files)
     const watchPatterns = this.envFiles.map(envFile => path.join(this.userCwd, envFile));
 
-    this.logger.log(`🔄 Setting up .env hot reload for: ${this.envFiles.join(', ')}`);
+    if (!isStdioMode) {
+      this.logger.log(`🔄 Setting up .env hot reload for: ${this.envFiles.join(', ')}`);
+    }
 
     // Create watcher
     this.watcher = chokidar.watch(watchPatterns, {
@@ -80,7 +87,9 @@ class EnvHotReloader {
       this.logger.error(`❌ Env watcher error: ${error.message}`);
     });
 
-    this.logger.log('✅ .env hot reload is now active');
+    if (!isStdioMode) {
+      this.logger.log('✅ .env hot reload is now active');
+    }
   }
 
   /**
