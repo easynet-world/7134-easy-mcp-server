@@ -371,9 +371,104 @@ class DynamicAPIMCPServer {
     return this.lifecycleManager.createWebSocketServer();
   }
 
-  // Deprecated HTTP handler methods removed - use httpHandler directly
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processMCPRequest(data) {
+    // Lazy initialization if not already initialized
+    if (!this.mcpRequestProcessor) {
+      const MCPRequestProcessor = require('./processors/mcp-request-processor');
+      this.mcpRequestProcessor = new MCPRequestProcessor(this, {
+        toolBuilder: this.toolBuilder,
+        toolExecutor: this.toolExecutor,
+        promptHandler: this.promptHandler,
+        resourceHandler: this.resourceHandler,
+        schemaNormalizer: this.schemaNormalizer,
+        getLoadedRoutes: this.getLoadedRoutes.bind(this),
+        trackRequest: this.trackRequest.bind(this),
+        handleError: this.handleError.bind(this)
+      });
+    }
+    return this.mcpRequestProcessor.processMCPRequest(data);
+  }
 
-  // Deprecated request processing methods removed - use mcpRequestProcessor directly
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processListTools(data) {
+    return this.processMCPRequest({ ...data, method: 'tools/list' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processCallTool(data) {
+    return this.processMCPRequest({ ...data, method: 'tools/call' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processListPrompts(data) {
+    return this.processMCPRequest({ ...data, method: 'prompts/list' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processGetPrompt(data) {
+    return this.processMCPRequest({ ...data, method: 'prompts/get' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processListResources(data) {
+    return this.processMCPRequest({ ...data, method: 'resources/list' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processReadResource(data) {
+    return this.processMCPRequest({ ...data, method: 'resources/read' });
+  }
+
+  /**
+   * @deprecated Use this.toolExecutor.executeAPIEndpoint() instead
+   */
+  async executeAPIEndpoint(route, args) {
+    return this.toolExecutor.executeAPIEndpoint(route, args, {
+      schemaNormalizer: this.schemaNormalizer
+    });
+  }
+
+  /**
+   * @deprecated Use this.httpHandler.handleSSEConnection() instead
+   */
+  handleSSEConnection(req, res) {
+    if (!this.httpHandler) return;
+    return this.httpHandler.handleSSEConnection(req, res, {
+      httpClients: this.httpClients,
+      cacheManager: this.cacheManager
+    });
+  }
+
+  /**
+   * @deprecated Use this.httpHandler.handleHTTPMCPRequest() instead
+   */
+  handleHTTPMCPRequest(req, res) {
+    if (!this.httpHandler) return;
+    return this.httpHandler.handleHTTPMCPRequest(req, res);
+  }
+
+  /**
+   * @deprecated Use this.httpHandler.handleStreamableHttpRequest() instead
+   */
+  handleStreamableHttpRequest(req, res) {
+    if (!this.httpHandler) return;
+    return this.httpHandler.handleStreamableHttpRequest(req, res);
+  }
 
   /**
    * Notify clients about route changes
