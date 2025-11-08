@@ -14,6 +14,7 @@ const PromptHandler = require('./handlers/content/prompt-handler');
 const ResourceHandler = require('./handlers/content/resource-handler');
 const HTTPHandler = require('./handlers/transport/http-handler');
 const WebSocketHandler = require('./handlers/transport/websocket-handler');
+const STDIOHandler = require('./handlers/transport/stdio-handler');
 const MCPRequestProcessor = require('./processors/mcp-request-processor');
 
 class DynamicAPIMCPServer {
@@ -256,10 +257,14 @@ class DynamicAPIMCPServer {
     this.promptHandler = new PromptHandler(this.prompts, this.config, this.resolvedBasePath, this.cacheManager);
     this.resourceHandler = new ResourceHandler(this.resources, this.config, this.resolvedBasePath, this.cacheManager);
     
-    // Initialize request processor, HTTP and WebSocket handlers (will be set up after methods are available)
+    // Initialize request processor, HTTP, WebSocket, and STDIO handlers (will be set up after methods are available)
     this.mcpRequestProcessor = null;
     this.httpHandler = null;
     this.wsHandler = null;
+    this.stdioHandler = null;
+    
+    // Check if STDIO mode is enabled
+    this.stdioMode = options.stdioMode || process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
   }
 
   /**
@@ -653,22 +658,31 @@ class DynamicAPIMCPServer {
    * Broadcast notification to all connected clients
    */
   broadcastNotification(notification) {
+    // Notify STDIO client (if in STDIO mode)
+    if (this.stdioMode && this.stdioHandler) {
+      this.stdioHandler.sendNotification(notification);
+    }
+    
     // Notify WebSocket clients
-    this.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(notification));
-      }
-    });
+    if (this.clients) {
+      this.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(notification));
+        }
+      });
+    }
 
     // Notify HTTP clients
-    this.httpClients.forEach((res, clientId) => {
-      try {
-        res.write(`data: ${JSON.stringify(notification)}\n\n`);
-      } catch (error) {
-        // Remove disconnected clients
-        this.httpClients.delete(clientId);
-      }
-    });
+    if (this.httpClients) {
+      this.httpClients.forEach((res, clientId) => {
+        try {
+          res.write(`data: ${JSON.stringify(notification)}\n\n`);
+        } catch (error) {
+          // Remove disconnected clients
+          this.httpClients.delete(clientId);
+        }
+      });
+    }
   }
 
   /**
@@ -687,40 +701,48 @@ class DynamicAPIMCPServer {
       handleError: this.handleError.bind(this)
     });
     
-    this.httpHandler = new HTTPHandler(this, {
-      processMCPRequest: this.mcpRequestProcessor.processMCPRequest.bind(this.mcpRequestProcessor)
-    });
-    
-    this.wsHandler = new WebSocketHandler(this, {
-      processMCPRequest: (data) => this.mcpRequestProcessor.processMCPRequest(data)
-    });
-    
-    // Create HTTP server with explicit IPv4 binding
-    this.server = http.createServer();
-    // Harden against server errors to avoid process crashes
-    this.server.on('error', (err) => {
-      try {
-        console.error('❌ MCP HTTP server error (continuing):', err);
-      } catch (logErr) { /* ignore logging error */ }
-    });
-    
-    // Add HTTP endpoints for MCP Inspector compatibility
-    this.server.on('request', (req, res) => {
-      try {
-        this.httpHandler.handleHTTPRequest(req, res);
-      } catch (err) {
+    // Initialize STDIO handler if in STDIO mode
+    if (this.stdioMode) {
+      this.stdioHandler = new STDIOHandler(this, {
+        processMCPRequest: this.mcpRequestProcessor.processMCPRequest.bind(this.mcpRequestProcessor)
+      });
+    } else {
+      // Initialize HTTP and WebSocket handlers only if not in STDIO mode
+      this.httpHandler = new HTTPHandler(this, {
+        processMCPRequest: this.mcpRequestProcessor.processMCPRequest.bind(this.mcpRequestProcessor)
+      });
+      
+      this.wsHandler = new WebSocketHandler(this, {
+        processMCPRequest: (data) => this.mcpRequestProcessor.processMCPRequest(data)
+      });
+      
+      // Create HTTP server with explicit IPv4 binding
+      this.server = http.createServer();
+      // Harden against server errors to avoid process crashes
+      this.server.on('error', (err) => {
         try {
-          console.error('❌ MCP HTTP request handling error:', err);
+          console.error('❌ MCP HTTP server error (continuing):', err);
         } catch (logErr) { /* ignore logging error */ }
+      });
+      
+      // Add HTTP endpoints for MCP Inspector compatibility
+      this.server.on('request', (req, res) => {
         try {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Internal Server Error' }));
-        } catch (writeErr) { /* ignore write error */ }
-      }
-    });
-    
-    // Log the host configuration for debugging
-    console.log(`🔌 MCP Server: Host configured as: ${this.host}`);
+          this.httpHandler.handleHTTPRequest(req, res);
+        } catch (err) {
+          try {
+            console.error('❌ MCP HTTP request handling error:', err);
+          } catch (logErr) { /* ignore logging error */ }
+          try {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Internal Server Error' }));
+          } catch (writeErr) { /* ignore write error */ }
+        }
+      });
+      
+      // Log the host configuration for debugging
+      console.log(`🔌 MCP Server: Host configured as: ${this.host}`);
+    }
   }
   
   /**
@@ -1902,6 +1924,20 @@ class DynamicAPIMCPServer {
     this.createServer();
     // Attach bridge listeners so notifications are forwarded
     this.attachBridgeListeners();
+    
+    // If in STDIO mode, start STDIO handler instead of HTTP/WebSocket server
+    if (this.stdioMode) {
+      this.stdioHandler.start();
+      if (!this.quiet) {
+        console.log('🚀 MCP Server started in STDIO mode');
+        console.log('📡 Reading from stdin, writing to stdout');
+        console.log('🔧 Available MCP commands:');
+        console.log('  - tools/list: Discover available API endpoints');
+        console.log('  - tools/call: Execute a specific API endpoint');
+        console.log('  - ping: Health check');
+      }
+      return Promise.resolve();
+    }
     
     return new Promise((resolve, reject) => {
       // Force IPv4 binding to avoid IPv6 issues
