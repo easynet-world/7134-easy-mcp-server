@@ -3,23 +3,9 @@
  * Handles starting the Easy MCP Server in different modes
  */
 
-// CRITICAL: Redirect console output to stderr in STDIO mode BEFORE any other code runs
-// This must happen before any require() statements to catch all console output
+// Console redirection is now handled at the entry point (easy-mcp-server.js)
+// Check if STDIO mode is enabled for conditional logic
 const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
-if (isStdioMode) {
-  const originalLog = console.log;
-  const originalWarn = console.warn;
-  
-  // Redirect console.log and console.warn to stderr in STDIO mode
-  // This allows stdout to be used exclusively for JSON-RPC messages
-  console.log = (...args) => {
-    process.stderr.write(require('util').format(...args) + '\n');
-  };
-  console.warn = (...args) => {
-    process.stderr.write(require('util').format(...args) + '\n');
-  };
-  // console.error already goes to stderr, so we don't need to redirect it
-}
 
 const fs = require('fs');
 const path = require('path');

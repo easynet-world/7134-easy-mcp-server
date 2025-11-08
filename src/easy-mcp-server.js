@@ -13,6 +13,46 @@
  *   easy-mcp-server --help   # Show help
  */
 
+// CRITICAL: Redirect console output to stderr in STDIO mode BEFORE any other code runs
+// This must happen at the very entry point to catch ALL console output
+const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+if (isStdioMode) {
+  // Redirect console.log and console.warn to stderr in STDIO mode
+  // This allows stdout to be used exclusively for JSON-RPC messages
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  
+  console.log = (...args) => {
+    // Use a simple approach that doesn't require util
+    const message = args.map(arg => {
+      if (typeof arg === 'object') {
+        try {
+          return JSON.stringify(arg);
+        } catch {
+          return String(arg);
+        }
+      }
+      return String(arg);
+    }).join(' ');
+    process.stderr.write(message + '\n');
+  };
+  
+  console.warn = (...args) => {
+    const message = args.map(arg => {
+      if (typeof arg === 'object') {
+        try {
+          return JSON.stringify(arg);
+        } catch {
+          return String(arg);
+        }
+      }
+      return String(arg);
+    }).join(' ');
+    process.stderr.write(message + '\n');
+  };
+  // console.error already goes to stderr, so we don't need to redirect it
+}
+
 const { showHelp } = require('./utils/cli/help');
 const { initProject } = require('./utils/cli/init-project');
 const { startServer } = require('./utils/cli/server-start');
