@@ -3,6 +3,24 @@
  * Handles starting the Easy MCP Server in different modes
  */
 
+// CRITICAL: Redirect console output to stderr in STDIO mode BEFORE any other code runs
+// This must happen before any require() statements to catch all console output
+const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+if (isStdioMode) {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  
+  // Redirect console.log and console.warn to stderr in STDIO mode
+  // This allows stdout to be used exclusively for JSON-RPC messages
+  console.log = (...args) => {
+    process.stderr.write(require('util').format(...args) + '\n');
+  };
+  console.warn = (...args) => {
+    process.stderr.write(require('util').format(...args) + '\n');
+  };
+  // console.error already goes to stderr, so we don't need to redirect it
+}
+
 const fs = require('fs');
 const path = require('path');
 const {
@@ -18,25 +36,9 @@ const {
  * @returns {Promise<void>}
  */
 async function startServer() {
-  // Check for STDIO mode first - if enabled, redirect console output to stderr
-  // This prevents console logs from interfering with JSON-RPC communication
-  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
-  
-  if (isStdioMode) {
-    // Redirect console.log to stderr in STDIO mode
-    // This allows stdout to be used exclusively for JSON-RPC messages
-    const originalLog = console.log;
-    const originalError = console.error;
-    const originalWarn = console.warn;
-    
-    console.log = (...args) => {
-      originalError(...args);
-    };
-    console.warn = (...args) => {
-      originalError(...args);
-    };
-    // Keep console.error going to stderr (it already does)
-  } else {
+  // Console redirection already happened at the top of the file
+  // Just log the startup message if not in STDIO mode
+  if (!isStdioMode) {
     console.log('🚀 Starting Easy MCP Server...');
   }
   
