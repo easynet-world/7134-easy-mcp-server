@@ -479,13 +479,13 @@ async function startServer() {
             onReload: () => {
               console.log('🔄 Environment variables reloaded - MCP server will use latest configuration');
             },
-          logger: console,
-          mcpServer: mcpServer,
-          apiLoader: apiLoader,
-          bridgeReloader: bridgeReloader
-        });
-        envHotReloader.startWatching();
-        
+            logger: console,
+            mcpServer: mcpServer,
+            apiLoader: apiLoader,
+            bridgeReloader: bridgeReloader
+          });
+          envHotReloader.startWatching();
+        }
       }).catch(error => {
         console.warn('⚠️  MCP Server failed to start:', error.message);
       });
