@@ -55,7 +55,8 @@ class MCPBridgeReloader {
       }
     }
     
-    return Object.keys(env).length > 0 ? env : null;
+    // Return empty object instead of null to allow merging
+    return env;
   }
 
   setQuiet(quiet) {
@@ -156,7 +157,8 @@ class MCPBridgeReloader {
             command: entry.command,
             args: Array.isArray(entry.args) ? entry.args : [],
             cwd: entry.cwd || null,
-            disabled: entry.disabled === true
+            disabled: entry.disabled === true,
+            env: entry.env || null
           });
         }
       }
@@ -188,7 +190,7 @@ class MCPBridgeReloader {
       // Skip bridges that have previously failed
       this.failedBridges = this.failedBridges || new Set();
       
-      servers.forEach(({ name, command, args, cwd, disabled }) => {
+      servers.forEach(({ name, command, args, cwd, disabled, env: configEnv }) => {
         // Skip disabled bridges
         if (disabled === true) {
           return;
@@ -199,8 +201,11 @@ class MCPBridgeReloader {
           return;
         }
         try {
-          // Build environment variables for this server
+          // Build environment variables for this server from process.env
           const childEnv = this.buildServerEnv(name);
+          
+          // Merge config env with childEnv (config env takes precedence)
+          const finalEnv = { ...childEnv, ...configEnv };
           
           // Resolve cwd if provided (for local projects)
           let resolvedCwd = null;
@@ -208,7 +213,7 @@ class MCPBridgeReloader {
             resolvedCwd = path.isAbsolute(cwd) ? cwd : path.resolve(this.root, cwd);
           }
           
-          const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv, cwd: resolvedCwd });
+          const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: finalEnv, cwd: resolvedCwd });
           
           // Wrap bridge with schema adapter for Chrome DevTools and other MCP servers
           const bridge = new MCPSchemaAdapter(rawBridge);
