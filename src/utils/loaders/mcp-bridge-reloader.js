@@ -253,7 +253,10 @@ class MCPBridgeReloader {
           setTimeout(() => {
             if (bridge.proc && bridge.proc.exitCode === null) {
               this.bridges.set(name, bridge);
-              this.logger.log(`🔌 MCP Bridge started: ${name}`);
+              const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+              if (!isStdioMode) {
+                this.logger.log(`🔌 MCP Bridge started: ${name}`);
+              }
             } else {
               // Provide better error messages based on the failure type
               if (hasCommandError) {
