@@ -180,7 +180,14 @@ class MCPBridgeReloader {
       
       const rawCfg = this.loadConfig();
       const servers = this.resolveAllServers(rawCfg);
+      // Skip bridges that have previously failed
+      this.failedBridges = this.failedBridges || new Set();
+      
       servers.forEach(({ name, command, args }) => {
+        // Skip bridges that have previously failed
+        if (this.failedBridges.has(name)) {
+          return;
+        }
         try {
           // Build environment variables for this server
           const childEnv = this.buildServerEnv(name);
@@ -189,6 +196,23 @@ class MCPBridgeReloader {
           
           // Wrap bridge with schema adapter for Chrome DevTools and other MCP servers
           const bridge = new MCPSchemaAdapter(rawBridge);
+          
+          // Track stderr messages to detect command/package errors
+          let stderrMessages = [];
+          let hasCommandError = false;
+          
+          bridge.on('stderr', (msg) => {
+            const errorMsg = msg.toString();
+            stderrMessages.push(errorMsg);
+            
+            // Detect common command/package errors
+            if (errorMsg.includes('could not determine executable') ||
+                errorMsg.includes('npm error') ||
+                errorMsg.includes('command not found') ||
+                errorMsg.includes('ENOENT')) {
+              hasCommandError = true;
+            }
+          });
           
           // Try to start the bridge and handle failures gracefully
           bridge.start();
@@ -215,12 +239,26 @@ class MCPBridgeReloader {
               this.bridges.set(name, bridge);
               this.logger.log(`🔌 MCP Bridge started: ${name}`);
             } else {
-              this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start - check your environment variables (EASY_MCP_SERVER.${name.toLowerCase()}.*)`);
+              // Provide better error messages based on the failure type
+              if (hasCommandError) {
+                const commandStr = [command, ...args].join(' ');
+                this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start: Command or package not found`);
+                this.logger.warn(`   Command: ${commandStr}`);
+                this.logger.warn(`   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.`);
+              } else {
+                this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start - check your environment variables (EASY_MCP_SERVER.${name.toLowerCase()}.*)`);
+              }
+              // Mark as failed to prevent retries
+              this.failedBridges = this.failedBridges || new Set();
+              this.failedBridges.add(name);
             }
           }, 1000);
           
         } catch (err) {
           this.logger.warn(`⚠️  Failed to start MCP Bridge '${name}': ${err && err.message ? err.message : String(err)}`);
+          // Mark as failed to prevent retries
+          this.failedBridges = this.failedBridges || new Set();
+          this.failedBridges.add(name);
         }
       });
     }
@@ -234,6 +272,10 @@ class MCPBridgeReloader {
         if (bridge && typeof bridge.stop === 'function') bridge.stop();
       }
       this.bridges.clear();
+    }
+    // Clear failed bridges on config change so they can be retried
+    if (this.failedBridges) {
+      this.failedBridges.clear();
     }
     this.ensureBridges();
     this.logger.log('🔄 MCP Bridges reloaded due to config change');
