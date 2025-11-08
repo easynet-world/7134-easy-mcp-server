@@ -19,35 +19,18 @@ const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
 if (isStdioMode) {
   // Redirect console.log and console.warn to stderr in STDIO mode
   // This allows stdout to be used exclusively for JSON-RPC messages
+  // Use util.format for proper formatting (it's a built-in Node.js module)
+  const util = require('util');
   const originalLog = console.log;
   const originalWarn = console.warn;
   
-  console.log = (...args) => {
-    // Use a simple approach that doesn't require util
-    const message = args.map(arg => {
-      if (typeof arg === 'object') {
-        try {
-          return JSON.stringify(arg);
-        } catch {
-          return String(arg);
-        }
-      }
-      return String(arg);
-    }).join(' ');
+  console.log = function(...args) {
+    const message = util.format(...args);
     process.stderr.write(message + '\n');
   };
   
-  console.warn = (...args) => {
-    const message = args.map(arg => {
-      if (typeof arg === 'object') {
-        try {
-          return JSON.stringify(arg);
-        } catch {
-          return String(arg);
-        }
-      }
-      return String(arg);
-    }).join(' ');
+  console.warn = function(...args) {
+    const message = util.format(...args);
     process.stderr.write(message + '\n');
   };
   // console.error already goes to stderr, so we don't need to redirect it
