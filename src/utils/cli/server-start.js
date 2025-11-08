@@ -18,7 +18,27 @@ const {
  * @returns {Promise<void>}
  */
 async function startServer() {
-  console.log('🚀 Starting Easy MCP Server...');
+  // Check for STDIO mode first - if enabled, redirect console output to stderr
+  // This prevents console logs from interfering with JSON-RPC communication
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
+  if (isStdioMode) {
+    // Redirect console.log to stderr in STDIO mode
+    // This allows stdout to be used exclusively for JSON-RPC messages
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    console.log = (...args) => {
+      originalError(...args);
+    };
+    console.warn = (...args) => {
+      originalError(...args);
+    };
+    // Keep console.error going to stderr (it already does)
+  } else {
+    console.log('🚀 Starting Easy MCP Server...');
+  }
   
   // Load environment files
   loadUserEnvFiles();
@@ -66,11 +86,14 @@ function startCustomServer(serverPath) {
  * @returns {Promise<void>}
  */
 async function startAutoServer(portConfig) {
-  console.log('📁 Found api/ directory - starting automatic server');
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
+  if (!isStdioMode) {
+    console.log('📁 Found api/ directory - starting automatic server');
+    console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
+  }
   
   try {
-    console.log('🚀 Using full-featured Easy MCP Server with MCP integration...');
-    
     // Set up environment variables for the server
     const originalCwd = process.cwd();
     // Resolve paths:
@@ -85,7 +108,9 @@ async function startAutoServer(portConfig) {
     const bridgeConfigPath = path.join(originalCwd, 'mcp-bridge.json');
     if (!process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH && fs.existsSync(bridgeConfigPath)) {
       process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = bridgeConfigPath;
-      console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
+      if (!isStdioMode) {
+        console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
+      }
     }
 
     // Configure static directory - use package root for fallback public directory
