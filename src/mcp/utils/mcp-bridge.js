@@ -31,6 +31,7 @@ class MCPBridge extends EventEmitter {
     this.args = Array.isArray(options.args) ? options.args : [];
     this.proc = null;
     this.env = options.env && typeof options.env === 'object' ? options.env : null;
+    this.cwd = options.cwd || null; // Support working directory for local projects
     this.nextId = 1;
     this.pending = new Map(); // id -> { resolve, reject }
     this.initialized = false;
@@ -47,10 +48,14 @@ class MCPBridge extends EventEmitter {
     if (!this.command) throw new Error('MCPBridge requires a command');
     if (this.proc) return;
     const spawnEnv = this.env ? { ...process.env, ...this.env } : process.env;
-    this.proc = spawn(this.command, this.args, {
+    const spawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: spawnEnv
-    });
+    };
+    if (this.cwd) {
+      spawnOptions.cwd = this.cwd;
+    }
+    this.proc = spawn(this.command, this.args, spawnOptions);
 
     this.proc.stdout.on('data', (chunk) => this._onData(chunk));
     this.proc.stderr.on('data', (chunk) => {

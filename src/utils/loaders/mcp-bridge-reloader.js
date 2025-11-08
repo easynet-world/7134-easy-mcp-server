@@ -142,7 +142,7 @@ class MCPBridgeReloader {
     }
   }
 
-  // Resolve all server entries (Cursor-compatible). Returns array of { name, command, args }
+  // Resolve all server entries (Cursor-compatible). Returns array of { name, command, args, cwd, disabled }
   resolveAllServers(config) {
     const servers = [];
     if (config && config.mcpServers && typeof config.mcpServers === 'object') {
@@ -151,7 +151,9 @@ class MCPBridgeReloader {
           servers.push({
             name,
             command: entry.command,
-            args: Array.isArray(entry.args) ? entry.args : []
+            args: Array.isArray(entry.args) ? entry.args : [],
+            cwd: entry.cwd || null,
+            disabled: entry.disabled === true
           });
         }
       }
@@ -183,7 +185,12 @@ class MCPBridgeReloader {
       // Skip bridges that have previously failed
       this.failedBridges = this.failedBridges || new Set();
       
-      servers.forEach(({ name, command, args }) => {
+      servers.forEach(({ name, command, args, cwd, disabled }) => {
+        // Skip disabled bridges
+        if (disabled === true) {
+          return;
+        }
+        
         // Skip bridges that have previously failed
         if (this.failedBridges.has(name)) {
           return;
@@ -192,7 +199,13 @@ class MCPBridgeReloader {
           // Build environment variables for this server
           const childEnv = this.buildServerEnv(name);
           
-          const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv });
+          // Resolve cwd if provided (for local projects)
+          let resolvedCwd = null;
+          if (cwd) {
+            resolvedCwd = path.isAbsolute(cwd) ? cwd : path.resolve(this.root, cwd);
+          }
+          
+          const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: childEnv, cwd: resolvedCwd });
           
           // Wrap bridge with schema adapter for Chrome DevTools and other MCP servers
           const bridge = new MCPSchemaAdapter(rawBridge);
@@ -244,6 +257,49 @@ class MCPBridgeReloader {
                 const commandStr = [command, ...args].join(' ');
                 this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start: Command or package not found`);
                 this.logger.warn(`   Command: ${commandStr}`);
+                
+                // Check if this might be a local project (created with easy-mcp-server init)
+                const isNpxCommand = command === 'npx' && args.length > 0 && args[0] === '-y';
+                const packageName = isNpxCommand && args.length > 1 ? args[1] : null;
+                
+                if (isNpxCommand && packageName) {
+                  // Check multiple possible locations for local project
+                  const possiblePaths = [
+                    path.resolve(this.root, '..', packageName), // Sibling directory
+                    path.resolve(this.root, packageName), // Subdirectory
+                    path.resolve(process.cwd(), '..', packageName), // From cwd
+                    path.resolve(process.cwd(), packageName) // From cwd subdirectory
+                  ];
+                  
+                  let localProjectPath = null;
+                  for (const possiblePath of possiblePaths) {
+                    if (fs.existsSync(possiblePath) && fs.existsSync(path.join(possiblePath, 'package.json'))) {
+                      // Check if it's an easy-mcp-server project
+                      const packageJson = JSON.parse(fs.readFileSync(path.join(possiblePath, 'package.json'), 'utf8'));
+                      if (packageJson.dependencies && packageJson.dependencies['easy-mcp-server']) {
+                        localProjectPath = possiblePath;
+                        break;
+                      }
+                    }
+                  }
+                  
+                  if (localProjectPath) {
+                    const relativePath = path.relative(this.root, localProjectPath);
+                    this.logger.warn(`   💡 This appears to be a local project created with 'easy-mcp-server init ${packageName}'`);
+                    this.logger.warn(`   Found at: ${localProjectPath}`);
+                    this.logger.warn(`   To use it as a bridge, update mcp-bridge.json:`);
+                    this.logger.warn(`   "test1": {`);
+                    this.logger.warn(`     "command": "npx",`);
+                    this.logger.warn(`     "args": ["easy-mcp-server"],`);
+                    this.logger.warn(`     "cwd": "${relativePath.startsWith('..') ? relativePath : '../' + relativePath}"`);
+                    this.logger.warn(`   }`);
+                    this.logger.warn(`   Or use the absolute path: "${localProjectPath}"`);
+                  } else {
+                    this.logger.warn(`   💡 If this is a local project, use a path-based command instead of npx.`);
+                    this.logger.warn(`   Example: { "command": "npx", "args": ["easy-mcp-server"], "cwd": "../${packageName}" }`);
+                  }
+                }
+                
                 this.logger.warn(`   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.`);
               } else {
                 this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start - check your environment variables (EASY_MCP_SERVER.${name.toLowerCase()}.*)`);
