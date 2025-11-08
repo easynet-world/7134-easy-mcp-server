@@ -26,6 +26,7 @@ function initProject(projectName) {
   
   // Create all project files
   createPackageJson(projectDir, projectName);
+  createBinScript(projectDir, projectName);
   createConfigFiles(projectDir, projectName);
   createTypeScriptConfig(projectDir);
   createApiFiles(projectDir);
@@ -48,7 +49,7 @@ function createPackageJson(projectDir, projectName) {
     description: 'Easy MCP Server project',
     main: 'index.js',
     bin: {
-      [projectName]: './node_modules/.bin/easy-mcp-server'
+      [projectName]: './bin/cli.js'
     },
     scripts: {
       start: './start.sh',
@@ -85,6 +86,7 @@ function createPackageJson(projectDir, projectName) {
     },
     files: [
       'index.js',
+      'bin/',
       'api/',
       'mcp/',
       'public/',
@@ -101,6 +103,47 @@ function createPackageJson(projectDir, projectName) {
     path.join(projectDir, 'package.json'),
     JSON.stringify(packageJson, null, 2)
   );
+}
+
+/**
+ * Create executable bin script for npx support
+ */
+function createBinScript(projectDir, projectName) {
+  const binDir = path.join(projectDir, 'bin');
+  fs.mkdirSync(binDir, { recursive: true });
+  
+  const cliScript = `#!/usr/bin/env node
+/**
+ * ${projectName} CLI
+ * Executable script for running this Easy MCP Server project
+ */
+
+// Change to project directory (where this script is located)
+const path = require('path');
+const fs = require('fs');
+const projectRoot = path.resolve(__dirname, '..');
+process.chdir(projectRoot);
+
+// Find easy-mcp-server bin script
+// npm creates a symlink in node_modules/.bin/ for all bin scripts
+const binScript = path.join(projectRoot, 'node_modules', '.bin', 'easy-mcp-server');
+
+if (!fs.existsSync(binScript)) {
+  console.error('❌ Could not find easy-mcp-server. Please run: npm install');
+  process.exit(1);
+}
+
+// Run easy-mcp-server CLI
+require(binScript);
+`;
+
+  const cliPath = path.join(binDir, 'cli.js');
+  fs.writeFileSync(cliPath, cliScript);
+  
+  // Make it executable on Unix-like systems
+  if (process.platform !== 'win32') {
+    fs.chmodSync(cliPath, '755');
+  }
 }
 
 /**
@@ -460,7 +503,7 @@ function displaySuccessMessage(projectName) {
 🚀 Next steps:
    1. cd ${projectName}
    2. npm install
-   3. ./start.sh           # Or: npm start, npm run dev, or npx easy-mcp-server
+   3. ./start.sh           # Or: npm start, npm run dev, npx easy-mcp-server, or npx ${projectName}
 
 📚 Your server will be available at:
   - Server: http://localhost:${'${config.port}'}
