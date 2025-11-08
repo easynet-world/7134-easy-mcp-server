@@ -440,6 +440,13 @@ class DynamicAPIMCPServer {
   }
 
   /**
+   * @deprecated Use this.resourceHandler.getMimeTypeForExtension() instead
+   */
+  getMimeTypeForExtension(ext) {
+    return this.resourceHandler.getMimeTypeForExtension(ext);
+  }
+
+  /**
    * @deprecated Use this.toolExecutor.executeAPIEndpoint() instead
    */
   async executeAPIEndpoint(route, args) {
