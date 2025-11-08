@@ -134,15 +134,21 @@ class DynamicAPIServer {
         dynamicStatic.dir = null;
         return;
       }
+      const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+      
       if (dynamicStatic.dir !== absDir) {
-        console.log(`📁 Static files enabled: serving from ${absDir}`);
+        if (!isStdioMode) {
+          console.log(`📁 Static files enabled: serving from ${absDir}`);
+        }
         dynamicStatic.handler = express.static(absDir, {
           index: false,
           dotfiles: 'ignore',
           etag: true,
           lastModified: true
         });
-        console.log('✅ Static file middleware applied successfully');
+        if (!isStdioMode) {
+          console.log('✅ Static file middleware applied successfully');
+        }
         dynamicStatic.dir = absDir;
         dynamicStatic.indexMountedFor = null;
       }
@@ -153,7 +159,9 @@ class DynamicAPIServer {
           this.app.get('/', (req, res) => {
             res.sendFile(indexPath);
           });
-          console.log(`🏠 Root route configured: serving ${this.defaultFile}`);
+          if (!isStdioMode) {
+            console.log(`🏠 Root route configured: serving ${this.defaultFile}`);
+          }
         }
         dynamicStatic.indexMountedFor = dynamicStatic.dir;
       }
@@ -373,10 +381,14 @@ class DynamicAPIServer {
         // Ensure APIs are loaded before starting the server
         this.ensureApisLoaded();
         
+        const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+        
         this.server = this.app.listen(this.port, this.host, { family: 4 }, () => {
-          console.log(`🚀 Easy MCP Server running on ${this.host}:${this.port}`);
-          console.log(`📚 API Documentation: http://localhost:${this.port}/docs`);
-          console.log(`🔍 Health Check: http://localhost:${this.port}/health`);
+          if (!isStdioMode) {
+            console.log(`🚀 Easy MCP Server running on ${this.host}:${this.port}`);
+            console.log(`📚 API Documentation: http://localhost:${this.port}/docs`);
+            console.log(`🔍 Health Check: http://localhost:${this.port}/health`);
+          }
           resolve();
         });
         

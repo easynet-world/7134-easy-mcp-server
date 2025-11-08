@@ -134,7 +134,10 @@ class MCPBridgeReloader {
     try {
       const raw = fs.readFileSync(cfgPath, 'utf8');
       const config = JSON.parse(raw);
-      this.logger.log(`🔌 Loaded MCP bridge config from ${cfgPath}`);
+      const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+      if (!isStdioMode) {
+        this.logger.log(`🔌 Loaded MCP bridge config from ${cfgPath}`);
+      }
       return config;
     } catch (e) {
       this.logger.warn(`⚠️  Failed to parse ${cfgPath}: ${e.message}`);
