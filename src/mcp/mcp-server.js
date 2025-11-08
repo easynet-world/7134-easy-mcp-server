@@ -1,6 +1,11 @@
 /**
  * MCP (Model Context Protocol) Server
  * Handles AI model communication and API execution
+ * 
+ * JSON-RPC 2.0 Error Codes:
+ * - -32601: Method not found
+ * - -32602: Invalid params
+ * - -32603: Internal error
  */
 
 const path = require('path');
@@ -491,7 +496,63 @@ class DynamicAPIMCPServer {
     return this.lifecycleManager.stop();
   }
 
-  // Deprecated system methods removed - use mcpRequestProcessor directly
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processHealth(data) {
+    return this.processMCPRequest({ ...data, method: 'health' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processMetrics(data) {
+    return this.processMCPRequest({ ...data, method: 'metrics' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processCacheStats(data) {
+    return this.processMCPRequest({ ...data, method: 'cache/stats' });
+  }
+
+  /**
+   * @deprecated Use this.mcpRequestProcessor.processMCPRequest() instead
+   */
+  async processCacheClear(data) {
+    return this.processMCPRequest({ ...data, method: 'cache/clear' });
+  }
+
+  /**
+   * @deprecated Use this.wsHandler.handleMessage() instead
+   */
+  async handleListTools(ws, data) {
+    if (!this.wsHandler) {
+      // Lazy initialization
+      const WebSocketHandler = require('./handlers/transport/websocket-handler');
+      this.wsHandler = new WebSocketHandler(this, {
+        processMCPRequest: (data) => this.processMCPRequest(data)
+      });
+    }
+    // Format as WebSocket message (legacy format)
+    const jsonrpcResponse = await this.processMCPRequest({ 
+      jsonrpc: '2.0',
+      id: data.id,
+      method: 'tools/list'
+    });
+    
+    // Convert JSON-RPC response to legacy WebSocket format
+    const wsResponse = {
+      type: 'list_tools_response',
+      id: data.id,
+      tools: jsonrpcResponse.result?.tools || []
+    };
+    
+    if (ws && ws.send) {
+      ws.send(JSON.stringify(wsResponse));
+    }
+  }
 }
 
 module.exports = DynamicAPIMCPServer;
