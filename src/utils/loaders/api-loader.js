@@ -83,11 +83,16 @@ class APILoader {
    */
   loadAPIs() {
     const apiDir = this.apiPath;
+    const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
     
-    console.log(`🔍 Loading APIs from: ${apiDir}`);
+    if (!isStdioMode) {
+      console.log(`🔍 Loading APIs from: ${apiDir}`);
+    }
     
     if (!fs.existsSync(apiDir)) {
-      console.log(`⚠️  No api/ directory found at: ${apiDir}`);
+      if (!isStdioMode) {
+        console.log(`⚠️  No api/ directory found at: ${apiDir}`);
+      }
       return [];
     }
 
@@ -104,7 +109,7 @@ class APILoader {
     this.scanDirectory(apiDir);
     this.attachProcessorsToRoutes();
     
-    if (this.errors.length > 0) {
+    if (this.errors.length > 0 && !isStdioMode) {
       console.log(`⚠️  ${this.errors.length} API loading errors encountered`);
     }
     
@@ -434,7 +439,10 @@ class APILoader {
         const key = `${httpMethod.toLowerCase()}:${normalizedPath}`;
         this.processors.set(key, instanceForRoute);
 
-        console.log(`✅ Loaded API: ${httpMethod} ${normalizedPath}`);
+        const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+        if (!isStdioMode) {
+          console.log(`✅ Loaded API: ${httpMethod} ${normalizedPath}`);
+        }
       };
 
       // Case 1: Object export with a process method

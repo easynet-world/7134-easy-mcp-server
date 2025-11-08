@@ -494,56 +494,60 @@ async function startServer() {
     }
   }
 
-  // Display server startup information
-  const host = process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
-  const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 8887;
-  const staticPath = process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public';
-  
-  console.log('\n');
-  console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
-  console.log('  ║                                                                                                      ║');
-  console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
-  console.log('  ║                                                                                                      ║');
-  console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
-  console.log('');
-  console.log('  🚀  SERVER STARTED SUCCESSFULLY');
-  console.log('  ' + '═'.repeat(78));
-  console.log(`  📍 Server Address: ${host}:${basePort}`);
-  console.log('  🌍 Environment: development');
-  console.log('');
-  console.log('  📡  API ENDPOINTS:');
-  console.log(`     • Health Check:     http://localhost:${basePort}/health`);
-  console.log(`     • API Information:  http://localhost:${basePort}/api-info`);
-  console.log(`     • MCP Tools:        http://localhost:${basePort}/mcp/tools`);
-  console.log('');
-  console.log('  📚  DOCUMENTATION:');
-  console.log(`     • OpenAPI JSON:     http://localhost:${basePort}/openapi.json`);
-  console.log(`     • Swagger UI:       http://localhost:${basePort}/docs ✨`);
-  console.log(`     • LLM Context:      http://localhost:${basePort}/LLM.txt`);
-  console.log(`     • Agent Context:    http://localhost:${basePort}/Agent.md`);
-  console.log('');
-  if (mcpServer) {
-    console.log('  🤖  MCP SERVER:');
-    console.log(`     • WebSocket:       ws://${mcpServer.host}:${mcpServer.port}`);
-    console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
+  // Display server startup information (skip in STDIO mode)
+  if (!isStdioMode) {
+    const host = process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
+    const basePort = parseInt(process.env.EASY_MCP_SERVER_PORT) || 8887;
+    const staticPath = process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || './public';
+    
+    console.log('\n');
+    console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ║                                    🚀 EASY MCP SERVER 🚀                                           ║');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log('  🚀  SERVER STARTED SUCCESSFULLY');
+    console.log('  ' + '═'.repeat(78));
+    console.log(`  📍 Server Address: ${host}:${basePort}`);
+    console.log('  🌍 Environment: development');
+    console.log('');
+    console.log('  📡  API ENDPOINTS:');
+    console.log(`     • Health Check:     http://localhost:${basePort}/health`);
+    console.log(`     • API Information:  http://localhost:${basePort}/api-info`);
+    console.log(`     • MCP Tools:        http://localhost:${basePort}/mcp/tools`);
+    console.log('');
+    console.log('  📚  DOCUMENTATION:');
+    console.log(`     • OpenAPI JSON:     http://localhost:${basePort}/openapi.json`);
+    console.log(`     • Swagger UI:       http://localhost:${basePort}/docs ✨`);
+    console.log(`     • LLM Context:      http://localhost:${basePort}/LLM.txt`);
+    console.log(`     • Agent Context:    http://localhost:${basePort}/Agent.md`);
+    console.log('');
+    if (mcpServer) {
+      console.log('  🤖  MCP SERVER:');
+      console.log(`     • WebSocket:       ws://${mcpServer.host}:${mcpServer.port}`);
+      console.log(`     • Routes Loaded:   ${loadedRoutes.length} API endpoints`);
+      console.log('');
+    }
+    console.log('  ⚡  FEATURES:');
+    console.log('     • Auto-discovery of API endpoints');
+    console.log('     • Real-time MCP tool generation');
+    console.log('     • Automatic OpenAPI documentation');
+    console.log('     • Hot reloading enabled');
+    if (fs.existsSync(staticPath)) {
+      console.log('     • Static file serving enabled');
+    }
+    console.log('');
+    console.log('  🎯  Ready to serve your APIs!');
+    console.log('  ' + '═'.repeat(78));
     console.log('');
   }
-  console.log('  ⚡  FEATURES:');
-  console.log('     • Auto-discovery of API endpoints');
-  console.log('     • Real-time MCP tool generation');
-  console.log('     • Automatic OpenAPI documentation');
-  console.log('     • Hot reloading enabled');
-  if (fs.existsSync(staticPath)) {
-    console.log('     • Static file serving enabled');
-  }
-  console.log('');
-  console.log('  🎯  Ready to serve your APIs!');
-  console.log('  ' + '═'.repeat(78));
-  console.log('');
 
   // Graceful shutdown handlers
   const shutdown = async () => {
-    console.log('\n🛑 Shutting down servers...');
+    if (!isStdioMode) {
+      console.log('\n🛑 Shutting down servers...');
+    }
     if (hotReloader) {
       hotReloader.stopWatching();
     }
