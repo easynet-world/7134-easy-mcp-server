@@ -376,24 +376,29 @@ async function executeAPIEndpoint(route, args, res) {
 
 // Server startup function
 async function startServer() {
-  // Display startup banner
-  console.log('\n');
-  console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
-  console.log('  ║                                                                                                      ║');
-  console.log('  ║  🚀  STARTING EASY MCP SERVER...                                                                      ║');
-  console.log('  ║                                                                                                      ║');
-  console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
-  console.log('');
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
+  // Only display startup banner and start HTTP server if not in STDIO mode
+  if (!isStdioMode) {
+    // Display startup banner
+    console.log('\n');
+    console.log('  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════╗');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ║  🚀  STARTING EASY MCP SERVER...                                                                      ║');
+    console.log('  ║                                                                                                      ║');
+    console.log('  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════╝');
+    console.log('');
 
-  // Start REST API server using DynamicAPIServer
-  await apiServer.start();
+    // Start REST API server using DynamicAPIServer
+    await apiServer.start();
+  }
 
   // Get loaded routes and errors for display
   const loadedRoutes = apiLoader.getRoutes();
   const errors = apiLoader.getErrors();
 
-  // Display error summary if there are any
-  if (errors.length > 0) {
+  // Display error summary if there are any (only in non-STDIO mode)
+  if (errors.length > 0 && !isStdioMode) {
     console.log('\n⚠️  API Loading Summary:');
     console.log(`   Total APIs attempted: ${loadedRoutes.length + errors.length}`);
     console.log(`   Successfully loaded: ${loadedRoutes.length}`);
@@ -444,29 +449,36 @@ async function startServer() {
       
       // Set the routes for MCP server before starting (so it's available immediately)
       mcpServer.setRoutes(loadedRoutes);
-      console.log(`📡 Registered ${loadedRoutes.length} API routes with MCP server`);
+      if (!isStdioMode) {
+        console.log(`📡 Registered ${loadedRoutes.length} API routes with MCP server`);
+      }
       
       // Start MCP server
       mcpServer.run().then(() => {
-        console.log('🤖  MCP Server initialized successfully');
+        if (!isStdioMode) {
+          console.log('🤖  MCP Server initialized successfully');
+        }
         
         // Update routes again after server is fully started (in case of hot reload)
         mcpServer.setRoutes(apiLoader.getRoutes());
         
-        // Initialize hot reloading after MCP server is ready
-        hotReloader = new HotReloader(apiLoader, mcpServer, {
-          autoInstall: true, // Enable auto package installation
-          userCwd: process.cwd(),
-          logger: console
-        });
-        hotReloader.startWatching();
+        // Initialize hot reloading after MCP server is ready (skip in STDIO mode)
+        if (!isStdioMode) {
+          hotReloader = new HotReloader(apiLoader, mcpServer, {
+            autoInstall: true, // Enable auto package installation
+            userCwd: process.cwd(),
+            logger: console
+          });
+          hotReloader.startWatching();
+        }
         
-        // Initialize .env hot reloader
-        envHotReloader = new EnvHotReloader({
-          debounceDelay: 1000,
-          onReload: () => {
-            console.log('🔄 Environment variables reloaded - MCP server will use latest configuration');
-          },
+        // Initialize .env hot reloader (skip in STDIO mode)
+        if (!isStdioMode) {
+          envHotReloader = new EnvHotReloader({
+            debounceDelay: 1000,
+            onReload: () => {
+              console.log('🔄 Environment variables reloaded - MCP server will use latest configuration');
+            },
           logger: console,
           mcpServer: mcpServer,
           apiLoader: apiLoader,
