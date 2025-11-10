@@ -419,6 +419,33 @@ async function startServer() {
       console.log(`   ${type}: ${count} errors`);
     });
     
+    // Show detailed error information for each failed file
+    if (errors.length > 0 && errors.length <= 10) {
+      console.log('\n📋 Failed Files:');
+      errors.forEach((error, index) => {
+        const file = typeof error === 'object' ? error.file : 'unknown';
+        const errorMsg = typeof error === 'object' ? error.error : String(error);
+        const errorType = typeof error === 'object' ? error.type : 'unknown';
+        const relativePath = file && file.startsWith(process.cwd()) 
+          ? path.relative(process.cwd(), file) 
+          : file;
+        console.log(`   ${index + 1}. ${relativePath || 'unknown'}`);
+        console.log(`      Type: ${errorType}`);
+        console.log(`      Error: ${errorMsg.substring(0, 100)}${errorMsg.length > 100 ? '...' : ''}`);
+      });
+    } else if (errors.length > 10) {
+      console.log(`\n📋 Showing first 10 of ${errors.length} failed files:`);
+      errors.slice(0, 10).forEach((error, index) => {
+        const file = typeof error === 'object' ? error.file : 'unknown';
+        const errorType = typeof error === 'object' ? error.type : 'unknown';
+        const relativePath = file && file.startsWith(process.cwd()) 
+          ? path.relative(process.cwd(), file) 
+          : file;
+        console.log(`   ${index + 1}. ${relativePath || 'unknown'} (${errorType})`);
+      });
+      console.log(`   ... and ${errors.length - 10} more. Check /health endpoint for full details.`);
+    }
+    
     console.log('\n💡 Server will continue running with available APIs.');
     console.log('   Check /health endpoint for detailed API status.');
     console.log('   Fix missing dependencies to enable failed APIs.\n');

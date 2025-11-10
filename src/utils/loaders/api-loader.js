@@ -515,21 +515,34 @@ class APILoader {
         // Continue to error handling below to record the error but don't return early
       }
       
+      // Categorize errors more comprehensively
       if (error.code === 'MODULE_NOT_FOUND') {
         errorType = 'missing_dependency';
         errorMessage = `Missing dependency: ${error.message}`;
-      } else if (error.message.includes('Cannot find module')) {
+      } else if (error.message && error.message.includes('Cannot find module')) {
         errorType = 'missing_module';
         errorMessage = `Missing module: ${error.message}`;
-      } else if (error.message.includes('is not a constructor')) {
+      } else if (error.message && error.message.includes('is not a constructor')) {
         errorType = 'invalid_constructor';
         errorMessage = `Invalid constructor: ${error.message}`;
-      } else if (error.message.includes('Cannot read properties')) {
+      } else if (error.message && error.message.includes('Cannot read properties')) {
         errorType = 'property_error';
         errorMessage = `Property access error: ${error.message}`;
-      } else if (errorMessage.includes('TS1005') && isTestFileError) {
-        // TypeScript syntax error in test files - ignore
-        return;
+      } else if (error.message && error.message.includes('Unexpected token')) {
+        errorType = 'syntax_error';
+        errorMessage = `Syntax error: ${error.message}`;
+      } else if (error.message && (error.message.includes('TS') || error.message.includes('TypeScript'))) {
+        errorType = 'typescript_error';
+        errorMessage = `TypeScript error: ${error.message}`;
+      } else if (error.message && error.message.includes('ReferenceError')) {
+        errorType = 'reference_error';
+        errorMessage = `Reference error: ${error.message}`;
+      } else if (error.message && error.message.includes('TypeError')) {
+        errorType = 'type_error';
+        errorMessage = `Type error: ${error.message}`;
+      } else if (error.stack && error.stack.includes('at require')) {
+        errorType = 'require_error';
+        errorMessage = `Require error: ${error.message}`;
       }
       
       this.errors.push({
