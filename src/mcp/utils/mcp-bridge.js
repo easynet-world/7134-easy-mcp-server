@@ -107,8 +107,11 @@ class MCPBridge extends EventEmitter {
       }
 
       // Set up a one-time listener for the initialization response
+      let timeoutId;
       const initHandler = (msg) => {
         if (msg.id === 0) {
+          clearTimeout(timeoutId);
+          this.removeListener('response', initHandler);
           this.initialized = true;
           if (!this.quiet) {
             console.log('🔌 Bridge: Initialization completed');
@@ -120,11 +123,11 @@ class MCPBridge extends EventEmitter {
       // Store the handler temporarily
       this.once('response', initHandler);
 
-      // Set up timeout for initialization
-      const timeoutId = setTimeout(() => {
+      // Set up timeout for initialization (increased to 30 seconds for slow MCP servers)
+      timeoutId = setTimeout(() => {
         this.removeListener('response', initHandler);
         reject(new Error('Bridge initialization timeout'));
-      }, 10000);
+      }, 30000);
 
       try {
         if (!this.quiet) {
@@ -210,23 +213,109 @@ class MCPBridge extends EventEmitter {
     if (!this.quiet) {
       console.log('🔌 Bridge stdout raw:', JSON.stringify(chunk.toString()));
     }
-    
-    // Parse newline-delimited JSON
-    const data = this.buffer.toString('utf8');
-    const lines = data.split('\n');
-    
-    // Keep the last line in buffer if it's not complete
-    this.buffer = Buffer.from(lines.pop() || '', 'utf8');
-    
-    // Process each complete line
-    for (const line of lines) {
-      if (line.trim()) {
+
+    // Support both LSP-style (Content-Length headers) and NDJSON (newline-delimited JSON)
+    while (true) {
+      // First, try to detect if we have LSP-style headers
+      if (this.expectingHeaders) {
+        const headerEnd = this.buffer.indexOf('\r\n\r\n');
+        
+        if (headerEnd !== -1) {
+          // Found LSP-style headers
+          const headerText = this.buffer.slice(0, headerEnd).toString('utf8');
+          const contentLengthMatch = headerText.match(/Content-Length:\s*(\d+)/i);
+
+          if (contentLengthMatch) {
+            const contentLength = parseInt(contentLengthMatch[1], 10);
+            if (!isNaN(contentLength) && contentLength >= 0) {
+              this.expectedLength = contentLength;
+              this.expectingHeaders = false;
+              this.buffer = this.buffer.slice(headerEnd + 4); // Remove headers and \r\n\r\n
+              
+              // Check if we have enough data for the message
+              if (this.buffer.length < this.expectedLength) {
+                // Not enough data yet, wait for more
+                return;
+              }
+
+              // Extract the message
+              const messageBuffer = this.buffer.slice(0, this.expectedLength);
+              this.buffer = this.buffer.slice(this.expectedLength);
+              this.expectingHeaders = true;
+              this.expectedLength = 0;
+
+              // Parse and process the message
+              try {
+                const msg = JSON.parse(messageBuffer.toString('utf8'));
+                this._handleMessage(msg);
+                continue; // Continue parsing more messages
+              } catch (err) {
+                if (!this.quiet) {
+                  console.log('🔌 Bridge: Failed to parse LSP message:', messageBuffer.toString('utf8'), err.message);
+                }
+                // Reset and try NDJSON format
+                this.expectingHeaders = true;
+                this.expectedLength = 0;
+              }
+            }
+          }
+        }
+        
+        // If no LSP headers found, try NDJSON format (newline-delimited JSON)
+        // Check for both \n and \r\n line endings
+        let newlineIndex = this.buffer.indexOf('\n');
+        let lineEndingLength = 1;
+        if (newlineIndex === -1) {
+          newlineIndex = this.buffer.indexOf('\r\n');
+          if (newlineIndex !== -1) {
+            lineEndingLength = 2;
+          }
+        }
+        
+        if (newlineIndex !== -1) {
+          // Found a newline, try to parse as NDJSON
+          const line = this.buffer.slice(0, newlineIndex).toString('utf8').trim();
+          this.buffer = this.buffer.slice(newlineIndex + lineEndingLength);
+          
+          if (line.length > 0) {
+            try {
+              const msg = JSON.parse(line);
+              this._handleMessage(msg);
+              continue; // Continue parsing more messages
+            } catch (err) {
+              if (!this.quiet) {
+                console.log('🔌 Bridge: Failed to parse NDJSON message:', line, err.message);
+              }
+              // Continue to next line
+            }
+          } else {
+            // Empty line, continue
+            continue;
+          }
+        } else {
+          // No newline found yet, wait for more data
+          return;
+        }
+      } else {
+        // We're in the middle of reading an LSP message
+        if (this.buffer.length < this.expectedLength) {
+          // Not enough data yet, wait for more
+          return;
+        }
+
+        // Extract the message
+        const messageBuffer = this.buffer.slice(0, this.expectedLength);
+        this.buffer = this.buffer.slice(this.expectedLength);
+        this.expectingHeaders = true;
+        this.expectedLength = 0;
+
+        // Parse and process the message
         try {
-          const msg = JSON.parse(line);
+          const msg = JSON.parse(messageBuffer.toString('utf8'));
           this._handleMessage(msg);
         } catch (err) {
           if (!this.quiet) {
-            console.log('🔌 Bridge: Failed to parse line:', line, err.message);
+            console.log('🔌 Bridge: Failed to parse message:', messageBuffer.toString('utf8'), err.message);
           }
         }
       }

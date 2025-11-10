@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--isolated"],
+      "description": "Chrome DevTools for browser automation, testing, and web scraping"
+    },
+    "iterm2": {
+      "command": "npx",
+      "args": ["-y", "iterm-mcp@latest"],
+      "description": "iTerm2 terminal automation for system operations and deployment"
+    }
+  }
+}
