@@ -180,12 +180,51 @@ class ToolExecutor {
         const bridges = bridgeReloader.ensureBridges();
         for (const [serverName, bridge] of bridges.entries()) {
           try {
-            // Try different name variations to find the right tool
-            const namesToTry = [
+            // Query bridge's tools/list to find the correct original tool name
+            // This handles cases where tool names have been cleaned (e.g., chrome_new_page -> new_page)
+            let originalToolName = null;
+            try {
+              const bridgeToolsList = await bridge.rpcRequest('tools/list', {}, 5000);
+              if (bridgeToolsList && Array.isArray(bridgeToolsList.tools)) {
+                for (const tool of bridgeToolsList.tools) {
+                  if (!tool || !tool.name) continue;
+                  
+                  // Check if this tool matches the requested name
+                  // For Chrome tools, we strip prefixes to match
+                  let cleanToolName = tool.name;
+                  if (serverName === 'chrome') {
+                    const prefixes = ['chrome_', 'mcp_'];
+                    for (const prefix of prefixes) {
+                      if (cleanToolName.startsWith(prefix)) {
+                        cleanToolName = cleanToolName.substring(prefix.length);
+                        break;
+                      }
+                    }
+                  }
+                  
+                  // If the clean name matches, use the original tool name
+                  if (cleanToolName === name) {
+                    originalToolName = tool.name;
+                    break;
+                  }
+                }
+              }
+            } catch (e) {
+              // If tools/list fails, fall back to name variations
+              console.warn(`⚠️  Failed to query tools/list from ${serverName}, trying name variations:`, e.message);
+            }
+            
+            // Build list of names to try: original from tools/list, then variations
+            const namesToTry = [];
+            if (originalToolName) {
+              namesToTry.push(originalToolName);
+            }
+            // Add fallback variations
+            namesToTry.push(
               name,                           // Original clean name
               `${serverName}_${name}`,       // With server prefix
-              `${serverName}${serverName}_${name}` // With double prefix
-            ];
+              `mcp_${name}`                  // With mcp_ prefix (common for Chrome tools)
+            );
             
             for (const toolName of namesToTry) {
               try {

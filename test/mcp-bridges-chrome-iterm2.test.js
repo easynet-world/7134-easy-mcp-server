@@ -100,6 +100,102 @@ describe('MCP bridges: chrome-devtools and iterm2', () => {
     const type = await serverModule.mcp.processMCPRequest({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'type', arguments: { text } } });
     expect(JSON.stringify(type)).toContain(text);
   });
+
+  test('tools/call correctly maps cleaned tool names to original bridge tool names (chrome_new_page -> new_page)', async () => {
+    // This test verifies the fix for issue #449: chrome MCP call failure
+    // When a tool is listed as 'chrome_new_page' but exposed as 'new_page',
+    // calling 'new_page' should correctly map back to 'chrome_new_page'
+    
+    // Create a mock bridge with chrome_new_page tool
+    const bridgeModulePath = require('path').resolve(__dirname, '../src/mcp/utils/mcp-bridge.js');
+    const MockBridge = jest.fn().mockImplementation(() => {
+      let callCount = 0;
+      return {
+        start() {},
+        on() {},
+        async rpcRequest(method, params) {
+          if (method === 'tools/list') {
+            return { 
+              tools: [
+                { 
+                  name: 'chrome_new_page', 
+                  description: 'Create a new page', 
+                  inputSchema: { 
+                    type: 'object', 
+                    properties: { 
+                      url: { type: 'string' } 
+                    } 
+                  } 
+                }
+              ]
+            };
+          }
+          if (method === 'tools/call') {
+            callCount++;
+            // Verify that the tool name used is the original 'chrome_new_page', not 'new_page'
+            if (params.name === 'chrome_new_page') {
+              return { 
+                content: [{ 
+                  type: 'text', 
+                  text: JSON.stringify({ success: true, tool: params.name, arguments: params.arguments }) 
+                }], 
+                isError: false 
+              };
+            }
+            // If wrong name is used, return error
+            throw new Error(`Tool ${params.name} not found`);
+          }
+          throw new Error('unsupported');
+        }
+      };
+    });
+
+    const reloaderModulePath = require('path').resolve(__dirname, '../src/utils/loaders/mcp-bridge-reloader.js');
+    jest.doMock(reloaderModulePath, () => {
+      return class MockReloader {
+        ensureBridges() {
+          return new Map([
+            ['chrome', new MockBridge()]
+          ]);
+        }
+      };
+    });
+
+    // Reset modules to use the new mock
+    jest.resetModules();
+    const DynamicAPIMCPServer = require('../src/mcp');
+    const BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
+    
+    const reloader = new BridgeReloader();
+    const mcp = new DynamicAPIMCPServer('127.0.0.1', 0, { bridgeReloader: reloader });
+    mcp.setRoutes([]);
+
+    // First, verify the tool is listed as 'new_page' (cleaned name)
+    const listResp = await mcp.processMCPRequest({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
+    expect(listResp && listResp.result && Array.isArray(listResp.result.tools)).toBe(true);
+    const toolNames = listResp.result.tools.map(t => t.name);
+    expect(toolNames).toContain('new_page');
+
+    // Then, call the tool using the cleaned name 'new_page'
+    const callResp = await mcp.processMCPRequest({ 
+      jsonrpc: '2.0', 
+      id: 2, 
+      method: 'tools/call', 
+      params: { 
+        name: 'new_page', 
+        arguments: { url: 'https://example.com' } 
+      } 
+    });
+    
+    // Verify the call succeeded (should have mapped 'new_page' to 'chrome_new_page')
+    expect(callResp.result).toBeDefined();
+    expect(callResp.result.content).toBeDefined();
+    const resultText = callResp.result.content[0].text;
+    const result = JSON.parse(resultText);
+    expect(result.success).toBe(true);
+    expect(result.tool).toBe('chrome_new_page');
+    expect(result.arguments.url).toBe('https://example.com');
+  });
 });
 
 
