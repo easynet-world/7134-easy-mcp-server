@@ -40,8 +40,9 @@ describe('MCP tools/list merges bridge tools (HTTP MCP)', () => {
     const resp = await mcpServer.processMCPRequest({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
     expect(resp && resp.result && Array.isArray(resp.result.tools)).toBe(true);
     const names = resp.result.tools.map(t => t.name);
-    // Tool names no longer have double prefixes - clean names are used
-    expect(names).toContain('mock_bridge_tool');
+    // Tool names have server-specific prefixes stripped - clean names are used
+    // mock_bridge_tool becomes bridge_tool after stripping mock_ prefix
+    expect(names).toContain('bridge_tool');
   });
 });
 
