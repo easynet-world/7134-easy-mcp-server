@@ -85,7 +85,7 @@ class MCPToolMerger {
         const bridges = this.bridgeReloader.ensureBridges();
         for (const [serverName, bridge] of bridges.entries()) {
           try {
-            const bridgeResult = await bridge.rpcRequest('tools/list', {}, 5000); // 5 second timeout
+            const bridgeResult = await bridge.rpcRequest('tools/list', {}, 10000); // 10 second timeout
             if (bridgeResult && Array.isArray(bridgeResult.tools)) {
               bridgeResult.tools.forEach(t => {
                 // Skip null/undefined tools
@@ -94,20 +94,19 @@ class MCPToolMerger {
                   return;
                 }
                 
-                // Only strip prefixes from Chrome DevTools to avoid naming conflicts
+                // Strip server-specific prefixes to avoid naming conflicts
                 let cleanName = t.name;
                 if (!cleanName) {
                   console.warn(`⚠️  Skipping bridge tool without name from ${serverName}`);
                   return;
                 }
                 
-                if (serverName === 'chrome') {
-                  const prefixes = ['chrome_', 'mcp_'];
-                  for (const prefix of prefixes) {
-                    if (cleanName.startsWith(prefix)) {
-                      cleanName = cleanName.substring(prefix.length);
-                      break;
-                    }
+                // Strip server-specific prefixes (e.g., chrome_new_page -> new_page)
+                const prefixes = [`${serverName}_`, 'mcp_'];
+                for (const prefix of prefixes) {
+                  if (cleanName.startsWith(prefix)) {
+                    cleanName = cleanName.substring(prefix.length);
+                    break;
                   }
                 }
                 
@@ -126,7 +125,7 @@ class MCPToolMerger {
                 }
                 
                 tools.push({
-                  name: cleanName, // Cleaned name (only for Chrome tools)
+                  name: cleanName, // Cleaned name (server-specific prefixes stripped)
                   description: `[${serverName}] ${t.description || 'Bridge tool'}`,
                   inputSchema: inputSchema,
                   responseSchema: null,

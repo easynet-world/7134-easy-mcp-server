@@ -153,7 +153,7 @@ class ToolExecutor {
   /**
    * Execute a tool (either API endpoint or bridge tool)
    */
-  async executeTool(name, args, { getLoadedRoutes, bridgeReloader, executeAPIEndpoint } = {}) {
+  async executeTool(name, args, { getLoadedRoutes, bridgeReloader, executeAPIEndpoint, getToolsList } = {}) {
     const routes = getLoadedRoutes ? getLoadedRoutes() : [];
     
     // First try to find API route (format: api_[path]_[http_method])
@@ -178,72 +178,130 @@ class ToolExecutor {
     if (bridgeReloader) {
       try {
         const bridges = bridgeReloader.ensureBridges();
+        
+        // First, try to get the original tool name from the tools list metadata
+        let originalToolName = null;
+        let targetServerName = null;
+        if (getToolsList) {
+          try {
+            const toolsList = await getToolsList();
+            if (Array.isArray(toolsList)) {
+              // Find the tool in the list that matches the requested name
+              const tool = toolsList.find(t => t && t.name === name);
+              if (tool && tool._bridgeToolName && tool._bridgeServerName) {
+                originalToolName = tool._bridgeToolName;
+                targetServerName = tool._bridgeServerName;
+              }
+            }
+          } catch (e) {
+            // If getToolsList fails, fall back to querying bridges
+            console.warn('⚠️  Failed to get tools list, will query bridges directly:', e.message);
+          }
+        }
+        
+        // If we found the original tool name from metadata, use it directly
+        if (originalToolName && targetServerName) {
+          const bridge = bridges.get(targetServerName);
+          if (bridge) {
+            try {
+              const bridgeResult = await bridge.rpcRequest('tools/call', { name: originalToolName, arguments: args }, 10000);
+              if (bridgeResult && bridgeResult.content) {
+                return bridgeResult;
+              }
+            } catch (e) {
+              console.warn(`⚠️  Failed to call tool ${originalToolName} on ${targetServerName}:`, e.message);
+              // Fall through to try other bridges
+            }
+          }
+        }
+        
+        // Fallback: query bridges to find the tool
         for (const [serverName, bridge] of bridges.entries()) {
+          // Skip if we already tried this server with the original name
+          if (targetServerName === serverName && originalToolName) {
+            continue;
+          }
+          
           try {
             // Query bridge's tools/list to find the correct original tool name
-            // This handles cases where tool names have been cleaned (e.g., chrome_new_page -> new_page)
-            let originalToolName = null;
+            // This handles cases where tool names have been cleaned (e.g., server_new_page -> new_page)
+            let foundOriginalToolName = null;
             try {
-              const bridgeToolsList = await bridge.rpcRequest('tools/list', {}, 5000);
+              const bridgeToolsList = await bridge.rpcRequest('tools/list', {}, 10000);
               if (bridgeToolsList && Array.isArray(bridgeToolsList.tools)) {
                 for (const tool of bridgeToolsList.tools) {
                   if (!tool || !tool.name) continue;
                   
                   // Check if this tool matches the requested name
-                  // For Chrome tools, we strip prefixes to match
+                  // Strip server-specific prefixes to match (e.g., server_new_page -> new_page)
                   let cleanToolName = tool.name;
-                  if (serverName === 'chrome') {
-                    const prefixes = ['chrome_', 'mcp_'];
-                    for (const prefix of prefixes) {
-                      if (cleanToolName.startsWith(prefix)) {
-                        cleanToolName = cleanToolName.substring(prefix.length);
-                        break;
-                      }
+                  const prefixes = [`${serverName}_`, 'mcp_'];
+                  for (const prefix of prefixes) {
+                    if (cleanToolName.startsWith(prefix)) {
+                      cleanToolName = cleanToolName.substring(prefix.length);
+                      break;
                     }
                   }
                   
                   // If the clean name matches, use the original tool name
                   if (cleanToolName === name) {
-                    originalToolName = tool.name;
+                    foundOriginalToolName = tool.name;
                     break;
                   }
                 }
               }
             } catch (e) {
-              // If tools/list fails, fall back to name variations
-              console.warn(`⚠️  Failed to query tools/list from ${serverName}, trying name variations:`, e.message);
+              // If tools/list fails or times out, fall back to name variations
+              // This is expected for slow bridges, so we continue with name variations
+              if (e.message && e.message.includes('timeout')) {
+                console.warn(`⚠️  tools/list timeout from ${serverName}, trying name variations for tool: ${name}`);
+              } else {
+                console.warn(`⚠️  Failed to query tools/list from ${serverName}, trying name variations:`, e.message);
+              }
             }
             
             // Build list of names to try: original from tools/list, then variations
             const namesToTry = [];
-            if (originalToolName) {
-              namesToTry.push(originalToolName);
+            if (foundOriginalToolName) {
+              namesToTry.push(foundOriginalToolName);
             }
-            // Add fallback variations
+            // Add fallback variations - try common patterns
             namesToTry.push(
               name,                           // Original clean name
               `${serverName}_${name}`,       // With server prefix
-              `mcp_${name}`                  // With mcp_ prefix (common for Chrome tools)
+              `mcp_${name}`,                 // With mcp_ prefix (common for MCP tools)
+              `${name}_${serverName}`        // With server suffix
             );
             
+            // Try each name variation
+            let lastError = null;
             for (const toolName of namesToTry) {
               try {
-                const bridgeResult = await bridge.rpcRequest('tools/call', { name: toolName, arguments: args }, 5000);
+                const bridgeResult = await bridge.rpcRequest('tools/call', { name: toolName, arguments: args }, 10000);
                 if (bridgeResult && bridgeResult.content) {
                   return bridgeResult;
                 }
               } catch (e) {
+                // Store the last error for better error reporting
+                lastError = e;
                 // This name variation didn't work, try next one
                 continue;
               }
             }
+            
+            // If we tried all variations and none worked, log helpful error
+            if (lastError) {
+              console.warn(`⚠️  Tool ${name} not found in ${serverName} bridge after trying: ${namesToTry.join(', ')}`);
+            }
           } catch (e) {
             // Tool not found in this bridge, try next one
+            console.warn(`⚠️  Error querying ${serverName} bridge for tool ${name}:`, e.message);
             continue;
           }
         }
       } catch (e) {
         // Bridge error, fall through to not found
+        console.warn(`⚠️  Bridge error while looking for tool ${name}:`, e.message);
       }
     }
     

@@ -42,13 +42,23 @@ class ToolProcessor {
     const { name, arguments: args } = data.params || data;
 
     try {
+      // Get tools list to access _bridgeToolName metadata
+      const getToolsList = async () => {
+        const routes = this.getLoadedRoutes();
+        return await this.toolBuilder.buildToolsList(routes, {
+          bridgeReloader: this.server.bridgeReloader,
+          warn: this.server.warn.bind(this.server)
+        });
+      };
+      
       // Execute tool and get result with content array
       const result = await this.toolExecutor.executeTool(name, args, {
         getLoadedRoutes: this.getLoadedRoutes,
         bridgeReloader: this.server.bridgeReloader,
         executeAPIEndpoint: (route, args) => this.toolExecutor.executeAPIEndpoint(route, args, {
           schemaNormalizer: this.schemaNormalizer
-        })
+        }),
+        getToolsList: getToolsList
       });
 
       // Ensure result has content array (MCP requirement)
