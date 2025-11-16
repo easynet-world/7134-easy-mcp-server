@@ -58,7 +58,8 @@ function createPackageJson(projectDir, projectName) {
       dev: 'easy-mcp-server',
       test: 'jest',
       'start:direct': 'easy-mcp-server',
-      'start:npx': 'npx easy-mcp-server'
+      'start:npx': 'npx easy-mcp-server',
+      'n8n:generate': 'node node_modules/easy-mcp-server/src/n8n/n8n-server.js'
     },
     dependencies: {
       'easy-mcp-server': '^1.1.5',
@@ -116,6 +117,11 @@ function createBinScript(projectDir, projectName) {
 /**
  * ${projectName} CLI
  * Executable script for running this Easy MCP Server project
+ * 
+ * Usage:
+ *   ${projectName}  # Automatically detects mode based on .env configuration
+ *                   # - If EASY_MCP_SERVER_MCP_PORT is set: HTTP/Streamable mode
+ *                   # - If not set: STDIO mode
  */
 
 // Change to project directory (where this script is located)
@@ -123,6 +129,31 @@ const path = require('path');
 const fs = require('fs');
 const projectRoot = path.resolve(__dirname, '..');
 process.chdir(projectRoot);
+
+// Automatic mode detection based on .env port configuration
+// Check if MCP port is configured in environment (from .env file or environment variables)
+const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+
+if (hasMcpPort) {
+  // Port is configured - use HTTP/Streamable mode
+  // Don't set STDIO mode, so it will use HTTP transport
+  // Set host to 0.0.0.0 to allow external connections (only if not set)
+  if (!process.env.EASY_MCP_SERVER_MCP_HOST) {
+    process.env.EASY_MCP_SERVER_MCP_HOST = '0.0.0.0';
+  }
+  console.log('🔌 MCP Server Mode: HTTP/Streamable');
+  console.log('📡 Port:', process.env.EASY_MCP_SERVER_MCP_PORT);
+  console.log('🌐 HTTP endpoints will be available at:');
+  console.log('   - POST http://localhost:' + process.env.EASY_MCP_SERVER_MCP_PORT + '/mcp');
+  console.log('   - POST http://localhost:' + process.env.EASY_MCP_SERVER_MCP_PORT + '/');
+  console.log('   - GET  http://localhost:' + process.env.EASY_MCP_SERVER_MCP_PORT + '/sse');
+} else {
+  // No port configured - use STDIO mode
+  process.env.EASY_MCP_SERVER_STDIO_MODE = 'true';
+  console.log('🔌 MCP Server Mode: STDIO');
+  console.log('📡 Communication: stdin/stdout (JSON-RPC)');
+  console.log('💡 To use HTTP/Streamable mode, set EASY_MCP_SERVER_MCP_PORT in your .env file');
+}
 
 // Find easy-mcp-server bin script
 // npm creates a symlink in node_modules/.bin/ for all bin scripts

@@ -7,7 +7,11 @@
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
 
-## Write a handler once, get REST endpoints, Swagger/OpenAPI docs, MCP tools, and n8n nodes automatically.
+### Write a handler once, get 
+* MCP tools
+* REST endpoints
+* n8n nodes
+* Swagger/OpenAPI automatically.
 
 ---
 
@@ -17,7 +21,8 @@
 
 | You provide | You get automatically |
 |-------------|-----------------------|
-| `api/foo/get.ts` style handlers | MCP tools (`api__foo__get`) and REST routes `GET /foo` |
+| `api/foo/get.ts` style handlers | MCP tools (`api__foo__get`) 
+|| REST routes `GET /foo` |
 | Request/Response classes | MCP tools and OpenAPI schema + Swagger UI |
 | `npm run n8n:generate` | n8n nodes that mirror your APIs |
 
@@ -35,10 +40,10 @@ cd my-project
 
 | Service | URL |
 |---------|-----|
+| MCP Server | http://localhost:8888 |
 | REST API | http://localhost:8887 |
 | Swagger UI | http://localhost:8887/docs |
 | OpenAPI Spec | http://localhost:8887/openapi.json |
-| MCP Server | http://localhost:8888 |
 
 Stop the stack with `./stop.sh`.
 
