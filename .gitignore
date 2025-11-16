@@ -96,3 +96,6 @@ test1-*/
 test-ts-fix-*/
 test-mcp-*/
 test-build-n8n-*/
+
+# n8n build outputs
+n8n-nodes-output/
