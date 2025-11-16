@@ -116,7 +116,7 @@ Annotations (`@description`, `@summary`, `@tags`) feed OpenAPI docs and MCP tool
 Visual overview of how Easy MCP Server turns file-based handlers into REST APIs, MCP tools, and automations.
 
 ```mermaid
-flowchart LR
+flowchart TD
     %% Node styles
     classDef boxPrimary fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#27272a,font-size:12px,padding:12px;
     classDef cardBlue fill:#e0ecff,stroke:#4574d4,color:#0f172a,font-weight:600;
@@ -124,50 +124,37 @@ flowchart LR
     classDef cardOrange fill:#ffe8d9,stroke:#f97316,color:#7c2d12,font-weight:600;
     classDef cardNeutral fill:#f5f5f5,stroke:#a7a7a7,color:#1f2937,font-weight:600;
 
-    subgraph Clients["Clients"]
-        Browser["Web UI<br/>(Swagger, Docs)"]
-        Agent["AI Agents<br/>(Model Context Protocol)"]
-        Automation["n8n Flows"]
-    end
-
     subgraph Server["Easy MCP Server"]
-        subgraph RestLayer["REST & Documentation"]
-            Router["HTTP Router<br/>Express + Validation"]
-            OpenAPI["OpenAPI & Swagger<br/>Auto-generated"]
+        direction TB
+        subgraph MCPUmbrella["MCP Runtime"]
+            direction LR
+            Bridges["Bridge Loader<br/>External MCP Servers"]
+            MCPServer["MCP Server<br/>JSON-RPC + Tool Execution"]
+            ToolBuilder["Tool Builder<br/>Annotation Parser"]
         end
 
         subgraph CodeConfig["Code & Config"]
+            direction LR
+            Watcher["Hot Reload Watcher"]
             Nodes["n8n Generator<br/>npm run n8n:generate"]
             Handlers["Handlers<br/>api/**/*.ts"]
-            Watcher["Hot Reload Watcher"]
         end
 
-        subgraph MCPUmbrella["MCP Runtime"]
-            MCPServer["MCP Server<br/>JSON-RPC + Tool Execution"]
-            ToolBuilder["Tool Builder<br/>Annotation Parser"]
-            Bridges["Bridge Loader<br/>External MCP Servers"]
+        subgraph RestLayer["REST & Documentation"]
+            direction LR
+            Router["HTTP Router<br/>Express + Validation"]
+            OpenAPI["OpenAPI & Swagger<br/>Auto-generated"]
         end
     end
 
     DataSources[(External APIs/DBs)]
 
-    %% Flows
-    Browser --> Router
-    Router --> OpenAPI
-    Router --> Handlers
-    OpenAPI --> Browser
-
-    Agent --> MCPServer
-    MCPServer --> ToolBuilder
-    ToolBuilder --> Handlers
-    Bridges --> MCPServer
-
-    Automation --> Nodes
-    Nodes --> Handlers
-
-    Handlers --> DataSources
-    Watcher --> Router
-    Watcher --> MCPServer
+    subgraph Clients["Clients"]
+        direction LR
+        Browser["Web UI<br/>(Swagger, Docs)"]
+        Agent["AI Agents<br/>(Model Context Protocol)"]
+        Automation["n8n Flows"]
+    end
 
     %% Apply visual classes
     class Clients,Server boxPrimary
@@ -175,6 +162,52 @@ flowchart LR
     class Router,OpenAPI,MCPServer,ToolBuilder,Bridges cardGreen
     class Nodes,Handlers,Watcher cardOrange
     class DataSources cardNeutral
+```
+
+### Interaction Sequence
+
+End-to-end flow across REST calls, MCP tool executions, and automation hooks.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    box REST
+        participant Web as Web UI
+        participant Router as HTTP Router
+        participant Docs as OpenAPI Docs
+        participant Handler as API Handler
+        participant Data as External APIs/DBs
+    end
+
+    box MCP
+        participant Agent as AI Agent
+        participant MCP as MCP Server
+        participant Tool as Tool Builder
+    end
+
+    box Automation
+        participant Flow as n8n Flow
+        participant NodeGen as n8n Generator
+    end
+
+    Web->>Router: Request docs / endpoint
+    Router-->>Docs: Serve OpenAPI + Swagger UI
+    Router-->>Web: Response rendered
+    Web->>Router: Invoke REST endpoint
+    Router->>Handler: Execute handler logic
+    Handler-->>Data: Fetch/persist domain data
+    Data-->>Handler: Return business data
+    Handler-->>Web: REST response
+
+    Agent->>MCP: tools/call request
+    MCP->>Tool: Build tool metadata
+    Tool->>Handler: Run handler via MCP
+    Handler-->>Agent: JSON-RPC result
+
+    Flow->>NodeGen: Trigger n8n node
+    NodeGen->>Handler: Call API handler
+    Handler-->>Flow: Node output for workflow
 ```
 
 ---
