@@ -164,11 +164,11 @@ flowchart TD
     class DataSources cardNeutral
 ```
 
-### Flow Blocks
+### 4.1 Flows
 
-Each block targets one lifecycle: build/reload, REST, MCP, and n8n. Use the diagrams to see how changes move from `api/` files into every runtime. The `Handler` participant is the same generic handler powering REST routes, MCP tools, and generated n8n nodes.
+Each diagram shows what happens after you add a handler under `api/`. Use them to trace hot reloads, REST calls, MCP tool executions, and generated n8n community nodes. The `Handler` participant represents the same generic handler shared across every interface.
 
-#### Hot Reload Flow
+#### 4.1.1 Hot Reload Flow
 
 Tracks how a saved file propagates to new REST routes, OpenAPI docs, and MCP tool metadata without restarting the server.
 
@@ -193,7 +193,7 @@ sequenceDiagram
     Tools-->>Dev: Auto-reloaded MCP tools
 ```
 
-#### REST Flow
+#### 4.1.2 REST Flow
 
 Reference request path for REST/HTTP consumers hitting the freshly generated endpoints.
 
@@ -216,7 +216,7 @@ sequenceDiagram
     Handler-->>Web: REST response payload
 ```
 
-#### MCP Tool Flow
+#### 4.1.3 MCP Tool Flow
 
 Details how an AI agent call travels through the MCP server, bridge/tool builder, and back out with JSON-RPC responses.
 
@@ -236,7 +236,7 @@ sequenceDiagram
     MCP-->>Agent: Response to calling agent
 ```
 
-#### n8n Community Node Flow
+#### 4.1.4 n8n Community Node Flow
 
 Illustrates generating a community node package, installing it into n8n, and using it inside workflows against your easy-mcp-server handlers.
 
