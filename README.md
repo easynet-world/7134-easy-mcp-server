@@ -164,50 +164,101 @@ flowchart TD
     class DataSources cardNeutral
 ```
 
-### Interaction Sequence
+### Flow Blocks
 
-End-to-end flow across REST calls, MCP tool executions, and automation hooks.
+Each block targets one lifecycle: build/reload, REST, MCP, and n8n. Use the diagrams to see how changes move from `api/` files into every runtime. The `Handler` participant is the same generic handler powering REST routes, MCP tools, and generated n8n nodes.
+
+#### Hot Reload Flow
+
+Tracks how a saved file propagates to new REST routes, OpenAPI docs, and MCP tool metadata without restarting the server.
 
 ```mermaid
 sequenceDiagram
     autonumber
+    participant Dev as Developer
+    participant Watcher as File Watcher
+    participant Loader as API Loader
+    participant Router as HTTP Router
+    participant OpenAPI as OpenAPI Spec
+    participant MCP as MCP Server
+    participant Tools as Tool Registry
 
-    box REST
-        participant Web as Web UI
-        participant Router as HTTP Router
-        participant Docs as OpenAPI Docs
-        participant Handler as API Handler
-        participant Data as External APIs/DBs
-    end
+    Dev->>Watcher: Save api/foo/get.ts
+    Watcher->>Loader: Emit change event
+    Loader->>Router: Rebuild route + validation
+    Loader->>OpenAPI: Regenerate schema + docs
+    Loader->>MCP: Push new metadata + args
+    MCP->>Tools: Refresh MCP + bridge tools
+    Router-->>Dev: Updated REST route ready
+    Tools-->>Dev: Auto-reloaded MCP tools
+```
 
-    box MCP
-        participant Agent as AI Agent
-        participant MCP as MCP Server
-        participant Tool as Tool Builder
-    end
+#### REST Flow
 
-    box Automation
-        participant Flow as n8n Flow
-        participant NodeGen as n8n Generator
-    end
+Reference request path for REST/HTTP consumers hitting the freshly generated endpoints.
 
-    Web->>Router: Request docs / endpoint
-    Router-->>Docs: Serve OpenAPI + Swagger UI
-    Router-->>Web: Response rendered
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Web as Web/UI Client
+    participant Router as HTTP Router
+    participant Docs as OpenAPI Docs
+    participant Handler as Generic Handler
+    participant Data as External APIs/DBs
+
+    Web->>Router: Request /docs or /openapi.json
+    Router-->>Docs: Serve Swagger assets
+    Docs-->>Web: Render documentation
     Web->>Router: Invoke REST endpoint
-    Router->>Handler: Execute handler logic
-    Handler-->>Data: Fetch/persist domain data
+    Router->>Handler: Validate + forward request
+    Handler->>Data: Fetch / persist domain data
     Data-->>Handler: Return business data
-    Handler-->>Web: REST response
+    Handler-->>Web: REST response payload
+```
+
+#### MCP Tool Flow
+
+Details how an AI agent call travels through the MCP server, bridge/tool builder, and back out with JSON-RPC responses.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Agent as AI Agent
+    participant MCP as MCP Server
+    participant Tool as Tool Builder
+    participant Handler as Generic Handler
 
     Agent->>MCP: tools/call request
-    MCP->>Tool: Build tool metadata
-    Tool->>Handler: Run handler via MCP
-    Handler-->>Agent: JSON-RPC result
+    MCP->>Tool: Resolve annotations + schema
+    Tool->>Handler: Execute handler with args
+    Handler-->>Tool: Handler result
+    Tool-->>MCP: Tool output (JSON-RPC)
+    MCP-->>Agent: Response to calling agent
+```
 
-    Flow->>NodeGen: Trigger n8n node
-    NodeGen->>Handler: Call API handler
-    Handler-->>Flow: Node output for workflow
+#### n8n Community Node Flow
+
+Illustrates generating a community node package, installing it into n8n, and using it inside workflows against your easy-mcp-server handlers.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Dev as Developer CLI
+    participant Builder as n8n Node Builder
+    participant Generator as Node Generator
+    participant Package as npm Package
+    participant n8n as n8n Instance
+    participant Workflow as n8n Workflow
+    participant Handler as Generic Handler
+
+    Dev->>Builder: npm run n8n:generate
+    Builder->>Generator: Convert routes to node ops
+    Generator->>Package: Emit TS sources + package.json
+    Package->>n8n: Install under ~/.n8n/custom
+    n8n->>Workflow: Node appears in community nodes
+    Workflow->>n8n: Use node inside workflow
+    n8n->>Handler: Execute generated node call
+    Handler-->>n8n: REST response back to workflow
 ```
 
 ---
