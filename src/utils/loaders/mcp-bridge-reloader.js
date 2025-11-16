@@ -23,6 +23,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const chokidar = require('chokidar');
 const MCPBridge = require('../../mcp/utils/mcp-bridge');
 const MCPSchemaAdapter = require('../../mcp/utils/mcp-schema-adapter');
@@ -123,6 +124,47 @@ class MCPBridgeReloader {
     }
     
     return null;
+  }
+
+  /**
+   * Check if a command exists in PATH
+   * @param {string} command - The command name to check (must be a simple command name, no special chars)
+   * @returns {boolean} - True if command exists, false otherwise
+   */
+  commandExists(command) {
+    // Sanitize command name - only allow alphanumeric, dash, underscore
+    if (!/^[a-zA-Z0-9_-]+$/.test(command)) {
+      return false;
+    }
+    
+    try {
+      // Use 'which' on Unix-like systems, 'where' on Windows
+      const isWindows = process.platform === 'win32';
+      const checkCommand = isWindows ? 'where' : 'which';
+      // Use spawnSync for better control and security
+      const result = spawnSync(checkCommand, [command], { 
+        stdio: 'ignore',
+        shell: false
+      });
+      return result.status === 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Extract package name from npx command args
+   * Handles formats like: test1@1.0.0, test1, @scope/test1@1.0.0
+   * @param {string} packageSpec - Package specification from npx args
+   * @returns {string} - Package name without version
+   */
+  extractPackageName(packageSpec) {
+    if (!packageSpec) return null;
+    // Remove version specifier (e.g., @1.0.0)
+    const withoutVersion = packageSpec.replace(/@[\d.]+.*$/, '');
+    // Remove scope prefix if present (e.g., @scope/package -> package)
+    const parts = withoutVersion.split('/');
+    return parts[parts.length - 1];
   }
 
   loadConfig() {
@@ -271,51 +313,64 @@ class MCPBridgeReloader {
                 
                 // Check if this might be a local project (created with easy-mcp-server init)
                 const isNpxCommand = command === 'npx' && args.length > 0 && args[0] === '-y';
-                const packageName = isNpxCommand && args.length > 1 ? args[1] : null;
+                const packageSpec = isNpxCommand && args.length > 1 ? args[1] : null;
+                const packageName = packageSpec ? this.extractPackageName(packageSpec) : null;
                 
                 if (isNpxCommand && packageName) {
-                  // Check multiple possible locations for local project
-                  const possiblePaths = [
-                    path.resolve(this.root, '..', packageName), // Sibling directory
-                    path.resolve(this.root, packageName), // Subdirectory
-                    path.resolve(process.cwd(), '..', packageName), // From cwd
-                    path.resolve(process.cwd(), packageName) // From cwd subdirectory
-                  ];
+                  // First, check if the package is globally installed and available as a command
+                  const isGloballyInstalled = this.commandExists(packageName);
                   
-                  let localProjectPath = null;
-                  for (const possiblePath of possiblePaths) {
-                    if (fs.existsSync(possiblePath) && fs.existsSync(path.join(possiblePath, 'package.json'))) {
-                      // Check if it's an easy-mcp-server project
-                      const packageJson = JSON.parse(fs.readFileSync(path.join(possiblePath, 'package.json'), 'utf8'));
-                      if (packageJson.dependencies && packageJson.dependencies['easy-mcp-server']) {
-                        localProjectPath = possiblePath;
-                        break;
+                  if (isGloballyInstalled) {
+                    this.logger.warn(`   💡 Package '${packageName}' appears to be globally installed.`);
+                    this.logger.warn('   Use the binary directly instead of npx:');
+                    this.logger.warn(`   "${name}": {`);
+                    this.logger.warn(`     "command": "${packageName}",`);
+                    this.logger.warn('     "args": []');
+                    this.logger.warn('   }');
+                  } else {
+                    // Check multiple possible locations for local project
+                    const possiblePaths = [
+                      path.resolve(this.root, '..', packageName), // Sibling directory
+                      path.resolve(this.root, packageName), // Subdirectory
+                      path.resolve(process.cwd(), '..', packageName), // From cwd
+                      path.resolve(process.cwd(), packageName) // From cwd subdirectory
+                    ];
+                    
+                    let localProjectPath = null;
+                    for (const possiblePath of possiblePaths) {
+                      if (fs.existsSync(possiblePath) && fs.existsSync(path.join(possiblePath, 'package.json'))) {
+                        // Check if it's an easy-mcp-server project
+                        const packageJson = JSON.parse(fs.readFileSync(path.join(possiblePath, 'package.json'), 'utf8'));
+                        if (packageJson.dependencies && packageJson.dependencies['easy-mcp-server']) {
+                          localProjectPath = possiblePath;
+                          break;
+                        }
                       }
                     }
-                  }
-                  
-                  if (localProjectPath) {
-                    const relativePath = path.relative(this.root, localProjectPath);
-                    this.logger.warn(`   💡 This appears to be a local project created with 'easy-mcp-server init ${packageName}'`);
-                    this.logger.warn(`   Found at: ${localProjectPath}`);
-                    this.logger.warn('   To use it as a bridge, update mcp-bridge.json:');
-                    this.logger.warn(`   "${name}": {`);
-                    this.logger.warn('     "command": "npx",');
-                    this.logger.warn('     "args": ["easy-mcp-server"],');
-                    this.logger.warn(`     "cwd": "${relativePath.startsWith('..') ? relativePath : '../' + relativePath}",`);
-                    this.logger.warn('     "env": {');
-                    this.logger.warn('       "EASY_MCP_SERVER_STDIO_MODE": "true"');
-                    this.logger.warn('     }');
-                    this.logger.warn('   }');
-                    this.logger.warn('   Note: MCP bridges require STDIO mode. The env variable is required.');
-                  } else {
-                    this.logger.warn('   💡 If this is a local project, use a path-based command with STDIO mode:');
-                    this.logger.warn('   Example: {');
-                    this.logger.warn('     "command": "npx",');
-                    this.logger.warn('     "args": ["easy-mcp-server"],');
-                    this.logger.warn(`     "cwd": "../${packageName}",`);
-                    this.logger.warn('     "env": { "EASY_MCP_SERVER_STDIO_MODE": "true" }');
-                    this.logger.warn('   }');
+                    
+                    if (localProjectPath) {
+                      const relativePath = path.relative(this.root, localProjectPath);
+                      this.logger.warn(`   💡 This appears to be a local project created with 'easy-mcp-server init ${packageName}'`);
+                      this.logger.warn(`   Found at: ${localProjectPath}`);
+                      this.logger.warn('   To use it as a bridge, update mcp-bridge.json:');
+                      this.logger.warn(`   "${name}": {`);
+                      this.logger.warn('     "command": "npx",');
+                      this.logger.warn('     "args": ["easy-mcp-server"],');
+                      this.logger.warn(`     "cwd": "${relativePath.startsWith('..') ? relativePath : '../' + relativePath}",`);
+                      this.logger.warn('     "env": {');
+                      this.logger.warn('       "EASY_MCP_SERVER_STDIO_MODE": "true"');
+                      this.logger.warn('     }');
+                      this.logger.warn('   }');
+                      this.logger.warn('   Note: MCP bridges require STDIO mode. The env variable is required.');
+                    } else {
+                      this.logger.warn('   💡 If this is a local project, use a path-based command with STDIO mode:');
+                      this.logger.warn('   Example: {');
+                      this.logger.warn('     "command": "npx",');
+                      this.logger.warn('     "args": ["easy-mcp-server"],');
+                      this.logger.warn(`     "cwd": "../${packageName}",`);
+                      this.logger.warn('     "env": { "EASY_MCP_SERVER_STDIO_MODE": "true" }');
+                      this.logger.warn('   }');
+                    }
                   }
                 }
                 
