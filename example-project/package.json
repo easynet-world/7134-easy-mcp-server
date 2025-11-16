@@ -6,7 +6,8 @@
   "scripts": {
     "start": "easy-mcp-server",
     "dev": "easy-mcp-server",
-    "test": "echo \"No tests configured for example project\" && exit 0"
+    "test": "echo \"No tests configured for example project\" && exit 0",
+    "n8n:generate": "node node_modules/easy-mcp-server/src/n8n/n8n-server.js"
   },
   "keywords": [
     "easy-mcp-server",

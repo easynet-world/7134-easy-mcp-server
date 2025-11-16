@@ -13,7 +13,7 @@ import { Request, Response } from 'express';
 // @description ('Request payload')
 class RequestPayload {
   // @description ('Example message')
-  message: string;
+  message!: string;
 }
 
 // @description ('Response payload')

@@ -121,6 +121,106 @@ This project is configured to be built and published as an npm package:
    npm publish {{PROJECT_NAME}}-1.0.0.tgz
    ```
 
+## Using as MCP Server in mcp-bridge.json
+
+Once published, this package can be used as an MCP server in any easy-mcp-server project's `mcp-bridge.json`. It **automatically detects** the transport mode based on your `.env` configuration.
+
+### Automatic Mode Detection
+
+The server automatically chooses the transport mode:
+
+- **HTTP/Streamable Mode**: If `EASY_MCP_SERVER_MCP_PORT` is set in `.env`
+- **STDIO Mode**: If `EASY_MCP_SERVER_MCP_PORT` is not set in `.env`
+
+The mode is displayed in the startup logs.
+
+### STDIO Mode (Default when no port configured)
+
+STDIO mode uses stdin/stdout for JSON-RPC communication, which is the standard for MCP bridge servers.
+
+**Configuration:**
+- Don't set `EASY_MCP_SERVER_MCP_PORT` in `.env` (or remove it)
+- Server will automatically start in STDIO mode
+
+**Usage in mcp-bridge.json:**
+
+```json
+{
+  "mcpServers": {
+    "{{PROJECT_NAME}}": {
+      "command": "npx",
+      "args": ["-y", "{{PROJECT_NAME}}@latest"],
+      "description": "Your {{PROJECT_NAME}} MCP server (STDIO mode)"
+    }
+  }
+}
+```
+
+### HTTP/Streamable Mode (When port is configured)
+
+HTTP mode provides HTTP endpoints for MCP communication, useful for:
+- Direct HTTP connections
+- MCP Inspector compatibility
+- Network-based MCP servers
+
+**Configuration:**
+- Set `EASY_MCP_SERVER_MCP_PORT=8888` in your `.env` file
+- Server will automatically start in HTTP/Streamable mode
+
+**HTTP Endpoints:**
+- `POST /mcp` - Standard HTTP MCP requests
+- `POST /` - StreamableHttp for MCP Inspector
+- `GET /sse` - Server-Sent Events for Inspector
+
+**Connect via HTTP:**
+
+```bash
+# Example: Call tools/list via HTTP
+curl -X POST http://localhost:8888/mcp \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+### Environment Variables
+
+You can pass environment variables to the MCP server:
+
+```json
+{
+  "mcpServers": {
+    "{{PROJECT_NAME}}": {
+      "command": "npx",
+      "args": ["-y", "{{PROJECT_NAME}}@latest", "--stdio"],
+      "env": {
+        "EASY_MCP_SERVER_API_PATH": "./api",
+        "EASY_MCP_SERVER_MCP_BASE_PATH": "./mcp",
+        "EASY_MCP_SERVER_MCP_PORT": "8888"
+      },
+      "description": "Your {{PROJECT_NAME}} MCP server"
+    }
+  }
+}
+```
+
+### Transport Mode Comparison
+
+| Feature | STDIO Mode | HTTP/Streamable Mode |
+|---------|-----------|---------------------|
+| **Transport** | stdin/stdout | HTTP POST requests |
+| **Use Case** | MCP bridge (mcp-bridge.json) | Direct HTTP, Inspector |
+| **Port Required** | No | Yes (must be in .env) |
+| **Network Access** | No | Yes |
+| **Configuration** | Don't set `EASY_MCP_SERVER_MCP_PORT` | Set `EASY_MCP_SERVER_MCP_PORT` in .env |
+| **Endpoint** | N/A | `POST /mcp` or `POST /` |
+| **Auto-detection** | ✅ Automatic | ✅ Automatic |
+
+**Note:** 
+- Mode is **automatically detected** based on `.env` configuration
+- No command-line flags needed - just configure your `.env` file
+- The active mode is displayed in the startup logs
+- STDIO mode: Don't set `EASY_MCP_SERVER_MCP_PORT` in `.env`
+- HTTP mode: Set `EASY_MCP_SERVER_MCP_PORT=8888` in `.env`
+
 ## Learn More
 
 - [Easy MCP Server Documentation](https://github.com/easynet-world/7134-easy-mcp-server)

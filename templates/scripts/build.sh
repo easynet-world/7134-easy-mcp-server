@@ -59,8 +59,24 @@ else
 fi
 echo ""
 
-# Step 4: Pack the npm package
-echo "📦 Step 4: Packing npm package..."
+# Step 4: Generate n8n nodes (if API directory exists)
+echo "🔧 Step 4: Generating n8n nodes..."
+if [ -d "./api" ] && [ "$(ls -A ./api 2>/dev/null)" ]; then
+    if $NPM_PATH run n8n:generate > /dev/null 2>&1; then
+        echo "✅ n8n nodes generated successfully"
+        if [ -d "./n8n-nodes-output" ]; then
+            echo "   Output directory: ./n8n-nodes-output"
+        fi
+    else
+        echo "⚠️  n8n node generation failed. Continuing anyway..."
+    fi
+else
+    echo "ℹ️  No API directory found. Skipping n8n node generation."
+fi
+echo ""
+
+# Step 5: Pack the npm package
+echo "📦 Step 5: Packing npm package..."
 PACK_FILE=$($NPM_PATH pack 2>&1)
 if [ $? -ne 0 ]; then
     echo "❌ Failed to pack npm package"
@@ -88,8 +104,8 @@ PACK_SIZE=$(du -h "$PACK_FILENAME" | cut -f1)
 echo "✅ Package created: $PACK_FILENAME ($PACK_SIZE)"
 echo ""
 
-# Step 5: Verify package contents
-echo "🔍 Step 5: Verifying package contents..."
+# Step 6: Verify package contents
+echo "🔍 Step 6: Verifying package contents..."
 if tar -tzf "$PACK_FILENAME" > /dev/null 2>&1; then
     echo "✅ Package archive is valid"
     FILE_COUNT=$(tar -tzf "$PACK_FILENAME" | wc -l | tr -d ' ')

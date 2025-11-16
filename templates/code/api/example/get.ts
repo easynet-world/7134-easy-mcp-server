@@ -19,7 +19,7 @@ class RequestPayload {
 // @description ('Response payload')
 class ResponsePayload {
   // @description ('Response data')
-  data: {
+  data!: {
     message: string;
     timestamp: number;
     description: string;
