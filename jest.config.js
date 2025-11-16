@@ -35,9 +35,12 @@ module.exports = {
   
   // Ignore test files in init-test-projects directory (these are generated projects, not tests)
   // Also ignore template test files - they are templates, not actual tests to run
+  // Ignore example/test projects (test1-final, test1-new) - these are separate projects
   testPathIgnorePatterns: [
     '/node_modules/',
     '/test/init-test-projects/',
-    '/templates/'
+    '/templates/',
+    '/test1-final/',
+    '/test1-new/'
   ]
 };

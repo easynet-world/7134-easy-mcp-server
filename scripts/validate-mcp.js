@@ -21,9 +21,9 @@ console.log('');
 const MCP_PORT = process.env.EASY_MCP_SERVER_MCP_PORT || 8888;
 const MCP_HOST = 'localhost';
 
-let errors = [];
-let warnings = [];
-let tests = {
+const errors = [];
+const warnings = [];
+const tests = {
   passed: 0,
   failed: 0,
   total: 0

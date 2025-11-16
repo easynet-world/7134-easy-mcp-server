@@ -219,7 +219,7 @@ class MCPBridgeReloader {
           const bridge = new MCPSchemaAdapter(rawBridge);
           
           // Track stderr messages to detect command/package errors
-          let stderrMessages = [];
+          const stderrMessages = [];
           let hasCommandError = false;
           
           bridge.on('stderr', (msg) => {
@@ -298,28 +298,28 @@ class MCPBridgeReloader {
                     const relativePath = path.relative(this.root, localProjectPath);
                     this.logger.warn(`   💡 This appears to be a local project created with 'easy-mcp-server init ${packageName}'`);
                     this.logger.warn(`   Found at: ${localProjectPath}`);
-                    this.logger.warn(`   To use it as a bridge, update mcp-bridge.json:`);
+                    this.logger.warn('   To use it as a bridge, update mcp-bridge.json:');
                     this.logger.warn(`   "${name}": {`);
-                    this.logger.warn(`     "command": "npx",`);
-                    this.logger.warn(`     "args": ["easy-mcp-server"],`);
+                    this.logger.warn('     "command": "npx",');
+                    this.logger.warn('     "args": ["easy-mcp-server"],');
                     this.logger.warn(`     "cwd": "${relativePath.startsWith('..') ? relativePath : '../' + relativePath}",`);
-                    this.logger.warn(`     "env": {`);
-                    this.logger.warn(`       "EASY_MCP_SERVER_STDIO_MODE": "true"`);
-                    this.logger.warn(`     }`);
-                    this.logger.warn(`   }`);
-                    this.logger.warn(`   Note: MCP bridges require STDIO mode. The env variable is required.`);
+                    this.logger.warn('     "env": {');
+                    this.logger.warn('       "EASY_MCP_SERVER_STDIO_MODE": "true"');
+                    this.logger.warn('     }');
+                    this.logger.warn('   }');
+                    this.logger.warn('   Note: MCP bridges require STDIO mode. The env variable is required.');
                   } else {
-                    this.logger.warn(`   💡 If this is a local project, use a path-based command with STDIO mode:`);
-                    this.logger.warn(`   Example: {`);
-                    this.logger.warn(`     "command": "npx",`);
-                    this.logger.warn(`     "args": ["easy-mcp-server"],`);
+                    this.logger.warn('   💡 If this is a local project, use a path-based command with STDIO mode:');
+                    this.logger.warn('   Example: {');
+                    this.logger.warn('     "command": "npx",');
+                    this.logger.warn('     "args": ["easy-mcp-server"],');
                     this.logger.warn(`     "cwd": "../${packageName}",`);
-                    this.logger.warn(`     "env": { "EASY_MCP_SERVER_STDIO_MODE": "true" }`);
-                    this.logger.warn(`   }`);
+                    this.logger.warn('     "env": { "EASY_MCP_SERVER_STDIO_MODE": "true" }');
+                    this.logger.warn('   }');
                   }
                 }
                 
-                this.logger.warn(`   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.`);
+                this.logger.warn('   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.');
               } else {
                 this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start - check your environment variables (EASY_MCP_SERVER.${name.toLowerCase()}.*)`);
               }

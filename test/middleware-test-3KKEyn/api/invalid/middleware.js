@@ -1,2 +1,2 @@
 
-module.exports = "invalid middleware";
+module.exports = 'invalid middleware';

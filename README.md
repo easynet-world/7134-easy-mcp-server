@@ -6,184 +6,262 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
-[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
-[![Hot Reload](https://img.shields.io/badge/Hot-Reload-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
-**Write code once, get everything automatically: REST API + OpenAPI + Swagger + MCP Tools + n8n Nodes**
+**Write a handler once, get REST endpoints, Swagger/OpenAPI docs, MCP tools, and n8n nodes automatically.**
 
 ---
 
-## What is easy-mcp-server?
+## 1. What Is It?
 
-A professional framework that transforms your API code into multiple integrations automatically. Write your endpoint once, and instantly get:
+`easy-mcp-server` watches the `api/` folder and turns every file into:
 
-- **MCP Tools** - AI agent integration (Claude, GPT, etc.)
-- **REST API** - Standard HTTP endpoints
-- **OpenAPI Spec** - Industry-standard documentation
-- **Swagger UI** - Interactive API testing
-- **n8n Nodes** - Workflow automation integration
+| You provide | You get automatically |
+|-------------|-----------------------|
+| `api/foo/get.ts` style handlers | REST routes + health checks |
+| Request/Response classes | OpenAPI schema + Swagger UI |
+| `module.exports = handler` | MCP tools (`api__foo__get`) |
+| `npm run n8n:generate` | n8n nodes that mirror your APIs |
 
-Zero configuration. Convention-based. Production-ready.
+Everything hot-reloads and ships with zero config.
 
 ---
 
-## Quick Start
-
-### Install and Run
+## 2. Quick Start
 
 ```bash
 npx easy-mcp-server init my-project
 cd my-project
 npm install
 ./start.sh
+curl http://localhost:8887/health
 ```
 
-Your services are now running at:
-- MCP Server: http://localhost:8888
-- REST API: http://localhost:8887
-- Swagger UI: http://localhost:8887/docs
-- OpenAPI Spec: http://localhost:8887/openapi.json
+| Service | URL |
+|---------|-----|
+| REST API | http://localhost:8887 |
+| Swagger UI | http://localhost:8887/docs |
+| OpenAPI Spec | http://localhost:8887/openapi.json |
+| MCP Server | http://localhost:8888 |
 
-### Write Your First Endpoint
+Stop the stack with `./stop.sh`.
 
-Create `api/users/post.js`:
+---
 
-```javascript
+## 3. Define an Endpoint
+
+### File Name = Route (Examples)
+
+| File | Method | Route |
+|------|--------|-------|
+| `api/users/get.ts` | GET | `/users` |
+| `api/users/post.ts` | POST | `/users` |
+| `api/users/[id]/get.ts` | GET | `/users/:id` |
+
+### Minimal Handler Template
+
+**Request block**
+
+```typescript
+// @description('Incoming payload')
 class Request {
   // @description('User name')
   name: string;
-
   // @description('User email')
   email: string;
 }
+```
 
+**Response block**
+
+```typescript
+// @description('Response payload')
 class Response {
   success: boolean;
-  id: string;
+  data: { id: string; name: string; email: string };
 }
+```
 
-// @description('Create a new user')
-// @summary('Create user')
-function handler(req, res) {
+**Handler block**
+
+```typescript
+// @summary('Create a user')
+// @tags('users')
+function handler(req: any, res: any) {
   const { name, email } = req.body;
-  res.json({ success: true, id: '123' });
+  if (!name || !email) {
+    res.status(400).json({ success: false, error: 'Name and email required' });
+    return;
+  }
+
+  res.status(201).json({
+    success: true,
+    data: { id: '123', name, email }
+  });
 }
+```
 
+**Export block**
+
+```typescript
 module.exports = handler;
+export {};
 ```
 
-**You automatically get:**
-- MCP tool for AI agents
-- REST endpoint: `POST /users`
-- Swagger documentation
-- OpenAPI specification
-- n8n node (on demand)
-- Hot reload
+Annotations (`@description`, `@summary`, `@tags`) feed OpenAPI docs and MCP tool metadata automatically.
 
 ---
 
-## Key Features
+## 4. System Architecture
 
-### MCP Bridge
+Visual overview of how Easy MCP Server turns file-based handlers into REST APIs, MCP tools, and automations.
 
-Access external MCP servers (Chrome DevTools, iTerm2, etc.) through your MCP server. Configure via `mcp-bridge.json`.
+```mermaid
+flowchart TD
+    %% Node styles
+    classDef boxPrimary fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#27272a,font-size:12px,padding:12px;
+    classDef cardBlue fill:#e0ecff,stroke:#4574d4,color:#0f172a,font-weight:600;
+    classDef cardGreen fill:#e8f5e9,stroke:#5aa454,color:#1b4332,font-weight:600;
+    classDef cardOrange fill:#ffe8d9,stroke:#f97316,color:#7c2d12,font-weight:600;
+    classDef cardNeutral fill:#f5f5f5,stroke:#a7a7a7,color:#1f2937,font-weight:600;
 
-### File-Based Routing
-```
-api/users/get.js       →  GET /users
-api/users/post.js      →  POST /users
-api/users/[id]/get.js  →  GET /users/:id
-```
+    subgraph Server["Easy MCP Server"]
+        direction TB
+        subgraph MCPUmbrella["MCP Runtime"]
+            direction LR
+            Bridges["Bridge Loader<br/>External MCP Servers"]
+            MCPServer["MCP Server<br/>JSON-RPC + Tool Execution"]
+            ToolBuilder["Tool Builder<br/>Annotation Parser"]
+        end
 
-### n8n Node Generation
+        subgraph CodeConfig["Code & Config"]
+            direction LR
+            Watcher["Hot Reload Watcher"]
+            Nodes["n8n Generator<br/>npm run n8n:generate"]
+            Handlers["Handlers<br/>api/**/*.ts"]
+        end
 
-Generate workflow automation nodes from your APIs:
+        subgraph RestLayer["REST & Documentation"]
+            direction LR
+            Router["HTTP Router<br/>Express + Validation"]
+            OpenAPI["OpenAPI & Swagger<br/>Auto-generated"]
+        end
+    end
 
-```bash
-npm run n8n:generate
-```
+    DataSources[(External APIs/DBs)]
 
-Creates a complete n8n community node package ready to publish or install locally.
+    subgraph Clients["Clients"]
+        direction LR
+        Browser["Web UI<br/>(Swagger, Docs)"]
+        Agent["AI Agents<br/>(Model Context Protocol)"]
+        Automation["n8n Flows"]
+    end
 
----
-
-## Visual Overview
-
-![MCP Generation](docs/to-mcp.png)
-*API endpoints automatically become MCP tools*
-
-![OpenAPI Generation](docs/to-openapi.png)
-*Code automatically generates OpenAPI specification*
-
-![Swagger Generation](docs/to-swagger.png)
-*Interactive Swagger UI generated automatically*
-
----
-
-## Why Choose easy-mcp-server?
-
-| Traditional Approach | With easy-mcp-server |
-|---------------------|---------------------|
-| Manual Express routing | File-based auto-routing |
-| Hand-written OpenAPI specs | Auto-generated from code |
-| Separate MCP tool development | Automatic integration |
-| Manual n8n node coding | One-command generation |
-| Multiple codebases to maintain | Single source of truth |
-| Manual documentation updates | Always synchronized |
-
-### Use Cases
-
-- **AI Integration**: Connect APIs to Claude, GPT, and MCP-compatible AI agents
-- **Workflow Automation**: Generate n8n nodes for visual workflow builders
-- **API Development**: Rapid REST API development with auto-documentation
-- **Enterprise Integration**: Single codebase for multiple platforms
-
----
-
-## Configuration
-
-Basic configuration via environment variables:
-
-```bash
-EASY_MCP_SERVER_MCP_PORT=8888      # MCP server port
-EASY_MCP_SERVER_PORT=8887          # REST API port
-EASY_MCP_SERVER_LOG_LEVEL=info     # Logging level
+    %% Apply visual classes
+    class Clients,Server boxPrimary
+    class Browser,Agent,Automation cardBlue
+    class Router,OpenAPI,MCPServer,ToolBuilder,Bridges cardGreen
+    class Nodes,Handlers,Watcher cardOrange
+    class DataSources cardNeutral
 ```
 
-For complete configuration options, see the [Development Guide](docs/DEVELOPMENT.md#configuration-management).
+### Interaction Sequence
+
+End-to-end flow across REST calls, MCP tool executions, and automation hooks.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    box REST
+        participant Web as Web UI
+        participant Router as HTTP Router
+        participant Docs as OpenAPI Docs
+        participant Handler as API Handler
+        participant Data as External APIs/DBs
+    end
+
+    box MCP
+        participant Agent as AI Agent
+        participant MCP as MCP Server
+        participant Tool as Tool Builder
+    end
+
+    box Automation
+        participant Flow as n8n Flow
+        participant NodeGen as n8n Generator
+    end
+
+    Web->>Router: Request docs / endpoint
+    Router-->>Docs: Serve OpenAPI + Swagger UI
+    Router-->>Web: Response rendered
+    Web->>Router: Invoke REST endpoint
+    Router->>Handler: Execute handler logic
+    Handler-->>Data: Fetch/persist domain data
+    Data-->>Handler: Return business data
+    Handler-->>Web: REST response
+
+    Agent->>MCP: tools/call request
+    MCP->>Tool: Build tool metadata
+    Tool->>Handler: Run handler via MCP
+    Handler-->>Agent: JSON-RPC result
+
+    Flow->>NodeGen: Trigger n8n node
+    NodeGen->>Handler: Call API handler
+    Handler-->>Flow: Node output for workflow
+```
 
 ---
 
-## Documentation
+## 5. MCP Bridge (Optional)
 
-- **[Development Guide](docs/DEVELOPMENT.md)** - Complete technical documentation, architecture, and API reference
-- **MCP Server** - http://localhost:8888 (when server is running)
-- **Swagger UI** - http://localhost:8887/docs (when server is running)
-- **OpenAPI Spec** - http://localhost:8887/openapi.json (when server is running)
-- **Example Project** - See `example-project/` directory
+### Combine Other MCP Servers via `mcp-bridge.json`
 
----
+```json
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "npx",
+      "args": ["-y", "chrome-mcp-server"]
+    }
+  }
+}
+```
 
-## Support & Services
-
-**Professional Services:**
-- AI Quick Onboarding - Fast-track AI/MCP integration
-- AI Consulting - Expert guidance on architecture and best practices
-
-**Contact:** info@easynet.world
-
----
-
-## Contributing
-
-Contributions welcome! Please see our [Development Guide](docs/DEVELOPMENT.md#contributing) for details.
+Hot reload keeps bridge tools and your API tools available on port `8888`. Disable any bridge by adding `"disabled": true`.
 
 ---
 
-## License
+## 6. Operations
 
-MIT License - see [package.json](package.json) for details.
+| Command | Purpose |
+|---------|---------|
+| `./start.sh` | Launch REST + MCP servers |
+| `./stop.sh` | Stop them |
+| `npm run n8n:generate` | Refresh n8n nodes |
+| `npm test` | Run tests (where configured) |
+
+| Env var | Default | Notes |
+|---------|---------|-------|
+| `EASY_MCP_SERVER_PORT` | `8887` | REST port |
+| `EASY_MCP_SERVER_MCP_PORT` | `8888` | MCP port |
+| `EASY_MCP_SERVER_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
+| `EASY_MCP_SERVER_API_PATH` | `./api` | Folder to watch |
+| `EASY_MCP_SERVER_HOST` | `0.0.0.0` | Host binding |
 
 ---
 
-**Maintainer:** Boqiang Liang (boqiang.liang@easynet.world)
+## 7. Resources
+
+- Guide: `docs/DEVELOPMENT.md`
+- Example project: `example-project/`
+- Swagger: http://localhost:8887/docs
+- OpenAPI: http://localhost:8887/openapi.json
+- MCP endpoint: http://localhost:8888
+
+## 8. Support & Contributions
+
+| Topic | Details |
+|-------|---------|
+| Questions / Enterprise Support | `info@easynet.world` |
+| Licensed | MIT |
+| Maintainer | Boqiang Liang (`boqiang.liang@easynet.world`) |

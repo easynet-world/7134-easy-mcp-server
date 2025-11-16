@@ -265,7 +265,7 @@ describe('Tool Executor Timeout and Tool Not Found', () => {
     test('should try server-specific prefix for any server', async () => {
       const executor = new ToolExecutor();
       
-      let triedNames = [];
+      const triedNames = [];
       mockBridge.rpcRequest
         .mockImplementationOnce(async (method) => {
           if (method === 'tools/list') {

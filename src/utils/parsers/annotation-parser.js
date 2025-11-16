@@ -160,32 +160,32 @@ class AnnotationParser {
           properties: {}
         };
         
-          Object.entries(simpleJson).forEach(([key, value]) => {
-            if (typeof value === 'object' && value !== null) {
-              // Direct object format: { "type": "string", "description": "...", "required": true, ... }
-              const property = {
-                type: value.type,
-                description: value.description || ''
-              };
+        Object.entries(simpleJson).forEach(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            // Direct object format: { "type": "string", "description": "...", "required": true, ... }
+            const property = {
+              type: value.type,
+              description: value.description || ''
+            };
               
-              // Add additional properties if they exist
-              if (value.required === false) {
-                property.required = false;
-              }
-              
-              schema.properties[key] = property;
-            } else if (typeof value === 'string') {
-              // Parse "type - description" format
-              const parts = value.split(' - ');
-              const type = parts[0].trim();
-              const description = parts[1] ? parts[1].trim() : '';
-              
-              schema.properties[key] = {
-                type: type,
-                description: description
-              };
+            // Add additional properties if they exist
+            if (value.required === false) {
+              property.required = false;
             }
-          });
+              
+            schema.properties[key] = property;
+          } else if (typeof value === 'string') {
+            // Parse "type - description" format
+            const parts = value.split(' - ');
+            const type = parts[0].trim();
+            const description = parts[1] ? parts[1].trim() : '';
+              
+            schema.properties[key] = {
+              type: type,
+              description: description
+            };
+          }
+        });
         
         return schema;
       }

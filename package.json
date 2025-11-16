@@ -3,6 +3,7 @@
   "version": "1.0.111",
   "description": "AI-era Express replacement with zero-config MCP integration - Build AI-ready APIs in 30 seconds",
   "main": "index.js",
+  "types": "index.d.ts",
   "bin": {
     "easy-mcp-server": "./src/easy-mcp-server.js"
   },
@@ -119,8 +120,17 @@
   "engines": {
     "node": ">=16.0.0"
   },
+  "peerDependencies": {
+    "@types/express": "^4.17.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    }
+  },
   "files": [
     "index.js",
+    "index.d.ts",
     "src/",
     "scripts/",
     "README.md",

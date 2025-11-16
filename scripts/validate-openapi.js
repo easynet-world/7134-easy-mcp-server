@@ -31,8 +31,8 @@ try {
   const generator = new OpenAPIGenerator(apiLoader);
   const spec = generator.generateSpec();
 
-  let errors = [];
-  let warnings = [];
+  const errors = [];
+  const warnings = [];
 
   // ========================================
   // 1. Validate Required Top-Level Fields

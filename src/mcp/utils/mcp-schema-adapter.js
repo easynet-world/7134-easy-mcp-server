@@ -163,12 +163,12 @@ class MCPSchemaAdapter {
       const originalArgs = params.arguments || {};
       
       console.log(`🔧 [SchemaAdapter] Intercepting tool call: ${toolName}`);
-      console.log(`📥 [SchemaAdapter] Original arguments:`, JSON.stringify(originalArgs, null, 2));
+      console.log('📥 [SchemaAdapter] Original arguments:', JSON.stringify(originalArgs, null, 2));
       
       // Adapt the arguments
       const adaptedArgs = this.adaptToolParameters(toolName, originalArgs);
       
-      console.log(`📤 [SchemaAdapter] Adapted arguments:`, JSON.stringify(adaptedArgs, null, 2));
+      console.log('📤 [SchemaAdapter] Adapted arguments:', JSON.stringify(adaptedArgs, null, 2));
       
       // Replace the arguments with adapted ones
       params = {

@@ -30,7 +30,7 @@ describe('MCP tools/list merges bridge tools (HTTP MCP)', () => {
     });
 
     const DynamicAPIMCPServer = require('../src/mcp');
-      const BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
+    const BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
     const reloader = new BridgeReloader();
     const mcpServer = new DynamicAPIMCPServer('0.0.0.0', 8888, { bridgeReloader: reloader });
 

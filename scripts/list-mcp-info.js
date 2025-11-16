@@ -66,7 +66,7 @@ function sendHTTPRequest(method, params = {}) {
 
     const timeout = setTimeout(() => {
       req.destroy();
-      reject(new Error(`Request timeout after 10 seconds`));
+      reject(new Error('Request timeout after 10 seconds'));
     }, 10000);
 
     const req = http.request({
@@ -118,7 +118,7 @@ function sendHTTPRequest(method, params = {}) {
     req.on('timeout', () => {
       req.destroy();
       clearTimeout(timeout);
-      reject(new Error(`Request timeout`));
+      reject(new Error('Request timeout'));
     });
 
     req.write(data);
@@ -369,7 +369,7 @@ function formatAsDetailed(info) {
       output += `   Description: ${tool.description || tool.summary || 'N/A'}\n`;
       
       if (tool.inputSchema) {
-        output += `   Input Schema:\n`;
+        output += '   Input Schema:\n';
         const schema = tool.inputSchema;
         if (schema.properties) {
           Object.keys(schema.properties).forEach(prop => {
@@ -409,7 +409,7 @@ function formatAsDetailed(info) {
       output += `   Description: ${tool.description || tool.summary || 'N/A'}\n`;
       
       if (tool.inputSchema) {
-        output += `   Input Schema:\n`;
+        output += '   Input Schema:\n';
         const schema = tool.inputSchema;
         if (schema.properties) {
           Object.keys(schema.properties).forEach(prop => {
@@ -429,7 +429,7 @@ function formatAsDetailed(info) {
         output += `   Response Schema: ${JSON.stringify(tool.responseSchema, null, 2).split('\n').join('\n     ')}\n`;
       } else {
         // Note that responseSchema is optional per MCP specification
-        output += `   Response Schema: Not specified (optional per MCP spec)\n`;
+        output += '   Response Schema: Not specified (optional per MCP spec)\n';
       }
       
       output += '\n';
@@ -448,7 +448,7 @@ function formatAsDetailed(info) {
       output += `   Description: ${prompt.description || 'N/A'}\n`;
       
       if (prompt.arguments) {
-        output += `   Arguments:\n`;
+        output += '   Arguments:\n';
         if (prompt.arguments.properties) {
           Object.keys(prompt.arguments.properties).forEach(arg => {
             const argSchema = prompt.arguments.properties[arg];
@@ -567,8 +567,8 @@ async function main() {
     console.error('\n💡 Make sure the MCP server is running:');
     console.error('   - Start the server: npm start');
     console.error('   - Or: node src/orchestrator.js');
-    console.error(`   - Check MCP port in .env (EASY_MCP_SERVER_MCP_PORT, default: 8888)`);
-    console.error(`   - Or specify port: npm run mcp:list -- --port 8888\n`);
+    console.error('   - Check MCP port in .env (EASY_MCP_SERVER_MCP_PORT, default: 8888)');
+    console.error('   - Or specify port: npm run mcp:list -- --port 8888\n');
     process.exit(1);
   }
   
@@ -610,7 +610,7 @@ async function main() {
     }
 
     // Summary
-    console.log(`\n📊 Summary:`);
+    console.log('\n📊 Summary:');
     console.log(`   Tools: ${info.tools.length}`);
     console.log(`   Prompts: ${info.prompts.length}`);
     console.log(`   Resources: ${info.resources.length}\n`);

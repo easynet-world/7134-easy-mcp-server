@@ -311,7 +311,7 @@ class N8nNodeBuilder {
     if (paramType === 'path') {
       field.routing = {
         request: {
-          url: `={{$value}}`, // Path params are injected into URL
+          url: '={{$value}}', // Path params are injected into URL
         },
         send: {
           property: name,
@@ -368,21 +368,21 @@ class N8nNodeBuilder {
     if (schema.enum) return 'options';
 
     switch (jsonSchemaType) {
-      case 'string':
-        if (schema.format === 'date-time') return 'dateTime';
-        if (schema.format === 'date') return 'dateTime';
-        return 'string';
-      case 'number':
-      case 'integer':
-        return 'number';
-      case 'boolean':
-        return 'boolean';
-      case 'array':
-        return 'collection';
-      case 'object':
-        return 'json';
-      default:
-        return 'string';
+    case 'string':
+      if (schema.format === 'date-time') return 'dateTime';
+      if (schema.format === 'date') return 'dateTime';
+      return 'string';
+    case 'number':
+    case 'integer':
+      return 'number';
+    case 'boolean':
+      return 'boolean';
+    case 'array':
+      return 'collection';
+    case 'object':
+      return 'json';
+    default:
+      return 'string';
     }
   }
 
@@ -395,13 +395,13 @@ class N8nNodeBuilder {
     if (schema.default !== undefined) return schema.default;
 
     switch (schema.type) {
-      case 'string': return '';
-      case 'number':
-      case 'integer': return 0;
-      case 'boolean': return false;
-      case 'array': return [];
-      case 'object': return {};
-      default: return '';
+    case 'string': return '';
+    case 'number':
+    case 'integer': return 0;
+    case 'boolean': return false;
+    case 'array': return [];
+    case 'object': return {};
+    default: return '';
     }
   }
 

@@ -13,9 +13,9 @@ console.log('🔍 MCP Static Code Compliance Analysis...');
 console.log('MCP Protocol Version: 2024-11-05');
 console.log('');
 
-let errors = [];
-let warnings = [];
-let checks = {
+const errors = [];
+const warnings = [];
+const checks = {
   passed: 0,
   failed: 0,
   total: 0
