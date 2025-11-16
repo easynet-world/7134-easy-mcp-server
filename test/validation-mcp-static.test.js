@@ -330,7 +330,7 @@ describe('MCP 2024-11-05 Static Compliance Tests', () => {
     console.log('\n========================================');
     console.log('MCP Static Compliance Test Summary');
     console.log('========================================');
-    console.log(`Specification: MCP 2024-11-05`);
+    console.log('Specification: MCP 2024-11-05');
     console.log(`Errors:        ${errors.length}`);
     console.log(`Warnings:      ${warnings.length}`);
     console.log(`Status:        ${errors.length === 0 ? '✅ PASSED' : '❌ FAILED'}`);

@@ -467,8 +467,8 @@ describe('MCP 2024-11-05 Runtime Compliance Tests', () => {
           id: id++,
           method,
           params: method.includes('call') ? { name: 'test', arguments: {} } :
-                  method.includes('get') ? { name: 'test' } :
-                  method.includes('read') ? { uri: 'resource://test' } : {}
+            method.includes('get') ? { name: 'test' } :
+              method.includes('read') ? { uri: 'resource://test' } : {}
         };
 
         const response = await mcpServer.processMCPRequest(request);
@@ -533,8 +533,8 @@ describe('MCP 2024-11-05 Runtime Compliance Tests', () => {
     console.log('\n========================================');
     console.log('MCP Runtime Compliance Test Summary');
     console.log('========================================');
-    console.log(`Specification: MCP 2024-11-05`);
-    console.log(`Transport:     In-Memory (Direct)`);
+    console.log('Specification: MCP 2024-11-05');
+    console.log('Transport:     In-Memory (Direct)');
     console.log(`Errors:        ${errors.length}`);
     console.log(`Warnings:      ${warnings.length}`);
     console.log(`Status:        ${errors.length === 0 ? '✅ PASSED' : '❌ FAILED'}`);

@@ -66,6 +66,7 @@ try {
 }
 const { apiSpecTs } = require('../../api/openapi/openapi-helper');
 const { apiSpec, queryParam, tsSchema } = require('../../api/openapi/openapi-helper');
+const APIEndpointValidator = require('../validators/api-endpoint-validator');
 
 class APILoader {
   constructor(app, apiPath = null) {
@@ -76,6 +77,7 @@ class APILoader {
     this.errors = [];
     this.middleware = new Map(); // Store loaded middleware
     this.middlewareLayers = new Map(); // Track middleware layers by file path
+    this.validationResults = []; // Store validation results for each file
   }
 
   /**
@@ -101,6 +103,7 @@ class APILoader {
     this.middleware.clear();
     this.middlewareLayers.clear();
     this.errors = [];
+    this.validationResults = [];
     
     // Load middleware first
     this.loadMiddleware(apiDir);
@@ -272,6 +275,28 @@ class APILoader {
     if (!validMethods.includes(httpMethod)) {
       this.errors.push(`Invalid HTTP method in filename: ${fileName}`);
       return;
+    }
+    
+    // Validate API endpoint structure (Request, Response, handler, annotations)
+    const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+    const validationResult = APIEndpointValidator.validate(filePath);
+    
+    // Store validation result
+    this.validationResults.push(validationResult);
+    
+    if (!validationResult.isValid) {
+      // Validation errors are critical - add to errors array
+      validationResult.errors.forEach(error => {
+        this.errors.push(`${filePath}: ${error}`);
+      });
+      // Don't return here - still try to load the file, but log the validation issues
+    }
+    
+    // Log warnings (non-critical issues)
+    if (validationResult.warnings && validationResult.warnings.length > 0 && !isStdioMode) {
+      validationResult.warnings.forEach(warning => {
+        console.warn(`⚠️  ${filePath}: ${warning}`);
+      });
     }
     
     try {
@@ -607,6 +632,22 @@ class APILoader {
    */
   getErrors() {
     return [...this.errors];
+  }
+
+  /**
+   * Get all validation results
+   */
+  getValidationResults() {
+    return [...this.validationResults];
+  }
+
+  /**
+   * Validate all loaded API files
+   * @returns {Object} Aggregated validation results
+   */
+  validateAllAPIs() {
+    const filePaths = this.routes.map(route => route.filePath).filter(Boolean);
+    return APIEndpointValidator.validateMultiple(filePaths);
   }
 
   /**

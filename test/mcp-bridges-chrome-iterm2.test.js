@@ -66,7 +66,7 @@ describe('MCP bridges: chrome-devtools and iterm2', () => {
     });
 
     DynamicAPIMCPServer = require('../src/mcp');
-      BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
+    BridgeReloader = require('../src/utils/loaders/mcp-bridge-reloader');
 
     // Create MCP server instance (no network bind needed for unit tests)
     const reloader = new BridgeReloader();

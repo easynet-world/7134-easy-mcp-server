@@ -353,7 +353,7 @@ function schemaFromTsDeclaration(filePath, className, seen = new Set()) {
     let pendingDesc = undefined;
 
     const lines = body.split(/\n/);
-    for (let raw of lines) {
+    for (const raw of lines) {
       const line = raw.trim();
       if (!line) continue;
       // Collect JSDoc block start
@@ -361,7 +361,7 @@ function schemaFromTsDeclaration(filePath, className, seen = new Set()) {
         const block = [line];
         // handled outside; simple accumulation until '*/'
         // Note: minimalistic; merge into pendingDesc when block closes
-        let content = line;
+        const content = line;
         if (!line.includes('*/')) {
           // multi-line block
           // no stream parsing here; rely on next lines accumulation below
@@ -421,7 +421,7 @@ function schemaFromTsDeclaration(filePath, className, seen = new Set()) {
           } else {
             tsType = 'object';
           }
-        } else if (defaultValue.startsWith("'") || defaultValue.startsWith('"') || defaultValue.startsWith('`')) {
+        } else if (defaultValue.startsWith('\'') || defaultValue.startsWith('"') || defaultValue.startsWith('`')) {
           tsType = 'string';
         }
 
@@ -565,7 +565,7 @@ function parseTsDefaultLiteral(lit) {
   const s = (lit || '').trim();
   if (!s) return undefined;
   const str = s.match(/^(["'])([\s\S]*)\1$/);
-  if (str) return str[2].replace(/\\"/g, '"').replace(/\\'/g, "'");
+  if (str) return str[2].replace(/\\"/g, '"').replace(/\\'/g, '\'');
   if (s === 'true') return true;
   if (s === 'false') return false;
   if (/^[-+]?[0-9]+(\.[0-9]+)?$/.test(s)) return Number(s);

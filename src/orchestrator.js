@@ -128,17 +128,17 @@ if (!process.env.JEST_WORKER_ID) {
 app.get('/mcp/tools', (req, res) => {
   try {
     const routes = apiLoader.getRoutes();
-  const tools = routes.map(route => {
-    const proc = route.processorInstance;
-    let openApi = proc?.openApi;
-    // Fallback to generated OpenAPI if missing/incomplete
-    try {
-      const needsFallback = !openApi || (!openApi.requestBody && !Array.isArray(openApi.parameters));
-      if (needsFallback) {
-        const { apiSpecTs } = require('./api/openapi/openapi-helper');
-        openApi = apiSpecTs(route.filePath);
-      }
-    } catch (_) { /* ignore */ }
+    const tools = routes.map(route => {
+      const proc = route.processorInstance;
+      let openApi = proc?.openApi;
+      // Fallback to generated OpenAPI if missing/incomplete
+      try {
+        const needsFallback = !openApi || (!openApi.requestBody && !Array.isArray(openApi.parameters));
+        if (needsFallback) {
+          const { apiSpecTs } = require('./api/openapi/openapi-helper');
+          openApi = apiSpecTs(route.filePath);
+        }
+      } catch (_) { /* ignore */ }
       const tool = {
         name: `api_${route.path.replace(/\//g, '_')}_${route.method.toLowerCase()}`,
         description: proc?.mcpDescription || openApi?.description || proc?.description || `Execute ${route.method} request to ${route.path}`,

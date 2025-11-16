@@ -6,184 +6,161 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
-[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-green.svg)](https://www.openapis.org/)
-[![Hot Reload](https://img.shields.io/badge/Hot-Reload-purple.svg)](https://github.com/easynet-world/7134-easy-mcp-server)
 
-**Write code once, get everything automatically: REST API + OpenAPI + Swagger + MCP Tools + n8n Nodes**
+**Write a handler once, get REST endpoints, Swagger/OpenAPI docs, MCP tools, and n8n nodes automatically.**
 
 ---
 
-## What is easy-mcp-server?
+## 1. What Is It?
 
-A professional framework that transforms your API code into multiple integrations automatically. Write your endpoint once, and instantly get:
+`easy-mcp-server` watches the `api/` folder and turns every file into:
 
-- **MCP Tools** - AI agent integration (Claude, GPT, etc.)
-- **REST API** - Standard HTTP endpoints
-- **OpenAPI Spec** - Industry-standard documentation
-- **Swagger UI** - Interactive API testing
-- **n8n Nodes** - Workflow automation integration
+| You provide | You get automatically |
+|-------------|-----------------------|
+| `api/foo/get.ts` style handlers | REST routes + health checks |
+| Request/Response classes | OpenAPI schema + Swagger UI |
+| `module.exports = handler` | MCP tools (`api__foo__get`) |
+| `npm run n8n:generate` | n8n nodes that mirror your APIs |
 
-Zero configuration. Convention-based. Production-ready.
+Everything hot-reloads and ships with zero config.
 
 ---
 
-## Quick Start
-
-### Install and Run
+## 2. Quick Start
 
 ```bash
 npx easy-mcp-server init my-project
 cd my-project
 npm install
 ./start.sh
+curl http://localhost:8887/health
 ```
 
-Your services are now running at:
-- MCP Server: http://localhost:8888
-- REST API: http://localhost:8887
-- Swagger UI: http://localhost:8887/docs
-- OpenAPI Spec: http://localhost:8887/openapi.json
+| Service | URL |
+|---------|-----|
+| REST API | http://localhost:8887 |
+| Swagger UI | http://localhost:8887/docs |
+| OpenAPI Spec | http://localhost:8887/openapi.json |
+| MCP Server | http://localhost:8888 |
 
-### Write Your First Endpoint
+Stop the stack with `./stop.sh`.
 
-Create `api/users/post.js`:
+---
 
-```javascript
+## 3. Define an Endpoint
+
+### File Name = Route (Examples)
+
+| File | Method | Route |
+|------|--------|-------|
+| `api/users/get.ts` | GET | `/users` |
+| `api/users/post.ts` | POST | `/users` |
+| `api/users/[id]/get.ts` | GET | `/users/:id` |
+
+### Minimal Handler Template
+
+**Request block**
+
+```typescript
+// @description('Incoming payload')
 class Request {
   // @description('User name')
   name: string;
-
   // @description('User email')
   email: string;
 }
+```
 
+**Response block**
+
+```typescript
+// @description('Response payload')
 class Response {
   success: boolean;
-  id: string;
+  data: { id: string; name: string; email: string };
 }
+```
 
-// @description('Create a new user')
-// @summary('Create user')
-function handler(req, res) {
+**Handler block**
+
+```typescript
+// @summary('Create a user')
+// @tags('users')
+function handler(req: any, res: any) {
   const { name, email } = req.body;
-  res.json({ success: true, id: '123' });
+  if (!name || !email) {
+    res.status(400).json({ success: false, error: 'Name and email required' });
+    return;
+  }
+
+  res.status(201).json({
+    success: true,
+    data: { id: '123', name, email }
+  });
 }
+```
 
+**Export block**
+
+```typescript
 module.exports = handler;
+export {};
 ```
 
-**You automatically get:**
-- MCP tool for AI agents
-- REST endpoint: `POST /users`
-- Swagger documentation
-- OpenAPI specification
-- n8n node (on demand)
-- Hot reload
+Annotations (`@description`, `@summary`, `@tags`) feed OpenAPI docs and MCP tool metadata automatically.
 
 ---
 
-## Key Features
+## 4. MCP Bridge (Optional)
 
-### MCP Bridge
+### Combine Other MCP Servers via `mcp-bridge.json`
 
-Access external MCP servers (Chrome DevTools, iTerm2, etc.) through your MCP server. Configure via `mcp-bridge.json`.
-
-### File-Based Routing
-```
-api/users/get.js       →  GET /users
-api/users/post.js      →  POST /users
-api/users/[id]/get.js  →  GET /users/:id
+```json
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "npx",
+      "args": ["-y", "chrome-mcp-server"]
+    }
+  }
+}
 ```
 
-### n8n Node Generation
-
-Generate workflow automation nodes from your APIs:
-
-```bash
-npm run n8n:generate
-```
-
-Creates a complete n8n community node package ready to publish or install locally.
+Hot reload keeps bridge tools and your API tools available on port `8888`. Disable any bridge by adding `"disabled": true`.
 
 ---
 
-## Visual Overview
+## 5. Operations
 
-![MCP Generation](docs/to-mcp.png)
-*API endpoints automatically become MCP tools*
+| Command | Purpose |
+|---------|---------|
+| `./start.sh` | Launch REST + MCP servers |
+| `./stop.sh` | Stop them |
+| `npm run n8n:generate` | Refresh n8n nodes |
+| `npm test` | Run tests (where configured) |
 
-![OpenAPI Generation](docs/to-openapi.png)
-*Code automatically generates OpenAPI specification*
-
-![Swagger Generation](docs/to-swagger.png)
-*Interactive Swagger UI generated automatically*
-
----
-
-## Why Choose easy-mcp-server?
-
-| Traditional Approach | With easy-mcp-server |
-|---------------------|---------------------|
-| Manual Express routing | File-based auto-routing |
-| Hand-written OpenAPI specs | Auto-generated from code |
-| Separate MCP tool development | Automatic integration |
-| Manual n8n node coding | One-command generation |
-| Multiple codebases to maintain | Single source of truth |
-| Manual documentation updates | Always synchronized |
-
-### Use Cases
-
-- **AI Integration**: Connect APIs to Claude, GPT, and MCP-compatible AI agents
-- **Workflow Automation**: Generate n8n nodes for visual workflow builders
-- **API Development**: Rapid REST API development with auto-documentation
-- **Enterprise Integration**: Single codebase for multiple platforms
+| Env var | Default | Notes |
+|---------|---------|-------|
+| `EASY_MCP_SERVER_PORT` | `8887` | REST port |
+| `EASY_MCP_SERVER_MCP_PORT` | `8888` | MCP port |
+| `EASY_MCP_SERVER_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
+| `EASY_MCP_SERVER_API_PATH` | `./api` | Folder to watch |
+| `EASY_MCP_SERVER_HOST` | `0.0.0.0` | Host binding |
 
 ---
 
-## Configuration
+## 6. Resources
 
-Basic configuration via environment variables:
+- Guide: `docs/DEVELOPMENT.md`
+- Example project: `example-project/`
+- Swagger: http://localhost:8887/docs
+- OpenAPI: http://localhost:8887/openapi.json
+- MCP endpoint: http://localhost:8888
 
-```bash
-EASY_MCP_SERVER_MCP_PORT=8888      # MCP server port
-EASY_MCP_SERVER_PORT=8887          # REST API port
-EASY_MCP_SERVER_LOG_LEVEL=info     # Logging level
-```
+## 7. Support & Contributions
 
-For complete configuration options, see the [Development Guide](docs/DEVELOPMENT.md#configuration-management).
-
----
-
-## Documentation
-
-- **[Development Guide](docs/DEVELOPMENT.md)** - Complete technical documentation, architecture, and API reference
-- **MCP Server** - http://localhost:8888 (when server is running)
-- **Swagger UI** - http://localhost:8887/docs (when server is running)
-- **OpenAPI Spec** - http://localhost:8887/openapi.json (when server is running)
-- **Example Project** - See `example-project/` directory
-
----
-
-## Support & Services
-
-**Professional Services:**
-- AI Quick Onboarding - Fast-track AI/MCP integration
-- AI Consulting - Expert guidance on architecture and best practices
-
-**Contact:** info@easynet.world
-
----
-
-## Contributing
-
-Contributions welcome! Please see our [Development Guide](docs/DEVELOPMENT.md#contributing) for details.
-
----
-
-## License
-
-MIT License - see [package.json](package.json) for details.
-
----
-
-**Maintainer:** Boqiang Liang (boqiang.liang@easynet.world)
+| Topic | Details |
+|-------|---------|
+| Questions / Enterprise Support | `info@easynet.world` |
+| Licensed | MIT |
+| Maintainer | Boqiang Liang (`boqiang.liang@easynet.world`) |

@@ -98,7 +98,7 @@ describe('OpenAPI, MCP, and Swagger details', () => {
     test('/docs serves Swagger UI referencing /openapi.json', async () => {
       const res = await request(app).get('/docs').expect(200);
       expect(res.text).toContain('SwaggerUIBundle');
-      expect(res.text).toContain("url: '/openapi.json'");
+      expect(res.text).toContain('url: \'/openapi.json\'');
     });
   });
 });

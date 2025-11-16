@@ -87,37 +87,37 @@ class WebSocketHandler {
     const id = data.id || null;
     
     switch (data.type) {
-      case 'list_tools':
-        return { jsonrpc: '2.0', id, method: 'tools/list' };
-      case 'call_tool':
-        return { 
-          jsonrpc: '2.0', 
-          id, 
-          method: 'tools/call', 
-          params: { name: data.name, arguments: data.arguments || {} }
-        };
-      case 'list_prompts':
-        return { jsonrpc: '2.0', id, method: 'prompts/list' };
-      case 'get_prompt':
-        return { 
-          jsonrpc: '2.0', 
-          id, 
-          method: 'prompts/get', 
-          params: { name: data.name, arguments: data.arguments || {} }
-        };
-      case 'list_resources':
-        return { jsonrpc: '2.0', id, method: 'resources/list' };
-      case 'read_resource':
-        return { 
-          jsonrpc: '2.0', 
-          id, 
-          method: 'resources/read', 
-          params: { uri: data.uri, arguments: data.arguments || {} }
-        };
-      case 'ping':
-        return { jsonrpc: '2.0', id, method: 'ping' };
-      default:
-        return null;
+    case 'list_tools':
+      return { jsonrpc: '2.0', id, method: 'tools/list' };
+    case 'call_tool':
+      return { 
+        jsonrpc: '2.0', 
+        id, 
+        method: 'tools/call', 
+        params: { name: data.name, arguments: data.arguments || {} }
+      };
+    case 'list_prompts':
+      return { jsonrpc: '2.0', id, method: 'prompts/list' };
+    case 'get_prompt':
+      return { 
+        jsonrpc: '2.0', 
+        id, 
+        method: 'prompts/get', 
+        params: { name: data.name, arguments: data.arguments || {} }
+      };
+    case 'list_resources':
+      return { jsonrpc: '2.0', id, method: 'resources/list' };
+    case 'read_resource':
+      return { 
+        jsonrpc: '2.0', 
+        id, 
+        method: 'resources/read', 
+        params: { uri: data.uri, arguments: data.arguments || {} }
+      };
+    case 'ping':
+      return { jsonrpc: '2.0', id, method: 'ping' };
+    default:
+      return null;
     }
   }
 
