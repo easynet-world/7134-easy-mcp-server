@@ -210,8 +210,15 @@ class MCPBridge extends EventEmitter {
 
   _onData(chunk) {
     this.buffer = Buffer.concat([this.buffer, chunk]);
+    // Only log raw stdout in debug mode (when quiet is false and it looks like JSON)
+    // This reduces noise from informational messages
     if (!this.quiet) {
-      console.log('🔌 Bridge stdout raw:', JSON.stringify(chunk.toString()));
+      const chunkStr = chunk.toString();
+      const firstLine = chunkStr.split('\n')[0].trim();
+      // Only log if it looks like it might be JSON
+      if (firstLine.startsWith('{') || firstLine.startsWith('[')) {
+        console.log('🔌 Bridge stdout raw:', JSON.stringify(chunkStr.substring(0, 200)));
+      }
     }
 
     // Support both LSP-style (Content-Length headers) and NDJSON (newline-delimited JSON)
@@ -278,15 +285,27 @@ class MCPBridge extends EventEmitter {
           this.buffer = this.buffer.slice(newlineIndex + lineEndingLength);
           
           if (line.length > 0) {
-            try {
-              const msg = JSON.parse(line);
-              this._handleMessage(msg);
-              continue; // Continue parsing more messages
-            } catch (err) {
-              if (!this.quiet) {
-                console.log('🔌 Bridge: Failed to parse NDJSON message:', line, err.message);
+            // Check if line looks like JSON before attempting to parse
+            // JSON messages should start with { or [
+            const trimmedLine = line.trim();
+            const looksLikeJSON = trimmedLine.startsWith('{') || trimmedLine.startsWith('[');
+            
+            if (looksLikeJSON) {
+              try {
+                const msg = JSON.parse(line);
+                this._handleMessage(msg);
+                continue; // Continue parsing more messages
+              } catch (err) {
+                // Only log if it looked like JSON but failed to parse
+                if (!this.quiet) {
+                  console.log('🔌 Bridge: Failed to parse NDJSON message:', line.substring(0, 100), err.message);
+                }
+                // Continue to next line
               }
-              // Continue to next line
+            } else {
+              // Line doesn't look like JSON (likely informational output), silently skip
+              // This prevents error logs for informational messages from child processes
+              continue;
             }
           } else {
             // Empty line, continue
