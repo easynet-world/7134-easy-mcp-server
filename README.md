@@ -7,7 +7,7 @@
 [![AI-Ready](https://img.shields.io/badge/AI-Ready-brightgreen.svg)](https://modelcontextprotocol.io)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io)
 
-**Write a handler once, get REST endpoints, Swagger/OpenAPI docs, MCP tools, and n8n nodes automatically.**
+## Write a handler once, get REST endpoints, Swagger/OpenAPI docs, MCP tools, and n8n nodes automatically.
 
 ---
 
@@ -17,9 +17,8 @@
 
 | You provide | You get automatically |
 |-------------|-----------------------|
-| `api/foo/get.ts` style handlers | REST routes + health checks |
-| Request/Response classes | OpenAPI schema + Swagger UI |
-| `module.exports = handler` | MCP tools (`api__foo__get`) |
+| `api/foo/get.ts` style handlers | MCP tools (`api__foo__get`) and REST routes `GET /foo` |
+| Request/Response classes | MCP tools and OpenAPI schema + Swagger UI |
 | `npm run n8n:generate` | n8n nodes that mirror your APIs |
 
 Everything hot-reloads and ships with zero config.
