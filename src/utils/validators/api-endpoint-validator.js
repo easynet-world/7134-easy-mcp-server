@@ -88,10 +88,16 @@ class APIEndpointValidator {
     // Check for handler function definition
     const handlerFunctionRegex = /(?:function\s+handler|const\s+handler\s*=\s*(?:async\s*)?\(|handler\s*[:=]\s*(?:async\s*)?\(|export\s+(?:default\s+)?(?:async\s+)?function\s+handler)/;
     const hasHandlerFunction = handlerFunctionRegex.test(sourceCode);
+    
+    // Check for class-based handler (class with process method)
+    const hasClassWithProcess = /class\s+\w+.*?\{[\s\S]*?process\s*\(/s.test(sourceCode);
+    
+    // Check for object export with process method
+    const hasObjectWithProcess = /(?:module\.exports|export\s+default)\s*=\s*\{[\s\S]*?process\s*[:=]\s*(?:async\s*)?\(/s.test(sourceCode);
 
-    if (!hasHandlerFunction) {
+    if (!hasHandlerFunction && !hasClassWithProcess && !hasObjectWithProcess) {
       result.isValid = false;
-      result.errors.push('Handler function not found. Expected: function handler(req, res) or const handler = (req, res) => {}');
+      result.errors.push('Handler function not found. Expected: function handler(req, res) or const handler = (req, res) => {}, or a class/object with a process(req, res) method');
       return result;
     }
 
@@ -99,11 +105,19 @@ class APIEndpointValidator {
     const hasModuleExport = /module\.exports\s*=\s*handler/.test(sourceCode);
     const hasDefaultExport = /export\s+default\s+handler/.test(sourceCode);
     const hasNamedExport = /export\s+(?:const|function|async\s+function)\s+handler/.test(sourceCode);
+    
+    // For class-based handlers, check for class export
+    const hasClassExport = hasClassWithProcess && /(?:module\.exports\s*=\s*\w+|export\s+default\s+class)/.test(sourceCode);
+    // For object-based handlers, check for object export
+    const hasObjectExport = hasObjectWithProcess;
 
-    if (!hasModuleExport && !hasDefaultExport && !hasNamedExport) {
-      result.isValid = false;
-      result.errors.push('Handler function is not exported. Expected: module.exports = handler or export default handler');
-      return result;
+    if (!hasModuleExport && !hasDefaultExport && !hasNamedExport && !hasClassExport && !hasObjectExport) {
+      // Only require export if it's a function handler, not class/object
+      if (hasHandlerFunction) {
+        result.isValid = false;
+        result.errors.push('Handler function is not exported. Expected: module.exports = handler or export default handler');
+        return result;
+      }
     }
 
     // Check handler function signature

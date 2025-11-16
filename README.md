@@ -111,7 +111,75 @@ Annotations (`@description`, `@summary`, `@tags`) feed OpenAPI docs and MCP tool
 
 ---
 
-## 4. MCP Bridge (Optional)
+## 4. System Architecture
+
+Visual overview of how Easy MCP Server turns file-based handlers into REST APIs, MCP tools, and automations.
+
+```mermaid
+flowchart LR
+    %% Node styles
+    classDef boxPrimary fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#27272a,font-size:12px,padding:12px;
+    classDef cardBlue fill:#e0ecff,stroke:#4574d4,color:#0f172a,font-weight:600;
+    classDef cardGreen fill:#e8f5e9,stroke:#5aa454,color:#1b4332,font-weight:600;
+    classDef cardOrange fill:#ffe8d9,stroke:#f97316,color:#7c2d12,font-weight:600;
+    classDef cardNeutral fill:#f5f5f5,stroke:#a7a7a7,color:#1f2937,font-weight:600;
+
+    subgraph Clients["Clients"]
+        Browser["Web UI<br/>(Swagger, Docs)"]
+        Agent["AI Agents<br/>(Model Context Protocol)"]
+        Automation["n8n Flows"]
+    end
+
+    subgraph Server["Easy MCP Server"]
+        subgraph RestLayer["REST & Documentation"]
+            Router["HTTP Router<br/>Express + Validation"]
+            OpenAPI["OpenAPI & Swagger<br/>Auto-generated"]
+        end
+
+        subgraph CodeConfig["Code & Config"]
+            Nodes["n8n Generator<br/>npm run n8n:generate"]
+            Handlers["Handlers<br/>api/**/*.ts"]
+            Watcher["Hot Reload Watcher"]
+        end
+
+        subgraph MCPUmbrella["MCP Runtime"]
+            MCPServer["MCP Server<br/>JSON-RPC + Tool Execution"]
+            ToolBuilder["Tool Builder<br/>Annotation Parser"]
+            Bridges["Bridge Loader<br/>External MCP Servers"]
+        end
+    end
+
+    DataSources[(External APIs/DBs)]
+
+    %% Flows
+    Browser --> Router
+    Router --> OpenAPI
+    Router --> Handlers
+    OpenAPI --> Browser
+
+    Agent --> MCPServer
+    MCPServer --> ToolBuilder
+    ToolBuilder --> Handlers
+    Bridges --> MCPServer
+
+    Automation --> Nodes
+    Nodes --> Handlers
+
+    Handlers --> DataSources
+    Watcher --> Router
+    Watcher --> MCPServer
+
+    %% Apply visual classes
+    class Clients,Server boxPrimary
+    class Browser,Agent,Automation cardBlue
+    class Router,OpenAPI,MCPServer,ToolBuilder,Bridges cardGreen
+    class Nodes,Handlers,Watcher cardOrange
+    class DataSources cardNeutral
+```
+
+---
+
+## 5. MCP Bridge (Optional)
 
 ### Combine Other MCP Servers via `mcp-bridge.json`
 
@@ -130,7 +198,7 @@ Hot reload keeps bridge tools and your API tools available on port `8888`. Disab
 
 ---
 
-## 5. Operations
+## 6. Operations
 
 | Command | Purpose |
 |---------|---------|
@@ -149,7 +217,7 @@ Hot reload keeps bridge tools and your API tools available on port `8888`. Disab
 
 ---
 
-## 6. Resources
+## 7. Resources
 
 - Guide: `docs/DEVELOPMENT.md`
 - Example project: `example-project/`
@@ -157,7 +225,7 @@ Hot reload keeps bridge tools and your API tools available on port `8888`. Disab
 - OpenAPI: http://localhost:8887/openapi.json
 - MCP endpoint: http://localhost:8888
 
-## 7. Support & Contributions
+## 8. Support & Contributions
 
 | Topic | Details |
 |-------|---------|

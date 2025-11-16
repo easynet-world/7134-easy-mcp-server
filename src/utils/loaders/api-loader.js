@@ -285,9 +285,14 @@ class APILoader {
     this.validationResults.push(validationResult);
     
     if (!validationResult.isValid) {
-      // Validation errors are critical - add to errors array
+      // Validation errors are critical - add to errors array as structured objects
       validationResult.errors.forEach(error => {
-        this.errors.push(`${filePath}: ${error}`);
+        this.errors.push({
+          file: filePath,
+          error: error,
+          type: 'validation_error',
+          timestamp: new Date().toISOString()
+        });
       });
       // Don't return here - still try to load the file, but log the validation issues
     }
