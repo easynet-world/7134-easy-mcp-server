@@ -93,3 +93,6 @@ lib-cov
 .out
 .storybook-out
 test1-*/
+test-ts-fix-*/
+test-mcp-*/
+test-build-n8n-*/
