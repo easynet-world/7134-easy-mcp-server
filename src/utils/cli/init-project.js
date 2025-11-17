@@ -117,9 +117,10 @@ function createBinScript(projectDir, projectName) {
 /**
  * ${projectName} CLI
  * Executable script for running this Easy MCP Server project
- * 
+ *
  * Usage:
  *   ${projectName}  # Automatically detects mode based on .env configuration
+ *                   # - If EASY_MCP_SERVER_STDIO_MODE=true: STDIO mode (explicit)
  *                   # - If EASY_MCP_SERVER_MCP_PORT is set: HTTP/Streamable mode
  *                   # - If not set: STDIO mode
  */
@@ -130,11 +131,12 @@ const fs = require('fs');
 const projectRoot = path.resolve(__dirname, '..');
 process.chdir(projectRoot);
 
-// Automatic mode detection based on .env port configuration
-// Check if MCP port is configured in environment (from .env file or environment variables)
+// Detect STDIO mode: explicit flag takes precedence, otherwise auto-detect by port presence
+const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
 const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+const isStdioMode = explicitStdioMode || !hasMcpPort;
 
-if (hasMcpPort) {
+if (!isStdioMode) {
   // Port is configured - use HTTP/Streamable mode
   // Don't set STDIO mode, so it will use HTTP transport
   // Set host to 0.0.0.0 to allow external connections (only if not set)

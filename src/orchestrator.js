@@ -373,9 +373,10 @@ async function executeAPIEndpoint(route, args, res) {
 
 // Server startup function
 async function startServer() {
-  // Auto-detect STDIO mode: if no MCP port is configured, use STDIO mode
+  // Detect STDIO mode: explicit flag takes precedence, otherwise auto-detect by port presence
+  const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
   const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
-  const isStdioMode = !hasMcpPort;
+  const isStdioMode = explicitStdioMode || !hasMcpPort;
 
   // If in STDIO mode, explicitly set the env var for child processes
   if (isStdioMode) {
