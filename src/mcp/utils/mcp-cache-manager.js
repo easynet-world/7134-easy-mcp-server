@@ -85,10 +85,25 @@ class MCPCacheManager {
    * @param {string} filePath - Path to changed file
    */
   async handleFileChange(type, event, filePath) {
-    // Check if file has a supported extension
-    const ext = path.extname(filePath).toLowerCase();
-    const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
-    if (!supportedExtensions.includes(ext)) return;
+    // Determine which formats to use based on type
+    const formats = type === 'prompts' ? this.promptFormats : this.resourceFormats;
+    
+    // Check if file should be processed based on formats config
+    // If '*' is specified, accept all files (no extension filtering)
+    if (!formats.includes('*')) {
+      // Use specified formats, converting to extensions
+      const supportedExtensions = formats.map(fmt => {
+        // If format already starts with '.', use as-is, otherwise add '.'
+        return fmt.startsWith('.') ? fmt : `.${fmt}`;
+      });
+      // Also include the standard supported extensions for compatibility
+      const standardExtensions = SimpleParameterParser.getSupportedExtensions();
+      const allExtensions = [...new Set([...supportedExtensions, ...standardExtensions])];
+      
+      const ext = path.extname(filePath).toLowerCase();
+      if (!allExtensions.includes(ext)) return;
+    }
+    // If formats includes '*', accept all files (no filtering needed)
     
     const relativePath = path.relative(this.basePath, filePath);
     const cache = type === 'prompts' ? this.promptsCache : this.resourcesCache;
