@@ -119,8 +119,9 @@ describe('MCP Server Mode Detection and Bin Script', () => {
       expect(fs.existsSync(binScriptPath)).toBe(true);
 
       const content = fs.readFileSync(binScriptPath, 'utf8');
-      expect(content).toContain('Automatic mode detection');
+      expect(content).toContain('Detect STDIO mode');
       expect(content).toContain('EASY_MCP_SERVER_MCP_PORT');
+      expect(content).toContain('EASY_MCP_SERVER_STDIO_MODE');
       expect(content).toContain('HTTP/Streamable');
       expect(content).toContain('STDIO');
     });
@@ -132,6 +133,7 @@ describe('MCP Server Mode Detection and Bin Script', () => {
       const content = fs.readFileSync(binScriptPath, 'utf8');
 
       expect(content).toContain('Automatically detects mode');
+      expect(content).toContain('EASY_MCP_SERVER_STDIO_MODE=true: STDIO mode');
       expect(content).toContain('If EASY_MCP_SERVER_MCP_PORT is set: HTTP/Streamable mode');
       expect(content).toContain('If not set: STDIO mode');
     });
@@ -177,11 +179,26 @@ describe('MCP Server Mode Detection and Bin Script', () => {
       // Mock the bin script execution to check environment variable
       const binScriptPath = path.join(projectDir, 'bin', 'cli.js');
       const originalRequire = require;
-      
+
       // We'll check by reading the script and verifying logic
       const content = fs.readFileSync(binScriptPath, 'utf8');
       expect(content).toContain('EASY_MCP_SERVER_STDIO_MODE = \'true\'');
-      expect(content).toContain('hasMcpPort');
+      expect(content).toContain('isStdioMode');
+    });
+
+    test('should respect explicit EASY_MCP_SERVER_STDIO_MODE=true even when port is set', async () => {
+      await runInitCommand(projectName);
+
+      // Set MCP_PORT in environment but also set explicit STDIO mode flag
+      const result = await runBinScript(projectDir, {
+        EASY_MCP_SERVER_MCP_PORT: '8888', // Port is set
+        EASY_MCP_SERVER_STDIO_MODE: 'true' // But explicit STDIO mode should take precedence
+      });
+
+      // Should be in STDIO mode despite port being set
+      expect(result.output).toContain('MCP Server Mode: STDIO');
+      expect(result.output).toContain('stdin/stdout');
+      expect(result.output).not.toContain('Port: 8888');
     });
   });
 

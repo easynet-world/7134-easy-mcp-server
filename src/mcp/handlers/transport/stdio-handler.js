@@ -66,7 +66,7 @@ class STDIOHandler {
     // Handle stdin end
     process.stdin.on('end', () => {
       if (!this.server.quiet) {
-        console.log('📡 STDIO: stdin ended');
+        process.stderr.write('📡 STDIO: stdin ended\n');
       }
       process.exit(0);
     });
@@ -80,11 +80,12 @@ class STDIOHandler {
     
     // Keep stdout in binary mode for Content-Length framing
     // Don't set encoding - we write raw binary data
-    
+
+    // Use stderr for informational messages in STDIO mode to keep stdout clean for JSON-RPC
     if (!this.server.quiet) {
-      console.log('📡 STDIO transport started');
-      console.log('📥 Reading from stdin');
-      console.log('📤 Writing to stdout');
+      process.stderr.write('📡 STDIO transport started\n');
+      process.stderr.write('📥 Reading from stdin\n');
+      process.stderr.write('📤 Writing to stdout\n');
     }
   }
 

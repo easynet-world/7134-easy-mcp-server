@@ -116,17 +116,25 @@ class MCPServerLifecycle {
   async start() {
     this.createServer();
     this.server.attachBridgeListeners();
-    
+
     // If in STDIO mode, start STDIO handler instead of HTTP/WebSocket server
     if (this.server.stdioMode) {
+      // Redirect console.log to stderr in STDIO mode to keep stdout clean for JSON-RPC
+      const originalConsoleLog = console.log;
+      console.log = function(...args) {
+        process.stderr.write(args.join(' ') + '\n');
+      };
+      // Store original for potential restoration
+      console.log.original = originalConsoleLog;
+
       this.server.stdioHandler.start();
       if (!this.server.quiet) {
-        console.log('🚀 MCP Server started in STDIO mode');
-        console.log('📡 Reading from stdin, writing to stdout');
-        console.log('🔧 Available MCP commands:');
-        console.log('  - tools/list: Discover available API endpoints');
-        console.log('  - tools/call: Execute a specific API endpoint');
-        console.log('  - ping: Health check');
+        process.stderr.write('🚀 MCP Server started in STDIO mode\n');
+        process.stderr.write('📡 Reading from stdin, writing to stdout\n');
+        process.stderr.write('🔧 Available MCP commands:\n');
+        process.stderr.write('  - tools/list: Discover available API endpoints\n');
+        process.stderr.write('  - tools/call: Execute a specific API endpoint\n');
+        process.stderr.write('  - ping: Health check\n');
       }
       return Promise.resolve();
     }
