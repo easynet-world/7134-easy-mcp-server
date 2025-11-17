@@ -91,6 +91,23 @@ class MCPHTTPBridge extends EventEmitter {
       };
 
       const req = httpModule.request(options, (res) => {
+        // Handle redirects (3xx status codes)
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          req.destroy();
+          // Follow redirect
+          const redirectUrl = new URL(res.headers.location, url);
+          return this._httpRequest(method, redirectUrl.pathname + (redirectUrl.search || ''), payload)
+            .then(resolve)
+            .catch(reject);
+        }
+        
+        // Check for non-2xx status codes
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          req.destroy();
+          reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage || 'Request failed'}`));
+          return;
+        }
+        
         let body = '';
         
         res.on('data', (chunk) => {
@@ -99,6 +116,13 @@ class MCPHTTPBridge extends EventEmitter {
         
         res.on('end', () => {
           try {
+            // Check if response is HTML (likely an error page or redirect)
+            const trimmedBody = body.trim();
+            if (trimmedBody.startsWith('<!DOCTYPE') || trimmedBody.startsWith('<html')) {
+              reject(new Error('Server returned HTML instead of JSON. This might indicate the endpoint is incorrect or the server is not an MCP server. Response preview: ' + trimmedBody.substring(0, 200)));
+              return;
+            }
+            
             const result = JSON.parse(body);
             
             // Handle JSON-RPC response
@@ -108,7 +132,7 @@ class MCPHTTPBridge extends EventEmitter {
               resolve(result.result || result);
             }
           } catch (e) {
-            reject(new Error(`Failed to parse response: ${e.message}`));
+            reject(new Error('Failed to parse response: ' + e.message + '. Response preview: ' + body.substring(0, 200)));
           }
         });
       });
@@ -175,7 +199,7 @@ class MCPHTTPBridge extends EventEmitter {
       } catch (error) {
         // If /mcp fails, try root endpoint
         if (!this.quiet) {
-          console.log(`🔌 HTTP Bridge: /mcp endpoint failed, trying root endpoint`);
+          console.log('🔌 HTTP Bridge: /mcp endpoint failed, trying root endpoint');
         }
         try {
           result = await this._httpRequest('POST', '/', initRequest);
@@ -201,7 +225,7 @@ class MCPHTTPBridge extends EventEmitter {
       });
 
       // Try to establish SSE connection for notifications
-      this._connectSSE().catch((error) => {
+      this._connectSSE().catch(() => {
         if (!this.quiet) {
           console.log(`🔌 HTTP Bridge: SSE not available for ${this.url} (this is normal if server doesn't support SSE)`);
         }
@@ -338,7 +362,7 @@ class MCPHTTPBridge extends EventEmitter {
     } catch (error) {
       // Ignore parsing errors for SSE messages
       if (!this.quiet) {
-        console.warn(`⚠️  HTTP Bridge: Failed to parse SSE message:`, error.message);
+        console.warn('⚠️  HTTP Bridge: Failed to parse SSE message:', error.message);
       }
     }
   }
