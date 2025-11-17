@@ -73,16 +73,32 @@ class ResourceHandler {
    */
   async loadResourcesFromFilesystem() {
     try {
-      // Load resources if enabled and cache manager is not available
-      if (this.config.mcp.resources.enabled && !this.cacheManager) {
-        const resourcesPath = path.resolve(this.resolvedBasePath, 'resources');
-        await this.loadResourcesFromDirectory(resourcesPath);
+      if (this.config.mcp.resources.enabled) {
+        if (this.cacheManager) {
+          // Load from cache manager (which handles filesystem loading with caching)
+          const cachedResources = await this.cacheManager.getResources();
+          // Populate the static resources map for backward compatibility
+          for (const resource of cachedResources) {
+            this.addResource({
+              uri: resource.uri,
+              name: resource.name,
+              description: resource.description,
+              mimeType: resource.mimeType,
+              content: resource.content,
+              filePath: resource.filePath
+            });
+          }
+        } else {
+          // Direct filesystem loading when cache manager is not available
+          const resourcesPath = path.resolve(this.resolvedBasePath, 'resources');
+          await this.loadResourcesFromDirectory(resourcesPath);
+        }
       }
       
       console.log(`🔌 MCP Server: Loaded ${this.resources.size} resources from filesystem`);
       
-      // Setup file watchers if enabled
-      if (this.config.mcp.resources.watch && this.config.mcp.resources.enabled) {
+      // Setup file watchers if enabled (only when cache manager is not handling it)
+      if (this.config.mcp.resources.watch && this.config.mcp.resources.enabled && !this.cacheManager) {
         this.setupResourcesWatcher();
       }
     } catch (error) {
