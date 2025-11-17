@@ -294,9 +294,22 @@ class MCPCacheManager {
       
       const parsed = SimpleParameterParser.parse(content, fileName);
       
+      // Generate name from file path (matching direct loader behavior)
+      // Use relative path with underscores for nested directories, or just filename for root level
+      let promptName = parsed.name;
+      // If filePath includes directory separators, use the full relative path
+      if (filePath.includes('/') || filePath.includes('\\')) {
+        // Remove the 'prompts/' prefix if present, then replace slashes with underscores
+        let relativePath = filePath;
+        if (relativePath.startsWith('prompts/')) {
+          relativePath = relativePath.substring(8); // Remove 'prompts/' prefix
+        }
+        promptName = relativePath.replace(/[/\\]/g, '_').replace(/\.[^/.]+$/, '');
+      }
+      
       // Cache all prompts, with or without parameters
       const prompt = {
-        name: parsed.name,
+        name: promptName,
         description: parsed.hasParameters 
           ? `${parsed.format} prompt with ${parsed.parameterCount} parameters`
           : `${parsed.format} prompt`,
@@ -347,12 +360,39 @@ class MCPCacheManager {
       
       const parsed = SimpleParameterParser.parse(content, fileName);
       
-      // Generate URI with file extension to match static loader format
-      const uri = `resource://${fileName}`;
+      // Generate URI from file path (matching direct loader behavior)
+      // Use relative path, but clean up if it goes outside the resources directory
+      let cleanRelativePath = filePath;
+      if (cleanRelativePath.startsWith('resources/')) {
+        cleanRelativePath = cleanRelativePath.substring(10); // Remove 'resources/' prefix
+      }
+      // Normalize the path to use forward slashes consistently
+      cleanRelativePath = cleanRelativePath.replace(/\\/g, '/');
+      const uri = `resource://${cleanRelativePath}`;
+      
+      // Generate name from file path if not provided in content
+      let resourceName = parsed.name;
+      // If filePath includes directory separators, extract name from JSON/YAML if available, otherwise use filename
+      if (filePath.includes('/') || filePath.includes('\\')) {
+        // Try to extract name from structured formats
+        if (parsed.format === 'json' || parsed.format === 'yaml') {
+          try {
+            const data = parsed.format === 'json' ? JSON.parse(content) : require('js-yaml').load(content);
+            if (data && data.name) {
+              resourceName = data.name;
+            }
+          } catch (e) {
+            // Use filename if parsing fails
+            resourceName = fileName.replace(/\.[^/.]+$/, '');
+          }
+        } else {
+          resourceName = fileName.replace(/\.[^/.]+$/, '');
+        }
+      }
       
       const resource = {
         uri: uri,
-        name: parsed.name,
+        name: resourceName,
         description: `${parsed.format} resource: ${parsed.name}`,
         mimeType: parsed.format === 'markdown' ? 'text/markdown' : `text/${parsed.format}`,
         source: parsed.format,
