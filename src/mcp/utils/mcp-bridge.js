@@ -44,10 +44,34 @@ class MCPBridge extends EventEmitter {
     this.expectedLength = 0;
   }
 
+  /**
+   * Format a JSON-RPC message with Content-Length header (LSP-style)
+   * @param {object} payload - The JSON-RPC payload object
+   * @returns {Buffer} - Formatted message with Content-Length header
+   */
+  _formatMessage(payload) {
+    const json = JSON.stringify(payload);
+    const contentLength = Buffer.byteLength(json, 'utf8');
+    const header = `Content-Length: ${contentLength}\r\n\r\n`;
+    return Buffer.concat([
+      Buffer.from(header, 'utf8'),
+      Buffer.from(json, 'utf8')
+    ]);
+  }
+
   start() {
     if (!this.command) throw new Error('MCPBridge requires a command');
     if (this.proc) return;
-    const spawnEnv = this.env ? { ...process.env, ...this.env } : process.env;
+
+    // Filter out port-related environment variables to ensure child servers
+    // can automatically detect STDIO mode when no ports are configured
+    // Also explicitly set STDIO mode to enable proper console output redirection
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.EASY_MCP_SERVER_PORT;
+    delete cleanEnv.EASY_MCP_SERVER_MCP_PORT;
+    cleanEnv.EASY_MCP_SERVER_STDIO_MODE = 'true';
+
+    const spawnEnv = this.env ? { ...cleanEnv, ...this.env } : cleanEnv;
     const spawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: spawnEnv
@@ -61,12 +85,12 @@ class MCPBridge extends EventEmitter {
     this.proc.stderr.on('data', (chunk) => {
       // Surface stderr as warning but do not crash
       const msg = chunk.toString();
-      
+
       // Filter out common warning messages in quiet mode
       const isWarningMessage = msg.includes('exposes content of the browser instance') ||
                               msg.includes('Avoid sharing sensitive or personal information') ||
                               msg.includes('chrome-devtools-mcp exposes content');
-      
+
       if (!this.quiet || !isWarningMessage) {
         console.log(`🔌 Bridge stderr: ${msg}`);
       }
@@ -79,8 +103,32 @@ class MCPBridge extends EventEmitter {
         pending.reject(err);
       }
       this.pending.clear();
+      // Close stdin to prevent EPIPE errors
+      if (this.proc.stdin && !this.proc.stdin.destroyed) {
+        try {
+          this.proc.stdin.end();
+        } catch (e) {
+          // Ignore errors when closing stdin
+        }
+      }
       this.proc = null;
     });
+    
+    // Handle EPIPE errors gracefully
+    this.proc.stdin.on('error', (err) => {
+      if (err.code === 'EPIPE') {
+        // Process has exited, this is expected - don't log as error
+        // EPIPE is normal when process exits before we finish writing
+      } else {
+        this.emit('error', err);
+      }
+    });
+
+    // Automatically initialize the bridge after starting
+    // This prevents STDIO servers from exiting due to no input
+    if (!this.initPromise) {
+      this.initPromise = this._initialize();
+    }
 
   }
 
@@ -100,14 +148,13 @@ class MCPBridge extends EventEmitter {
         }
       };
 
-      const message = JSON.stringify(initRequest) + '\n';
-      
+      const message = this._formatMessage(initRequest);
+
       if (!this.quiet) {
-        console.log('🔌 Bridge: Sending initialization message:', JSON.stringify(message));
+        console.log('🔌 Bridge: Sending initialization message with Content-Length header');
       }
 
       // Set up a one-time listener for the initialization response
-      let timeoutId;
       const initHandler = (msg) => {
         if (msg.id === 0) {
           clearTimeout(timeoutId);
@@ -124,29 +171,70 @@ class MCPBridge extends EventEmitter {
       this.once('response', initHandler);
 
       // Set up timeout for initialization (increased to 30 seconds for slow MCP servers)
-      timeoutId = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         this.removeListener('response', initHandler);
         reject(new Error('Bridge initialization timeout'));
       }, 30000);
 
-      try {
-        if (!this.quiet) {
-          console.log('🔌 Bridge: Writing to stdin...');
-        }
-        this.proc.stdin.write(message);
-        if (!this.quiet) {
-          console.log('🔌 Bridge: Sent initialization request');
+      // Add a small delay to allow the child process to set up stdin listeners
+      // This prevents writing to stdin before the child is ready to receive
+      setTimeout(() => {
+        try {
+          // Check if process is still running before writing to stdin
+          if (!this.proc || this.proc.exitCode !== null) {
+            clearTimeout(timeoutId);
+            this.removeListener('response', initHandler);
+            reject(new Error('Process exited before initialization could complete'));
+            return;
+          }
+
+          // Check if stdin is writable before attempting to write
+          if (!this.proc.stdin.writable || this.proc.stdin.destroyed) {
+            clearTimeout(timeoutId);
+            this.removeListener('response', initHandler);
+            reject(new Error('Process stdin is not writable'));
+            return;
+          }
+
+          if (!this.quiet) {
+            console.log('🔌 Bridge: Writing to stdin...');
+          }
           
-          // Check if stdin is writable
-          console.log('🔌 Bridge: stdin writable:', this.proc.stdin.writable);
-          console.log('🔌 Bridge: stdin destroyed:', this.proc.stdin.destroyed);
+          // Handle EPIPE errors gracefully (process may have exited)
+          const writeSuccess = this.proc.stdin.write(message, (err) => {
+            if (err && err.code !== 'EPIPE') {
+              clearTimeout(timeoutId);
+              this.removeListener('response', initHandler);
+              reject(new Error(`Failed to write to stdin: ${err.message}`));
+            }
+          });
+          
+          // If write returns false, the stream is backpressured
+          if (!writeSuccess) {
+            this.proc.stdin.once('drain', () => {
+              // Drain event fired, write completed
+            });
+          }
+          
+          if (!this.quiet) {
+            console.log('🔌 Bridge: Sent initialization request');
+            console.log('🔌 Bridge: stdin writable:', this.proc.stdin.writable);
+            console.log('🔌 Bridge: stdin destroyed:', this.proc.stdin.destroyed);
+          }
+
+        } catch (err) {
+          // Handle EPIPE and other write errors gracefully
+          if (err.code === 'EPIPE') {
+            clearTimeout(timeoutId);
+            this.removeListener('response', initHandler);
+            reject(new Error('Process exited before initialization could complete'));
+          } else {
+            clearTimeout(timeoutId);
+            this.removeListener('response', initHandler);
+            reject(new Error(`Failed to initialize MCP bridge: ${err.message}`));
+          }
         }
-        
-      } catch (err) {
-        clearTimeout(timeoutId);
-        this.removeListener('response', initHandler);
-        reject(new Error(`Failed to initialize MCP bridge: ${err.message}`));
-      }
+      }, 10); // 10ms delay to allow child process to set up stdin listeners
     });
   }
 
@@ -161,7 +249,7 @@ class MCPBridge extends EventEmitter {
 
   async rpcRequest(method, params = {}, timeout = 10000) {
     if (!this.proc) this.start();
-    
+
     // Wait for initialization to complete
     if (!this.initialized) {
       if (!this.initPromise) {
@@ -169,25 +257,25 @@ class MCPBridge extends EventEmitter {
       }
       await this.initPromise;
     }
-    
+
     const id = this.nextId++;
     const payload = { jsonrpc: '2.0', id, method, params };
-    const message = JSON.stringify(payload) + '\n';
+    const message = this._formatMessage(payload);
 
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
-      
+
       // Set up timeout
       const timeoutId = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`RPC request timeout after ${timeout}ms for method: ${method}`));
       }, timeout);
-      
+
       // Clear timeout when request completes
       const originalResolve = this.pending.get(id).resolve;
       const originalReject = this.pending.get(id).reject;
-      
-      this.pending.set(id, { 
+
+      this.pending.set(id, {
         resolve: (result) => {
           clearTimeout(timeoutId);
           originalResolve(result);
@@ -197,7 +285,7 @@ class MCPBridge extends EventEmitter {
           originalReject(error);
         }
       });
-      
+
       try {
         this.proc.stdin.write(message);
       } catch (err) {
@@ -222,6 +310,7 @@ class MCPBridge extends EventEmitter {
     }
 
     // Support both LSP-style (Content-Length headers) and NDJSON (newline-delimited JSON)
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       // First, try to detect if we have LSP-style headers
       if (this.expectingHeaders) {
