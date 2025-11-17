@@ -103,8 +103,8 @@ describe('HTTP Bridge Real Integration Test', () => {
       }
     } catch (error) {
       // If server is unavailable, skip the test
-      if (error.message.includes('HTML') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
-        console.log('⚠️  Skipping test: Server unavailable or not an MCP server');
+      if (error.message.includes('HTML') || error.message.includes('403') || error.message.includes('Forbidden') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
+        console.log('⚠️  Skipping test: Server unavailable, forbidden, or not an MCP server');
         return;
       }
       throw error;
@@ -135,8 +135,8 @@ describe('HTTP Bridge Real Integration Test', () => {
       console.log(`✅ StreamableHttp protocol working (endpoint: ${bridge.workingEndpoint})`);
     } catch (error) {
       // If server is unavailable, skip the test
-      if (error.message.includes('HTML') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
-        console.log('⚠️  Skipping test: Server unavailable or not an MCP server');
+      if (error.message.includes('HTML') || error.message.includes('403') || error.message.includes('Forbidden') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
+        console.log('⚠️  Skipping test: Server unavailable, forbidden, or not an MCP server');
         return;
       }
       throw error;
@@ -184,8 +184,8 @@ describe('HTTP Bridge Real Integration Test', () => {
       }
     } catch (error) {
       // If server is unavailable, skip the test
-      if (error.message.includes('HTML') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
-        console.log('⚠️  Skipping test: Server unavailable or not an MCP server');
+      if (error.message.includes('HTML') || error.message.includes('403') || error.message.includes('Forbidden') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
+        console.log('⚠️  Skipping test: Server unavailable, forbidden, or not an MCP server');
         return;
       }
       throw error;
