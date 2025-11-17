@@ -22,23 +22,28 @@ const {
  * @returns {Promise<void>}
  */
 async function startServer() {
+  // Check if running in STDIO mode (when spawned as a bridge)
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+
   // Console redirection already happened at the top of the file
   // Just log the startup message if not in STDIO mode
   if (!isStdioMode) {
     console.log('🚀 Starting Easy MCP Server...');
   }
-  
+
   // Load environment files
   loadUserEnvFiles();
-  
+
   // Initialize hot reloader
   initializeEnvHotReloader();
-  
+
   // Parse port configuration
   const portConfig = parsePortArguments();
-  
-  // Auto-install dependencies
-  await autoInstallDependencies();
+
+  // Auto-install dependencies (skip in STDIO mode to prevent circular dependencies when running as a bridge)
+  if (!isStdioMode) {
+    await autoInstallDependencies();
+  }
   
   // Check what mode to start in
   const serverPath = path.join(process.cwd(), 'server.js');
@@ -107,9 +112,13 @@ async function startAutoServer(portConfig) {
       ? publicDir
       : (process.env.EASY_MCP_SERVER_STATIC_DIRECTORY || path.join(packageRoot, 'public'));
 
-    // Set ports
-    process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
-    process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
+    // Set ports (only if defined - in STDIO mode, mcpPort may be undefined)
+    if (portConfig.port != null) {
+      process.env.EASY_MCP_SERVER_PORT = portConfig.port.toString();
+    }
+    if (portConfig.mcpPort != null) {
+      process.env.EASY_MCP_SERVER_MCP_PORT = portConfig.mcpPort.toString();
+    }
 
     // Import and start the orchestrator (it's in the src directory within the package)
     const orchestratorPath = path.join(packageRoot, 'src', 'orchestrator.js');

@@ -144,11 +144,14 @@ async function autoInstallDependencies() {
  * @returns {Object} Configuration with port and mcpPort
  */
 function parsePortArguments() {
+  // Don't use default ports in STDIO mode
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+
   const config = {
-    port: process.env.EASY_MCP_SERVER_PORT || 8887,
-    mcpPort: process.env.EASY_MCP_SERVER_MCP_PORT || 8888
+    port: isStdioMode ? process.env.EASY_MCP_SERVER_PORT : (process.env.EASY_MCP_SERVER_PORT || 8887),
+    mcpPort: isStdioMode ? process.env.EASY_MCP_SERVER_MCP_PORT : (process.env.EASY_MCP_SERVER_MCP_PORT || 8888)
   };
-  
+
   return config;
 }
 

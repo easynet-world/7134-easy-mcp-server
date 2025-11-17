@@ -107,16 +107,13 @@ const app = apiServer.expressApp;
 const apiLoader = apiServer.getAPILoader();
 const openapiGenerator = apiServer.getOpenAPIGenerator();
 
-// Initialize bridge reloader
-const bridgeReloader = new MCPBridgeReloader({ 
-  root: process.cwd(), 
+// Initialize bridge reloader (but don't start watching yet)
+// We'll only start loading bridges if NOT in STDIO mode (checked in startServer)
+const bridgeReloader = new MCPBridgeReloader({
+  root: process.cwd(),
   logger: console,
   configFile: process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH || 'mcp-bridge.json'
 });
-// Avoid file watchers in Jest to prevent cross-test interference
-if (!process.env.JEST_WORKER_ID) {
-  bridgeReloader.startWatching();
-}
 
 // Note: /health, /api-info, /openapi.json, /docs, /LLM.txt, /Agent.md, and /admin/* endpoints 
 // are provided by DynamicAPIServer when enabled via options
@@ -376,8 +373,24 @@ async function executeAPIEndpoint(route, args, res) {
 
 // Server startup function
 async function startServer() {
-  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
-  
+  // Auto-detect STDIO mode: if no MCP port is configured, use STDIO mode
+  const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+  const isStdioMode = !hasMcpPort;
+
+  // If in STDIO mode, explicitly set the env var for child processes
+  if (isStdioMode) {
+    process.env.EASY_MCP_SERVER_STDIO_MODE = 'true';
+  }
+
+  // Start bridge watching ONLY if not in STDIO mode
+  // This prevents circular dependencies when running as a bridge
+  if (!isStdioMode) {
+    // Avoid file watchers in Jest to prevent cross-test interference
+    if (!process.env.JEST_WORKER_ID) {
+      bridgeReloader.startWatching();
+    }
+  }
+
   // Only display startup banner and start HTTP server if not in STDIO mode
   if (!isStdioMode) {
     // Display startup banner
@@ -460,19 +473,40 @@ async function startServer() {
     try {
       // Use custom MCP base path if provided, otherwise use default
       const mcpBasePath = process.env.EASY_MCP_SERVER_MCP_BASE_PATH || path.join(process.cwd(), 'mcp');
-      mcpServer = new DynamicAPIMCPServer(
-        process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0',
-        parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888,
-        {
-          mcp: {
-            basePath: mcpBasePath
-          },
-          // Provide bridge reloader so MCP tools/list can include bridge tools
-          bridgeReloader,
-          // Add quiet mode option
-          quiet: process.env.EASY_MCP_SERVER_QUIET === 'true'
-        }
-      );
+
+      // In STDIO mode, use STDIO handler; otherwise use HTTP/WebSocket
+      if (isStdioMode) {
+        // Create MCP server with STDIO transport only
+        // In STDIO mode (running as a bridge), do NOT load bridges to prevent circular dependencies
+        mcpServer = new DynamicAPIMCPServer(
+          null, // no host in STDIO mode
+          null, // no port in STDIO mode
+          {
+            mcp: {
+              basePath: mcpBasePath
+            },
+            stdioMode: true, // Enable STDIO mode
+            // Do NOT provide bridgeReloader in STDIO mode to prevent circular bridge loading
+            // Add quiet mode option
+            quiet: process.env.EASY_MCP_SERVER_QUIET === 'true'
+          }
+        );
+      } else {
+        // Create MCP server with HTTP/WebSocket transport
+        mcpServer = new DynamicAPIMCPServer(
+          process.env.EASY_MCP_SERVER_MCP_HOST || '0.0.0.0',
+          parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888,
+          {
+            mcp: {
+              basePath: mcpBasePath
+            },
+            // Provide bridge reloader so MCP tools/list can include bridge tools
+            bridgeReloader,
+            // Add quiet mode option
+            quiet: process.env.EASY_MCP_SERVER_QUIET === 'true'
+          }
+        );
+      }
       
       // Set the routes for MCP server before starting (so it's available immediately)
       mcpServer.setRoutes(loadedRoutes);

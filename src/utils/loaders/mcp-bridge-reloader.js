@@ -243,6 +243,19 @@ class MCPBridgeReloader {
           return;
         }
         try {
+          // Check if command exists before trying to spawn (for simple commands)
+          // Skip check for npx/node/npm as they should always exist
+          const isNpxCommand = command === 'npx' || command === 'node' || command === 'npm';
+          if (!isNpxCommand && !this.commandExists(command)) {
+            const commandStr = [command, ...args].join(' ');
+            this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start: Command '${command}' not found`);
+            this.logger.warn(`   Command: ${commandStr}`);
+            this.logger.warn('   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.');
+            this.failedBridges = this.failedBridges || new Set();
+            this.failedBridges.add(name);
+            return;
+          }
+          
           // Build environment variables for this server from process.env
           const childEnv = this.buildServerEnv(name);
           
@@ -263,6 +276,8 @@ class MCPBridgeReloader {
           // Track stderr messages to detect command/package errors
           const stderrMessages = [];
           let hasCommandError = false;
+          let processExitedEarly = false;
+          let exitCode = null;
           
           bridge.on('stderr', (msg) => {
             const errorMsg = msg.toString();
@@ -272,13 +287,49 @@ class MCPBridgeReloader {
             if (errorMsg.includes('could not determine executable') ||
                 errorMsg.includes('npm error') ||
                 errorMsg.includes('command not found') ||
-                errorMsg.includes('ENOENT')) {
+                errorMsg.includes('ENOENT') ||
+                errorMsg.includes('spawn') && errorMsg.includes('ENOENT')) {
               hasCommandError = true;
             }
           });
           
+          // Track when process started to detect quick exits
+          const processStartTime = Date.now();
+          let processExitedQuickly = false;
+          
+          // Listen for process exit immediately to catch early failures
+          const exitHandler = (code, _signal) => {
+            const exitTime = Date.now();
+            const timeSinceStart = exitTime - processStartTime;
+            processExitedEarly = true;
+            exitCode = code;
+            
+            // If process exits quickly (within 2 seconds) with non-zero code, it's likely a command/server error
+            if (timeSinceStart < 2000 && code !== null && code !== 0) {
+              processExitedQuickly = true;
+              hasCommandError = true;
+            } else if (!hasCommandError && (code !== null && code !== 0)) {
+              // Even if it takes longer, a non-zero exit usually means something is wrong
+              hasCommandError = true;
+            }
+          };
+          
           // Try to start the bridge and handle failures gracefully
           bridge.start();
+          
+          // Attach exit handler if process is available (access through adapter)
+          // Use a small delay to ensure proc is set after start()
+          setTimeout(() => {
+            const proc = bridge.proc || (bridge.bridge && bridge.bridge.proc);
+            if (proc) {
+              // Check if process already exited
+              if (proc.exitCode !== null) {
+                exitHandler(proc.exitCode, null);
+              } else {
+                proc.on('exit', exitHandler);
+              }
+            }
+          }, 10);
           
           bridge.on('notification', (msg) => {
             try {
@@ -298,17 +349,46 @@ class MCPBridgeReloader {
           
           // Check if bridge started successfully after a short delay
           setTimeout(() => {
-            if (bridge.proc && bridge.proc.exitCode === null) {
+            // Access proc through adapter (bridge.proc should work via proxy)
+            const proc = bridge.proc || (bridge.bridge && bridge.bridge.proc);
+            // Check if process exited early or has non-zero exit code
+            const procExited = proc && proc.exitCode !== null;
+            const procRunning = proc && proc.exitCode === null;
+            
+            if (procRunning) {
               this.bridges.set(name, bridge);
               const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
               if (!isStdioMode) {
                 this.logger.log(`🔌 MCP Bridge started: ${name}`);
               }
             } else {
-              // Provide better error messages based on the failure type
-              if (hasCommandError) {
+              // Process exited or never started - determine error type
+              // Consider it a command/server error if:
+              // 1. We detected command errors from stderr
+              // 2. Process exited early (within timeout window)
+              // 3. Process exited with non-zero code (especially if quickly)
+              const commandExists = this.commandExists(command);
+              // Check if process exited - if proc is null or exitCode is set, it exited
+              const actualExitCode = proc ? proc.exitCode : exitCode;
+              const actuallyExited = !proc || proc.exitCode !== null || processExitedEarly;
+              const hasNonZeroExit = actualExitCode !== null && actualExitCode !== 0;
+              
+              const isCommandNotFound = hasCommandError || processExitedEarly || processExitedQuickly || (actuallyExited && hasNonZeroExit);
+              
+              if (isCommandNotFound) {
                 const commandStr = [command, ...args].join(' ');
-                this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start: Command or package not found`);
+                // Determine more specific error message
+                let errorMsg = `⚠️  MCP Bridge '${name}' failed to start`;
+                if (!commandExists) {
+                  errorMsg += ': Command not found';
+                } else if (processExitedQuickly || (actuallyExited && hasNonZeroExit)) {
+                  errorMsg += ': Command exists but is not a valid MCP server or failed to start';
+                } else if (processExitedEarly) {
+                  errorMsg += ': Command exists but process exited unexpectedly';
+                } else {
+                  errorMsg += ': Command or package not found';
+                }
+                this.logger.warn(errorMsg);
                 this.logger.warn(`   Command: ${commandStr}`);
                 
                 // Check if this might be a local project (created with easy-mcp-server init)
@@ -372,6 +452,9 @@ class MCPBridgeReloader {
                       this.logger.warn('   }');
                     }
                   }
+                } else if (!isNpxCommand) {
+                  // For non-npx commands, provide simpler error message
+                  this.logger.warn(`   💡 Make sure the command '${command}' is installed and available in your PATH.`);
                 }
                 
                 this.logger.warn('   This bridge will be skipped. Remove it from mcp-bridge.json if not needed.');

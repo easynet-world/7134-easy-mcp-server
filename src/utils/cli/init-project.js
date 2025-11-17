@@ -150,9 +150,10 @@ if (hasMcpPort) {
 } else {
   // No port configured - use STDIO mode
   process.env.EASY_MCP_SERVER_STDIO_MODE = 'true';
-  console.log('🔌 MCP Server Mode: STDIO');
-  console.log('📡 Communication: stdin/stdout (JSON-RPC)');
-  console.log('💡 To use HTTP/Streamable mode, set EASY_MCP_SERVER_MCP_PORT in your .env file');
+  // Write to stderr in STDIO mode to keep stdout clean for JSON-RPC messages
+  process.stderr.write('🔌 MCP Server Mode: STDIO\\n');
+  process.stderr.write('📡 Communication: stdin/stdout (JSON-RPC)\\n');
+  process.stderr.write('💡 To use HTTP/Streamable mode, set EASY_MCP_SERVER_MCP_PORT in your .env file\\n');
 }
 
 // Find easy-mcp-server bin script

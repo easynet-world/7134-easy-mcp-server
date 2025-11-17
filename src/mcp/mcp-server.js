@@ -22,20 +22,23 @@ const ResourceHandler = require('./handlers/content/resource-handler');
 
 class DynamicAPIMCPServer {
   constructor(host = '0.0.0.0', port = parseInt(process.env.EASY_MCP_SERVER_MCP_PORT) || 8888, options = {}) {
-    this.host = host;
-    this.port = port;
+    // Detect STDIO mode: if stdioMode option is set OR if host/port are null/undefined
+    this.stdioMode = options.stdioMode || (host == null && port == null);
+
+    this.host = this.stdioMode ? null : host;
+    this.port = this.stdioMode ? null : port;
     this.wss = null;
     this.server = null;
     this.clients = new Set();
     this.httpClients = new Map();
-    
+
     // Don't import server module to avoid circular dependency
     this.getLoadedRoutes = () => [];
-    
+
     // Initialize prompts and resources storage
     this.prompts = new Map();
     this.resources = new Map();
-    
+
     // Add quiet mode option
     this.quiet = options.quiet || process.env.EASY_MCP_SERVER_QUIET === 'true';
     
