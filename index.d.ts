@@ -85,10 +85,6 @@ export class BaseAPI {
   // Add method signatures as needed
 }
 
-export class BaseAPIEnhanced {
-  // Add method signatures as needed
-}
-
 export class APILoader {
   // Add method signatures as needed
 }
@@ -106,8 +102,6 @@ export class APIResponseUtils {
   static sendErrorResponse(res: any, message: string, statusCode?: number, details?: any, errorCode?: string): any;
   // Add other static methods as needed
 }
-
-export function createLLMService(options?: any): any;
 
 export class Logger {
   // Add method signatures as needed
@@ -127,18 +121,16 @@ export class MCPBridgeReloader {
 
 // For CommonJS compatibility
 declare namespace EasyMcpServer {
-  export { DynamicAPIServer, BaseAPI, BaseAPIEnhanced, APILoader, OpenAPIGenerator, DynamicAPIMCPServer, APIResponseUtils, createLLMService, Logger, HotReloader, EnvHotReloader, MCPBridgeReloader };
+  export { DynamicAPIServer, BaseAPI, APILoader, OpenAPIGenerator, DynamicAPIMCPServer, APIResponseUtils, Logger, HotReloader, EnvHotReloader, MCPBridgeReloader };
 }
 
 declare const easyMcpServer: {
   DynamicAPIServer: typeof DynamicAPIServer;
   BaseAPI: typeof BaseAPI;
-  BaseAPIEnhanced: typeof BaseAPIEnhanced;
   APILoader: typeof APILoader;
   OpenAPIGenerator: typeof OpenAPIGenerator;
   DynamicAPIMCPServer: typeof DynamicAPIMCPServer;
   APIResponseUtils: typeof APIResponseUtils;
-  createLLMService: typeof createLLMService;
   Logger: typeof Logger;
   HotReloader: typeof HotReloader;
   EnvHotReloader: typeof EnvHotReloader;

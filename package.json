@@ -11,8 +11,6 @@
     ".": "./index.js",
     "./base-api": "./src/api/base/base-api.js",
     "./lib/api-response-utils": "./src/api/utils/api-response-utils.js",
-    "./lib/base-api-enhanced": "./src/api/base/base-api-enhanced.js",
-    "./lib/llm-service": "./src/utils/llm/llm-service.js",
     "./utils/logger": "./src/utils/logger.js",
     "./utils/mcp-resource-loader": "./src/utils/resource-loader.js",
     "./utils/openapi-helper": "./src/api/openapi/openapi-helper.js"
