@@ -16,12 +16,8 @@ module.exports.OpenAPIGenerator = require('./api/openapi/openapi-generator');
 // Export MCP server
 module.exports.DynamicAPIMCPServer = require('./mcp');
 
-// Export core modules
-module.exports.BaseAPIEnhanced = require('./api/base/base-api-enhanced');
-
 // Export library modules
 module.exports.APIResponseUtils = require('./api/utils/api-response-utils');
-module.exports.createLLMService = require('./utils/llm/llm-service').createLLMService;
 
 // Export utilities (commonly used ones)
 module.exports.Logger = require('./utils/logger');

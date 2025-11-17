@@ -325,8 +325,6 @@ src/
 │       └── schema-normalizer.js
 │
 ├── utils/                 # Utility modules
-│   ├── llm/               # LLM utilities
-│   │   └── llm-service.js
 │   ├── loaders/           # Loader utilities
 │   │   ├── api-loader.js
 │   │   ├── env-hot-reloader.js
