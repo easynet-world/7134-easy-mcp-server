@@ -18,6 +18,8 @@ class MCPCacheManager {
     this.logger = options.logger || null;
     this.enableHotReload = options.enableHotReload !== false;
     this.onChange = typeof options.onChange === 'function' ? options.onChange : null;
+    this.promptFormats = options.promptFormats || ['*']; // Default to all formats
+    this.resourceFormats = options.resourceFormats || ['*']; // Default to all formats
     
     // Cache storage
     this.promptsCache = new Map(); // filePath -> parsed prompt
@@ -125,7 +127,22 @@ class MCPCacheManager {
   async getPrompts() {
     try {
       const promptsDir = path.join(this.basePath, 'prompts');
-      const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
+      
+      // Determine which extensions to support based on formats config
+      let supportedExtensions;
+      if (this.promptFormats.includes('*')) {
+        // If '*' is specified, accept all files (no extension filtering)
+        supportedExtensions = null; // null means accept all
+      } else {
+        // Use specified formats, converting to extensions
+        supportedExtensions = this.promptFormats.map(fmt => {
+          // If format already starts with '.', use as-is, otherwise add '.'
+          return fmt.startsWith('.') ? fmt : `.${fmt}`;
+        });
+        // Also include the standard supported extensions for compatibility
+        const standardExtensions = SimpleParameterParser.getSupportedExtensions();
+        supportedExtensions = [...new Set([...supportedExtensions, ...standardExtensions])];
+      }
       
       // If the prompts directory doesn't exist, return empty without error
       try {
@@ -186,9 +203,14 @@ class MCPCacheManager {
         const subFiles = await this.findPromptFiles(fullPath, fileRelativePath, supportedExtensions);
         promptFiles.push(...subFiles);
       } else if (file.isFile()) {
-        const ext = path.extname(file.name).toLowerCase();
-        if (supportedExtensions.includes(ext)) {
+        // If supportedExtensions is null, accept all files (formats: ['*'])
+        if (supportedExtensions === null) {
           promptFiles.push(fileRelativePath);
+        } else {
+          const ext = path.extname(file.name).toLowerCase();
+          if (supportedExtensions.includes(ext)) {
+            promptFiles.push(fileRelativePath);
+          }
         }
       }
     }
@@ -203,7 +225,22 @@ class MCPCacheManager {
   async getResources() {
     try {
       const resourcesDir = path.join(this.basePath, 'resources');
-      const supportedExtensions = SimpleParameterParser.getSupportedExtensions();
+      
+      // Determine which extensions to support based on formats config
+      let supportedExtensions;
+      if (this.resourceFormats.includes('*')) {
+        // If '*' is specified, accept all files (no extension filtering)
+        supportedExtensions = null; // null means accept all
+      } else {
+        // Use specified formats, converting to extensions
+        supportedExtensions = this.resourceFormats.map(fmt => {
+          // If format already starts with '.', use as-is, otherwise add '.'
+          return fmt.startsWith('.') ? fmt : `.${fmt}`;
+        });
+        // Also include the standard supported extensions for compatibility
+        const standardExtensions = SimpleParameterParser.getSupportedExtensions();
+        supportedExtensions = [...new Set([...supportedExtensions, ...standardExtensions])];
+      }
       
       // If the resources directory doesn't exist, return empty without error
       try {
@@ -262,9 +299,14 @@ class MCPCacheManager {
         const subFiles = await this.findResourceFiles(fullPath, fileRelativePath, supportedExtensions);
         resourceFiles.push(...subFiles);
       } else if (file.isFile()) {
-        const ext = path.extname(file.name).toLowerCase();
-        if (supportedExtensions.includes(ext)) {
+        // If supportedExtensions is null, accept all files (formats: ['*'])
+        if (supportedExtensions === null) {
           resourceFiles.push(fileRelativePath);
+        } else {
+          const ext = path.extname(file.name).toLowerCase();
+          if (supportedExtensions.includes(ext)) {
+            resourceFiles.push(fileRelativePath);
+          }
         }
       }
     }

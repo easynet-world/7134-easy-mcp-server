@@ -85,6 +85,8 @@ class DynamicAPIMCPServer {
     this.cacheManager = new MCPCacheManager(resolvedBasePath, {
       enableHotReload: true,
       logger: options.logger,
+      promptFormats: options.prompts?.formats || ['*'],
+      resourceFormats: options.resources?.formats || ['*'],
       onChange: async ({ type, event, filePath, relativePath }) => {
         // Update static maps when files change (after handlers are initialized)
         if (this.promptHandler && this.resourceHandler) {
