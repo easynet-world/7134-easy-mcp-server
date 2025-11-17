@@ -70,16 +70,31 @@ class PromptHandler {
    */
   async loadPromptsFromFilesystem() {
     try {
-      // Load prompts if enabled and cache manager is not available
-      if (this.config.mcp.prompts.enabled && !this.cacheManager) {
-        const promptsPath = path.resolve(this.resolvedBasePath, 'prompts');
-        await this.loadPromptsFromDirectory(promptsPath);
+      if (this.config.mcp.prompts.enabled) {
+        if (this.cacheManager) {
+          // Load from cache manager (which handles filesystem loading with caching)
+          const cachedPrompts = await this.cacheManager.getPrompts();
+          // Populate the static prompts map for backward compatibility
+          for (const prompt of cachedPrompts) {
+            this.addPrompt({
+              name: prompt.name,
+              description: prompt.description,
+              template: prompt.content,
+              arguments: prompt.arguments || [],
+              filePath: prompt.filePath
+            });
+          }
+        } else {
+          // Direct filesystem loading when cache manager is not available
+          const promptsPath = path.resolve(this.resolvedBasePath, 'prompts');
+          await this.loadPromptsFromDirectory(promptsPath);
+        }
       }
       
       console.log(`🔌 MCP Server: Loaded ${this.prompts.size} prompts from filesystem`);
       
-      // Setup file watchers if enabled
-      if (this.config.mcp.prompts.watch && this.config.mcp.prompts.enabled) {
+      // Setup file watchers if enabled (only when cache manager is not handling it)
+      if (this.config.mcp.prompts.watch && this.config.mcp.prompts.enabled && !this.cacheManager) {
         this.setupPromptsWatcher();
       }
     } catch (error) {

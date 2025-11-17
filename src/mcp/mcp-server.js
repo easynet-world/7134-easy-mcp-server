@@ -85,7 +85,68 @@ class DynamicAPIMCPServer {
     this.cacheManager = new MCPCacheManager(resolvedBasePath, {
       enableHotReload: true,
       logger: options.logger,
-      onChange: ({ type }) => {
+      onChange: async ({ type, event, filePath, relativePath }) => {
+        // Update static maps when files change (after handlers are initialized)
+        if (this.promptHandler && this.resourceHandler) {
+          if (type === 'prompts' && event !== 'unlink') {
+            // Reload the specific prompt and update the static map
+            try {
+              const prompt = await this.cacheManager.getPrompt(relativePath);
+              if (prompt && !prompt.error) {
+                // Remove old entry if it exists (in case of rename/change)
+                this.prompts.delete(prompt.name);
+                this.promptHandler.addPrompt({
+                  name: prompt.name,
+                  description: prompt.description,
+                  template: prompt.content,
+                  arguments: prompt.arguments || [],
+                  filePath: prompt.filePath
+                });
+              }
+            } catch (error) {
+              // Ignore errors during hot reload
+            }
+          } else if (type === 'prompts' && event === 'unlink') {
+            // Remove from static map - need to find by filePath since we don't have the name
+            // The cache manager will handle the actual deletion, we just need to clean up
+            // Try to find and remove by matching filePath in existing prompts
+            for (const [name, prompt] of this.prompts.entries()) {
+              if (prompt.filePath === relativePath) {
+                this.prompts.delete(name);
+                break;
+              }
+            }
+          } else if (type === 'resources' && event !== 'unlink') {
+            // Reload the specific resource and update the static map
+            try {
+              const resource = await this.cacheManager.getResource(relativePath);
+              if (resource && !resource.error) {
+                // Remove old entry if it exists (in case of rename/change)
+                this.resources.delete(resource.uri);
+                this.resourceHandler.addResource({
+                  uri: resource.uri,
+                  name: resource.name,
+                  description: resource.description,
+                  mimeType: resource.mimeType,
+                  content: resource.content,
+                  filePath: resource.filePath
+                });
+              }
+            } catch (error) {
+              // Ignore errors during hot reload
+            }
+          } else if (type === 'resources' && event === 'unlink') {
+            // Remove from static map - need to find by filePath since we don't have the URI
+            // Try to find and remove by matching filePath in existing resources
+            for (const [uri, resource] of this.resources.entries()) {
+              if (resource.filePath === relativePath) {
+                this.resources.delete(uri);
+                break;
+              }
+            }
+          }
+        }
+        
         // Broadcast notifications when cache detects changes
         if (type === 'prompts') {
           this.notificationManager.notifyPromptsChanged();

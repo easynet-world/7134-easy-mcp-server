@@ -26,6 +26,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const chokidar = require('chokidar');
 const MCPBridge = require('../../mcp/utils/mcp-bridge');
+const MCPHTTPBridge = require('../../mcp/utils/mcp-http-bridge');
 const MCPSchemaAdapter = require('../../mcp/utils/mcp-schema-adapter');
 
 class MCPBridgeReloader {
@@ -188,20 +189,31 @@ class MCPBridgeReloader {
     }
   }
 
-  // Resolve all server entries (Cursor-compatible). Returns array of { name, command, args, cwd, disabled }
+  // Resolve all server entries (Cursor-compatible). Returns array of { name, command, args, cwd, disabled, url }
   resolveAllServers(config) {
     const servers = [];
     if (config && config.mcpServers && typeof config.mcpServers === 'object') {
       for (const [name, entry] of Object.entries(config.mcpServers)) {
-        if (entry && (entry.command || entry.args)) {
-          servers.push({
-            name,
-            command: entry.command,
-            args: Array.isArray(entry.args) ? entry.args : [],
-            cwd: entry.cwd || null,
-            disabled: entry.disabled === true,
-            env: entry.env || null
-          });
+        if (entry) {
+          // Check if this is a URL-based bridge
+          if (entry.url) {
+            servers.push({
+              name,
+              url: entry.url,
+              disabled: entry.disabled === true,
+              env: entry.env || null
+            });
+          } else if (entry.command || entry.args) {
+            // This is a stdio-based bridge
+            servers.push({
+              name,
+              command: entry.command,
+              args: Array.isArray(entry.args) ? entry.args : [],
+              cwd: entry.cwd || null,
+              disabled: entry.disabled === true,
+              env: entry.env || null
+            });
+          }
         }
       }
     }
@@ -232,7 +244,7 @@ class MCPBridgeReloader {
       // Skip bridges that have previously failed
       this.failedBridges = this.failedBridges || new Set();
       
-      servers.forEach(({ name, command, args, cwd, disabled, env: configEnv }) => {
+      servers.forEach(({ name, command, args, cwd, disabled, env: configEnv, url }) => {
         // Skip disabled bridges
         if (disabled === true) {
           return;
@@ -243,6 +255,49 @@ class MCPBridgeReloader {
           return;
         }
         try {
+          // Handle URL-based bridges (HTTP/HTTPS)
+          if (url) {
+            try {
+              const httpBridge = new MCPHTTPBridge({ 
+                url, 
+                quiet: this.quiet,
+                timeout: 30000
+              });
+              
+              // Wrap bridge with schema adapter for consistency
+              const bridge = new MCPSchemaAdapter(httpBridge);
+              
+              // Initialize the bridge asynchronously
+              (async () => {
+                try {
+                  await bridge.start();
+                  this.bridges.set(name, bridge);
+                  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+                  if (!isStdioMode) {
+                    this.logger.log(`🔌 HTTP Bridge connected: ${name} (${url})`);
+                  }
+                } catch (error) {
+                  this.logger.warn(`⚠️  HTTP Bridge '${name}' failed to initialize: ${error.message}`);
+                  this.failedBridges = this.failedBridges || new Set();
+                  this.failedBridges.add(name);
+                }
+              })();
+              
+              bridge.on('error', (err) => {
+                this.logger.warn(`⚠️  HTTP Bridge '${name}' error: ${err && err.message ? err.message : String(err)}`);
+                // Don't remove on error, just log it (HTTP bridges can have transient errors)
+              });
+              
+              return; // Skip stdio bridge handling for URL bridges
+            } catch (error) {
+              this.logger.warn(`⚠️  Failed to create HTTP Bridge '${name}': ${error.message}`);
+              this.failedBridges = this.failedBridges || new Set();
+              this.failedBridges.add(name);
+              return;
+            }
+          }
+          
+          // Handle stdio-based bridges (existing logic)
           // Check if command exists before trying to spawn (for simple commands)
           // Skip check for npx/node/npm as they should always exist
           const isNpxCommand = command === 'npx' || command === 'node' || command === 'npm';
