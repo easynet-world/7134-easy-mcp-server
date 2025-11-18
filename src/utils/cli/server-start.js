@@ -78,8 +78,10 @@ async function startServer(options = {}) {
   }
   
   // Check what mode to start in
+  // For global installs, API path may be set via environment variable (from bin script)
+  // Otherwise, check current working directory
   const serverPath = path.join(process.cwd(), 'server.js');
-  const apiPath = path.join(process.cwd(), 'api');
+  const apiPath = process.env.EASY_MCP_SERVER_API_PATH || path.join(process.cwd(), 'api');
   
   if (fs.existsSync(serverPath)) {
     startCustomServer(serverPath);
