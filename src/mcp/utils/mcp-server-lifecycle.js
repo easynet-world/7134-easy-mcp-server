@@ -129,9 +129,10 @@ class MCPServerLifecycle {
 
       this.server.stdioHandler.start();
       if (!this.server.quiet) {
-        process.stderr.write('🚀 MCP Server started in STDIO mode\n');
-        process.stderr.write('📡 Reading from stdin, writing to stdout\n');
-        process.stderr.write('🔧 Available MCP commands:\n');
+        // Remove emojis in STDIO mode to prevent encoding issues
+        process.stderr.write('MCP Server started in STDIO mode\n');
+        process.stderr.write('Reading from stdin, writing to stdout\n');
+        process.stderr.write('Available MCP commands:\n');
         process.stderr.write('  - tools/list: Discover available API endpoints\n');
         process.stderr.write('  - tools/call: Execute a specific API endpoint\n');
         process.stderr.write('  - ping: Health check\n');
