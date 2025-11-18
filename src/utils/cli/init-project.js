@@ -172,12 +172,6 @@ if (isGlobalInstall) {
   process.env.EASY_MCP_SERVER_API_PATH = path.join(projectRoot, 'api');
   process.env.EASY_MCP_SERVER_MCP_BASE_PATH = path.join(projectRoot, 'mcp');
   
-  // Also set mcp-bridge.json path if it exists in package folder
-  const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
-  if (fs.existsSync(packageBridgeConfig)) {
-    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = packageBridgeConfig;
-  }
-  
   // Set package root in environment so other parts of the system can find package resources
   process.env.EASY_MCP_SERVER_PACKAGE_ROOT = projectRoot;
   
@@ -192,6 +186,17 @@ if (isGlobalInstall) {
     }
   } catch (error) {
     // dotenv might not be available, continue anyway
+  }
+  
+  // Check for mcp-bridge.json in current working directory first (like .env files)
+  // This allows users to have different bridge configs in different directories
+  // Only fall back to package folder if not found in current directory
+  const currentBridgeConfig = path.join(currentDir, 'mcp-bridge.json');
+  const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
+  if (fs.existsSync(currentBridgeConfig)) {
+    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = currentBridgeConfig;
+  } else if (fs.existsSync(packageBridgeConfig)) {
+    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = packageBridgeConfig;
   }
   
   // Change to current directory for .env loading context
@@ -220,18 +225,19 @@ const explicitHttpMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'false';
 const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
 
 // Check if bridge mode is active (mcp-bridge.json exists)
-// Check in both package root (for global installs) and current directory
+// Use environment variable if already set (from global install logic above)
+// Otherwise check current directory first, then package root
 let bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
 if (!bridgeConfigPath) {
-  // Check package root first (for global installs)
-  const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
-  if (fs.existsSync(packageBridgeConfig)) {
-    bridgeConfigPath = packageBridgeConfig;
+  // Check current working directory first (allows per-directory configs)
+  const currentBridgeConfig = path.join(currentDir, 'mcp-bridge.json');
+  if (fs.existsSync(currentBridgeConfig)) {
+    bridgeConfigPath = currentBridgeConfig;
   } else {
-    // Check current working directory
-    const currentBridgeConfig = path.join(currentDir, 'mcp-bridge.json');
-    if (fs.existsSync(currentBridgeConfig)) {
-      bridgeConfigPath = currentBridgeConfig;
+    // Fall back to package root (for global installs)
+    const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
+    if (fs.existsSync(packageBridgeConfig)) {
+      bridgeConfigPath = packageBridgeConfig;
     }
   }
 }

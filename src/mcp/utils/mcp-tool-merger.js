@@ -79,6 +79,9 @@ class MCPToolMerger {
       };
     });
 
+    // Track tool names to prevent duplicates
+    const toolNames = new Set(tools.map(t => t.name));
+    
     // Merge bridge tools
     if (this.bridgeReloader) {
       try {
@@ -109,6 +112,15 @@ class MCPToolMerger {
                     break;
                   }
                 }
+                
+                // Skip duplicate tools (same name already exists)
+                if (toolNames.has(cleanName)) {
+                  console.warn(`⚠️  Skipping duplicate tool '${cleanName}' from bridge '${serverName}' (already exists)`);
+                  return;
+                }
+                
+                // Mark this tool name as used
+                toolNames.add(cleanName);
                 
                 // Safely process inputSchema - handle various formats
                 let inputSchema = { type: 'object', properties: {} };
