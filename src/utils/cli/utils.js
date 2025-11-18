@@ -8,9 +8,17 @@ const path = require('path');
 
 /**
  * Check if STDIO mode is enabled
+ * Also checks if MCP port is not set (which indicates STDIO mode)
  */
 function isStdioMode() {
-  return process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  // Check explicit flag first
+  if (process.env.EASY_MCP_SERVER_STDIO_MODE === 'true') {
+    return true;
+  }
+  // If no MCP port is set, we're likely in STDIO mode
+  const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && 
+                     process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+  return !hasMcpPort;
 }
 
 /**
@@ -74,68 +82,49 @@ function initializeEnvHotReloader() {
  * @returns {Promise<void>}
  */
 async function autoInstallDependencies() {
+  // CRITICAL: Double-check STDIO mode before doing anything
+  // This function should NEVER run in STDIO mode
+  if (isStdioMode()) {
+    // Silently return - don't do anything in STDIO mode
+    return;
+  }
+  
   const userCwd = process.cwd();
   const packageJsonPath = path.join(userCwd, 'package.json');
   
   if (!fs.existsSync(packageJsonPath)) {
-    if (!isStdioMode()) {
-      console.log('📦 No package.json found - skipping auto-install');
-    }
+    console.log('📦 No package.json found - skipping auto-install');
     return;
   }
   
-  if (!isStdioMode()) {
-    console.log('📦 Checking for missing dependencies...');
-  }
+  console.log('📦 Checking for missing dependencies...');
   
   try {
     const { spawn } = require('child_process');
     
-    // In STDIO mode, suppress npm output by using pipe instead of inherit
-    const stdioOption = isStdioMode() ? 'pipe' : 'inherit';
-    
-    // Run npm install
+    // Run npm install with inherit stdio (we're not in STDIO mode)
     const installProcess = spawn('npm', ['install'], {
       cwd: userCwd,
-      stdio: stdioOption
+      stdio: 'inherit'
     });
-    
-    // In STDIO mode, redirect npm output to stderr
-    if (isStdioMode()) {
-      installProcess.stdout.on('data', (data) => {
-        process.stderr.write(data);
-      });
-      installProcess.stderr.on('data', (data) => {
-        process.stderr.write(data);
-      });
-    }
     
     return new Promise((resolve) => {
       installProcess.on('close', (code) => {
         if (code === 0) {
-          if (!isStdioMode()) {
-            console.log('✅ Dependencies installed successfully');
-          }
-          resolve();
+          console.log('✅ Dependencies installed successfully');
         } else {
-          if (!isStdioMode()) {
-            console.warn(`⚠️  npm install completed with code ${code}`);
-          }
-          resolve(); // Don't fail the server startup
+          console.warn(`⚠️  npm install completed with code ${code}`);
         }
+        resolve(); // Don't fail the server startup
       });
       
       installProcess.on('error', (error) => {
-        if (!isStdioMode()) {
-          console.warn(`⚠️  Could not run npm install: ${error.message}`);
-        }
+        console.warn(`⚠️  Could not run npm install: ${error.message}`);
         resolve(); // Don't fail the server startup
       });
     });
   } catch (error) {
-    if (!isStdioMode()) {
-      console.warn(`⚠️  Error during auto-install: ${error.message}`);
-    }
+    console.warn(`⚠️  Error during auto-install: ${error.message}`);
   }
 }
 

@@ -123,13 +123,94 @@ function createBinScript(projectDir, projectName) {
  *                   # - If EASY_MCP_SERVER_STDIO_MODE=true: STDIO mode (explicit)
  *                   # - If EASY_MCP_SERVER_MCP_PORT is set: HTTP/Streamable mode
  *                   # - If not set: STDIO mode
+ * 
+ * When installed globally, this script:
+ * - ALWAYS loads ALL package resources (API, MCP, package.json, src, etc.) from the package folder
+ * - Loads .env from the current working directory (where the command is run)
+ * - This allows the same package to be used with different configurations in different directories
+ * - Supports MCP stdio mode
+ * 
+ * Example: Run the same package with different .env files:
+ *   cd /project1 && test  # Uses /project1/.env
+ *   cd /project2 && test  # Uses /project2/.env (same package, different config)
+ * 
+ * When using npx (without installation):
+ *   npx -y xxx_test --cwd /path/to/project --stdio  # Works! Arguments are passed through
+ *   npx -y xxx_test --cwd /path/to/project          # Uses /path/to/project/.env
+ * 
+ * When installed locally, this script:
+ * - Loads everything (API, MCP, .env, package.json, etc.) from the project directory
  */
 
-// Change to project directory (where this script is located)
 const path = require('path');
 const fs = require('fs');
-const projectRoot = path.resolve(__dirname, '..');
-process.chdir(projectRoot);
+
+// Determine if this is a global installation
+const scriptDir = __dirname;
+const projectRoot = path.resolve(scriptDir, '..');
+const currentDir = process.cwd();
+
+// Check if project root is in node_modules (indicates global install)
+// Also check if package.json exists in project root to confirm it's a package
+const isGlobalInstall = projectRoot.includes('node_modules') &&
+                        fs.existsSync(path.join(projectRoot, 'package.json')) &&
+                        (fs.existsSync(path.join(projectRoot, 'api')) || 
+                         fs.existsSync(path.join(projectRoot, 'mcp')));
+
+if (isGlobalInstall) {
+  // Global installation: ALL package resources (API, MCP, package.json, src, etc.) come from package folder
+  // Only .env comes from working directory (where command is run)
+  // This allows the same package to be used with different configurations in different directories
+  // 
+  // Example usage:
+  //   cd /project1 && test  # Uses /project1/.env with package resources from package folder
+  //   cd /project2 && test  # Uses /project2/.env with same package resources from package folder
+  //
+  // Set environment variables to point to package folder for API and MCP
+  // These will be respected by startAutoServer() which checks if they're already set
+  process.env.EASY_MCP_SERVER_API_PATH = path.join(projectRoot, 'api');
+  process.env.EASY_MCP_SERVER_MCP_BASE_PATH = path.join(projectRoot, 'mcp');
+  
+  // Also set mcp-bridge.json path if it exists in package folder
+  const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
+  if (fs.existsSync(packageBridgeConfig)) {
+    process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = packageBridgeConfig;
+  }
+  
+  // Set package root in environment so other parts of the system can find package resources
+  process.env.EASY_MCP_SERVER_PACKAGE_ROOT = projectRoot;
+  
+  // Load .env from current working directory (where command is run)
+  // This allows users to have different .env files in different directories
+  // Each directory can have its own configuration (ports, API keys, etc.)
+  try {
+    const dotenv = require('dotenv');
+    const envPath = path.join(currentDir, '.env');
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath });
+    }
+  } catch (error) {
+    // dotenv might not be available, continue anyway
+  }
+  
+  // Change to current directory for .env loading context
+  // But API/MCP paths are already set via environment variables above
+  process.chdir(currentDir);
+} else {
+  // Local installation: everything comes from project root
+  process.chdir(projectRoot);
+  
+  // Load .env from project directory
+  try {
+    const dotenv = require('dotenv');
+    const envPath = path.join(projectRoot, '.env');
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath });
+    }
+  } catch (error) {
+    // dotenv might not be available, continue anyway
+  }
+}
 
 // Detect STDIO mode: explicit flag takes precedence, otherwise auto-detect by port presence
 const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
@@ -153,22 +234,100 @@ if (!isStdioMode) {
   // No port configured - use STDIO mode
   process.env.EASY_MCP_SERVER_STDIO_MODE = 'true';
   // Write to stderr in STDIO mode to keep stdout clean for JSON-RPC messages
-  process.stderr.write('🔌 MCP Server Mode: STDIO\\n');
-  process.stderr.write('📡 Communication: stdin/stdout (JSON-RPC)\\n');
-  process.stderr.write('💡 To use HTTP/Streamable mode, set EASY_MCP_SERVER_MCP_PORT in your .env file\\n');
+  // Remove emojis to prevent encoding issues
+  process.stderr.write('MCP Server Mode: STDIO\\n');
+  process.stderr.write('Communication: stdin/stdout (JSON-RPC)\\n');
+  process.stderr.write('To use HTTP/Streamable mode, set EASY_MCP_SERVER_MCP_PORT in your .env file\\n');
 }
 
 // Find easy-mcp-server bin script
-// npm creates a symlink in node_modules/.bin/ for all bin scripts
-const binScript = path.join(projectRoot, 'node_modules', '.bin', 'easy-mcp-server');
+// Try multiple locations:
+// 1. Local node_modules (if installed locally)
+// 2. Global node_modules (if installed globally)
+// 3. Use npx as fallback
+let binScript = null;
 
-if (!fs.existsSync(binScript)) {
-  console.error('❌ Could not find easy-mcp-server. Please run: npm install');
-  process.exit(1);
+// isGlobalInstall is already determined above
+
+if (!isGlobalInstall) {
+  // Local installation: try project's node_modules
+  const localBinScript = path.join(projectRoot, 'node_modules', '.bin', 'easy-mcp-server');
+  if (fs.existsSync(localBinScript)) {
+    binScript = localBinScript;
+  }
 }
+
+if (!binScript) {
+  // Try global node_modules
+  // Find npm's global prefix and check multiple possible locations
+  try {
+    const { execSync } = require('child_process');
+    const npmGlobalPrefix = execSync('npm config get prefix', { encoding: 'utf8' }).trim();
+    
+    // Try different possible locations for global installation
+    const possiblePaths = [
+      path.join(npmGlobalPrefix, 'lib', 'node_modules', 'easy-mcp-server', 'src', 'easy-mcp-server.js'),
+      path.join(npmGlobalPrefix, 'node_modules', 'easy-mcp-server', 'src', 'easy-mcp-server.js'),
+      path.join(npmGlobalPrefix, 'lib', 'node_modules', '.bin', 'easy-mcp-server')
+    ];
+    
+    for (const possiblePath of possiblePaths) {
+      if (fs.existsSync(possiblePath)) {
+        binScript = possiblePath;
+        break;
+      }
+    }
+  } catch (error) {
+    // Continue to npx fallback
+  }
+}
+
+// Pass through command-line arguments to easy-mcp-server
+// This allows users to use --cwd, --stdio, etc. with the project command
+const cliArgs = process.argv.slice(2);
+
+if (!binScript) {
+  // Fallback: use npx to run easy-mcp-server
+  // This will work if easy-mcp-server is installed globally or can be downloaded
+  try {
+    const { spawn } = require('child_process');
+    const npxArgs = ['-y', 'easy-mcp-server', ...cliArgs];
+    const npxProcess = spawn('npx', npxArgs, {
+      stdio: 'inherit',
+      cwd: workingDir,
+      env: process.env
+    });
+    
+    npxProcess.on('close', (code) => {
+      process.exit(code || 0);
+    });
+    
+    npxProcess.on('error', (error) => {
+      console.error('❌ Could not run easy-mcp-server via npx:', error.message);
+      console.error('💡 Please install easy-mcp-server: npm install -g easy-mcp-server');
+      process.exit(1);
+    });
+    
+    return; // Exit early, npx will handle the rest
+  } catch (error) {
+    console.error('❌ Could not find easy-mcp-server. Please install it:');
+    console.error('   npm install -g easy-mcp-server');
+    console.error('   or');
+    console.error('   npm install easy-mcp-server');
+    process.exit(1);
+  }
+}
+
+// Set up arguments for easy-mcp-server
+// Override process.argv to pass through command-line arguments
+const originalArgv = process.argv;
+process.argv = [process.argv[0], binScript, ...cliArgs];
 
 // Run easy-mcp-server CLI
 require(binScript);
+
+// Restore original argv (though we won't reach here if require() succeeds)
+process.argv = originalArgv;
 `;
 
   const cliPath = path.join(binDir, 'cli.js');
@@ -538,6 +697,20 @@ function displaySuccessMessage(projectName) {
    1. cd ${projectName}
    2. npm install
    3. ./start.sh           # Or: npm start, npm run dev, npx easy-mcp-server, or npx ${projectName}
+
+📦 To create a distributable npm package:
+   1. ./build.sh           # Creates a .tgz package file
+   2. npm install -g ./${projectName}-*.tgz  # Install globally
+   3. ${projectName}        # Run from any directory (reads .env from current directory)
+   
+   After global installation, you can run:
+   - ${projectName}                    # Start server (uses current directory's .env)
+   - ${projectName} --cwd /path/to/dir # Use specific directory's .env
+   - ${projectName} --stdio            # Enable STDIO mode
+   - ${projectName} --cwd /path/to/dir --stdio  # Combine options
+   
+   Or use npx (no installation needed):
+   - npx -y ${projectName} --cwd /path/to/dir --stdio
 
 📚 Your server will be available at:
   - Server: http://localhost:${'${config.port}'}

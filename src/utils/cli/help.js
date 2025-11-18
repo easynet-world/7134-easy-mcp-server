@@ -9,7 +9,7 @@ Easy MCP Server - Dynamic API Framework with MCP Integration
 
 Usage:
   easy-mcp-server                    # Start the server (uses server.js if exists, otherwise auto-starts)
-  easy-mcp-server init               # Initialize a new project
+  easy-mcp-server init [name]        # Initialize a new project
   easy-mcp-server start              # Start the server (alias)
   easy-mcp-server --help             # Show this help
 
@@ -19,7 +19,11 @@ Commands:
   --help  Show this help message
 
 Options:
-  (No CLI options - use environment variables)
+  --cwd, --working-dir <dir>         Set the working directory
+                                      - For local installs: loads API, MCP, and .env from this directory
+                                      - For global installs: loads .env from this directory (API/MCP from package)
+  --stdio, --stdio-mode              Enable STDIO mode for MCP communication
+  --help, -h                         Show this help message
 
 Environment Variables:
   EASY_MCP_SERVER_PORT   REST API server port
@@ -45,6 +49,21 @@ Examples:
   easy-mcp-server                    # Start server (custom or auto)
   easy-mcp-server init               # Create new project
   npx easy-mcp-server                # Run without installation
+  
+  # Using command-line options
+  easy-mcp-server --cwd /path/to/project    # Set working directory (works for both local and global installs)
+  easy-mcp-server --stdio                   # Enable STDIO mode
+  easy-mcp-server --cwd /path/to/project --stdio  # Combine options
+  
+  # Local install: --cwd loads everything from that directory
+  cd /somewhere && easy-mcp-server --cwd /path/to/project  # Uses /path/to/project/.env, api/, mcp/
+  
+  # Global install: --cwd only affects .env location
+  cd /somewhere && test --cwd /path/to/project  # Uses /path/to/project/.env, but API/MCP from package
+  
+  # Using npx (no installation needed):
+  npx -y xxx_test --cwd /path/to/project --stdio  # Works with both --cwd and --stdio
+  npx -y xxx_test --cwd /path/to/project          # Uses /path/to/project/.env
   
   # Using environment variables (recommended)
   EASY_MCP_SERVER_PORT=8887 EASY_MCP_SERVER_MCP_PORT=8888 easy-mcp-server

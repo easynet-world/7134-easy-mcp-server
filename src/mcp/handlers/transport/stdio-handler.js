@@ -51,6 +51,12 @@ class STDIOHandler {
    * Sets up stdin/stdout handlers and processes incoming messages
    */
   start() {
+    // Enable stdout writes for JSON-RPC messages (if stdout was protected)
+    // This allows the STDIO handler to write JSON-RPC responses to stdout
+    if (typeof global !== 'undefined' && global.__enableStdoutForJSONRPC) {
+      global.__enableStdoutForJSONRPC();
+    }
+    
     // Keep stdin in binary mode for Content-Length framing
     // Don't set encoding - we need raw binary data
     if (process.stdin.setRawMode) {
@@ -66,7 +72,8 @@ class STDIOHandler {
     // Handle stdin end
     process.stdin.on('end', () => {
       if (!this.server.quiet) {
-        process.stderr.write('📡 STDIO: stdin ended\n');
+        // Remove emojis in STDIO mode to prevent encoding issues
+        process.stderr.write('STDIO: stdin ended\n');
       }
       process.exit(0);
     });
@@ -74,7 +81,8 @@ class STDIOHandler {
     // Handle stdin errors
     process.stdin.on('error', (error) => {
       if (!this.server.quiet) {
-        console.error('❌ STDIO: stdin error:', error);
+        // Remove emojis in STDIO mode to prevent encoding issues
+        process.stderr.write(`STDIO: stdin error: ${error.message}\n`);
       }
     });
     
@@ -82,10 +90,11 @@ class STDIOHandler {
     // Don't set encoding - we write raw binary data
 
     // Use stderr for informational messages in STDIO mode to keep stdout clean for JSON-RPC
+    // Remove emojis to prevent encoding issues
     if (!this.server.quiet) {
-      process.stderr.write('📡 STDIO transport started\n');
-      process.stderr.write('📥 Reading from stdin\n');
-      process.stderr.write('📤 Writing to stdout\n');
+      process.stderr.write('STDIO transport started\n');
+      process.stderr.write('Reading from stdin\n');
+      process.stderr.write('Writing to stdout\n');
     }
   }
 
@@ -179,18 +188,45 @@ class STDIOHandler {
             },
             serverInfo: {
               name: 'easy-mcp-server',
-              version: this.version
+              version: this.version || '1.0.0'
+            }
+          }
+        };
+        // Store server info for potential later retrieval
+        this.serverInfo = response.result.serverInfo;
+        this.sendResponse(response);
+        this.initialized = true;
+        
+        // Send initialized notification after a small delay to ensure response is sent first
+        setImmediate(() => {
+          this.sendNotification({
+            jsonrpc: '2.0',
+            method: 'notifications/initialized'
+          });
+        });
+        return;
+      }
+      
+      // Handle re-initialization (some clients may send initialize multiple times)
+      if (message.method === 'initialize' && this.initialized) {
+        // Return the same server info if already initialized
+        const response = {
+          jsonrpc: '2.0',
+          id: message.id,
+          result: {
+            protocolVersion: '2024-11-05',
+            capabilities: {
+              tools: {},
+              prompts: {},
+              resources: {}
+            },
+            serverInfo: this.serverInfo || {
+              name: 'easy-mcp-server',
+              version: this.version || '1.0.0'
             }
           }
         };
         this.sendResponse(response);
-        this.initialized = true;
-        
-        // Send initialized notification
-        this.sendNotification({
-          jsonrpc: '2.0',
-          method: 'notifications/initialized'
-        });
         return;
       }
       

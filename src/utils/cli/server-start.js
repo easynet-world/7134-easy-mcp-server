@@ -19,11 +19,16 @@ const {
 /**
  * Start the Easy MCP Server
  * Checks for server.js or api/ directory and starts accordingly
+ * @param {Object} options - Command-line options (cwd, stdio, etc.)
  * @returns {Promise<void>}
  */
-async function startServer() {
+async function startServer(options = {}) {
   // Check if running in STDIO mode (when spawned as a bridge)
-  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  // Use robust detection: check explicit flag or absence of MCP port
+  const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && 
+                     process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+  const isStdioMode = explicitStdioMode || !hasMcpPort;
 
   // Console redirection already happened at the top of the file
   // Just log the startup message if not in STDIO mode
@@ -63,12 +68,20 @@ async function startServer() {
  * @param {string} serverPath - Path to server.js file
  */
 function startCustomServer(serverPath) {
-  console.log('📁 Found server.js - using custom server configuration');
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
+  if (!isStdioMode) {
+    console.log('📁 Found server.js - using custom server configuration');
+  }
   
   try {
     require(serverPath);
   } catch (error) {
-    console.error('❌ Failed to start server from server.js:', error.message);
+    if (isStdioMode) {
+      process.stderr.write(`Failed to start server from server.js: ${error.message}\n`);
+    } else {
+      console.error('❌ Failed to start server from server.js:', error.message);
+    }
     process.exit(1);
   }
 }
@@ -94,15 +107,25 @@ async function startAutoServer(portConfig) {
     const packageRoot = path.join(__dirname, '..', '..', '..');
 
     // Configure environment variables
-    process.env.EASY_MCP_SERVER_API_PATH = path.join(originalCwd, 'api');
-    process.env.EASY_MCP_SERVER_MCP_BASE_PATH = path.join(originalCwd, 'mcp');
+    // If already set (e.g., by bin script for globally installed packages), use those
+    // Otherwise, use current working directory (local installation)
+    if (!process.env.EASY_MCP_SERVER_API_PATH) {
+      process.env.EASY_MCP_SERVER_API_PATH = path.join(originalCwd, 'api');
+    }
+    if (!process.env.EASY_MCP_SERVER_MCP_BASE_PATH) {
+      process.env.EASY_MCP_SERVER_MCP_BASE_PATH = path.join(originalCwd, 'mcp');
+    }
 
     // Auto-detect MCP bridge config
-    const bridgeConfigPath = path.join(originalCwd, 'mcp-bridge.json');
-    if (!process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH && fs.existsSync(bridgeConfigPath)) {
-      process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = bridgeConfigPath;
-      if (!isStdioMode) {
-        console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
+    // If already set (e.g., by bin script), use that
+    // Otherwise, check current working directory
+    if (!process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH) {
+      const bridgeConfigPath = path.join(originalCwd, 'mcp-bridge.json');
+      if (fs.existsSync(bridgeConfigPath)) {
+        process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH = bridgeConfigPath;
+        if (!isStdioMode) {
+          console.log(`🔌 Auto-detected MCP bridge config: ${bridgeConfigPath}`);
+        }
       }
     }
 
@@ -129,12 +152,19 @@ async function startAutoServer(portConfig) {
     if (orchestrator && typeof orchestrator.startServer === 'function') {
       orchestrator.startServer();
     } else {
-      console.log('🚀 Starting server...');
+      if (!isStdioMode) {
+        console.log('🚀 Starting server...');
+      }
     }
     
   } catch (error) {
-    console.error('❌ Failed to start server:', error.message);
-    console.error(error.stack);
+    if (isStdioMode) {
+      process.stderr.write(`Failed to start server: ${error.message}\n`);
+      process.stderr.write(`${error.stack}\n`);
+    } else {
+      console.error('❌ Failed to start server:', error.message);
+      console.error(error.stack);
+    }
     process.exit(1);
   }
 }
@@ -143,9 +173,45 @@ async function startAutoServer(portConfig) {
  * Show error when neither server.js nor api/ directory is found
  */
 function showNoServerError() {
-  console.error('❌ Error: Neither server.js nor api/ directory found in current directory');
-  console.log('💡 Tip: Run "easy-mcp-server init" to create a new project');
-  console.log('💡 Tip: Or create a server.js file with your custom configuration');
+  const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
+  // In STDIO mode, write directly to stderr to avoid interfering with JSON-RPC on stdout
+  // Remove emojis in STDIO mode to prevent encoding issues
+  // CRITICAL: In STDIO mode, we must NEVER write to stdout as it's used for JSON-RPC
+  // Also check if stdout is being used (no MCP port means STDIO mode)
+  const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+  const isActuallyStdioMode = isStdioMode || !hasMcpPort;
+  
+  // ALWAYS write to stderr in STDIO mode to avoid any possibility of writing to stdout
+  // Even if console redirection is in place, we want to be absolutely sure
+  if (isActuallyStdioMode) {
+    // Write to stderr synchronously and flush to ensure it's written before exit
+    // NEVER use console.log/error here as it might not be redirected yet or might have timing issues
+    process.stderr.write('Error: Neither server.js nor api/ directory found in current directory\n', 'utf8');
+    process.stderr.write('Tip: Run "easy-mcp-server init" to create a new project\n', 'utf8');
+    process.stderr.write('Tip: Or create a server.js file with your custom configuration\n', 'utf8');
+    // Force flush stderr before exiting
+    if (process.stderr.flushSync) {
+      process.stderr.flushSync();
+    }
+  } else {
+    // Only use console in non-STDIO mode
+    // But still check one more time to be safe
+    const finalCheck = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true' || 
+                       (!process.env.EASY_MCP_SERVER_MCP_PORT || process.env.EASY_MCP_SERVER_MCP_PORT.trim() === '');
+    if (finalCheck) {
+      // Double-check: if we're actually in STDIO mode, write to stderr
+      process.stderr.write('Error: Neither server.js nor api/ directory found in current directory\n', 'utf8');
+      process.stderr.write('Tip: Run "easy-mcp-server init" to create a new project\n', 'utf8');
+      process.stderr.write('Tip: Or create a server.js file with your custom configuration\n', 'utf8');
+    } else {
+      console.error('❌ Error: Neither server.js nor api/ directory found in current directory');
+      console.log('💡 Tip: Run "easy-mcp-server init" to create a new project');
+      console.log('💡 Tip: Or create a server.js file with your custom configuration');
+    }
+  }
+  // Use process.exitCode to allow stderr to flush, then exit
+  process.exitCode = 1;
   process.exit(1);
 }
 
