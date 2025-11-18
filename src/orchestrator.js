@@ -659,7 +659,11 @@ async function startServer() {
 
 // Only start server if this file is run directly
 if (require.main === module) {
-  startServer();
+  startServer().catch((error) => {
+    console.error('❌ Fatal error starting server:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+  });
 }
 
 // Export functions for external use
