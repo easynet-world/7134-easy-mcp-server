@@ -40,6 +40,8 @@ class MCPBridgeReloader {
     this.bridges = new Map(); // name -> MCPBridge
     this.quiet = options.quiet || false;
     this.bridgesAttempted = false; // Track if we've already attempted to load bridges
+    this.loadedBridgeIdentifiers = new Set(); // Track loaded bridge identifiers to prevent duplicates
+    this.bridgeLoadingChain = []; // Track bridge loading chain to detect circular references
   }
 
 
@@ -169,6 +171,97 @@ class MCPBridgeReloader {
     return parts[parts.length - 1];
   }
 
+  /**
+   * Generate a unique identifier for a bridge based on its configuration
+   * This is used to detect duplicate bridges (same command/args/url with same config)
+   * Includes cwd and env vars to allow same MCP with different configurations
+   * @param {Object} serverConfig - Server configuration { name, command, args, url, cwd, env }
+   * @param {string} resolvedCwd - Resolved working directory (absolute path)
+   * @param {Object} finalEnv - Final merged environment variables
+   * @returns {string} - Unique identifier for the bridge
+   */
+  getBridgeIdentifier({ name, command, args, url }, resolvedCwd = null, finalEnv = null) {
+    if (url) {
+      // For URL-based bridges, use normalized URL as identifier
+      // URL-based bridges typically don't have cwd/env differences
+      try {
+        const urlObj = new URL(url);
+        return `url:${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`;
+      } catch (e) {
+        return `url:${url}`;
+      }
+    } else if (command) {
+      // For stdio-based bridges, include command, args, cwd, and env hash
+      const normalizedArgs = Array.isArray(args) ? args.join(' ') : String(args || '');
+      
+      // Build base identifier
+      let baseId;
+      // Extract package name from npx commands for better deduplication
+      if (command === 'npx' && normalizedArgs) {
+        const packageName = this.extractPackageName(normalizedArgs.split(' ')[0]);
+        if (packageName) {
+          baseId = `stdio:npx:${packageName}`;
+        } else {
+          baseId = `stdio:${command}:${normalizedArgs}`;
+        }
+      } else {
+        baseId = `stdio:${command}:${normalizedArgs}`;
+      }
+      
+      // Include cwd if specified (allows same MCP from different directories)
+      if (resolvedCwd) {
+        baseId += `:cwd:${resolvedCwd}`;
+      }
+      
+      // Include env vars hash if specified (allows same MCP with different config)
+      // Only include config-specific env vars, not all inherited ones
+      if (finalEnv && typeof finalEnv === 'object' && Object.keys(finalEnv).length > 0) {
+        // Create a stable hash of env vars (sorted keys + values)
+        // Exclude common system vars that don't affect MCP behavior
+        const relevantEnv = {};
+        const excludeKeys = ['PATH', 'HOME', 'USER', 'SHELL', 'PWD', 'TMPDIR', 'TMP', 'TEMP'];
+        for (const [key, value] of Object.entries(finalEnv)) {
+          if (!excludeKeys.includes(key) && value !== undefined && value !== null) {
+            relevantEnv[key] = value;
+          }
+        }
+        
+        if (Object.keys(relevantEnv).length > 0) {
+          // Create a simple hash from sorted env vars
+          const envStr = Object.keys(relevantEnv)
+            .sort()
+            .map(key => `${key}=${String(relevantEnv[key])}`)
+            .join('|');
+          // Use a simple hash (first 16 chars of the string representation)
+          // For better performance, we could use crypto.createHash, but this is simpler
+          const envHash = Buffer.from(envStr).toString('base64').substring(0, 16);
+          baseId += `:env:${envHash}`;
+        }
+      }
+      
+      return baseId;
+    }
+    // Fallback to name if no command/url
+    return `name:${name}`;
+  }
+
+  /**
+   * Check if loading a bridge would create a circular reference
+   * @param {string} bridgeIdentifier - The bridge identifier to check
+   * @param {string} bridgeName - The bridge name for error messages
+   * @returns {boolean} - True if circular reference detected
+   */
+  wouldCreateCircularReference(bridgeIdentifier, bridgeName) {
+    // Check if this bridge is already in the loading chain
+    if (this.bridgeLoadingChain.includes(bridgeIdentifier)) {
+      const chain = [...this.bridgeLoadingChain, bridgeIdentifier].join(' -> ');
+      this.logger.warn(`⚠️  Circular bridge reference detected: ${chain}`);
+      this.logger.warn(`   Bridge '${bridgeName}' would create a circular dependency and will be skipped.`);
+      return true;
+    }
+    return false;
+  }
+
   loadConfig() {
     const cfgPath = this.getConfigPath();
     if (!fs.existsSync(cfgPath)) {
@@ -264,6 +357,45 @@ class MCPBridgeReloader {
         if (this.failedBridges.has(name)) {
           return;
         }
+
+        // Build environment variables for this server from process.env
+        const childEnv = this.buildServerEnv(name);
+        
+        // Merge config env with childEnv (config env takes precedence)
+        const finalEnv = { ...childEnv, ...configEnv };
+        
+        // Resolve cwd if provided (for local projects)
+        let resolvedCwd = null;
+        if (cwd) {
+          resolvedCwd = path.isAbsolute(cwd) ? cwd : path.resolve(this.root, cwd);
+        }
+        
+        // Generate bridge identifier to check for duplicates
+        // Include cwd and env to allow same MCP with different configurations
+        const bridgeIdentifier = this.getBridgeIdentifier(
+          { name, command, args, url },
+          resolvedCwd,
+          finalEnv
+        );
+        
+        // Check for duplicate bridges (same command/args/url with same cwd/env already loaded)
+        if (this.loadedBridgeIdentifiers.has(bridgeIdentifier)) {
+          const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+          if (!isStdioMode) {
+            this.logger.warn(`⚠️  Duplicate bridge detected: '${name}' (${bridgeIdentifier})`);
+            this.logger.warn(`   This bridge is already loaded with the same configuration and will be skipped to avoid duplication.`);
+          }
+          return;
+        }
+
+        // Check for circular references
+        if (this.wouldCreateCircularReference(bridgeIdentifier, name)) {
+          return;
+        }
+
+        // Add to loading chain
+        this.bridgeLoadingChain.push(bridgeIdentifier);
+        
         try {
           // Handle URL-based bridges (HTTP/HTTPS)
           if (url) {
@@ -282,11 +414,23 @@ class MCPBridgeReloader {
                 try {
                   await bridge.start();
                   this.bridges.set(name, bridge);
+                  // Mark as loaded to prevent duplicates
+                  this.loadedBridgeIdentifiers.add(bridgeIdentifier);
+                  // Remove from loading chain
+                  const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+                  if (index > -1) {
+                    this.bridgeLoadingChain.splice(index, 1);
+                  }
                   const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
                   if (!isStdioMode) {
                     this.logger.log(`🔌 HTTP Bridge connected: ${name} (${url})`);
                   }
                 } catch (error) {
+                  // Remove from loading chain on failure
+                  const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+                  if (index > -1) {
+                    this.bridgeLoadingChain.splice(index, 1);
+                  }
                   this.logger.warn(`⚠️  HTTP Bridge '${name}' failed to initialize: ${error.message}`);
                   this.failedBridges = this.failedBridges || new Set();
                   this.failedBridges.add(name);
@@ -300,6 +444,11 @@ class MCPBridgeReloader {
               
               return; // Skip stdio bridge handling for URL bridges
             } catch (error) {
+              // Remove from loading chain on failure
+              const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+              if (index > -1) {
+                this.bridgeLoadingChain.splice(index, 1);
+              }
               this.logger.warn(`⚠️  Failed to create HTTP Bridge '${name}': ${error.message}`);
               this.failedBridges = this.failedBridges || new Set();
               this.failedBridges.add(name);
@@ -312,6 +461,11 @@ class MCPBridgeReloader {
           // Skip check for npx/node/npm as they should always exist
           const isNpxCommand = command === 'npx' || command === 'node' || command === 'npm';
           if (!isNpxCommand && !this.commandExists(command)) {
+            // Remove from loading chain on failure
+            const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+            if (index > -1) {
+              this.bridgeLoadingChain.splice(index, 1);
+            }
             const commandStr = [command, ...args].join(' ');
             this.logger.warn(`⚠️  MCP Bridge '${name}' failed to start: Command '${command}' not found`);
             this.logger.warn(`   Command: ${commandStr}`);
@@ -319,18 +473,6 @@ class MCPBridgeReloader {
             this.failedBridges = this.failedBridges || new Set();
             this.failedBridges.add(name);
             return;
-          }
-          
-          // Build environment variables for this server from process.env
-          const childEnv = this.buildServerEnv(name);
-          
-          // Merge config env with childEnv (config env takes precedence)
-          const finalEnv = { ...childEnv, ...configEnv };
-          
-          // Resolve cwd if provided (for local projects)
-          let resolvedCwd = null;
-          if (cwd) {
-            resolvedCwd = path.isAbsolute(cwd) ? cwd : path.resolve(this.root, cwd);
           }
           
           const rawBridge = new MCPBridge({ command, args, quiet: this.quiet, env: finalEnv, cwd: resolvedCwd });
@@ -422,11 +564,23 @@ class MCPBridgeReloader {
             
             if (procRunning) {
               this.bridges.set(name, bridge);
+              // Mark as loaded to prevent duplicates
+              this.loadedBridgeIdentifiers.add(bridgeIdentifier);
+              // Remove from loading chain
+              const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+              if (index > -1) {
+                this.bridgeLoadingChain.splice(index, 1);
+              }
               const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
               if (!isStdioMode) {
                 this.logger.log(`🔌 MCP Bridge started: ${name}`);
               }
             } else {
+              // Remove from loading chain on failure
+              const index = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+              if (index > -1) {
+                this.bridgeLoadingChain.splice(index, 1);
+              }
               // Process exited or never started - determine error type
               // Consider it a command/server error if:
               // 1. We detected command errors from stderr
@@ -453,6 +607,12 @@ class MCPBridgeReloader {
                 } else {
                   errorMsg += ': Command or package not found';
                 }
+                // Remove from loading chain on failure
+                const failIndex = this.bridgeLoadingChain.indexOf(bridgeIdentifier);
+                if (failIndex > -1) {
+                  this.bridgeLoadingChain.splice(failIndex, 1);
+                }
+                
                 this.logger.warn(errorMsg);
                 this.logger.warn(`   Command: ${commandStr}`);
                 

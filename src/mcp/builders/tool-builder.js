@@ -198,6 +198,9 @@ class ToolBuilder {
   async buildToolsList(routes, { bridgeReloader, warn } = {}) {
     const tools = routes.map(route => this.buildToolFromRoute(route, { warn }));
     
+    // Track tool names to prevent duplicates
+    const toolNames = new Set(tools.map(t => t.name));
+    
     // Merge bridge tools if available
     if (bridgeReloader) {
       try {
@@ -228,6 +231,15 @@ class ToolBuilder {
                     break;
                   }
                 }
+                
+                // Skip duplicate tools (same name already exists)
+                if (toolNames.has(cleanName)) {
+                  if (warn) warn(`Skipping duplicate tool '${cleanName}' from bridge '${serverName}' (already exists)`, { tool: t });
+                  return;
+                }
+                
+                // Mark this tool name as used
+                toolNames.add(cleanName);
                 
                 // Safely process inputSchema - handle various formats
                 let inputSchema = { type: 'object', properties: {} };
