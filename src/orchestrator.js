@@ -543,8 +543,9 @@ async function startServer() {
         console.log(`📡 Registered ${loadedRoutes.length} API routes with MCP server`);
       }
       
-      // Start MCP server
-      mcpServer.run().then(() => {
+      // Start MCP server and await it to ensure it's fully started before function completes
+      try {
+        await mcpServer.run();
         if (!isStdioMode) {
           console.log('🤖  MCP Server initialized successfully');
         }
@@ -576,9 +577,9 @@ async function startServer() {
           });
           envHotReloader.startWatching();
         }
-      }).catch(error => {
+      } catch (error) {
         console.warn('⚠️  MCP Server failed to start:', error.message);
-      });
+      }
     } catch (error) {
       console.warn('⚠️  MCP Server not available:', error.message);
     }
