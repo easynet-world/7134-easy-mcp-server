@@ -373,7 +373,6 @@ async function executeAPIEndpoint(route, args, res) {
 
 // Server startup function
 async function startServer() {
-  console.error('[ORCHESTRATOR] startServer() called');
   // Detect STDIO mode: explicit flag takes precedence, otherwise auto-detect by port presence
   // If bridge mode is detected (mcp-bridge.json exists), default to STDIO mode
   const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
