@@ -172,12 +172,16 @@ async function startAutoServer(portConfig) {
 
     // Import and start the orchestrator (it's in the src directory within the package)
     const orchestratorPath = path.join(packageRoot, 'src', 'orchestrator.js');
+    console.error('[SERVER-START] Loading orchestrator from:', orchestratorPath);
     const orchestrator = require(orchestratorPath);
+    console.error('[SERVER-START] Orchestrator loaded, startServer type:', typeof orchestrator.startServer);
     
     // The orchestrator should start automatically when required
     // If it has an explicit start function, call it and await it
     if (orchestrator && typeof orchestrator.startServer === 'function') {
+      console.error('[SERVER-START] Calling orchestrator.startServer()');
       await orchestrator.startServer();
+      console.error('[SERVER-START] orchestrator.startServer() completed');
       // After startServer() completes, the HTTP servers should keep the process alive
       // The servers (HTTP listeners) will keep the event loop alive
     } else {

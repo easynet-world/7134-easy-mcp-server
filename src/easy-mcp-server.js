@@ -230,9 +230,9 @@ async function main() {
     }
   } else {
     // No command provided, start server
-    console.log('[DEBUG] No command, starting server');
+    console.error('[MAIN] No command, calling startServer()');
     await startServer(parsed.options);
-    console.log('[DEBUG] startServer() returned');
+    console.error('[MAIN] startServer() returned');
   }
 }
 
