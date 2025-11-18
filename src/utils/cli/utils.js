@@ -9,15 +9,42 @@ const path = require('path');
 /**
  * Check if STDIO mode is enabled
  * Also checks if MCP port is not set (which indicates STDIO mode)
+ * If bridge mode is detected (mcp-bridge.json exists), defaults to STDIO mode
  */
 function isStdioMode() {
   // Check explicit flag first
   if (process.env.EASY_MCP_SERVER_STDIO_MODE === 'true') {
     return true;
   }
-  // If no MCP port is set, we're likely in STDIO mode
+  // If explicitly set to false and port is set, use HTTP mode
+  if (process.env.EASY_MCP_SERVER_STDIO_MODE === 'false') {
+    const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && 
+                       process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+    return !hasMcpPort;
+  }
+  
+  // Check if bridge mode is active (mcp-bridge.json exists)
+  // In bridge mode, default to STDIO unless port is explicitly set
+  let bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+  if (!bridgeConfigPath) {
+    // Check for mcp-bridge.json in current working directory
+    const cwd = process.cwd();
+    const defaultBridgeConfig = path.join(cwd, 'mcp-bridge.json');
+    if (fs.existsSync(defaultBridgeConfig)) {
+      bridgeConfigPath = defaultBridgeConfig;
+    }
+  }
+  
+  const hasBridgeConfig = bridgeConfigPath && fs.existsSync(bridgeConfigPath);
   const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && 
                      process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
+  
+  // If bridge mode is active, default to STDIO unless port is explicitly set
+  if (hasBridgeConfig && !hasMcpPort) {
+    return true;
+  }
+  
+  // If no MCP port is set, we're likely in STDIO mode
   return !hasMcpPort;
 }
 

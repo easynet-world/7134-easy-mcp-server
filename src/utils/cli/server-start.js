@@ -24,11 +24,38 @@ const {
  */
 async function startServer(options = {}) {
   // Check if running in STDIO mode (when spawned as a bridge)
-  // Use robust detection: check explicit flag or absence of MCP port
+  // Use robust detection: check explicit flag, bridge mode, or absence of MCP port
   const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  const explicitHttpMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'false';
   const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && 
                      process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
-  const isStdioMode = explicitStdioMode || !hasMcpPort;
+  
+  // Check if bridge mode is active (mcp-bridge.json exists)
+  let bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+  if (!bridgeConfigPath) {
+    const cwd = process.cwd();
+    const defaultBridgeConfig = path.join(cwd, 'mcp-bridge.json');
+    if (fs.existsSync(defaultBridgeConfig)) {
+      bridgeConfigPath = defaultBridgeConfig;
+    }
+  }
+  const hasBridgeConfig = bridgeConfigPath && fs.existsSync(bridgeConfigPath);
+  
+  // Determine STDIO mode:
+  // 1. Explicit flag takes precedence
+  // 2. If bridge mode is active and no port is set, default to STDIO
+  // 3. Otherwise, check if port is set
+  let isStdioMode;
+  if (explicitStdioMode) {
+    isStdioMode = true;
+  } else if (explicitHttpMode && hasMcpPort) {
+    isStdioMode = false;
+  } else if (hasBridgeConfig && !hasMcpPort) {
+    // Bridge mode: default to STDIO unless port is explicitly set
+    isStdioMode = true;
+  } else {
+    isStdioMode = !hasMcpPort;
+  }
 
   // Console redirection already happened at the top of the file
   // Just log the startup message if not in STDIO mode
