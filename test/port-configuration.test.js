@@ -9,16 +9,57 @@ const { spawn } = require('child_process');
 describe('Port Configuration', () => {
   let tempDir;
   let originalCwd;
+  let serverProcesses = [];
 
   beforeEach(() => {
     originalCwd = process.cwd();
     tempDir = fs.mkdtempSync(path.join(__dirname, 'port-test-'));
     process.chdir(tempDir);
+    serverProcesses = [];
   });
 
-  afterEach(() => {
-    process.chdir(originalCwd);
-    fs.rmSync(tempDir, { recursive: true, force: true });
+  afterEach((done) => {
+    // Kill all spawned processes
+    const killPromises = serverProcesses.map(proc => {
+      return new Promise((resolve) => {
+        if (proc && !proc.killed) {
+          try {
+            proc.kill('SIGTERM');
+            // Wait a bit, then force kill if still alive
+            setTimeout(() => {
+              if (proc && !proc.killed) {
+                try {
+                  proc.kill('SIGKILL');
+                } catch (e) {
+                  // Ignore errors
+                }
+              }
+              resolve();
+            }, 200);
+          } catch (e) {
+            // Ignore errors
+            resolve();
+          }
+        } else {
+          resolve();
+        }
+      });
+    });
+    
+    // Wait for all processes to be killed, then wait for ports to be released
+    Promise.all(killPromises).then(() => {
+      serverProcesses = [];
+      // Wait longer for ports to be released by OS
+      setTimeout(() => {
+        process.chdir(originalCwd);
+        try {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        done();
+      }, 1000);
+    });
   });
 
   test('should use default ports when no configuration provided', (done) => {
@@ -45,6 +86,7 @@ module.exports = TestAPI;
       stdio: 'pipe',
       cwd: tempDir
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -98,6 +140,7 @@ module.exports = TestAPI;
       stdio: 'pipe',
       cwd: tempDir
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -163,6 +206,7 @@ EASY_MCP_SERVER_MCP_PORT=8888
         EASY_MCP_SERVER_MCP_PORT: '8888'
       }
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -229,6 +273,7 @@ MCP_PORT=8888
         MCP_PORT: '8888'
       }
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -288,6 +333,7 @@ module.exports = TestAPI;
         EASY_MCP_SERVER_MCP_PORT: '9998'
       }
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {

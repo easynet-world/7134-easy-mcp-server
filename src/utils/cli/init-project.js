@@ -121,6 +121,7 @@ function createBinScript(projectDir, projectName) {
  * Usage:
  *   ${projectName}  # Automatically detects mode based on .env configuration
  *                   # - If EASY_MCP_SERVER_STDIO_MODE=true: STDIO mode (explicit)
+ *                   # - If mcp-bridge.json exists: STDIO mode (default for bridge mode)
  *                   # - If EASY_MCP_SERVER_MCP_PORT is set: HTTP/Streamable mode
  *                   # - If not set: STDIO mode
  * 
@@ -213,9 +214,44 @@ if (isGlobalInstall) {
 }
 
 // Detect STDIO mode: explicit flag takes precedence, otherwise auto-detect by port presence
+// If bridge mode is detected (mcp-bridge.json exists), default to STDIO mode
 const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+const explicitHttpMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'false';
 const hasMcpPort = process.env.EASY_MCP_SERVER_MCP_PORT && process.env.EASY_MCP_SERVER_MCP_PORT.trim() !== '';
-const isStdioMode = explicitStdioMode || !hasMcpPort;
+
+// Check if bridge mode is active (mcp-bridge.json exists)
+// Check in both package root (for global installs) and current directory
+let bridgeConfigPath = process.env.EASY_MCP_SERVER_BRIDGE_CONFIG_PATH;
+if (!bridgeConfigPath) {
+  // Check package root first (for global installs)
+  const packageBridgeConfig = path.join(projectRoot, 'mcp-bridge.json');
+  if (fs.existsSync(packageBridgeConfig)) {
+    bridgeConfigPath = packageBridgeConfig;
+  } else {
+    // Check current working directory
+    const currentBridgeConfig = path.join(currentDir, 'mcp-bridge.json');
+    if (fs.existsSync(currentBridgeConfig)) {
+      bridgeConfigPath = currentBridgeConfig;
+    }
+  }
+}
+const hasBridgeConfig = bridgeConfigPath && fs.existsSync(bridgeConfigPath);
+
+// Determine STDIO mode:
+// 1. Explicit flag takes precedence
+// 2. If bridge mode is active and no port is set, default to STDIO
+// 3. Otherwise, check if port is set
+let isStdioMode;
+if (explicitStdioMode) {
+  isStdioMode = true;
+} else if (explicitHttpMode && hasMcpPort) {
+  isStdioMode = false;
+} else if (hasBridgeConfig && !hasMcpPort) {
+  // Bridge mode: default to STDIO unless port is explicitly set
+  isStdioMode = true;
+} else {
+  isStdioMode = !hasMcpPort;
+}
 
 if (!isStdioMode) {
   // Port is configured - use HTTP/Streamable mode

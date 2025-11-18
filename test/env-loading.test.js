@@ -9,16 +9,57 @@ const { spawn } = require('child_process');
 describe('Environment File Loading', () => {
   let tempDir;
   let originalCwd;
+  let serverProcesses = [];
 
   beforeEach(() => {
     originalCwd = process.cwd();
     tempDir = fs.mkdtempSync(path.join(__dirname, 'env-test-'));
     process.chdir(tempDir);
+    serverProcesses = [];
   });
 
-  afterEach(() => {
-    process.chdir(originalCwd);
-    fs.rmSync(tempDir, { recursive: true, force: true });
+  afterEach((done) => {
+    // Kill all spawned processes
+    const killPromises = serverProcesses.map(proc => {
+      return new Promise((resolve) => {
+        if (proc && !proc.killed) {
+          try {
+            proc.kill('SIGTERM');
+            // Wait a bit, then force kill if still alive
+            setTimeout(() => {
+              if (proc && !proc.killed) {
+                try {
+                  proc.kill('SIGKILL');
+                } catch (e) {
+                  // Ignore errors
+                }
+              }
+              resolve();
+            }, 200);
+          } catch (e) {
+            // Ignore errors
+            resolve();
+          }
+        } else {
+          resolve();
+        }
+      });
+    });
+    
+    // Wait for all processes to be killed, then wait for ports to be released
+    Promise.all(killPromises).then(() => {
+      serverProcesses = [];
+      // Wait longer for ports to be released by OS
+      setTimeout(() => {
+        process.chdir(originalCwd);
+        try {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        done();
+      }, 1000);
+    });
   });
 
   test('should load .env file from user directory', (done) => {
@@ -57,6 +98,7 @@ module.exports = TestAPI;
       stdio: 'pipe',
       cwd: tempDir
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -87,6 +129,7 @@ module.exports = TestAPI;
   });
 
   test('should load multiple .env files in correct order', (done) => {
+    jest.setTimeout(15000);
     // Create multiple .env files
     fs.writeFileSync(path.join(tempDir, '.env'), 'BASE_VAR=base\nEASY_MCP_SERVER_PORT=8887');
     fs.writeFileSync(path.join(tempDir, '.env.development'), 'DEV_VAR=development\nEASY_MCP_SERVER_PORT=8888');
@@ -115,6 +158,7 @@ module.exports = TestAPI;
       stdio: 'pipe',
       cwd: tempDir
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
@@ -125,25 +169,48 @@ module.exports = TestAPI;
       output += data.toString();
     });
 
-    // Wait for server to start
+    // Wait for server to start - check for output or timeout
+    const checkOutput = () => {
+      if (output.includes('📄 Loaded environment from .env.local') &&
+          output.includes('📄 Loaded environment from .env.development') &&
+          output.includes('📄 Loaded environment from .env')) {
+        // All .env files loaded, clean up
+        let finished2 = false;
+        const finish2 = () => { if (!finished2) { finished2 = true; done(); } };
+        serverProcess.once('close', finish2);
+        serverProcess.kill('SIGTERM');
+        setTimeout(() => {
+          if (!serverProcess.killed) {
+            serverProcess.kill('SIGKILL');
+          }
+          finish2();
+        }, 300);
+      } else if (output.includes('Error') || output.includes('EADDRINUSE')) {
+        // Server failed to start, fail the test
+        serverProcess.kill('SIGKILL');
+        done(new Error('Server failed to start: ' + output));
+      }
+    };
+
+    // Check output periodically
+    const checkInterval = setInterval(() => {
+      checkOutput();
+    }, 100);
+
+    // Timeout after 10 seconds
     setTimeout(() => {
-      // Check if all .env files are loaded
-      expect(output).toContain('📄 Loaded environment from .env.local');
-      expect(output).toContain('📄 Loaded environment from .env.development');
-      expect(output).toContain('📄 Loaded environment from .env');
-      
-      // Clean up
-      let finished2 = false;
-      const finish2 = () => { if (!finished2) { finished2 = true; done(); } };
-      serverProcess.once('close', finish2);
-      serverProcess.kill('SIGTERM');
-      setTimeout(() => {
-        if (!serverProcess.killed) {
-          serverProcess.kill('SIGKILL');
-        }
-        finish2();
-      }, 300);
-    }, 3000);
+      clearInterval(checkInterval);
+      if (!serverProcess.killed) {
+        serverProcess.kill('SIGKILL');
+      }
+      if (output.includes('📄 Loaded environment from .env.local') &&
+          output.includes('📄 Loaded environment from .env.development') &&
+          output.includes('📄 Loaded environment from .env')) {
+        done();
+      } else {
+        done(new Error('Timeout waiting for .env files to load. Output: ' + output.substring(0, 500)));
+      }
+    }, 10000);
   });
 
   test('should handle missing .env files gracefully', (done) => {
@@ -170,6 +237,7 @@ module.exports = TestAPI;
       stdio: 'pipe',
       cwd: tempDir
     });
+    serverProcesses.push(serverProcess);
 
     let output = '';
     serverProcess.stdout.on('data', (data) => {
