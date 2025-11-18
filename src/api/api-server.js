@@ -44,7 +44,11 @@ const HotReloader = require('../utils/loaders/hot-reloader');
 
 class DynamicAPIServer {
   constructor(options = {}) {
-    this.port = options.port || process.env.EASY_MCP_SERVER_PORT || 8887;
+    // Handle port 0 (dynamic port assignment) correctly
+    // Use !== undefined to allow port 0 to be explicitly set
+    this.port = options.port !== undefined 
+      ? options.port 
+      : (process.env.EASY_MCP_SERVER_PORT ? parseInt(process.env.EASY_MCP_SERVER_PORT) : 8887);
     this.host = options.host || process.env.EASY_MCP_SERVER_HOST || '0.0.0.0';
     this.cors = options.cors || {};
     this.apiPath = options.apiPath || this._resolveApiPath();
@@ -384,6 +388,14 @@ class DynamicAPIServer {
         const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
         
         this.server = this.app.listen(this.port, this.host, { family: 4 }, () => {
+          // Update port if it was 0 (dynamic port assignment)
+          if (this.port === 0 && this.server) {
+            const address = this.server.address();
+            if (address) {
+              this.port = address.port;
+            }
+          }
+          
           if (!isStdioMode) {
             console.log(`🚀 Easy MCP Server running on ${this.host}:${this.port}`);
             console.log(`📚 API Documentation: http://localhost:${this.port}/docs`);
