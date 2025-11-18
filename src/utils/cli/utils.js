@@ -51,16 +51,44 @@ function isStdioMode() {
 /**
  * Load .env files from user directory
  * Loads files in order: .env.local, .env.development, .env
+ * If EASY_MCP_SERVER_STDIO_MODE is already set to 'true', port-related variables
+ * from .env files will not override it to prevent conflicts when running as a bridge
  */
 function loadUserEnvFiles() {
   const userCwd = process.cwd();
   const envFiles = ['.env.local', '.env.development', '.env'];
   
+  // Check if STDIO mode is already set (e.g., by bridge loader)
+  const stdioModeAlreadySet = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+  
   for (const envFile of envFiles) {
     const envPath = path.join(userCwd, envFile);
     if (fs.existsSync(envPath)) {
       try {
-        require('dotenv').config({ path: envPath });
+        // If STDIO mode is already set, we need to filter out port-related vars
+        // to prevent .env from overriding the bridge configuration
+        if (stdioModeAlreadySet) {
+          // Load .env file but don't override port-related variables
+          const dotenv = require('dotenv');
+          const envConfig = dotenv.config({ path: envPath, override: false });
+          
+          if (envConfig.parsed) {
+            // Remove port-related variables that would conflict with STDIO mode
+            delete envConfig.parsed.EASY_MCP_SERVER_PORT;
+            delete envConfig.parsed.EASY_MCP_SERVER_MCP_PORT;
+            
+            // Apply the filtered config
+            for (const [key, value] of Object.entries(envConfig.parsed)) {
+              if (!process.env[key]) {
+                process.env[key] = value;
+              }
+            }
+          }
+        } else {
+          // Normal loading when not in STDIO mode
+          require('dotenv').config({ path: envPath });
+        }
+        
         if (!isStdioMode()) {
           console.log(`📄 Loaded environment from ${envFile}`);
         }
