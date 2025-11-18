@@ -366,10 +366,30 @@ const originalArgv = process.argv;
 process.argv = [process.argv[0], binScript, ...cliArgs];
 
 // Run easy-mcp-server CLI
-require(binScript);
-
-// Restore original argv (though we won't reach here if require() succeeds)
-process.argv = originalArgv;
+// The module exports main() function, so call it directly
+const easyMcpServer = require(binScript);
+if (easyMcpServer && typeof easyMcpServer.main === 'function') {
+  // Call main() directly - it will handle starting the server
+  easyMcpServer.main().catch((error) => {
+    const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
+    if (isStdioMode) {
+      process.stderr.write(`Fatal error: ${error.message}\n`);
+      process.stderr.write(`${error.stack}\n`);
+    } else {
+      console.error('❌ Fatal error:', error.message);
+      console.error(error.stack);
+    }
+    process.exit(1);
+  });
+  // Don't restore argv or exit - let main() handle the process lifecycle
+  // The server will keep the process alive
+} else {
+  // Fallback: try to require and let it run if require.main === module
+  // This shouldn't happen, but handle it for compatibility
+  require(binScript);
+  // Restore original argv
+  process.argv = originalArgv;
+}
 `;
 
   const cliPath = path.join(binDir, 'cli.js');
