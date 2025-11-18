@@ -234,6 +234,9 @@ async function main() {
   }
 }
 
+// Export main function for programmatic use
+module.exports.main = main;
+
 // Run the CLI if this file is executed directly
 if (require.main === module) {
   main().catch((error) => {
