@@ -178,11 +178,17 @@ async function startAutoServer(portConfig) {
     // If it has an explicit start function, call it and await it
     if (orchestrator && typeof orchestrator.startServer === 'function') {
       await orchestrator.startServer();
+      // After startServer() completes, the HTTP servers should keep the process alive
+      // The servers (HTTP listeners) will keep the event loop alive
     } else {
       if (!isStdioMode) {
         console.log('🚀 Starting server...');
       }
     }
+    
+    // In HTTP mode, the servers should keep the process alive
+    // If we're in STDIO mode, the STDIO handler will keep it alive
+    // No need to do anything else here - the servers will keep the event loop active
     
   } catch (error) {
     if (isStdioMode) {
