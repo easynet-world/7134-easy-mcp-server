@@ -175,9 +175,9 @@ async function startAutoServer(portConfig) {
     const orchestrator = require(orchestratorPath);
     
     // The orchestrator should start automatically when required
-    // If it has an explicit start function, call it
+    // If it has an explicit start function, call it and await it
     if (orchestrator && typeof orchestrator.startServer === 'function') {
-      orchestrator.startServer();
+      await orchestrator.startServer();
     } else {
       if (!isStdioMode) {
         console.log('🚀 Starting server...');
