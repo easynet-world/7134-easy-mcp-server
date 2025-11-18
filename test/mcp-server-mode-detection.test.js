@@ -168,9 +168,10 @@ describe('MCP Server Mode Detection and Bin Script', () => {
         EASY_MCP_SERVER_MCP_PORT: ''
       });
 
-      expect(result.output).toContain('🔌 MCP Server Mode: STDIO');
-      expect(result.output).toContain('📡 Communication: stdin/stdout (JSON-RPC)');
-      expect(result.output).toContain('💡 To use HTTP/Streamable mode');
+      // Check for messages with or without emojis (STDIO mode writes to stderr without emojis)
+      expect(result.output).toMatch(/MCP Server Mode: STDIO/);
+      expect(result.output).toMatch(/Communication: stdin\/stdout \(JSON-RPC\)/);
+      expect(result.output).toMatch(/To use HTTP\/Streamable mode/);
     });
 
     test('should set EASY_MCP_SERVER_STDIO_MODE=true when in STDIO mode', async () => {
