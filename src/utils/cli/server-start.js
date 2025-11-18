@@ -23,6 +23,9 @@ const {
  * @returns {Promise<void>}
  */
 async function startServer(options = {}) {
+  // Load environment files FIRST so port configuration is available for mode detection
+  loadUserEnvFiles();
+  
   // Check if running in STDIO mode (when spawned as a bridge)
   // Use robust detection: check explicit flag, bridge mode, or absence of MCP port
   const explicitStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
@@ -62,9 +65,6 @@ async function startServer(options = {}) {
   if (!isStdioMode) {
     console.log('🚀 Starting Easy MCP Server...');
   }
-
-  // Load environment files
-  loadUserEnvFiles();
 
   // Initialize hot reloader
   initializeEnvHotReloader();

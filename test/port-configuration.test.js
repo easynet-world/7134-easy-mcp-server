@@ -509,4 +509,107 @@ module.exports = TestAPI;
       }, 300);
     }, 3000);
   });
+
+  test('should start in HTTP mode when mcp-bridge.json exists but port is set in .env', (done) => {
+    jest.setTimeout(15000);
+    // Create a simple API file
+    const apiDir = path.join(tempDir, 'api');
+    fs.mkdirSync(apiDir, { recursive: true });
+    
+    const apiFile = path.join(apiDir, 'get.js');
+    const apiContent = `
+const BaseAPI = require('easy-mcp-server/base-api');
+
+class TestAPI extends BaseAPI {
+  process(req, res) {
+    res.json({ message: 'Test API' });
+  }
+}
+
+module.exports = TestAPI;
+`;
+    fs.writeFileSync(apiFile, apiContent);
+
+    // Create .env file with port configuration (use random ports to avoid conflicts)
+    const apiPort = 18887 + Math.floor(Math.random() * 100);
+    const mcpPort = 18888 + Math.floor(Math.random() * 100);
+    const envContent = `
+EASY_MCP_SERVER_PORT=${apiPort}
+EASY_MCP_SERVER_MCP_PORT=${mcpPort}
+`;
+    fs.writeFileSync(path.join(tempDir, '.env'), envContent);
+
+    // Create mcp-bridge.json (this should NOT force STDIO mode if port is set)
+    const bridgeConfig = {
+      mcpServers: {
+        test: {
+          command: 'npx',
+          args: ['test']
+        }
+      }
+    };
+    fs.writeFileSync(path.join(tempDir, 'mcp-bridge.json'), JSON.stringify(bridgeConfig, null, 2));
+
+    // Start the server
+    const serverProcess = spawn('node', ['../../src/easy-mcp-server.js'], {
+      stdio: 'pipe',
+      cwd: tempDir
+    });
+    serverProcesses.push(serverProcess);
+
+    let output = '';
+    serverProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+    serverProcess.stderr.on('data', (data) => {
+      output += data.toString();
+    });
+
+    // Check output periodically
+    const checkInterval = setInterval(() => {
+      // Server should start in HTTP mode (not STDIO mode) because port is set
+      // Look for HTTP mode indicators, not STDIO mode indicators
+      if (output.includes('MCP Server started successfully') || 
+          output.includes('WebSocket server listening') ||
+          output.includes('HTTP endpoints available') ||
+          output.includes('EASY MCP SERVER')) {
+        clearInterval(checkInterval);
+        // Verify it's NOT in STDIO mode
+        expect(output).not.toContain('STDIO mode');
+        expect(output).not.toContain('Reading from stdin');
+        // If we got here, the server started in HTTP mode (we checked for HTTP mode indicators above)
+        // Just verify it's not in STDIO mode
+        
+        // Kill the server
+        serverProcess.kill('SIGTERM');
+        setTimeout(() => {
+          if (!serverProcess.killed) {
+            serverProcess.kill('SIGKILL');
+          }
+          done();
+        }, 300);
+      }
+    }, 100);
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      if (!serverProcess.killed) {
+        serverProcess.kill('SIGKILL');
+      }
+      // Check if server started successfully (even if we didn't catch the exact message)
+      const hasStarted = output.includes('MCP Server started successfully') || 
+                        output.includes('WebSocket server listening') ||
+                        output.includes('EASY MCP SERVER') ||
+                        output.includes('SERVER STARTED SUCCESSFULLY');
+      const isStdioMode = output.includes('STDIO mode') || output.includes('Reading from stdin');
+      
+      if (!hasStarted || isStdioMode) {
+        console.error('Server output:', output);
+        done(new Error(`Server did not start in HTTP mode as expected. Started: ${hasStarted}, STDIO: ${isStdioMode}`));
+      } else {
+        done();
+      }
+    }, 10000);
+  });
 });
