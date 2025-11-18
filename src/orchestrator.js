@@ -432,7 +432,17 @@ async function startServer() {
     console.log('');
 
     // Start REST API server using DynamicAPIServer
-    await apiServer.start();
+    try {
+      await apiServer.start();
+      // Verify server is actually listening
+      if (!apiServer.server || !apiServer.server.listening) {
+        console.error('❌ API server failed to start listening');
+        throw new Error('API server did not start listening');
+      }
+    } catch (error) {
+      console.error('❌ Failed to start API server:', error.message);
+      throw error;
+    }
   }
 
   // Get loaded routes and errors for display
@@ -546,6 +556,11 @@ async function startServer() {
       // Start MCP server and await it to ensure it's fully started before function completes
       try {
         await mcpServer.run();
+        // Verify MCP server is actually listening (if not in STDIO mode)
+        if (!isStdioMode && mcpServer.server && !mcpServer.server.listening) {
+          console.error('❌ MCP server failed to start listening');
+          throw new Error('MCP server did not start listening');
+        }
         if (!isStdioMode) {
           console.log('🤖  MCP Server initialized successfully');
         }

@@ -370,11 +370,12 @@ process.argv = [process.argv[0], binScript, ...cliArgs];
 const easyMcpServer = require(binScript);
 if (easyMcpServer && typeof easyMcpServer.main === 'function') {
   // Call main() directly - it will handle starting the server
+  // The HTTP servers started by main() will keep the process alive
   easyMcpServer.main().catch((error) => {
     const isStdioMode = process.env.EASY_MCP_SERVER_STDIO_MODE === 'true';
     if (isStdioMode) {
-      process.stderr.write(`Fatal error: ${error.message}\n`);
-      process.stderr.write(`${error.stack}\n`);
+      process.stderr.write('Fatal error: ' + error.message + '\\n');
+      process.stderr.write(error.stack + '\\n');
     } else {
       console.error('❌ Fatal error:', error.message);
       console.error(error.stack);
@@ -382,7 +383,7 @@ if (easyMcpServer && typeof easyMcpServer.main === 'function') {
     process.exit(1);
   });
   // Don't restore argv or exit - let main() handle the process lifecycle
-  // The server will keep the process alive
+  // The server will keep the process alive once HTTP servers start listening
 } else {
   // Fallback: try to require and let it run if require.main === module
   // This shouldn't happen, but handle it for compatibility
