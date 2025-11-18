@@ -39,6 +39,7 @@ class MCPBridgeReloader {
     this.watcher = null;
     this.bridges = new Map(); // name -> MCPBridge
     this.quiet = options.quiet || false;
+    this.bridgesAttempted = false; // Track if we've already attempted to load bridges
   }
 
 
@@ -221,7 +222,16 @@ class MCPBridgeReloader {
   }
 
   ensureBridges() {
-    if (this.bridges.size === 0) {
+    // Only attempt to load bridges once, unless we have successful bridges
+    // This prevents multiple initialization attempts when bridges fail
+    if (this.bridgesAttempted && this.bridges.size === 0) {
+      // Already attempted and no bridges succeeded - return empty map
+      return this.bridges;
+    }
+    
+    if (this.bridges.size === 0 && !this.bridgesAttempted) {
+      this.bridgesAttempted = true; // Mark that we've attempted to load bridges
+      
       if (process.env.EASY_MCP_SERVER_TEST_MODE === 'true') {
         // Provide a disabled stub in tests
         this.bridges.set('disabled', {
@@ -545,6 +555,8 @@ class MCPBridgeReloader {
     if (this.failedBridges) {
       this.failedBridges.clear();
     }
+    // Reset attempted flag so bridges can be retried after config change
+    this.bridgesAttempted = false;
     this.ensureBridges();
     this.logger.log('🔄 MCP Bridges reloaded due to config change');
   }
